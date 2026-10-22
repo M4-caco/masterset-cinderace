@@ -31,7 +31,6 @@
         .card-owned { border: 2px solid #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.35); }
         .card-not-owned { border: 1px solid #2A3B56; }
         
-        /* Abas Desktop e Mobile */
         .nav-btn-active { 
             background-color: rgba(187, 73, 46, 0.15); 
             color: #F4D664; 
@@ -60,15 +59,12 @@
     <header class="p-3 sm:p-4 bg-cinder-dark/95 backdrop-blur-md shadow-2xl border-b border-cinder-orange/20 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto flex flex-col gap-3">
             
-            <!-- LINHA PRINCIPAL: TÍTULO + MENU HAMBÚRGUER (MOBILE) + STATS (DESKTOP) -->
             <div class="flex justify-between items-center w-full">
                 
-                <!-- CANTO SUPERIOR ESQUERDO: TÍTULO -->
                 <h1 onclick="switchTab('dashboard')" class="text-xl sm:text-2xl font-black text-cinder-orange tracking-tight cursor-pointer hover:opacity-80 transition flex items-center gap-2 select-none">
                     <span class="text-cinder-yellow">🔥</span> MasterSet
                 </h1>
 
-                <!-- NAVEGAÇÃO DESKTOP (CENTRALIZADA) -->
                 <nav class="hidden md:flex items-center gap-2 bg-cinder-bg/80 p-1.5 rounded-2xl border border-cinder-orange/20 text-xs font-semibold">
                     <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-xl transition hover:text-cinder-yellow flex items-center gap-1.5">
                         <span>📊</span> Resumo
@@ -84,7 +80,6 @@
                     </button>
                 </nav>
 
-                <!-- BOTOES STATS (DESKTOP & MOBILE COMPACTO) -->
                 <div class="flex items-center gap-2">
                     <div class="flex gap-1.5 sm:gap-2">
                         <div class="bg-cinder-card px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-center border border-cinder-orange/20">
@@ -101,7 +96,6 @@
                         </div>
                     </div>
 
-                    <!-- BOTAO HAMBURGUER 3 LINHAS (MOBILE) -->
                     <button id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Abrir Menu" class="md:hidden bg-cinder-card hover:bg-cinder-bg active:scale-95 text-cinder-white border border-cinder-orange/30 p-2 rounded-xl transition flex flex-col justify-center items-center gap-1 w-9 h-9 shrink-0 ml-1">
                         <span class="w-5 h-0.5 bg-cinder-yellow rounded-full transition-all"></span>
                         <span class="w-5 h-0.5 bg-cinder-yellow rounded-full transition-all"></span>
@@ -110,7 +104,6 @@
                 </div>
             </div>
 
-            <!-- GAVETA SUSPENSA MODERNA (MOBILE) -->
             <div id="mobile-menu" class="hidden md:hidden flex-col gap-2 pt-2 border-t border-cinder-orange/20 animate-fade-in">
                 <p class="text-[10px] uppercase tracking-wider font-extrabold text-cinder-yellow px-1">Navegação das Abas</p>
                 <div class="grid grid-cols-2 gap-2">
@@ -132,10 +125,8 @@
         </div>
     </header>
 
-    <!-- ÁREA PRINCIPAL -->
     <main class="p-4 sm:p-6 max-w-7xl mx-auto">
 
-        <!-- BARRA DE CONTROLE E BUSCA -->
         <div id="filter-control-bar" class="flex flex-wrap justify-between items-center mb-6 gap-3 relative hidden">
             <div class="flex items-center gap-2 sm:gap-3 flex-1 max-w-2xl relative">
                 <button onclick="toggleFilterDrawer()" class="bg-cinder-dark hover:bg-cinder-card text-cinder-white border border-cinder-orange/40 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow shrink-0">
@@ -145,7 +136,6 @@
 
                 <input id="search-input" oninput="handleSearchInput()" type="text" placeholder="Buscar por Nome, expansão ou variante..." class="w-full bg-cinder-dark px-3 sm:px-4 py-2.5 rounded-xl text-xs outline-none border border-cinder-orange/30 focus:border-cinder-orange text-cinder-white shadow">
 
-                <!-- GAVETA DE FILTROS -->
                 <section id="filters-section" class="absolute left-0 top-12 w-72 sm:w-80 bg-cinder-dark p-4 rounded-2xl border border-cinder-orange/30 space-y-4 hidden z-40 shadow-2xl max-h-[80vh] overflow-y-auto custom-scroll">
                     
                     <div class="flex flex-col gap-1.5">
@@ -191,7 +181,6 @@
                 </section>
             </div>
 
-            <!-- CONTROLES DIREITA -->
             <div class="flex items-center gap-2 shrink-0">
                 <button onclick="clearAllFilters()" class="bg-cinder-red/30 text-cinder-yellow hover:bg-cinder-red/50 border border-cinder-orange/30 px-3.5 py-2.5 rounded-xl text-xs font-bold transition shadow">
                     Limpar Filtros
@@ -205,7 +194,6 @@
             </div>
         </div>
 
-        <!-- ABA 0: DASHBOARD -->
         <section id="view-dashboard" class="space-y-6">
             <div class="bg-cinder-dark border border-cinder-orange/20 rounded-3xl p-4 sm:p-6 shadow-xl">
                 <h2 class="text-lg sm:text-xl font-black text-cinder-white mb-1 flex items-center gap-2">
@@ -263,12 +251,10 @@
             </div>
         </section>
 
-        <!-- ABA 1: GRID DA COLEÇÃO -->
         <section id="view-grid" class="hidden">
             <div id="cards-grid" class="grid gap-2 sm:gap-4"></div>
         </section>
 
-        <!-- ABA 2: CAPTURA -->
         <section id="view-capture" class="hidden space-y-6">
             <div class="bg-cinder-dark border border-cinder-orange/20 rounded-3xl p-4 sm:p-6 shadow-xl">
                 <h2 class="text-lg sm:text-xl font-black text-cinder-white mb-1">Registro de Capturas</h2>
@@ -277,7 +263,6 @@
             </div>
         </section>
 
-        <!-- ABA 3: MERCADO -->
         <section id="view-market" class="hidden">
             <div class="bg-cinder-dark rounded-3xl border border-cinder-orange/20 p-4 sm:p-6 shadow-xl">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
@@ -297,7 +282,6 @@
 
     </main>
 
-    <!-- SCRIPT PRINCIPAL & FIREBASE -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -321,6 +305,7 @@
         let marketPricesMap = {};
         let currentLayout = localStorage.getItem('pokedex_layout_v2') || 'medio';
         let isInitialLoad = true;
+        let currentZoomIndex = 0;
 
         const allCards = [
             { id: "card-1", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "034/202", imagem: "SSH_034_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Espada+e+Escudo", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
@@ -566,7 +551,6 @@
 
         const uniqueSets = Array.from(new Set(allCards.map(c => c.set))).sort();
 
-        // ----------------- FIREBASE SYNC FUNCTIONS -----------------
         async function saveToCloud() {
             try {
                 await setDoc(docRef, {
@@ -593,7 +577,6 @@
             }
         }
 
-        // Listener em tempo real do Firestore
         onSnapshot(docRef, (docSnap) => {
             if (docSnap.exists()) {
                 const cloudData = docSnap.data();
@@ -619,7 +602,6 @@
             }
         });
 
-        // ----------------- UI FUNCTIONS -----------------
         window.toggleMobileMenu = function() {
             const menu = document.getElementById('mobile-menu');
             if (menu) {
@@ -829,7 +811,17 @@
             refreshCurrentView();
         };
 
-        window.showZoomModal = function(card) {
+        // --- SISTEMA DE ZOOM COM SWIPE / NAVEGAÇÃO ---
+        window.showZoomModal = function(cardId) {
+            const index = allCards.findIndex(c => c.id === cardId);
+            if (index !== -1) {
+                currentZoomIndex = index;
+                renderZoomContent();
+            }
+        };
+
+        function renderZoomContent() {
+            const card = allCards[currentZoomIndex];
             const modal = document.getElementById('zoom-modal');
             const content = document.getElementById('zoom-modal-content');
             const isObtained = !!obtainedMap[card.id];
@@ -837,14 +829,15 @@
             content.innerHTML = `
                 <div class="flex justify-between items-center w-full mb-3 px-1">
                     <span class="px-2.5 py-1 rounded text-xs font-black uppercase bg-cinder-bg text-cinder-yellow border border-cinder-orange/30">${card.lingua}</span>
-                    <span class="text-xs font-extrabold ${isObtained ? 'text-green-400' : 'text-cinder-yellow'}">${isObtained ? 'TENHO' : 'FALTANTE'}</span>
+                    <span class="text-xs font-extrabold ${isObtained ? 'text-green-400' : 'text-cinder-yellow'}">${isObtained ? 'TENHO' : 'FALTANTE'} (${currentZoomIndex + 1}/${allCards.length})</span>
                 </div>
-                <div class="w-full h-[60vh] sm:h-[65vh] flex items-center justify-center bg-cinder-bg rounded-2xl overflow-hidden border border-cinder-orange/20 shadow-inner p-2">
-                    <img src="${card.imagem}" class="max-h-full max-w-full object-contain" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                <div id="zoom-image-container" class="w-full h-[60vh] sm:h-[65vh] flex items-center justify-center bg-cinder-bg rounded-2xl overflow-hidden border border-cinder-orange/20 shadow-inner p-2 relative cursor-grab active:cursor-grabbing">
+                    <img src="${card.imagem}" class="max-h-full max-w-full object-contain pointer-events-none" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
                 </div>
                 <div class="mt-4 w-full text-center">
                     <p class="text-base sm:text-lg font-bold text-cinder-white">${card.nome}</p>
                     <p class="text-xs text-cinder-orange font-semibold mt-0.5">${card.set} — ${card.variante} (#${card.numero})</p>
+                    <p class="text-[10px] text-slate-400 mt-1">Dica: Arraste para o lado para navegar entre as cartas ‹ ›</p>
                 </div>`;
 
             modal.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
@@ -852,7 +845,41 @@
                 content.classList.remove('scale-95');
                 content.classList.add('scale-100');
             }, 10);
-        };
+
+            setupSwipeGesture();
+        }
+
+        function setupSwipeGesture() {
+            const imgContainer = document.getElementById('zoom-image-container');
+            if (!imgContainer) return;
+
+            let touchStartX = 0;
+            let touchEndX = 0;
+
+            imgContainer.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            imgContainer.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, { passive: true });
+
+            function handleSwipe() {
+                const threshold = 50; 
+                if (touchEndX < touchStartX - threshold) {
+                    if (currentZoomIndex < allCards.length - 1) {
+                        currentZoomIndex++;
+                        renderZoomContent();
+                    }
+                } else if (touchEndX > touchStartX + threshold) {
+                    if (currentZoomIndex > 0) {
+                        currentZoomIndex--;
+                        renderZoomContent();
+                    }
+                }
+            }
+        }
 
         window.hideZoomModal = function() {
             const modal = document.getElementById('zoom-modal');
@@ -981,14 +1008,14 @@
                     let pressTimer = null;
                     let isScrolling = false;
 
-                    cardEl.onmouseenter = () => { pressTimer = setTimeout(() => { showZoomModal(card); }, 1000); };
+                    cardEl.onmouseenter = () => { pressTimer = setTimeout(() => { showZoomModal(card.id); }, 1000); };
                     cardEl.onmouseleave = () => { clearTimeout(pressTimer); };
 
                     cardEl.ontouchstart = (e) => {
                         isScrolling = false;
                         pressTimer = setTimeout(() => {
                             if (!isScrolling) {
-                                showZoomModal(card);
+                                showZoomModal(card.id);
                             }
                         }, 1000);
                     };
@@ -1030,7 +1057,6 @@
             });
         }
 
-        /* --- CAPTURA --- */
         window.saveCaptureData = function(cardId, key, value) {
             if(!captureDataMap[cardId]) captureDataMap[cardId] = {};
             captureDataMap[cardId][key] = value;
@@ -1168,7 +1194,6 @@
             });
         }
 
-        /* --- MERCADO --- */
         window.saveMarketPrice = function(cardId, key, value) {
             if (!marketPricesMap[cardId]) marketPricesMap[cardId] = {};
             marketPricesMap[cardId][key] = value;
