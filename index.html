@@ -40,6 +40,18 @@
         
         #zoom-modal { transition: opacity 0.2s ease-in-out; }
 
+        /* Animações de transição suave do zoom */
+        @keyframes slideInLeft {
+            from { opacity: 0; transform: translateX(30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(-30px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        .slide-left { animation: slideInLeft 0.2s ease-out; }
+        .slide-right { animation: slideInRight 0.2s ease-out; }
+
         .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: #0F1622; border-radius: 8px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #2A3B56; border-radius: 8px; }
@@ -811,16 +823,30 @@
             refreshCurrentView();
         };
 
-        // --- SISTEMA DE ZOOM COM SWIPE / NAVEGAÇÃO ---
+        // --- SISTEMA DE ZOOM COM SETAS WEB, SWIPE E TECLADO ---
         window.showZoomModal = function(cardId) {
             const index = allCards.findIndex(c => c.id === cardId);
             if (index !== -1) {
                 currentZoomIndex = index;
-                renderZoomContent();
+                renderZoomContent('none');
             }
         };
 
-        function renderZoomContent() {
+        window.nextZoomCard = function() {
+            if (currentZoomIndex < allCards.length - 1) {
+                currentZoomIndex++;
+                renderZoomContent('left');
+            }
+        };
+
+        window.prevZoomCard = function() {
+            if (currentZoomIndex > 0) {
+                currentZoomIndex--;
+                renderZoomContent('right');
+            }
+        };
+
+        function renderZoomContent(animDirection = 'none') {
             const card = allCards[currentZoomIndex];
             const modal = document.getElementById('zoom-modal');
             const content = document.getElementById('zoom-modal-content');
@@ -831,13 +857,26 @@
                     <span class="px-2.5 py-1 rounded text-xs font-black uppercase bg-cinder-bg text-cinder-yellow border border-cinder-orange/30">${card.lingua}</span>
                     <span class="text-xs font-extrabold ${isObtained ? 'text-green-400' : 'text-cinder-yellow'}">${isObtained ? 'TENHO' : 'FALTANTE'} (${currentZoomIndex + 1}/${allCards.length})</span>
                 </div>
-                <div id="zoom-image-container" class="w-full h-[60vh] sm:h-[65vh] flex items-center justify-center bg-cinder-bg rounded-2xl overflow-hidden border border-cinder-orange/20 shadow-inner p-2 relative cursor-grab active:cursor-grabbing">
-                    <img src="${card.imagem}" class="max-h-full max-w-full object-contain pointer-events-none" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                
+                <!-- CONTAINER DA IMAGEM COM BOTÕES DE SETA NA WEB -->
+                <div class="relative w-full">
+                    <button onclick="prevZoomCard()" ${currentZoomIndex === 0 ? 'disabled' : ''} class="absolute -left-3 sm:-left-5 top-1/2 -translate-y-1/2 z-20 bg-cinder-dark/90 hover:bg-cinder-orange disabled:opacity-30 disabled:hover:bg-cinder-dark text-cinder-yellow hover:text-white p-2.5 sm:p-3 rounded-full border border-cinder-orange/40 shadow-lg transition active:scale-95 flex items-center justify-center cursor-pointer">
+                        ‹
+                    </button>
+                    
+                    <button onclick="nextZoomCard()" ${currentZoomIndex === allCards.length - 1 ? 'disabled' : ''} class="absolute -right-3 sm:-right-5 top-1/2 -translate-y-1/2 z-20 bg-cinder-dark/90 hover:bg-cinder-orange disabled:opacity-30 disabled:hover:bg-cinder-dark text-cinder-yellow hover:text-white p-2.5 sm:p-3 rounded-full border border-cinder-orange/40 shadow-lg transition active:scale-95 flex items-center justify-center cursor-pointer">
+                        ›
+                    </button>
+
+                    <div id="zoom-image-container" class="w-full h-[55vh] sm:h-[65vh] flex items-center justify-center bg-cinder-bg rounded-2xl overflow-hidden border border-cinder-orange/20 shadow-inner p-2 relative cursor-grab active:cursor-grabbing">
+                        <img src="${card.imagem}" class="max-h-full max-w-full object-contain pointer-events-none ${animDirection === 'left' ? 'slide-left' : animDirection === 'right' ? 'slide-right' : ''}" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                    </div>
                 </div>
+
                 <div class="mt-4 w-full text-center">
                     <p class="text-base sm:text-lg font-bold text-cinder-white">${card.nome}</p>
                     <p class="text-xs text-cinder-orange font-semibold mt-0.5">${card.set} — ${card.variante} (#${card.numero})</p>
-                    <p class="text-[10px] text-slate-400 mt-1">Dica: Arraste para o lado para navegar entre as cartas ‹ ›</p>
+                    <p class="text-[10px] text-slate-400 mt-1">Dica: Use as setas do teclado (← →) ou arraste para navegar</p>
                 </div>`;
 
             modal.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
@@ -849,6 +888,7 @@
             setupSwipeGesture();
         }
 
+        // Suporte a gestos de arrastar no toque
         function setupSwipeGesture() {
             const imgContainer = document.getElementById('zoom-image-container');
             if (!imgContainer) return;
@@ -868,18 +908,26 @@
             function handleSwipe() {
                 const threshold = 50; 
                 if (touchEndX < touchStartX - threshold) {
-                    if (currentZoomIndex < allCards.length - 1) {
-                        currentZoomIndex++;
-                        renderZoomContent();
-                    }
+                    nextZoomCard();
                 } else if (touchEndX > touchStartX + threshold) {
-                    if (currentZoomIndex > 0) {
-                        currentZoomIndex--;
-                        renderZoomContent();
-                    }
+                    prevZoomCard();
                 }
             }
         }
+
+        // Suporte às setas do teclado (← e →) e Esc
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('zoom-modal');
+            if (modal && !modal.classList.contains('hidden')) {
+                if (e.key === 'ArrowRight') {
+                    nextZoomCard();
+                } else if (e.key === 'ArrowLeft') {
+                    prevZoomCard();
+                } else if (e.key === 'Escape') {
+                    hideZoomModal();
+                }
+            }
+        });
 
         window.hideZoomModal = function() {
             const modal = document.getElementById('zoom-modal');
