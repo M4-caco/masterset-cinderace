@@ -30,7 +30,14 @@
         .card-owned img { filter: grayscale(0%) opacity(1); transition: all 0.2s ease; }
         .card-owned { border: 2px solid #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.35); }
         .card-not-owned { border: 1px solid #2A3B56; }
-        .active-tab { border-bottom: 3px solid #BB492E; color: #BB492E; font-weight: bold; }
+        
+        /* Abas Desktop e Mobile */
+        .nav-btn-active { 
+            background-color: rgba(187, 73, 46, 0.15); 
+            color: #F4D664; 
+            border-bottom: 2px solid #BB492E; 
+            font-weight: 800; 
+        }
         
         #zoom-modal { transition: opacity 0.2s ease-in-out; }
 
@@ -49,42 +56,79 @@
         </div>
     </div>
 
-    <!-- HEADER DE NAVEGAÇÃO -->
-    <header class="p-4 sm:p-5 bg-cinder-dark/95 backdrop-blur-md shadow-2xl border-b border-cinder-orange/20 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex flex-col sm:flex-row items-center justify-between w-full md:w-auto gap-4">
-                <h1 onclick="switchTab('dashboard')" class="text-xl sm:text-2xl font-black text-cinder-orange tracking-tight cursor-pointer hover:opacity-80 transition text-center sm:text-left flex items-center gap-2">
+    <!-- HEADER DE NAVEGAÇÃO MODERNO -->
+    <header class="p-3 sm:p-4 bg-cinder-dark/95 backdrop-blur-md shadow-2xl border-b border-cinder-orange/20 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-col gap-3">
+            
+            <!-- LINHA PRINCIPAL: TÍTULO + MENU HAMBÚRGUER (MOBILE) + STATS (DESKTOP) -->
+            <div class="flex justify-between items-center w-full">
+                
+                <!-- CANTO SUPERIOR ESQUERDO: TÍTULO -->
+                <h1 onclick="switchTab('dashboard')" class="text-xl sm:text-2xl font-black text-cinder-orange tracking-tight cursor-pointer hover:opacity-80 transition flex items-center gap-2 select-none">
                     <span class="text-cinder-yellow">🔥</span> MasterSet
                 </h1>
-                
-                <!-- BOTÃO MENU SUSPENSO MOBILE -->
-                <button onclick="toggleMobileMenu()" class="md:hidden bg-cinder-card hover:bg-cinder-dark text-cinder-white border border-cinder-orange/30 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition">
-                    <span>Menu / Abas</span>
-                    <span id="mobile-menu-arrow" class="transform transition duration-200 text-cinder-yellow">▼</span>
-                </button>
+
+                <!-- NAVEGAÇÃO DESKTOP (CENTRALIZADA) -->
+                <nav class="hidden md:flex items-center gap-2 bg-cinder-bg/80 p-1.5 rounded-2xl border border-cinder-orange/20 text-xs font-semibold">
+                    <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-4 py-2 rounded-xl transition hover:text-cinder-yellow flex items-center gap-1.5">
+                        <span>📊</span> Resumo
+                    </button>
+                    <button id="nav-grid" onclick="switchTab('grid')" class="px-4 py-2 rounded-xl transition hover:text-cinder-yellow flex items-center gap-1.5">
+                        <span>🎴</span> Coleção
+                    </button>
+                    <button id="nav-capture" onclick="switchTab('capture')" class="px-4 py-2 rounded-xl transition hover:text-cinder-yellow flex items-center gap-1.5">
+                        <span>🎯</span> Captura
+                    </button>
+                    <button id="nav-market" onclick="switchTab('market')" class="px-4 py-2 rounded-xl transition hover:text-cinder-yellow flex items-center gap-1.5">
+                        <span>📈</span> Mercado
+                    </button>
+                </nav>
+
+                <!-- BOTOES STATS (DESKTOP & MOBILE COMPACTO) -->
+                <div class="flex items-center gap-2">
+                    <div class="flex gap-1.5 sm:gap-2">
+                        <div class="bg-cinder-card px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-center border border-cinder-orange/20">
+                            <p class="text-[8px] sm:text-[9px] text-slate-400 uppercase font-bold">Total</p>
+                            <p id="total-count" class="text-xs sm:text-sm font-bold text-cinder-white">226</p>
+                        </div>
+                        <div class="bg-cinder-card px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-center border-l-2 border-green-500 shadow-sm">
+                            <p class="text-[8px] sm:text-[9px] text-slate-400 uppercase font-bold">Tenho</p>
+                            <p id="obtained-count" class="text-xs sm:text-sm font-bold text-green-400">0</p>
+                        </div>
+                        <div class="bg-cinder-card px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl text-center border-l-2 border-cinder-yellow shadow-sm">
+                            <p class="text-[8px] sm:text-[9px] text-slate-400 uppercase font-bold">Faltam</p>
+                            <p id="missing-count" class="text-xs sm:text-sm font-bold text-cinder-yellow">226</p>
+                        </div>
+                    </div>
+
+                    <!-- BOTAO HAMBURGUER 3 LINHAS (MOBILE) -->
+                    <button id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Abrir Menu" class="md:hidden bg-cinder-card hover:bg-cinder-bg active:scale-95 text-cinder-white border border-cinder-orange/30 p-2 rounded-xl transition flex flex-col justify-center items-center gap-1 w-9 h-9 shrink-0 ml-1">
+                        <span class="w-5 h-0.5 bg-cinder-yellow rounded-full transition-all"></span>
+                        <span class="w-5 h-0.5 bg-cinder-yellow rounded-full transition-all"></span>
+                        <span class="w-5 h-0.5 bg-cinder-yellow rounded-full transition-all"></span>
+                    </button>
+                </div>
             </div>
 
-            <!-- NAVEGAÇÃO DESKTOP & MOBILE -->
-            <nav id="nav-menu-container" class="hidden md:flex flex-col md:flex-row items-center gap-3 sm:gap-6 text-sm font-semibold text-slate-400 w-full md:w-auto bg-cinder-bg/80 md:bg-transparent p-4 md:p-0 rounded-2xl border md:border-0 border-cinder-orange/20">
-                <button id="nav-grid" onclick="switchTab('grid')" class="pb-1 hover:text-cinder-orange transition w-full md:w-auto text-left md:text-center">Minha Coleção</button>
-                <button id="nav-capture" onclick="switchTab('capture')" class="pb-1 hover:text-cinder-orange transition w-full md:w-auto text-left md:text-center">Captura</button>
-                <button id="nav-market" onclick="switchTab('market')" class="pb-1 hover:text-cinder-orange transition w-full md:w-auto text-left md:text-center">Mercado</button>
-            </nav>
-            
-            <div class="flex gap-2 sm:gap-3 w-full sm:w-auto justify-center">
-                <div class="bg-cinder-card px-3 sm:px-4 py-2 rounded-xl text-center min-w-[75px] sm:min-w-[85px] border border-cinder-orange/20">
-                    <p class="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold">Total</p>
-                    <p id="total-count" class="text-sm sm:text-base font-bold text-cinder-white">226</p>
-                </div>
-                <div class="bg-cinder-card px-3 sm:px-4 py-2 rounded-xl text-center min-w-[75px] sm:min-w-[85px] border-l-4 border-green-500 shadow-sm">
-                    <p class="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold">Tenho</p>
-                    <p id="obtained-count" class="text-sm sm:text-base font-bold text-green-400">0</p>
-                </div>
-                <div class="bg-cinder-card px-3 sm:px-4 py-2 rounded-xl text-center min-w-[75px] sm:min-w-[85px] border-l-4 border-cinder-yellow shadow-sm">
-                    <p class="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold">Faltam</p>
-                    <p id="missing-count" class="text-sm sm:text-base font-bold text-cinder-yellow">226</p>
+            <!-- GAVETA SUSPENSA MODERNA (MOBILE) -->
+            <div id="mobile-menu" class="hidden md:hidden flex-col gap-2 pt-2 border-t border-cinder-orange/20 animate-fade-in">
+                <p class="text-[10px] uppercase tracking-wider font-extrabold text-cinder-yellow px-1">Navegação das Abas</p>
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="mob-nav-dashboard" onclick="switchTab('dashboard')" class="bg-cinder-card hover:bg-cinder-bg p-3 rounded-xl text-xs font-bold text-left border border-cinder-orange/20 flex items-center gap-2 transition">
+                        <span class="text-base">📊</span> Resumo
+                    </button>
+                    <button id="mob-nav-grid" onclick="switchTab('grid')" class="bg-cinder-card hover:bg-cinder-bg p-3 rounded-xl text-xs font-bold text-left border border-cinder-orange/20 flex items-center gap-2 transition">
+                        <span class="text-base">🎴</span> Coleção
+                    </button>
+                    <button id="mob-nav-capture" onclick="switchTab('capture')" class="bg-cinder-card hover:bg-cinder-bg p-3 rounded-xl text-xs font-bold text-left border border-cinder-orange/20 flex items-center gap-2 transition">
+                        <span class="text-base">🎯</span> Captura
+                    </button>
+                    <button id="mob-nav-market" onclick="switchTab('market')" class="bg-cinder-card hover:bg-cinder-bg p-3 rounded-xl text-xs font-bold text-left border border-cinder-orange/20 flex items-center gap-2 transition">
+                        <span class="text-base">📈</span> Mercado
+                    </button>
                 </div>
             </div>
+
         </div>
     </header>
 
@@ -557,12 +601,10 @@
                 captureDataMap = cloudData.captureDataMap || {};
                 marketPricesMap = cloudData.marketPricesMap || {};
                 
-                // Cache local
                 localStorage.setItem('pokedex_obtained_v2', JSON.stringify(obtainedMap));
                 localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
                 localStorage.setItem('pokedex_market_prices_v1', JSON.stringify(marketPricesMap));
             } else {
-                // Primeira vez, salva o localStorage atual para o Cloud
                 obtainedMap = JSON.parse(localStorage.getItem('pokedex_obtained_v2') || '{}');
                 captureDataMap = JSON.parse(localStorage.getItem('pokedex_capture_data_v1') || '{}');
                 marketPricesMap = JSON.parse(localStorage.getItem('pokedex_market_prices_v1') || '{}');
@@ -578,29 +620,30 @@
         });
 
         // ----------------- UI FUNCTIONS -----------------
-        function toggleMobileMenu() {
-            const menu = document.getElementById('nav-menu-container');
-            const arrow = document.getElementById('mobile-menu-arrow');
-            if (menu.classList.contains('hidden')) {
-                menu.classList.remove('hidden');
-                arrow.style.transform = "rotate(180deg)";
-            } else {
-                menu.classList.add('hidden');
-                arrow.style.transform = "rotate(0deg)";
+        window.toggleMobileMenu = function() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu) {
+                if (menu.classList.contains('hidden')) {
+                    menu.classList.remove('hidden');
+                    menu.classList.add('flex');
+                } else {
+                    menu.classList.add('hidden');
+                    menu.classList.remove('flex');
+                }
             }
-        }
+        };
 
-        function toggleFilterDrawer() {
+        window.toggleFilterDrawer = function() {
             const section = document.getElementById('filters-section');
             const arrow = document.getElementById('drawer-arrow');
             if (section.classList.contains('hidden')) {
                 section.classList.remove('hidden');
-                arrow.style.transform = "rotate(180deg)";
+                if(arrow) arrow.style.transform = "rotate(180deg)";
             } else {
                 section.classList.add('hidden');
-                arrow.style.transform = "rotate(0deg)";
+                if(arrow) arrow.style.transform = "rotate(0deg)";
             }
-        }
+        };
 
         window.addEventListener('click', function(e) {
             const section = document.getElementById('filters-section');
@@ -609,6 +652,13 @@
                 section.classList.add('hidden');
                 const arrow = document.getElementById('drawer-arrow');
                 if(arrow) arrow.style.transform = "rotate(0deg)";
+            }
+
+            const mobileMenu = document.getElementById('mobile-menu');
+            const hambBtn = document.getElementById('hamburger-btn');
+            if (mobileMenu && hambBtn && !mobileMenu.contains(e.target) && !hambBtn.contains(e.target)) {
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('flex');
             }
         });
 
@@ -685,11 +735,7 @@
             const marketSec = document.getElementById('view-market');
             const filterBar = document.getElementById('filter-control-bar');
             const filtersSection = document.getElementById('filters-section');
-            const mobileMenu = document.getElementById('nav-menu-container');
-
-            const navGrid = document.getElementById('nav-grid');
-            const navCapture = document.getElementById('nav-capture');
-            const navMarket = document.getElementById('nav-market');
+            const mobileMenu = document.getElementById('mobile-menu');
 
             dashSec.classList.add('hidden');
             gridSec.classList.add('hidden');
@@ -697,11 +743,23 @@
             marketSec.classList.add('hidden');
             filterBar.classList.add('hidden');
             if(filtersSection) filtersSection.classList.add('hidden');
-            if(window.innerWidth < 768) mobileMenu.classList.add('hidden');
+            if(mobileMenu) {
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('flex');
+            }
 
-            navGrid.className = "pb-1 hover:text-cinder-orange transition w-full md:w-auto text-left md:text-center";
-            navCapture.className = "pb-1 hover:text-cinder-orange transition w-full md:w-auto text-left md:text-center";
-            navMarket.className = "pb-1 hover:text-cinder-orange transition w-full md:w-auto text-left md:text-center";
+            const tabs = ['dashboard', 'grid', 'capture', 'market'];
+            tabs.forEach(t => {
+                const navDesk = document.getElementById(`nav-${t}`);
+                const navMob = document.getElementById(`mob-nav-${t}`);
+                if (navDesk) navDesk.className = "px-4 py-2 rounded-xl transition hover:text-cinder-yellow flex items-center gap-1.5 text-slate-400 font-semibold";
+                if (navMob) navMob.className = "bg-cinder-card hover:bg-cinder-bg p-3 rounded-xl text-xs font-bold text-left border border-cinder-orange/20 flex items-center gap-2 transition text-slate-300";
+            });
+
+            const activeDesk = document.getElementById(`nav-${tab}`);
+            const activeMob = document.getElementById(`mob-nav-${tab}`);
+            if (activeDesk) activeDesk.className = "px-4 py-2 rounded-xl transition bg-cinder-orange/20 text-cinder-yellow border-b-2 border-cinder-orange font-extrabold flex items-center gap-1.5 shadow";
+            if (activeMob) activeMob.className = "bg-cinder-orange/20 text-cinder-yellow p-3 rounded-xl text-xs font-extrabold text-left border border-cinder-orange flex items-center gap-2 shadow";
 
             if(tab === 'dashboard') {
                 dashSec.classList.remove('hidden');
@@ -709,17 +767,14 @@
             } else if(tab === 'grid') {
                 gridSec.classList.remove('hidden');
                 filterBar.classList.remove('hidden');
-                navGrid.className = "active-tab pb-1 transition w-full md:w-auto text-left md:text-center";
                 updateFilterButtonsUI();
                 applyFilters();
             } else if(tab === 'capture') {
                 captureSec.classList.remove('hidden');
-                navCapture.className = "active-tab pb-1 transition w-full md:w-auto text-left md:text-center";
                 renderCaptureView();
             } else if(tab === 'market') {
                 marketSec.classList.remove('hidden');
                 filterBar.classList.remove('hidden');
-                navMarket.className = "active-tab pb-1 transition w-full md:w-auto text-left md:text-center";
                 updateFilterButtonsUI();
                 renderMarketTable();
             }
