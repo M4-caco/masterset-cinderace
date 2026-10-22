@@ -1,0 +1,1151 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pokédex Master Set Tracker - Cinderace Family</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        cinder: {
+                            white: '#EFEFEF',
+                            yellow: '#F4D664',
+                            orange: '#BB492E',
+                            red: '#83382A',
+                            dark: '#182234',
+                            bg: '#0F1622',
+                            card: '#1D2A3F'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .card-not-owned img { filter: grayscale(100%) opacity(0.35); transition: all 0.2s ease; }
+        .card-not-owned:hover img { filter: grayscale(30%) opacity(0.8); }
+        .card-owned img { filter: grayscale(0%) opacity(1); transition: all 0.2s ease; }
+        .card-owned { border: 2px solid #22c55e; box-shadow: 0 0 12px rgba(34, 197, 94, 0.35); }
+        .card-not-owned { border: 1px solid #2A3B56; }
+        .active-tab { border-bottom: 3px solid #BB492E; color: #BB492E; font-weight: bold; }
+        
+        #zoom-modal { transition: opacity 0.2s ease-in-out; }
+
+        .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
+        .custom-scroll::-webkit-scrollbar-track { background: #0F1622; border-radius: 8px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #2A3B56; border-radius: 8px; }
+        .custom-scroll::-webkit-scrollbar-thumb:hover { background: #BB492E; }
+    </style>
+</head>
+<body class="bg-cinder-bg text-cinder-white min-h-screen font-sans">
+
+    <!-- MODAL DE ZOOM CENTRALIZADO -->
+    <div id="zoom-modal" onclick="handleModalClick(event)" class="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center hidden opacity-0 pointer-events-none p-4">
+        <div id="zoom-modal-content" class="bg-cinder-dark border border-cinder-orange/40 p-4 sm:p-6 rounded-3xl shadow-2xl max-w-xl w-full max-h-[94vh] flex flex-col items-center relative transform scale-95 transition-transform duration-300">
+            <!-- Conteúdo injetado via JS -->
+        </div>
+    </div>
+
+    <!-- HEADER DE NAVEGAÇÃO -->
+    <header class="p-4 sm:p-5 bg-cinder-dark/95 backdrop-blur-md shadow-2xl border-b border-cinder-orange/20 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex flex-col sm:flex-row items-center justify-between w-full md:w-auto gap-4">
+                <h1 onclick="switchTab('dashboard')" class="text-xl sm:text-2xl font-black text-cinder-orange tracking-tight cursor-pointer hover:opacity-80 transition text-center sm:text-left flex items-center gap-2">
+                    <span class="text-cinder-yellow">🔥</span> MasterSet
+                </h1>
+                
+                <!-- BOTÃO MENU SUSPENSO MOBILE -->
+                <button onclick="toggleMobileMenu()" class="md:hidden bg-cinder-card hover:bg-cinder-dark text-cinder-white border border-cinder-orange/30 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-2 transition">
+                    <span>Menu / Abas</span>
+                    <span id="mobile-menu-arrow" class="transform transition duration-200 text-cinder-yellow">▼</span>
+                </button>
+            </div>
+
+            <!-- NAVEGAÇÃO DESKTOP & MOBILE -->
+            <nav id="nav-menu-container" class="hidden md:flex flex-col md:flex-row items-center gap-3 sm:gap-6 text-sm font-semibold text-slate-400 w-full md:w-auto bg-cinder-bg/80 md:bg-transparent p-4 md:p-0 rounded-2xl border md:border-0 border-cinder-orange/20">
+                <button id="nav-grid" onclick="switchTab('grid')" class="pb-1 hover:text-cinder-orange transition w-full md:w-auto text-left md:text-center">Minha Coleção</button>
+                <button id="nav-capture" onclick="switchTab('capture')" class="pb-1 hover:text-cinder-orange transition w-full md:w-auto text-left md:text-center">Captura</button>
+                <button id="nav-market" onclick="switchTab('market')" class="pb-1 hover:text-cinder-orange transition w-full md:w-auto text-left md:text-center">Mercado</button>
+            </nav>
+            
+            <div class="flex gap-2 sm:gap-3 w-full sm:w-auto justify-center">
+                <div class="bg-cinder-card px-3 sm:px-4 py-2 rounded-xl text-center min-w-[75px] sm:min-w-[85px] border border-cinder-orange/20">
+                    <p class="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold">Total</p>
+                    <p id="total-count" class="text-sm sm:text-base font-bold text-cinder-white">226</p>
+                </div>
+                <div class="bg-cinder-card px-3 sm:px-4 py-2 rounded-xl text-center min-w-[75px] sm:min-w-[85px] border-l-4 border-green-500 shadow-sm">
+                    <p class="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold">Tenho</p>
+                    <p id="obtained-count" class="text-sm sm:text-base font-bold text-green-400">0</p>
+                </div>
+                <div class="bg-cinder-card px-3 sm:px-4 py-2 rounded-xl text-center min-w-[75px] sm:min-w-[85px] border-l-4 border-cinder-yellow shadow-sm">
+                    <p class="text-[9px] sm:text-[10px] text-slate-400 uppercase font-bold">Faltam</p>
+                    <p id="missing-count" class="text-sm sm:text-base font-bold text-cinder-yellow">226</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ÁREA PRINCIPAL -->
+    <main class="p-4 sm:p-6 max-w-7xl mx-auto">
+
+        <!-- BARRA DE CONTROLE E BUSCA -->
+        <div id="filter-control-bar" class="flex flex-wrap justify-between items-center mb-6 gap-3 relative hidden">
+            <div class="flex items-center gap-2 sm:gap-3 flex-1 max-w-2xl relative">
+                <button onclick="toggleFilterDrawer()" class="bg-cinder-dark hover:bg-cinder-card text-cinder-white border border-cinder-orange/40 px-3 sm:px-4 py-2.5 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow shrink-0">
+                    <span>Filtros</span>
+                    <span id="drawer-arrow" class="transform transition duration-200 text-cinder-yellow">▼</span>
+                </button>
+
+                <input id="search-input" oninput="handleSearchInput()" type="text" placeholder="Buscar por Nome, expansão ou variante..." class="w-full bg-cinder-dark px-3 sm:px-4 py-2.5 rounded-xl text-xs outline-none border border-cinder-orange/30 focus:border-cinder-orange text-cinder-white shadow">
+
+                <!-- GAVETA DE FILTROS -->
+                <section id="filters-section" class="absolute left-0 top-12 w-72 sm:w-80 bg-cinder-dark p-4 rounded-2xl border border-cinder-orange/30 space-y-4 hidden z-40 shadow-2xl max-h-[80vh] overflow-y-auto custom-scroll">
+                    
+                    <div class="flex flex-col gap-1.5">
+                        <span class="text-[11px] font-bold text-cinder-yellow uppercase">Pokémon:</span>
+                        <div class="flex flex-col gap-1">
+                            <button id="btn-poke-Scorbunny" onclick="filterPoke('Scorbunny')" class="poke-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-cinder-white">Scorbunny</button>
+                            <button id="btn-poke-Raboot" onclick="filterPoke('Raboot')" class="poke-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-cinder-white">Raboot</button>
+                            <button id="btn-poke-Cinderace" onclick="filterPoke('Cinderace')" class="poke-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-cinder-white">Cinderace</button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5 pt-2 border-t border-cinder-orange/20">
+                        <span class="text-[11px] font-bold text-cinder-yellow uppercase">Língua:</span>
+                        <div class="grid grid-cols-2 gap-1">
+                            <button id="btn-lang-PT-BR" onclick="filterLang('PT-BR')" class="lang-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-center transition text-cinder-white">PT-BR</button>
+                            <button id="btn-lang-EN" onclick="filterLang('EN')" class="lang-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-center transition text-cinder-white">EN</button>
+                            <button id="btn-lang-JP" onclick="filterLang('JP')" class="lang-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-center transition text-cinder-white">JP</button>
+                            <button id="btn-lang-CN" onclick="filterLang('CN')" class="lang-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-center transition text-cinder-white">CN</button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5 pt-2 border-t border-cinder-orange/20">
+                        <span class="text-[11px] font-bold text-cinder-yellow uppercase">Característica:</span>
+                        <div class="flex flex-col gap-1">
+                            <button id="btn-var-Regular" onclick="filterVar('Regular')" class="var-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-cinder-white">Regular</button>
+                            <button id="btn-var-Holo" onclick="filterVar('Holográfica / Holo')" class="var-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-cinder-white">Holográfica / Holo</button>
+                            <button id="btn-var-Reverse" onclick="filterVar('Reverse Holo')" class="var-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-cinder-white">Reverse Holo</button>
+                            <button id="btn-var-Promo" onclick="filterVar('Promo')" class="var-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-cinder-white">Promo</button>
+                            <button id="btn-var-V" onclick="filterVar('V Card')" class="var-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-cinder-white">V Card</button>
+                            <button id="btn-var-VMAX" onclick="filterVar('VMAX')" class="var-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-cinder-white">VMAX</button>
+                            <button id="btn-var-FullArt" onclick="filterVar('Full Art')" class="var-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-cinder-white">Full Art</button>
+                            <button id="btn-var-AltArt" onclick="filterVar('Arte Alternativa (Alt Art)')" class="var-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-cinder-white">Arte Alternativa (Alt Art)</button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1.5 pt-2 border-t border-cinder-orange/20">
+                        <span class="text-[11px] font-bold text-cinder-yellow uppercase">Exibir Status:</span>
+                        <div class="flex flex-col gap-1">
+                            <button id="btn-status-MISSING" onclick="filterStatus('MISSING')" class="status-btn bg-cinder-card text-cinder-white hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition">Faltantes</button>
+                            <button id="btn-status-OWNED" onclick="filterStatus('OWNED')" class="status-btn bg-cinder-card text-cinder-white hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition">Tenho</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <!-- CONTROLES DIREITA -->
+            <div class="flex items-center gap-2 shrink-0">
+                <button onclick="clearAllFilters()" class="bg-cinder-red/30 text-cinder-yellow hover:bg-cinder-red/50 border border-cinder-orange/30 px-3.5 py-2.5 rounded-xl text-xs font-bold transition shadow">
+                    Limpar Filtros
+                </button>
+
+                <select id="layout-select" onchange="changeLayout(this.value)" class="bg-cinder-dark hover:bg-cinder-card text-cinder-white border border-cinder-orange/40 px-3 py-2.5 rounded-xl text-xs font-bold outline-none focus:border-cinder-orange transition shadow cursor-pointer">
+                    <option value="pequeno">Pequeno</option>
+                    <option value="medio">Médio</option>
+                    <option value="grande">Grande</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- ABA 0: DASHBOARD -->
+        <section id="view-dashboard" class="space-y-6">
+            <div class="bg-cinder-dark border border-cinder-orange/20 rounded-3xl p-4 sm:p-6 shadow-xl">
+                <h2 class="text-lg sm:text-xl font-black text-cinder-white mb-1 flex items-center gap-2">
+                    <span class="text-cinder-orange">📊</span> Resumo Geral da Coleção
+                </h2>
+                <p class="text-xs text-slate-400 mb-6">Acompanhe a conclusão por Pokémon, Idioma, Expansão e Característica.</p>
+                
+                <div class="mb-6 bg-cinder-bg p-4 sm:p-5 rounded-2xl border border-cinder-orange/20 shadow-inner">
+                    <div class="flex justify-between items-center text-sm font-bold mb-2">
+                        <span class="text-cinder-white">Master Set Completo</span>
+                        <span id="dashboard-total-pct" class="text-cinder-orange font-extrabold text-base">0%</span>
+                    </div>
+                    <div class="w-full bg-cinder-dark h-3.5 rounded-full overflow-hidden p-0.5 border border-cinder-orange/20">
+                        <div id="dashboard-total-bar" class="bg-gradient-to-r from-cinder-orange to-cinder-yellow h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="bg-cinder-bg p-4 sm:p-5 rounded-2xl border border-cinder-orange/20 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-4 border-b border-cinder-orange/10 pb-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-cinder-orange"></span>
+                                <h3 class="text-xs font-black text-cinder-yellow uppercase tracking-wider">Pokémon</h3>
+                            </div>
+                            <div id="stats-pokemon" class="space-y-3"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-cinder-bg p-4 sm:p-5 rounded-2xl border border-cinder-orange/20 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-4 border-b border-cinder-orange/10 pb-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-cinder-yellow"></span>
+                                <h3 class="text-xs font-black text-cinder-yellow uppercase tracking-wider">Idioma</h3>
+                            </div>
+                            <div id="stats-lang" class="space-y-3"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-cinder-bg p-4 sm:p-5 rounded-2xl border border-cinder-orange/20">
+                        <div class="flex items-center gap-2 mb-4 border-b border-cinder-orange/10 pb-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-cinder-red"></span>
+                            <h3 class="text-xs font-black text-cinder-yellow uppercase tracking-wider">Expansão</h3>
+                        </div>
+                        <div id="stats-set" class="space-y-3 max-h-72 overflow-y-auto pr-2 custom-scroll"></div>
+                    </div>
+
+                    <div class="bg-cinder-bg p-4 sm:p-5 rounded-2xl border border-cinder-orange/20">
+                        <div class="flex items-center gap-2 mb-4 border-b border-cinder-orange/10 pb-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                            <h3 class="text-xs font-black text-cinder-yellow uppercase tracking-wider">Característica</h3>
+                        </div>
+                        <div id="stats-var" class="space-y-3 max-h-72 overflow-y-auto pr-2 custom-scroll"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ABA 1: GRID DA COLEÇÃO -->
+        <section id="view-grid" class="hidden">
+            <div id="cards-grid" class="grid gap-2 sm:gap-4"></div>
+        </section>
+
+        <!-- ABA 2: CAPTURA -->
+        <section id="view-capture" class="hidden space-y-6">
+            <div class="bg-cinder-dark border border-cinder-orange/20 rounded-3xl p-4 sm:p-6 shadow-xl">
+                <h2 class="text-lg sm:text-xl font-black text-cinder-white mb-1">Registro de Capturas</h2>
+                <p class="text-xs text-slate-400 mb-6">Cadastre como você obteve cada carta. Ative o <strong>cadeado (🔒)</strong> para travar a remoção na coleção.</p>
+                <div id="capture-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6"></div>
+            </div>
+        </section>
+
+        <!-- ABA 3: MERCADO -->
+        <section id="view-market" class="hidden">
+            <div class="bg-cinder-dark rounded-3xl border border-cinder-orange/20 p-4 sm:p-6 shadow-xl">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <h2 class="text-base sm:text-lg font-bold text-cinder-white">Painel de Cotações & Mercado</h2>
+                        <p class="text-xs text-slate-400">Consulte os links diretos ou atualize os valores estimados da sua coleção.</p>
+                    </div>
+                    <button onclick="refreshMarketPrices()" class="w-full sm:w-auto bg-cinder-orange hover:bg-cinder-red text-cinder-white px-4 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow">
+                        <span id="refresh-icon">🔄</span>
+                        <span>Atualizar Preços</span>
+                    </button>
+                </div>
+
+                <div id="market-cards-container" class="space-y-3"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- SCRIPT PRINCIPAL -->
+    <script>
+        const allCards = [
+            { id: "card-1", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "034/202", imagem: "SSH_034_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Espada+e+Escudo", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-2", nome: "Cinderace", pokemon: "Cinderace", set: "Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "017/198", imagem: "CINDERACE_SV017_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Shiny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-3", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "035/202", imagem: "SSH_035_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Espada+e+Escudo", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-4", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "036/202", imagem: "SSH_036_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Espada+e+Escudo", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-5", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Regular", lingua: "PT-BR", numero: "028/198", imagem: "CRE_028_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Reinado+Glacial", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-6", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "PT-BR", numero: "SWSH112", imagem: "SP_112_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Promo", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-7", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "PT-BR", numero: "SWSH278", imagem: "SP_278_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Promo", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-8", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "V Card", lingua: "PT-BR", numero: "035/192", imagem: "RCL_035_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+V", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-9", nome: "Cinderace V", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "018/073", imagem: "SHF_018_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+V", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-10", nome: "Cinderace V", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "SWSH015", imagem: "SP_015_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+V+Promo", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-11", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "Full Art", lingua: "PT-BR", numero: "178/192", imagem: "RCL_178_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+V+Full+Art", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-12", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "PT-BR", numero: "043/264", imagem: "FST_043_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Punhos+de+Fusao", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-13", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "PT-BR", numero: "044/264", imagem: "FST_044_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Punhos+de+Fusao", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-14", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "VMAX", lingua: "PT-BR", numero: "036/192", imagem: "RCL_036_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+VMAX", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-15", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "019/073", imagem: "SHF_019_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+VMAX", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-16", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "Rainbow Rare", lingua: "PT-BR", numero: "194/192", imagem: "RCL_194_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+VMAX+Rainbow", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-17", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "PT-BR", numero: "045/264", imagem: "FST_045_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Punhos+de+Fusao", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-18", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "028/142", imagem: "SCR_028_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+ex", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-19", nome: "Cinderace ex", pokemon: "Cinderace", set: "Promos Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "SVP163", imagem: "SVP_163_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+ex+Promo", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-20", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "Special Illustration Rare", lingua: "PT-BR", numero: "157/142", imagem: "SCR_157_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+ex+SIR", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-21", nome: "Cinderace ex", pokemon: "Cinderace", set: "Heróis Ascendentes", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "038/195", imagem: "ASC_038_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+ex", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-22", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Regular", lingua: "PT-BR", numero: "028/132", imagem: "MEG_028_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Mega", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-23", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "PT-BR", numero: "036/202", imagem: "SSH_036_R_PT_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-24", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Reverse Holo", lingua: "PT-BR", numero: "028/132", imagem: "MEG_028_R_PT_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-25", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Reverse Holo", lingua: "PT-BR", numero: "028/198", imagem: "CRE_028_R_PT_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            
+            // EN
+            { id: "card-26", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+English", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-27", nome: "Cinderace", pokemon: "Cinderace", set: "Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "EN", numero: "017/198", imagem: "CINDERACE_SV017_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Shiny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-28", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "035/202", imagem: "SSH_035_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-29", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "036/202", imagem: "SSH_036_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-30", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Holográfica / Holo", lingua: "EN", numero: "036/202", imagem: "SSH_036_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-31", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Regular", lingua: "EN", numero: "028/198", imagem: "CRE_028_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-32", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "EN", numero: "SWSH112", imagem: "SP_112_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-33", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "EN", numero: "SWSH278", imagem: "SP_278_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-34", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "V Card", lingua: "EN", numero: "035/192", imagem: "RCL_035_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+V", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-35", nome: "Cinderace V", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "Holográfica / Holo", lingua: "EN", numero: "018/073", imagem: "SHF_018_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+V", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-36", nome: "Cinderace V", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Holográfica / Holo", lingua: "EN", numero: "SWSH015", imagem: "SP_015_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+V", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-37", nome: "Cinderace V", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Jumbo / Gigante", lingua: "EN", numero: "SWSH015", imagem: "SP_015_R_EN_JUMBO_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Jumbo", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-38", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "Holográfica / Holo", lingua: "EN", numero: "178/192", imagem: "RCL_178_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Full+Art", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-39", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "EN", numero: "043/264", imagem: "FST_043_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-40", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "EN", numero: "044/264", imagem: "FST_044_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-41", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "VMAX", lingua: "EN", numero: "036/192", imagem: "RCL_036_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+VMAX", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-42", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "Holográfica / Holo", lingua: "EN", numero: "019/073", imagem: "SHF_019_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+VMAX", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-43", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "Holográfica / Holo", lingua: "EN", numero: "194/192", imagem: "RCL_194_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Rainbow", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-44", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "EN", numero: "045/264", imagem: "FST_045_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-45", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "Holográfica / Holo", lingua: "EN", numero: "028/142", imagem: "SCR_028_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+ex", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-46", nome: "Cinderace ex", pokemon: "Cinderace", set: "Promos Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "EN", numero: "SVP163", imagem: "SVP_163_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+ex", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-47", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "Holográfica / Holo", lingua: "EN", numero: "157/142", imagem: "SCR_157_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+SIR", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-48", nome: "Cinderace ex", pokemon: "Cinderace", set: "Heróis Ascendentes", variante: "Holográfica / Holo", lingua: "EN", numero: "038/195", imagem: "ASC_038_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+ex", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-49", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Regular", lingua: "EN", numero: "028/132", imagem: "MEG_028_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-50", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN_LEAGUE_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+League", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-51", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Play Promo", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN_PLAY.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Play", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-52", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Play Promo", lingua: "EN", numero: "028/132", imagem: "MEG_028_R_EN_PLAY.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Play", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-53", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Holográfica / Holo", lingua: "EN", numero: "028/132", imagem: "MEG_028_R_EN_PLAY_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-54", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Prerelease / Staff", lingua: "EN", numero: "SWSH112", imagem: "SP_SWSH112_EN_STAFF_PRERELEASE.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Staff", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-55", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "EN", numero: "036/202", imagem: "SSH_036_R_EN_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-56", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Reverse Holo", lingua: "EN", numero: "028/132", imagem: "MEG_028_R_EN_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-57", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Reverse Holo", lingua: "EN", numero: "028/198", imagem: "CRE_028_R_EN_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-58", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Holográfica / Holo", lingua: "EN", numero: "043/264", imagem: "FST_043_R_EN_BATTLE_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-59", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Arte Alternativa (Alt Art)", lingua: "EN", numero: "028/198", imagem: "CRE_028_R_EN_ALT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Alt+Art", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-60", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Arte Alternativa (Alt Art)", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN_ALT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Alt+Art", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-61", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Holográfica / Holo", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN_COSMOS_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Cosmos", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+
+            // JP & CN
+            { id: "card-62", nome: "Cinderace", pokemon: "Cinderace", set: "Sword & Shield (JP)", variante: "Regular", lingua: "JP", numero: "009/060", imagem: "S1H_009_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-63", nome: "Cinderace", pokemon: "Cinderace", set: "Shiny Star V (JP)", variante: "Holográfica / Holo", lingua: "JP", numero: "024/190", imagem: "S4A_024_R_JP_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-64", nome: "Cinderace", pokemon: "Cinderace", set: "Shiny Star V (JP)", variante: "Holográfica / Holo", lingua: "JP", numero: "216/190", imagem: "S4A_216_R_JP_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-65", nome: "Cinderace", pokemon: "Cinderace", set: "Scarlet & Violet (JP)", variante: "Regular", lingua: "JP", numero: "008/078", imagem: "SAR_008_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-66", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "022/S-P", imagem: "SP_022_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-67", nome: "Cinderace", pokemon: "Cinderace", set: "Chilling Reign (JP)", variante: "Regular", lingua: "JP", numero: "017/070", imagem: "S6H_017_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-68", nome: "Cinderace", pokemon: "Cinderace", set: "Start Deck 100 (JP)", variante: "Regular", lingua: "JP", numero: "072/414", imagem: "SI_072_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-69", nome: "Cinderace", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "Regular", lingua: "JP", numero: "016/070", imagem: "S1A_016_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-70", nome: "Cinderace", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "Holográfica / Holo", lingua: "JP", numero: "072/070", imagem: "S1A_072_R_JP_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-71", nome: "Cinderace", pokemon: "Cinderace", set: "Shining Fates (JP)", variante: "Regular", lingua: "JP", numero: "010/050", imagem: "SH_010_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-72", nome: "Cinderace", pokemon: "Cinderace", set: "Start Deck 100 (JP)", variante: "Regular", lingua: "JP", numero: "073/414", imagem: "SI_073_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-73", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "168/S-P", imagem: "SP_168_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-74", nome: "Cinderace", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "Regular", lingua: "JP", numero: "017/070", imagem: "S1A_017_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-75", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Holográfica / Holo", lingua: "JP", numero: "002/020", imagem: "SP2_002_R_JP_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-76", nome: "Cinderace", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "Holográfica / Holo", lingua: "JP", numero: "080/070", imagem: "S1a_080_HR_JP_H.jpg", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-77", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "169/S-P", imagem: "SP_169_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-78", nome: "Cinderace", pokemon: "Cinderace", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "018/102", imagem: "SV7_018_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-79", nome: "Cinderace", pokemon: "Cinderace", set: "Promo (JP)", variante: "Regular", lingua: "JP", numero: "139/SV-P", imagem: "MC_139_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-80", nome: "Cinderace", pokemon: "Cinderace", set: "Stellar Miracle (JP)", variante: "Holográfica / Holo", lingua: "JP", numero: "116/102", imagem: "SV7_116_R_JP_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-81", nome: "Cinderace", pokemon: "Cinderace", set: "Battle Partners (JP)", variante: "Regular", lingua: "JP", numero: "017/080", imagem: "M1L_017_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-82", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "029/150", imagem: "CSV9C_029_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-83", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "218/150", imagem: "CSV9C_218_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-84", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "258/150", imagem: "CSV9C_258_CN_H.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-85", nome: "Cinderace", pokemon: "Cinderace", set: "Start Deck 100 (CN)", variante: "Regular", lingua: "CN", numero: "072/414", imagem: "SD100_072_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-86", nome: "Cinderace", pokemon: "Cinderace", set: "Start Deck 100 (CN)", variante: "Regular", lingua: "CN", numero: "073/414", imagem: "SD100_073_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-87", nome: "Cinderace", pokemon: "Cinderace", set: "Family Pokémon (CN)", variante: "Regular", lingua: "CN", numero: "010/050", imagem: "FAMILY_010_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-88", nome: "Cinderace", pokemon: "Cinderace", set: "Paradise Dragona (CN)", variante: "Regular", lingua: "CN", numero: "023/064", imagem: "PAO_023_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-89", nome: "Cinderace", pokemon: "Cinderace", set: "Paradise Volunteer (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "025/080", imagem: "PAV_025_CN_H.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-90", nome: "Cinderace", pokemon: "Cinderace", set: "Paradise Volunteer (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "026/080", imagem: "PAV_026_CN_H.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-91", nome: "Cinderace", pokemon: "Cinderace", set: "Paradise Volunteer (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "027/080", imagem: "PAV_027_CN_H.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-92", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "049/150", imagem: "DCF_049_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-93", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "050/150", imagem: "DCF_050_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-94", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "051/150", imagem: "DCF_051_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-95", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "142/150", imagem: "DCF_142_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-96", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "165/150", imagem: "DCF_165_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-97", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "184/150", imagem: "DCF_184_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-98", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Volunteer (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "039/080", imagem: "DCV_039_CN_H.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            { id: "card-99", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "CN", numero: "026/S-P", imagem: "SP_026_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
+            
+            // SCORBUNNY
+            { id: "card-100", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "PT-BR", numero: "SWSH002", imagem: "SP_002_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-101", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "030/202", imagem: "SSH_030_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-102", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "PT-BR", numero: "030/202", imagem: "SSH_030_R_PT_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-103", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "031/202", imagem: "SSH_031_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-104", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "PT-BR", numero: "031/202", imagem: "SSH_031_R_PT_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-105", nome: "Scorbunny", pokemon: "Scorbunny", set: "Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "015/198", imagem: "SCORBUNNY_SV015_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-106", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "PT-BR", numero: "SWSH071", imagem: "SP_071_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-107", nome: "Scorbunny", pokemon: "Scorbunny", set: "Reinado Glacial", variante: "Regular", lingua: "PT-BR", numero: "026/198", imagem: "CRE_026_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-108", nome: "Scorbunny", pokemon: "Scorbunny", set: "Reinado Glacial", variante: "Reverse Holo", lingua: "PT-BR", numero: "026/198", imagem: "CRE_026_R_PT_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-109", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "PT-BR", numero: "SWSH244", imagem: "SP_244_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-110", nome: "Scorbunny", pokemon: "Scorbunny", set: "Coroa Estelar", variante: "Regular", lingua: "PT-BR", numero: "026/142", imagem: "SCR_026_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-111", nome: "Scorbunny", pokemon: "Scorbunny", set: "Coroa Estelar", variante: "Reverse Holo", lingua: "PT-BR", numero: "026/142", imagem: "SCR_026_R_PT_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-112", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Regular", lingua: "PT-BR", numero: "036/195", imagem: "ASC_036_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-113", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "PT-BR", numero: "036/195", imagem: "ASC_036_PT_ES_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-114", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "PT-BR", numero: "036/195", imagem: "ASC_036_PT_FB_RH.jpg", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-115", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "225/195", imagem: "ASC_225_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-116", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Evolução", variante: "Regular", lingua: "PT-BR", numero: "026/132", imagem: "MEG_026_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-117", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Evolução", variante: "Reverse Holo", lingua: "PT-BR", numero: "026/132", imagem: "MEG_026_R_PT_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-118", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Promo", variante: "Regular", lingua: "PT-BR", numero: "MEP053", imagem: "MEP_053_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-119", nome: "Scorbunny", pokemon: "Scorbunny", set: "McDonald's 2021", variante: "Regular", lingua: "PT-BR", numero: "16/25", imagem: "MCD21_16_PT.jpg", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+McDonalds", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-120", nome: "Scorbunny", pokemon: "Scorbunny", set: "McDonald's 2021", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "16/25", imagem: "MCD21_16_PT_CONFETTI_H.jpg", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+McDonalds", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-121", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "EN", numero: "SWSH002", imagem: "SP_002_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-122", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "030/202", imagem: "SSH_030_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-123", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "EN", numero: "030/202", imagem: "SSH_030_R_EN_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-124", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "031/202", imagem: "SSH_031_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-125", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "EN", numero: "031/202", imagem: "SSH_031_R_EN_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-126", nome: "Scorbunny", pokemon: "Scorbunny", set: "Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "EN", numero: "015/198", imagem: "SCORBUNNY_SV015_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-127", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "EN", numero: "SWSH071", imagem: "SP_071_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-128", nome: "Scorbunny", pokemon: "Scorbunny", set: "Reinado Glacial", variante: "Regular", lingua: "EN", numero: "026/198", imagem: "CRE_026_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-129", nome: "Scorbunny", pokemon: "Scorbunny", set: "Reinado Glacial", variante: "Reverse Holo", lingua: "EN", numero: "026/198", imagem: "CRE_026_R_EN_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-130", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Holográfica / Holo", lingua: "EN", numero: "SWSH244", imagem: "SP_244_R_EN_COSMOS_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-131", nome: "Scorbunny", pokemon: "Scorbunny", set: "Coroa Estelar", variante: "Regular", lingua: "EN", numero: "026/142", imagem: "SCR_026_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-132", nome: "Scorbunny", pokemon: "Scorbunny", set: "Coroa Estelar", variante: "Reverse Holo", lingua: "EN", numero: "026/142", imagem: "SCR_026_R_EN_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-133", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Regular", lingua: "EN", numero: "036/195", imagem: "ASC_036_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-134", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "EN", numero: "036/195", imagem: "ASC_036_EN_ES_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-135", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "EN", numero: "036/195", imagem: "ASC_036_EN_FB_RH.jpg", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-136", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Holográfica / Holo", lingua: "EN", numero: "225/195", imagem: "ASC_225_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-137", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Evolução", variante: "Regular", lingua: "EN", numero: "026/132", imagem: "MEG_026_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-138", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Evolução", variante: "Reverse Holo", lingua: "EN", numero: "026/132", imagem: "MEG_026_R_EN_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-139", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Promo", variante: "Regular", lingua: "EN", numero: "MEP053", imagem: "MEP_053_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-140", nome: "Scorbunny", pokemon: "Scorbunny", set: "McDonald's 2021", variante: "Regular", lingua: "EN", numero: "16/25", imagem: "MCD21_16_EN.jpg", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+McDonalds", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-141", nome: "Scorbunny", pokemon: "Scorbunny", set: "McDonald's 2021", variante: "Holográfica / Holo", lingua: "EN", numero: "16/25", imagem: "MCD21_16_EN_CONFETTI_H.jpg", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+McDonalds", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-142", nome: "Scorbunny", pokemon: "Scorbunny", set: "Futsal Promo", variante: "Regular", lingua: "EN", numero: "004", imagem: "FUTSAL_004_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Futsal", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-143", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Arte Alternativa (Alt Art)", lingua: "EN", numero: "SWSH002", imagem: "SP_002_R_EN_ALT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Alt", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-144", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Holográfica / Holo", lingua: "EN", numero: "030/202", imagem: "SSH_030_R_EN_COSMOS_BLISTER_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Cosmos", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-145", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Holográfica / Holo", lingua: "EN", numero: "031/202", imagem: "SSH_031_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-146", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promo (JP)", variante: "Regular", lingua: "JP", numero: "137/SV-P", imagem: "MC_137_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-147", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promo (JP)", variante: "Regular", lingua: "JP", numero: "745/SV-P", imagem: "MC_745_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-148", nome: "Scorbunny", pokemon: "Scorbunny", set: "Battle Partners (JP)", variante: "Regular", lingua: "JP", numero: "015/080", imagem: "M1L_015_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-149", nome: "Scorbunny", pokemon: "Scorbunny", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "016/102", imagem: "SV7_016_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-150", nome: "Scorbunny", pokemon: "Scorbunny", set: "Start Deck 100 (JP)", variante: "Regular", lingua: "JP", numero: "070/414", imagem: "SI_070_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-151", nome: "Scorbunny", pokemon: "Scorbunny", set: "Chilling Reign (JP)", variante: "Regular", lingua: "JP", numero: "015/070", imagem: "S6H_015_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-152", nome: "Scorbunny", pokemon: "Scorbunny", set: "Shiny Star V (JP)", variante: "Regular", lingua: "JP", numero: "022/190", imagem: "S4A_022_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-153", nome: "Scorbunny", pokemon: "Scorbunny", set: "Shiny Star V (JP)", variante: "Regular", lingua: "JP", numero: "214/190", imagem: "S4A_214_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-154", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "016/S-P", imagem: "SD_016_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-155", nome: "Scorbunny", pokemon: "Scorbunny", set: "Sword & Shield (JP)", variante: "Regular", lingua: "JP", numero: "007/060", imagem: "S1H_007_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-156", nome: "Scorbunny", pokemon: "Scorbunny", set: "Scarlet & Violet (JP)", variante: "Regular", lingua: "JP", numero: "006/078", imagem: "SAR_006_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-157", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "006/S-P", imagem: "SP_006_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-158", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "034/S-P", imagem: "SP_034_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-159", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "130/S-P", imagem: "SP_130_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-160", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "255/S-P", imagem: "SP_255_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-161", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Holográfica / Holo", lingua: "JP", numero: "123/M-P", imagem: "M-P_123_P_JP_H.jpg", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-162", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "027/150", imagem: "CSV9C_027_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-163", nome: "Scorbunny", pokemon: "Scorbunny", set: "30th Anniversary", variante: "Regular", lingua: "CN", numero: "023/100", imagem: "30THP_023_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-164", nome: "Scorbunny", pokemon: "Scorbunny", set: "Start Deck 100 (CN)", variante: "Regular", lingua: "CN", numero: "070/414", imagem: "SD100_070_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-165", nome: "Scorbunny", pokemon: "Scorbunny", set: "Paradise Dragona (CN)", variante: "Regular", lingua: "CN", numero: "021/064", imagem: "PAO_021_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-166", nome: "Scorbunny", pokemon: "Scorbunny", set: "Paradise Volunteer (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "023/080", imagem: "PAV_023_CN_H.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-167", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "047/150", imagem: "DCF_047_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-168", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "140/150", imagem: "DCF_140_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-169", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Volunteer (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "037/080", imagem: "DCV_037_CN_H.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-170", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "CN", numero: "013/S-P", imagem: "SP_013_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-171", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "CN", numero: "053/S-P", imagem: "SP_053_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            { id: "card-172", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "CN", numero: "125/S-P", imagem: "SP_125_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Scorbunny+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" },
+            
+            // RABOOT
+            { id: "card-173", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "032/202", imagem: "SSH_032_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-174", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "PT-BR", numero: "032/202", imagem: "SSH_032_R_PT_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-175", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "033/202", imagem: "SSH_033_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-176", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "PT-BR", numero: "033/202", imagem: "SSH_033_R_PT_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-177", nome: "Raboot", pokemon: "Raboot", set: "Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "016/198", imagem: "RABOOT_SV016_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-178", nome: "Raboot", pokemon: "Raboot", set: "Reinado Glacial", variante: "Regular", lingua: "PT-BR", numero: "027/198", imagem: "CRE_027_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-179", nome: "Raboot", pokemon: "Raboot", set: "Reinado Glacial", variante: "Reverse Holo", lingua: "PT-BR", numero: "027/198", imagem: "CRE_027_R_PT_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-180", nome: "Raboot", pokemon: "Raboot", set: "Coroa Estelar", variante: "Regular", lingua: "PT-BR", numero: "027/142", imagem: "SCR_027_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-181", nome: "Raboot", pokemon: "Raboot", set: "Coroa Estelar", variante: "Reverse Holo", lingua: "PT-BR", numero: "027/142", imagem: "SCR_027_R_PT_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-182", nome: "Raboot", pokemon: "Raboot", set: "Coroa Estelar", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "147/142", imagem: "SCR_147_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-183", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Regular", lingua: "PT-BR", numero: "037/195", imagem: "ASC_037_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-184", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "PT-BR", numero: "037/195", imagem: "ASC_037_R_PT_ES_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-185", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "PT-BR", numero: "037/195", imagem: "ASC_037_PT_FB_RH.jpg", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-186", nome: "Raboot", pokemon: "Raboot", set: "Mega Evolução", variante: "Regular", lingua: "PT-BR", numero: "027/132", imagem: "MEG_027_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-187", nome: "Raboot", pokemon: "Raboot", set: "Mega Evolução", variante: "Reverse Holo", lingua: "PT-BR", numero: "027/132", imagem: "MEG_027_R_PT_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-188", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "032/202", imagem: "SSH_032_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-189", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "EN", numero: "032/202", imagem: "SSH_032_R_EN_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-190", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "033/202", imagem: "SSH_033_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-191", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "EN", numero: "033/202", imagem: "SSH_033_R_EN_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-192", nome: "Raboot", pokemon: "Raboot", set: "Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "EN", numero: "016/198", imagem: "RABOOT_SV016_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-193", nome: "Raboot", pokemon: "Raboot", set: "Reinado Glacial", variante: "Regular", lingua: "EN", numero: "027/198", imagem: "CRE_027_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-194", nome: "Raboot", pokemon: "Raboot", set: "Reinado Glacial", variante: "Reverse Holo", lingua: "EN", numero: "027/198", imagem: "CRE_027_R_EN_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-195", nome: "Raboot", pokemon: "Raboot", set: "Coroa Estelar", variante: "Regular", lingua: "EN", numero: "027/142", imagem: "SCR_027_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-196", nome: "Raboot", pokemon: "Raboot", set: "Coroa Estelar", variante: "Reverse Holo", lingua: "EN", numero: "027/142", imagem: "SCR_027_R_EN_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-197", nome: "Raboot", pokemon: "Raboot", set: "Coroa Estelar", variante: "Holográfica / Holo", lingua: "EN", numero: "147/142", imagem: "SCR_147_R_EN_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-198", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Regular", lingua: "EN", numero: "037/195", imagem: "ASC_037_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-199", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "EN", numero: "037/195", imagem: "ASC_037_R_EN_ES_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-200", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "EN", numero: "037/195", imagem: "ASC_037_EN_FB_RH.jpg", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-201", nome: "Raboot", pokemon: "Raboot", set: "Mega Evolução", variante: "Regular", lingua: "EN", numero: "027/132", imagem: "MEG_027_R_EN.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-202", nome: "Raboot", pokemon: "Raboot", set: "Mega Evolução", variante: "Reverse Holo", lingua: "EN", numero: "027/132", imagem: "MEG_027_R_EN_RH.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Reverse", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-203", nome: "Raboot", pokemon: "Raboot", set: "Promo (JP)", variante: "Regular", lingua: "JP", numero: "138/SV-P", imagem: "MC_138_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-204", nome: "Raboot", pokemon: "Raboot", set: "Battle Partners (JP)", variante: "Regular", lingua: "JP", numero: "016/080", imagem: "M1L_016_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-205", nome: "Raboot", pokemon: "Raboot", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "017/102", imagem: "SV7_017_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-206", nome: "Raboot", pokemon: "Raboot", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "106/102", imagem: "SV7_106_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-207", nome: "Raboot", pokemon: "Raboot", set: "Start Deck 100 (JP)", variante: "Regular", lingua: "JP", numero: "071/414", imagem: "SI_071_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-208", nome: "Raboot", pokemon: "Raboot", set: "Chilling Reign (JP)", variante: "Regular", lingua: "JP", numero: "016/070", imagem: "S6H_016_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-209", nome: "Raboot", pokemon: "Raboot", set: "Shiny Star V (JP)", variante: "Regular", lingua: "JP", numero: "023/190", imagem: "S4A_023_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-210", nome: "Raboot", pokemon: "Raboot", set: "Shiny Star V (JP)", variante: "Regular", lingua: "JP", numero: "215/190", imagem: "S4A_215_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-211", nome: "Raboot", pokemon: "Raboot", set: "Sword & Shield (JP)", variante: "Regular", lingua: "JP", numero: "008/060", imagem: "S1H_008_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-212", nome: "Raboot", pokemon: "Raboot", set: "Scarlet & Violet (JP)", variante: "Regular", lingua: "JP", numero: "007/078", imagem: "SAR_007_R_JP.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Japanese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-213", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "028/150", imagem: "CSV9C_028_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-214", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1901", imagem: "GP5_1901_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-215", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1902", imagem: "GP5_1902_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-216", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1903", imagem: "GP5_1903_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-217", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1904", imagem: "GP5_1904_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-218", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1905", imagem: "GP5_1905_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-219", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1906", imagem: "GP5_1906_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-220", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1907", imagem: "GP5_1907_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-221", nome: "Raboot", pokemon: "Raboot", set: "Start Deck 100 (CN)", variante: "Regular", lingua: "CN", numero: "071/414", imagem: "SD100_071_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-222", nome: "Raboot", pokemon: "Raboot", set: "Paradise Dragona (CN)", variante: "Regular", lingua: "CN", numero: "022/064", imagem: "PAO_022_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-223", nome: "Raboot", pokemon: "Raboot", set: "Paradise Volunteer (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "024/080", imagem: "PAV_024_CN_H.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-224", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "048/150", imagem: "DCF_048_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-225", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "141/150", imagem: "DCF_141_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
+            { id: "card-226", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "038/080", imagem: "DCV_038_CN_H.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" }
+        ];
+
+        let obtainedMap = JSON.parse(localStorage.getItem('pokedex_obtained_v2') || '{}');
+        let captureDataMap = JSON.parse(localStorage.getItem('pokedex_capture_data_v1') || '{}');
+        let marketPricesMap = JSON.parse(localStorage.getItem('pokedex_market_prices_v1') || '{}');
+        let currentLayout = localStorage.getItem('pokedex_layout_v2') || 'medio';
+        
+        let selectedPokes = new Set();
+        let selectedLangs = new Set();
+        let selectedVars = new Set();
+        let selectedStatus = new Set();
+
+        const uniqueSets = Array.from(new Set(allCards.map(c => c.set))).sort();
+
+        function toggleMobileMenu() {
+            const menu = document.getElementById('nav-menu-container');
+            const arrow = document.getElementById('mobile-menu-arrow');
+            if (menu.classList.contains('hidden')) {
+                menu.classList.remove('hidden');
+                arrow.style.transform = "rotate(180deg)";
+            } else {
+                menu.classList.add('hidden');
+                arrow.style.transform = "rotate(0deg)";
+            }
+        }
+
+        function toggleFilterDrawer() {
+            const section = document.getElementById('filters-section');
+            const arrow = document.getElementById('drawer-arrow');
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                arrow.style.transform = "rotate(180deg)";
+            } else {
+                section.classList.add('hidden');
+                arrow.style.transform = "rotate(0deg)";
+            }
+        }
+
+        window.addEventListener('click', function(e) {
+            const section = document.getElementById('filters-section');
+            const btn = document.querySelector('button[onclick="toggleFilterDrawer()"]');
+            if (section && btn && !section.contains(e.target) && !btn.contains(e.target)) {
+                section.classList.add('hidden');
+                const arrow = document.getElementById('drawer-arrow');
+                if(arrow) arrow.style.transform = "rotate(0deg)";
+            }
+        });
+
+        function clearAllFilters() {
+            selectedPokes.clear();
+            selectedLangs.clear();
+            selectedVars.clear();
+            selectedStatus.clear();
+            
+            const searchInput = document.getElementById('search-input');
+            if(searchInput) searchInput.value = "";
+            
+            updateFilterButtonsUI();
+            handleSearchInput();
+        }
+
+        function changeLayout(value) {
+            currentLayout = value;
+            localStorage.setItem('pokedex_layout_v2', currentLayout);
+            applyFilters();
+        }
+
+        function updateFilterButtonsUI() {
+            ['Scorbunny', 'Raboot', 'Cinderace'].forEach(p => {
+                const btn = document.getElementById(`btn-poke-${p}`);
+                if(btn) {
+                    btn.className = selectedPokes.has(p) 
+                        ? "poke-btn bg-cinder-orange px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-white shadow" 
+                        : "poke-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-cinder-white";
+                }
+            });
+
+            ['PT-BR', 'EN', 'JP', 'CN'].forEach(l => {
+                const btn = document.getElementById(`btn-lang-${l}`);
+                if(btn) {
+                    btn.className = selectedLangs.has(l) 
+                        ? "lang-btn bg-cinder-orange px-3 py-1.5 rounded-lg text-xs font-bold text-center transition text-white shadow" 
+                        : "lang-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-center transition text-cinder-white";
+                }
+            });
+
+            const mapping = {'Regular': 'Regular', 'Holográfica / Holo': 'Holo', 'Reverse Holo': 'Reverse', 'Promo': 'Promo', 'V Card': 'V', 'VMAX': 'VMAX', 'Full Art': 'FullArt', 'Arte Alternativa (Alt Art)': 'AltArt'};
+            Object.keys(mapping).forEach(key => {
+                const idKey = mapping[key];
+                const btn = document.getElementById(`btn-var-${idKey}`);
+                if(btn) {
+                    btn.className = selectedVars.has(key) 
+                        ? "var-btn bg-cinder-orange px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-white shadow" 
+                        : "var-btn bg-cinder-card hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition text-cinder-white";
+                }
+            });
+
+            ['MISSING', 'OWNED'].forEach(s => {
+                const btn = document.getElementById(`btn-status-${s}`);
+                if(btn) {
+                    if (selectedStatus.has(s)) {
+                        btn.className = s === 'MISSING' 
+                            ? "status-btn bg-cinder-yellow text-cinder-dark px-3 py-1.5 rounded-lg text-xs font-bold text-left transition shadow" 
+                            : "status-btn bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold text-left transition shadow";
+                    } else {
+                        btn.className = "status-btn bg-cinder-card text-cinder-white hover:bg-cinder-red px-3 py-1.5 rounded-lg text-xs font-bold text-left transition";
+                    }
+                }
+            });
+
+            const layoutSelect = document.getElementById('layout-select');
+            if(layoutSelect) layoutSelect.value = currentLayout;
+        }
+
+        function switchTab(tab) {
+            const dashSec = document.getElementById('view-dashboard');
+            const gridSec = document.getElementById('view-grid');
+            const captureSec = document.getElementById('view-capture');
+            const marketSec = document.getElementById('view-market');
+            const filterBar = document.getElementById('filter-control-bar');
+            const filtersSection = document.getElementById('filters-section');
+            const mobileMenu = document.getElementById('nav-menu-container');
+
+            const navGrid = document.getElementById('nav-grid');
+            const navCapture = document.getElementById('nav-capture');
+            const navMarket = document.getElementById('nav-market');
+
+            dashSec.classList.add('hidden');
+            gridSec.classList.add('hidden');
+            captureSec.classList.add('hidden');
+            marketSec.classList.add('hidden');
+            filterBar.classList.add('hidden');
+            if(filtersSection) filtersSection.classList.add('hidden');
+            if(window.innerWidth < 768) mobileMenu.classList.add('hidden');
+
+            navGrid.className = "pb-1 hover:text-cinder-orange transition w-full md:w-auto text-left md:text-center";
+            navCapture.className = "pb-1 hover:text-cinder-orange transition w-full md:w-auto text-left md:text-center";
+            navMarket.className = "pb-1 hover:text-cinder-orange transition w-full md:w-auto text-left md:text-center";
+
+            if(tab === 'dashboard') {
+                dashSec.classList.remove('hidden');
+                renderDashboard();
+            } else if(tab === 'grid') {
+                gridSec.classList.remove('hidden');
+                filterBar.classList.remove('hidden');
+                navGrid.className = "active-tab pb-1 transition w-full md:w-auto text-left md:text-center";
+                updateFilterButtonsUI();
+                applyFilters();
+            } else if(tab === 'capture') {
+                captureSec.classList.remove('hidden');
+                navCapture.className = "active-tab pb-1 transition w-full md:w-auto text-left md:text-center";
+                renderCaptureView();
+            } else if(tab === 'market') {
+                marketSec.classList.remove('hidden');
+                filterBar.classList.remove('hidden');
+                navMarket.className = "active-tab pb-1 transition w-full md:w-auto text-left md:text-center";
+                updateFilterButtonsUI();
+                renderMarketTable();
+            }
+        }
+
+        function handleSearchInput() {
+            if(!document.getElementById('view-grid').classList.contains('hidden')) {
+                applyFilters();
+            } else if(!document.getElementById('view-market').classList.contains('hidden')) {
+                renderMarketTable();
+            }
+        }
+
+        function filterPoke(poke) {
+            if(selectedPokes.has(poke)) selectedPokes.delete(poke);
+            else selectedPokes.add(poke);
+            updateFilterButtonsUI();
+            handleSearchInput();
+        }
+
+        function filterLang(lang) {
+            if(selectedLangs.has(lang)) selectedLangs.delete(lang);
+            else selectedLangs.add(lang);
+            updateFilterButtonsUI();
+            handleSearchInput();
+        }
+
+        function filterVar(variante) {
+            if(selectedVars.has(variante)) selectedVars.delete(variante);
+            else selectedVars.add(variante);
+            updateFilterButtonsUI();
+            handleSearchInput();
+        }
+
+        function filterStatus(status) {
+            if(selectedStatus.has(status)) selectedStatus.delete(status);
+            else selectedStatus.add(status);
+            updateFilterButtonsUI();
+            handleSearchInput();
+        }
+
+        function toggleCard(id) {
+            const isLocked = captureDataMap[id] && captureDataMap[id].locked;
+            if (obtainedMap[id] && isLocked) {
+                alert("🔒 Esta carta está BLOQUEADA pela aba Captura!\nPara desmarcar, desative o cadeado na aba Captura primeiro.");
+                return;
+            }
+
+            obtainedMap[id] = !obtainedMap[id];
+            localStorage.setItem('pokedex_obtained_v2', JSON.stringify(obtainedMap));
+            updateHeaderCounters();
+            if(!document.getElementById('view-dashboard').classList.contains('hidden')) {
+                renderDashboard();
+            } else if(!document.getElementById('view-grid').classList.contains('hidden')) {
+                applyFilters();
+            } else if(!document.getElementById('view-capture').classList.contains('hidden')) {
+                renderCaptureView();
+            } else if(!document.getElementById('view-market').classList.contains('hidden')) {
+                renderMarketTable();
+            }
+        }
+
+        function showZoomModal(card) {
+            const modal = document.getElementById('zoom-modal');
+            const content = document.getElementById('zoom-modal-content');
+            const isObtained = !!obtainedMap[card.id];
+
+            content.innerHTML = `
+                <div class="flex justify-between items-center w-full mb-3 px-1">
+                    <span class="px-2.5 py-1 rounded text-xs font-black uppercase bg-cinder-bg text-cinder-yellow border border-cinder-orange/30">${card.lingua}</span>
+                    <span class="text-xs font-extrabold ${isObtained ? 'text-green-400' : 'text-cinder-yellow'}">${isObtained ? 'TENHO' : 'FALTANTE'}</span>
+                </div>
+                <div class="w-full h-[60vh] sm:h-[65vh] flex items-center justify-center bg-cinder-bg rounded-2xl overflow-hidden border border-cinder-orange/20 shadow-inner p-2">
+                    <img src="${card.imagem}" class="max-h-full max-w-full object-contain" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                </div>
+                <div class="mt-4 w-full text-center">
+                    <p class="text-base sm:text-lg font-bold text-cinder-white">${card.nome}</p>
+                    <p class="text-xs text-cinder-orange font-semibold mt-0.5">${card.set} — ${card.variante} (#${card.numero})</p>
+                </div>`;
+
+            modal.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+        }
+
+        function hideZoomModal() {
+            const modal = document.getElementById('zoom-modal');
+            const content = document.getElementById('zoom-modal-content');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden', 'pointer-events-none');
+            }, 300);
+        }
+
+        function handleModalClick(event) {
+            const content = document.getElementById('zoom-modal-content');
+            if (!content.contains(event.target)) {
+                hideZoomModal();
+            }
+        }
+
+        function updateHeaderCounters() {
+            let totalObtainedCount = 0;
+            allCards.forEach(card => {
+                if(obtainedMap[card.id]) totalObtainedCount++;
+            });
+            document.getElementById('total-count').innerText = allCards.length;
+            document.getElementById('obtained-count').innerText = totalObtainedCount;
+            document.getElementById('missing-count').innerText = allCards.length - totalObtainedCount;
+        }
+
+        function renderDashboard() {
+            updateHeaderCounters();
+            let totalObtained = 0;
+            const totalCards = allCards.length;
+
+            let pokes = {};
+            let langs = {};
+            let sets = {};
+            let vars = {};
+
+            allCards.forEach(card => {
+                const obtained = !!obtainedMap[card.id];
+                if(obtained) totalObtained++;
+
+                if(!pokes[card.pokemon]) pokes[card.pokemon] = { total: 0, obtained: 0 };
+                pokes[card.pokemon].total++;
+                if(obtained) pokes[card.pokemon].obtained++;
+
+                if(!langs[card.lingua]) langs[card.lingua] = { total: 0, obtained: 0 };
+                langs[card.lingua].total++;
+                if(obtained) langs[card.lingua].obtained++;
+
+                if(!sets[card.set]) sets[card.set] = { total: 0, obtained: 0 };
+                sets[card.set].total++;
+                if(obtained) sets[card.set].obtained++;
+
+                if(!vars[card.variante]) vars[card.variante] = { total: 0, obtained: 0 };
+                vars[card.variante].total++;
+                if(obtained) vars[card.variante].obtained++;
+            });
+
+            const totalPct = Math.round((totalObtained / totalCards) * 100) || 0;
+            document.getElementById('dashboard-total-pct').innerText = `${totalPct}% (${totalObtained}/${totalCards})`;
+            document.getElementById('dashboard-total-bar').style.width = `${totalPct}%`;
+
+            const createStatRow = (label, data, colorClass) => {
+                const pct = Math.round((data.obtained / data.total) * 100) || 0;
+                return `
+                    <div>
+                        <div class="flex justify-between items-center text-xs font-semibold mb-1">
+                            <span class="text-cinder-white truncate pr-2 max-w-[180px] sm:max-w-[200px]" title="${label}">${label}</span>
+                            <span class="text-slate-400 text-[11px] font-mono">${pct}% <span class="text-slate-500">(${data.obtained}/${data.total})</span></span>
+                        </div>
+                        <div class="w-full bg-cinder-dark h-2 rounded-full overflow-hidden border border-cinder-orange/20">
+                            <div class="${colorClass} h-full rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+                        </div>
+                    </div>`;
+            };
+
+            document.getElementById('stats-pokemon').innerHTML = Object.keys(pokes).sort().map(p => createStatRow(p, pokes[p], 'bg-cinder-orange')).join('');
+            document.getElementById('stats-lang').innerHTML = Object.keys(langs).sort().map(l => createStatRow(l, langs[l], 'bg-cinder-yellow')).join('');
+            document.getElementById('stats-set').innerHTML = Object.keys(sets).sort().map(s => createStatRow(s, sets[s], 'bg-cinder-red')).join('');
+            document.getElementById('stats-var').innerHTML = Object.keys(vars).sort().map(v => createStatRow(v, vars[v], 'bg-green-500')).join('');
+        }
+
+        function applyFilters() {
+            updateHeaderCounters();
+            const searchInput = document.getElementById('search-input');
+            const search = searchInput ? searchInput.value.toLowerCase() : '';
+            const grid = document.getElementById('cards-grid');
+            
+            if (currentLayout === 'pequeno') {
+                grid.className = "grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2 sm:gap-3";
+            } else if (currentLayout === 'grande') {
+                grid.className = "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-5";
+            } else {
+                grid.className = "grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-4";
+            }
+
+            grid.innerHTML = '';
+
+            allCards.forEach(card => {
+                const isObtained = !!obtainedMap[card.id];
+
+                const matchesPoke = selectedPokes.size === 0 || selectedPokes.has(card.pokemon);
+                const matchesLang = selectedLangs.size === 0 || selectedLangs.has(card.lingua);
+                const matchesVar = selectedVars.size === 0 || selectedVars.has(card.variante);
+                
+                let matchesStatus = true;
+                if(selectedStatus.size > 0) {
+                    const hasOwned = selectedStatus.has('OWNED');
+                    const hasMissing = selectedStatus.has('MISSING');
+                    if (hasOwned && !hasMissing) matchesStatus = isObtained;
+                    else if (!hasOwned && hasMissing) matchesStatus = !isObtained;
+                }
+
+                const matchesSearch = card.nome.toLowerCase().includes(search) || 
+                                      card.set.toLowerCase().includes(search) || 
+                                      card.variante.toLowerCase().includes(search) ||
+                                      card.numero.toLowerCase().includes(search);
+
+                if (matchesPoke && matchesLang && matchesVar && matchesStatus && matchesSearch) {
+                    const cardEl = document.createElement('div');
+                    cardEl.className = 'cursor-pointer select-none';
+                    cardEl.onclick = () => toggleCard(card.id);
+
+                    let pressTimer = null;
+                    let isScrolling = false;
+
+                    cardEl.onmouseenter = () => { pressTimer = setTimeout(() => { showZoomModal(card); }, 1000); };
+                    cardEl.onmouseleave = () => { clearTimeout(pressTimer); };
+
+                    cardEl.ontouchstart = (e) => {
+                        isScrolling = false;
+                        pressTimer = setTimeout(() => {
+                            if (!isScrolling) {
+                                showZoomModal(card);
+                            }
+                        }, 1000);
+                    };
+
+                    cardEl.ontouchmove = () => {
+                        isScrolling = true;
+                        if (pressTimer) clearTimeout(pressTimer);
+                    };
+
+                    cardEl.ontouchend = () => {
+                        if (pressTimer) clearTimeout(pressTimer);
+                    };
+
+                    const isLocked = captureDataMap[card.id] && captureDataMap[card.id].locked;
+
+                    cardEl.innerHTML = `
+                        <div class="relative overflow-hidden rounded-2xl bg-cinder-dark p-1.5 sm:p-2 ${isObtained ? 'card-owned' : 'card-not-owned'} transition duration-200">
+                            <div class="flex justify-between items-center mb-1 px-0.5">
+                                <span class="px-1 py-0.5 rounded text-[8px] sm:text-[9px] font-black uppercase bg-cinder-bg text-cinder-yellow border border-cinder-orange/20">${card.lingua}</span>
+                                <div class="flex items-center gap-0.5">
+                                    ${isLocked ? '<span title="Bloqueado na aba Captura" class="text-[10px]">🔒</span>' : ''}
+                                    <span class="text-[9px] sm:text-[10px] font-extrabold ${isObtained ? 'text-green-400' : 'text-slate-500'}">${isObtained ? 'TENHO' : 'FALTANTE'}</span>
+                                </div>
+                            </div>
+                            <div class="aspect-[2.5/3.5] w-full rounded-xl overflow-hidden bg-cinder-bg flex items-center justify-center border border-cinder-orange/10 p-0.5">
+                                <img src="${card.imagem}" class="w-full h-full object-contain pointer-events-none" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                            </div>
+                            <div class="mt-1.5 px-0.5">
+                                <p class="text-[11px] sm:text-xs font-bold text-cinder-white truncate">${card.nome}</p>
+                                <p class="text-[9px] sm:text-[10px] text-cinder-orange font-semibold truncate">${card.set}</p>
+                                <div class="flex justify-between text-[8px] sm:text-[9px] text-slate-400 mt-0.5">
+                                    <span class="truncate max-w-[60px] sm:max-w-[100px]">${card.variante}</span>
+                                    <span class="font-bold text-slate-300">#${card.numero}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    grid.appendChild(cardEl);
+                }
+            });
+        }
+
+        /* --- CAPTURA --- */
+        function saveCaptureData(cardId, key, value) {
+            if(!captureDataMap[cardId]) captureDataMap[cardId] = {};
+            captureDataMap[cardId][key] = value;
+            localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
+        }
+
+        function toggleLock(cardId) {
+            if(!captureDataMap[cardId]) captureDataMap[cardId] = {};
+            captureDataMap[cardId].locked = !captureDataMap[cardId].locked;
+            localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
+            renderCaptureView();
+        }
+
+        function updateCaptureFieldsUI(cardId) {
+            const data = captureDataMap[cardId] || {};
+            const typeSelect = document.getElementById(`cap-type-${cardId}`);
+            const selectedType = typeSelect ? typeSelect.value : '';
+
+            const boosterDiv = document.getElementById(`cap-booster-div-${cardId}`);
+            const textDiv = document.getElementById(`cap-text-div-${cardId}`);
+            const textLabel = document.getElementById(`cap-text-label-${cardId}`);
+            const priceDiv = document.getElementById(`cap-price-div-${cardId}`);
+
+            if (boosterDiv) boosterDiv.classList.add('hidden');
+            if (textDiv) textDiv.classList.add('hidden');
+            if (priceDiv) priceDiv.classList.add('hidden');
+
+            if (selectedType === 'booster') {
+                if (boosterDiv) boosterDiv.classList.remove('hidden');
+            } else if (selectedType === 'troca') {
+                if (textDiv) {
+                    textDiv.classList.remove('hidden');
+                    if (textLabel) textLabel.innerText = "Pessoa / Loja trocada:";
+                }
+            } else if (selectedType === 'doada') {
+                if (textDiv) {
+                    textDiv.classList.remove('hidden');
+                    if (textLabel) textLabel.innerText = "Doador (Pessoa / Loja):";
+                }
+            } else if (selectedType === 'compra') {
+                if (textDiv) {
+                    textDiv.classList.remove('hidden');
+                    if (textLabel) textLabel.innerText = "Local / Pessoa que comprou:";
+                }
+                if (priceDiv) priceDiv.classList.remove('hidden');
+            }
+        }
+
+        function handleCaptureTypeChange(cardId, value) {
+            saveCaptureData(cardId, 'type', value);
+            updateCaptureFieldsUI(cardId);
+        }
+
+        function renderCaptureView() {
+            updateHeaderCounters();
+            const captureGrid = document.getElementById('capture-grid');
+            captureGrid.innerHTML = '';
+
+            const ownedCards = allCards.filter(card => !!obtainedMap[card.id]);
+
+            if (ownedCards.length === 0) {
+                captureGrid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-400 bg-cinder-dark/50 rounded-2xl border border-cinder-orange/20">
+                        <p class="text-sm font-bold">Nenhuma carta marcada na sua coleção ainda.</p>
+                        <p class="text-xs mt-1">Marque cartas como "TENHO" na aba <strong>Minha Coleção</strong> para cadastrar a origem delas aqui.</p>
+                    </div>`;
+                return;
+            }
+
+            ownedCards.forEach(card => {
+                const data = captureDataMap[card.id] || {};
+                const currentType = data.type || '';
+                const currentBooster = data.booster || card.set;
+                const currentEntity = data.entity || '';
+                const currentPrice = data.price || '';
+                const isLocked = !!data.locked;
+
+                const cardBox = document.createElement('div');
+                cardBox.className = "bg-cinder-dark border border-cinder-orange/20 rounded-2xl p-4 flex gap-4 items-start shadow-inner relative";
+
+                const boosterOptionsHtml = uniqueSets.map(s => 
+                    `<option value="${s}" ${s === currentBooster ? 'selected' : ''}>${s}</option>`
+                ).join('');
+
+                cardBox.innerHTML = `
+                    <div class="w-16 sm:w-20 h-24 sm:h-28 bg-cinder-bg rounded-xl overflow-hidden border border-cinder-orange/20 shrink-0 flex items-center justify-center p-1 relative">
+                        <img src="${card.imagem}" class="max-h-full max-w-full object-contain" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                    </div>
+                    
+                    <div class="flex-1 space-y-2 min-w-0">
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="truncate">
+                                <p class="text-xs font-bold text-cinder-white truncate">${card.nome}</p>
+                                <p class="text-[10px] text-cinder-orange font-semibold truncate">${card.set} — ${card.variante}</p>
+                            </div>
+                            <button onclick="toggleLock('${card.id}')" title="${isLocked ? 'Cadeado Ativo' : 'Cadeado Inativo'}" class="p-1.5 rounded-lg border transition shrink-0 ${isLocked ? 'bg-cinder-red/30 text-cinder-yellow border-cinder-orange/50' : 'bg-cinder-bg text-slate-500 border-cinder-orange/10 hover:text-cinder-white'}">
+                                ${isLocked ? '🔒' : '🔓'}
+                            </button>
+                        </div>
+
+                        <div>
+                            <label class="block text-[9px] font-bold text-cinder-yellow uppercase mb-1">Origem da Carta:</label>
+                            <select id="cap-type-${card.id}" onchange="handleCaptureTypeChange('${card.id}', this.value)" class="w-full bg-cinder-bg border border-cinder-orange/30 rounded-lg px-2 py-1.5 text-xs text-cinder-white outline-none focus:border-cinder-orange">
+                                <option value="" ${currentType === '' ? 'selected' : ''}>-- Selecione a origem --</option>
+                                <option value="booster" ${currentType === 'booster' ? 'selected' : ''}>Booster</option>
+                                <option value="troca" ${currentType === 'troca' ? 'selected' : ''}>Troca</option>
+                                <option value="doada" ${currentType === 'doada' ? 'selected' : ''}>Doada</option>
+                                <option value="compra" ${currentType === 'compra' ? 'selected' : ''}>Compra</option>
+                            </select>
+                        </div>
+
+                        <div id="cap-booster-div-${card.id}" class="hidden">
+                            <label class="block text-[9px] font-bold text-cinder-yellow uppercase mb-1">Qual Booster / Coleção?</label>
+                            <select onchange="saveCaptureData('${card.id}', 'booster', this.value)" class="w-full bg-cinder-bg border border-cinder-orange/30 rounded-lg px-2 py-1.5 text-xs text-cinder-white outline-none focus:border-cinder-orange">
+                                ${boosterOptionsHtml}
+                            </select>
+                        </div>
+
+                        <div id="cap-text-div-${card.id}" class="hidden">
+                            <label id="cap-text-label-${card.id}" class="block text-[9px] font-bold text-cinder-yellow uppercase mb-1">Pessoa / Loja:</label>
+                            <input type="text" value="${currentEntity}" oninput="saveCaptureData('${card.id}', 'entity', this.value)" placeholder="Digite o nome..." class="w-full bg-cinder-bg border border-cinder-orange/30 rounded-lg px-2.5 py-1.5 text-xs text-cinder-white outline-none focus:border-cinder-orange">
+                        </div>
+
+                        <div id="cap-price-div-${card.id}" class="hidden">
+                            <label class="block text-[9px] font-bold text-cinder-yellow uppercase mb-1">Preço Pago (R$):</label>
+                            <input type="text" value="${currentPrice}" oninput="saveCaptureData('${card.id}', 'price', this.value)" placeholder="Ex: 25,00" class="w-full bg-cinder-bg border border-cinder-orange/30 rounded-lg px-2.5 py-1.5 text-xs text-cinder-white outline-none focus:border-cinder-orange">
+                        </div>
+                    </div>
+                `;
+
+                captureGrid.appendChild(cardBox);
+                updateCaptureFieldsUI(card.id);
+            });
+        }
+
+        /* --- MERCADO --- */
+        function saveMarketPrice(cardId, key, value) {
+            if (!marketPricesMap[cardId]) marketPricesMap[cardId] = {};
+            marketPricesMap[cardId][key] = value;
+            localStorage.setItem('pokedex_market_prices_v1', JSON.stringify(marketPricesMap));
+        }
+
+        function refreshMarketPrices() {
+            const icon = document.getElementById('refresh-icon');
+            if (icon) icon.classList.add('animate-spin');
+
+            setTimeout(() => {
+                if (icon) icon.classList.remove('animate-spin');
+                renderMarketTable();
+            }, 600);
+        }
+
+        function renderMarketTable() {
+            updateHeaderCounters();
+            const searchInput = document.getElementById('search-input');
+            const search = searchInput ? searchInput.value.toLowerCase() : '';
+            const container = document.getElementById('market-cards-container');
+            container.innerHTML = '';
+
+            let count = 0;
+
+            allCards.forEach(card => {
+                const isObtained = !!obtainedMap[card.id];
+
+                const matchesPoke = selectedPokes.size === 0 || selectedPokes.has(card.pokemon);
+                const matchesLang = selectedLangs.size === 0 || selectedLangs.has(card.lingua);
+                const matchesVar = selectedVars.size === 0 || selectedVars.has(card.variante);
+                
+                let matchesStatus = true;
+                if(selectedStatus.size > 0) {
+                    const hasOwned = selectedStatus.has('OWNED');
+                    const hasMissing = selectedStatus.has('MISSING');
+                    if (hasOwned && !hasMissing) matchesStatus = isObtained;
+                    else if (!hasOwned && hasMissing) matchesStatus = !isObtained;
+                }
+
+                const matchesSearch = card.nome.toLowerCase().includes(search) || 
+                                      card.set.toLowerCase().includes(search) || 
+                                      card.variante.toLowerCase().includes(search) ||
+                                      card.numero.toLowerCase().includes(search);
+
+                if (matchesPoke && matchesLang && matchesVar && matchesStatus && matchesSearch) {
+                    count++;
+                    const prices = marketPricesMap[card.id] || {};
+                    const priceLiga = prices.liga !== undefined ? prices.liga : '';
+                    const priceEbay = prices.ebay !== undefined ? prices.ebay : '';
+
+                    const cardItem = document.createElement('div');
+                    cardItem.className = "bg-cinder-bg border border-cinder-orange/20 rounded-2xl p-3.5 sm:p-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-inner";
+                    cardItem.innerHTML = `
+                        <div class="flex items-center gap-3 min-w-0 w-full sm:w-auto">
+                            <div class="w-12 h-16 bg-cinder-dark rounded-lg overflow-hidden border border-cinder-orange/20 shrink-0 flex items-center justify-center p-0.5">
+                                <img src="${card.imagem}" class="max-h-full max-w-full object-contain" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                            </div>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-cinder-dark text-cinder-yellow border border-cinder-orange/20">${card.lingua}</span>
+                                    <span class="text-xs font-bold ${isObtained ? 'text-green-400' : 'text-cinder-yellow'}">${isObtained ? 'Tenho' : 'Faltante'}</span>
+                                </div>
+                                <p class="text-xs font-bold text-cinder-white truncate mt-0.5">${card.nome} <span class="text-cinder-orange font-normal">(${card.pokemon})</span></p>
+                                <p class="text-[10px] text-slate-400 truncate">${card.set} — ${card.variante} (#${card.numero})</p>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full sm:w-auto justify-between sm:justify-end border-t sm:border-t-0 pt-2 sm:pt-0 border-cinder-orange/10">
+                            <div class="flex items-center gap-2">
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] text-cinder-yellow font-bold uppercase">Liga (R$)</span>
+                                    <input type="text" value="${priceLiga}" oninput="saveMarketPrice('${card.id}', 'liga', this.value)" placeholder="R$ 0,00" class="w-24 bg-cinder-dark border border-cinder-orange/30 rounded px-2 py-1 text-xs text-cinder-white outline-none focus:border-cinder-orange">
+                                </div>
+                                <div class="flex flex-col">
+                                    <span class="text-[9px] text-cinder-yellow font-bold uppercase">eBay ($)</span>
+                                    <input type="text" value="${priceEbay}" oninput="saveMarketPrice('${card.id}', 'ebay', this.value)" placeholder="$ 0.00" class="w-24 bg-cinder-dark border border-cinder-orange/30 rounded px-2 py-1 text-xs text-cinder-white outline-none focus:border-cinder-orange">
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 mt-2 sm:mt-0">
+                                <a href="${card.linkLiga}" target="_blank" class="bg-cinder-orange/20 text-cinder-orange hover:bg-cinder-orange/40 border border-cinder-orange/30 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition inline-block text-center">Liga</a>
+                                <a href="${card.linkEbay}" target="_blank" class="bg-blue-600/20 text-blue-400 hover:bg-blue-600/40 border border-blue-500/30 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition inline-block text-center">eBay</a>
+                            </div>
+                        </div>
+                    `;
+                    container.appendChild(cardItem);
+                }
+            });
+
+            if (count === 0) {
+                container.innerHTML = `
+                    <div class="py-12 text-center text-slate-400 bg-cinder-dark/50 rounded-2xl border border-cinder-orange/20">
+                        <p class="text-sm font-bold">Nenhuma carta encontrada com os filtros atuais.</p>
+                    </div>`;
+            }
+        }
+
+        window.onload = () => {
+            switchTab('dashboard');
+        };
+    </script>
+</body>
+</html>
