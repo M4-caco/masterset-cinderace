@@ -253,8 +253,31 @@
 
     </main>
 
-    <!-- SCRIPT PRINCIPAL -->
-    <script>
+    <!-- SCRIPT PRINCIPAL & FIREBASE -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyADGiKo9OxGKNbVaRB_-S8j1Yfi2f1Zt5k",
+            authDomain: "pokedex-colecao.firebaseapp.com",
+            projectId: "pokedex-colecao",
+            storageBucket: "pokedex-colecao.firebasestorage.app",
+            messagingSenderId: "612860563936",
+            appId: "1:612860563936:web:9e2c47620127cbb0e05b85",
+            measurementId: "G-T6QLNGKX4E"
+        };
+
+        const firebaseApp = initializeApp(firebaseConfig);
+        const db = getFirestore(firebaseApp);
+        const docRef = doc(db, "users_data", "cinderace_masterset");
+
+        let obtainedMap = {};
+        let captureDataMap = {};
+        let marketPricesMap = {};
+        let currentLayout = localStorage.getItem('pokedex_layout_v2') || 'medio';
+        let isInitialLoad = true;
+
         const allCards = [
             { id: "card-1", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "034/202", imagem: "SSH_034_R_PT.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Espada+e+Escudo", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
             { id: "card-2", nome: "Cinderace", pokemon: "Cinderace", set: "Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "017/198", imagem: "CINDERACE_SV017_R_PT_H.png", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Cinderace+Shiny", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" },
@@ -491,11 +514,6 @@
             { id: "card-225", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "141/150", imagem: "DCF_141_CN.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" },
             { id: "card-226", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "038/080", imagem: "DCV_038_CN_H.webp", linkEbay: "https://www.ebay.com/sch/i.html?_nkw=Raboot+Chinese", linkLiga: "https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" }
         ];
-
-        let obtainedMap = JSON.parse(localStorage.getItem('pokedex_obtained_v2') || '{}');
-        let captureDataMap = JSON.parse(localStorage.getItem('pokedex_capture_data_v1') || '{}');
-        let marketPricesMap = JSON.parse(localStorage.getItem('pokedex_market_prices_v1') || '{}');
-        let currentLayout = localStorage.getItem('pokedex_layout_v2') || 'medio';
         
         let selectedPokes = new Set();
         let selectedLangs = new Set();
@@ -504,6 +522,62 @@
 
         const uniqueSets = Array.from(new Set(allCards.map(c => c.set))).sort();
 
+        // ----------------- FIREBASE SYNC FUNCTIONS -----------------
+        async function saveToCloud() {
+            try {
+                await setDoc(docRef, {
+                    obtainedMap,
+                    captureDataMap,
+                    marketPricesMap,
+                    updatedAt: new Date().toISOString()
+                });
+            } catch (e) {
+                console.error("Erro ao salvar no Firestore:", e);
+            }
+        }
+
+        function refreshCurrentView() {
+            updateHeaderCounters();
+            if(!document.getElementById('view-dashboard').classList.contains('hidden')) {
+                renderDashboard();
+            } else if(!document.getElementById('view-grid').classList.contains('hidden')) {
+                applyFilters();
+            } else if(!document.getElementById('view-capture').classList.contains('hidden')) {
+                renderCaptureView();
+            } else if(!document.getElementById('view-market').classList.contains('hidden')) {
+                renderMarketTable();
+            }
+        }
+
+        // Listener em tempo real do Firestore
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const cloudData = docSnap.data();
+                obtainedMap = cloudData.obtainedMap || {};
+                captureDataMap = cloudData.captureDataMap || {};
+                marketPricesMap = cloudData.marketPricesMap || {};
+                
+                // Cache local
+                localStorage.setItem('pokedex_obtained_v2', JSON.stringify(obtainedMap));
+                localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
+                localStorage.setItem('pokedex_market_prices_v1', JSON.stringify(marketPricesMap));
+            } else {
+                // Primeira vez, salva o localStorage atual para o Cloud
+                obtainedMap = JSON.parse(localStorage.getItem('pokedex_obtained_v2') || '{}');
+                captureDataMap = JSON.parse(localStorage.getItem('pokedex_capture_data_v1') || '{}');
+                marketPricesMap = JSON.parse(localStorage.getItem('pokedex_market_prices_v1') || '{}');
+                saveToCloud();
+            }
+            
+            if (isInitialLoad) {
+                isInitialLoad = false;
+                switchTab('dashboard');
+            } else {
+                refreshCurrentView();
+            }
+        });
+
+        // ----------------- UI FUNCTIONS -----------------
         function toggleMobileMenu() {
             const menu = document.getElementById('nav-menu-container');
             const arrow = document.getElementById('mobile-menu-arrow');
@@ -604,7 +678,7 @@
             if(layoutSelect) layoutSelect.value = currentLayout;
         }
 
-        function switchTab(tab) {
+        window.switchTab = function(tab) {
             const dashSec = document.getElementById('view-dashboard');
             const gridSec = document.getElementById('view-grid');
             const captureSec = document.getElementById('view-capture');
@@ -649,45 +723,45 @@
                 updateFilterButtonsUI();
                 renderMarketTable();
             }
-        }
+        };
 
-        function handleSearchInput() {
+        window.handleSearchInput = function() {
             if(!document.getElementById('view-grid').classList.contains('hidden')) {
                 applyFilters();
             } else if(!document.getElementById('view-market').classList.contains('hidden')) {
                 renderMarketTable();
             }
-        }
+        };
 
-        function filterPoke(poke) {
+        window.filterPoke = function(poke) {
             if(selectedPokes.has(poke)) selectedPokes.delete(poke);
             else selectedPokes.add(poke);
             updateFilterButtonsUI();
             handleSearchInput();
-        }
+        };
 
-        function filterLang(lang) {
+        window.filterLang = function(lang) {
             if(selectedLangs.has(lang)) selectedLangs.delete(lang);
             else selectedLangs.add(lang);
             updateFilterButtonsUI();
             handleSearchInput();
-        }
+        };
 
-        function filterVar(variante) {
+        window.filterVar = function(variante) {
             if(selectedVars.has(variante)) selectedVars.delete(variante);
             else selectedVars.add(variante);
             updateFilterButtonsUI();
             handleSearchInput();
-        }
+        };
 
-        function filterStatus(status) {
+        window.filterStatus = function(status) {
             if(selectedStatus.has(status)) selectedStatus.delete(status);
             else selectedStatus.add(status);
             updateFilterButtonsUI();
             handleSearchInput();
-        }
+        };
 
-        function toggleCard(id) {
+        window.toggleCard = function(id) {
             const isLocked = captureDataMap[id] && captureDataMap[id].locked;
             if (obtainedMap[id] && isLocked) {
                 alert("🔒 Esta carta está BLOQUEADA pela aba Captura!\nPara desmarcar, desative o cadeado na aba Captura primeiro.");
@@ -696,19 +770,11 @@
 
             obtainedMap[id] = !obtainedMap[id];
             localStorage.setItem('pokedex_obtained_v2', JSON.stringify(obtainedMap));
-            updateHeaderCounters();
-            if(!document.getElementById('view-dashboard').classList.contains('hidden')) {
-                renderDashboard();
-            } else if(!document.getElementById('view-grid').classList.contains('hidden')) {
-                applyFilters();
-            } else if(!document.getElementById('view-capture').classList.contains('hidden')) {
-                renderCaptureView();
-            } else if(!document.getElementById('view-market').classList.contains('hidden')) {
-                renderMarketTable();
-            }
-        }
+            saveToCloud();
+            refreshCurrentView();
+        };
 
-        function showZoomModal(card) {
+        window.showZoomModal = function(card) {
             const modal = document.getElementById('zoom-modal');
             const content = document.getElementById('zoom-modal-content');
             const isObtained = !!obtainedMap[card.id];
@@ -731,9 +797,9 @@
                 content.classList.remove('scale-95');
                 content.classList.add('scale-100');
             }, 10);
-        }
+        };
 
-        function hideZoomModal() {
+        window.hideZoomModal = function() {
             const modal = document.getElementById('zoom-modal');
             const content = document.getElementById('zoom-modal-content');
             content.classList.remove('scale-100');
@@ -742,14 +808,14 @@
             setTimeout(() => {
                 modal.classList.add('hidden', 'pointer-events-none');
             }, 300);
-        }
+        };
 
-        function handleModalClick(event) {
+        window.handleModalClick = function(event) {
             const content = document.getElementById('zoom-modal-content');
             if (!content.contains(event.target)) {
                 hideZoomModal();
             }
-        }
+        };
 
         function updateHeaderCounters() {
             let totalObtainedCount = 0;
@@ -910,18 +976,20 @@
         }
 
         /* --- CAPTURA --- */
-        function saveCaptureData(cardId, key, value) {
+        window.saveCaptureData = function(cardId, key, value) {
             if(!captureDataMap[cardId]) captureDataMap[cardId] = {};
             captureDataMap[cardId][key] = value;
             localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
-        }
+            saveToCloud();
+        };
 
-        function toggleLock(cardId) {
+        window.toggleLock = function(cardId) {
             if(!captureDataMap[cardId]) captureDataMap[cardId] = {};
             captureDataMap[cardId].locked = !captureDataMap[cardId].locked;
             localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
+            saveToCloud();
             renderCaptureView();
-        }
+        };
 
         function updateCaptureFieldsUI(cardId) {
             const data = captureDataMap[cardId] || {};
@@ -958,10 +1026,10 @@
             }
         }
 
-        function handleCaptureTypeChange(cardId, value) {
+        window.handleCaptureTypeChange = function(cardId, value) {
             saveCaptureData(cardId, 'type', value);
             updateCaptureFieldsUI(cardId);
-        }
+        };
 
         function renderCaptureView() {
             updateHeaderCounters();
@@ -1046,13 +1114,14 @@
         }
 
         /* --- MERCADO --- */
-        function saveMarketPrice(cardId, key, value) {
+        window.saveMarketPrice = function(cardId, key, value) {
             if (!marketPricesMap[cardId]) marketPricesMap[cardId] = {};
             marketPricesMap[cardId][key] = value;
             localStorage.setItem('pokedex_market_prices_v1', JSON.stringify(marketPricesMap));
-        }
+            saveToCloud();
+        };
 
-        function refreshMarketPrices() {
+        window.refreshMarketPrices = function() {
             const icon = document.getElementById('refresh-icon');
             if (icon) icon.classList.add('animate-spin');
 
@@ -1060,7 +1129,7 @@
                 if (icon) icon.classList.remove('animate-spin');
                 renderMarketTable();
             }, 600);
-        }
+        };
 
         function renderMarketTable() {
             updateHeaderCounters();
@@ -1142,10 +1211,6 @@
                     </div>`;
             }
         }
-
-        window.onload = () => {
-            switchTab('dashboard');
-        };
     </script>
 </body>
 </html>
