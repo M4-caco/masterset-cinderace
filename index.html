@@ -662,7 +662,7 @@
             }
         });
 
-        function clearAllFilters() {
+        window.clearAllFilters = function() {
             selectedPokes.clear();
             selectedLangs.clear();
             selectedVars.clear();
@@ -673,13 +673,13 @@
             
             updateFilterButtonsUI();
             handleSearchInput();
-        }
+        };
 
-        function changeLayout(value) {
+        window.changeLayout = function(value) {
             currentLayout = value;
             localStorage.setItem('pokedex_layout_v2', currentLayout);
             applyFilters();
-        }
+        };
 
         function updateFilterButtonsUI() {
             ['Scorbunny', 'Raboot', 'Cinderace'].forEach(p => {
