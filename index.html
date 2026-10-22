@@ -197,6 +197,7 @@
                     Limpar Filtros
                 </button>
 
+                <!-- SELETOR DE LAYOUT (Exibido apenas na aba Coleção) -->
                 <select id="layout-select" onchange="changeLayout(this.value)" class="bg-cinder-dark hover:bg-cinder-card text-cinder-white border border-cinder-orange/40 px-3 py-2.5 rounded-xl text-xs font-bold outline-none focus:border-cinder-orange transition shadow cursor-pointer">
                     <option value="pequeno">Pequeno</option>
                     <option value="medio">Médio</option>
@@ -274,7 +275,26 @@
             </div>
         </section>
 
-        <section id="view-market" class="hidden">
+        <section id="view-market" class="hidden space-y-4">
+            <!-- BANNER DE VALORIZAÇÃO DA COLEÇÃO -->
+            <div id="market-summary-banner" class="bg-cinder-dark border border-cinder-orange/20 rounded-3xl p-4 sm:p-6 shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <span class="text-[10px] uppercase font-bold tracking-wider text-cinder-yellow">Valuation do Master Set</span>
+                    <h3 class="text-base sm:text-lg font-black text-cinder-white mt-0.5">Estimativa Total da Coleção</h3>
+                    <p class="text-xs text-slate-400">Soma dos valores informados nas cartas listadas.</p>
+                </div>
+                <div class="flex gap-4 bg-cinder-bg px-4 py-3 rounded-2xl border border-cinder-orange/20 w-full sm:w-auto justify-around">
+                    <div>
+                        <p class="text-[9px] text-slate-400 uppercase font-bold">Total Liga (BR)</p>
+                        <p id="market-total-liga" class="text-sm sm:text-base font-black text-green-400 font-mono">R$ 0,00</p>
+                    </div>
+                    <div class="border-l border-cinder-orange/20 pl-4">
+                        <p class="text-[9px] text-slate-400 uppercase font-bold">Total eBay (INT)</p>
+                        <p id="market-total-ebay" class="text-sm sm:text-base font-black text-blue-400 font-mono">$ 0.00</p>
+                    </div>
+                </div>
+            </div>
+
             <div class="bg-cinder-dark rounded-3xl border border-cinder-orange/20 p-4 sm:p-6 shadow-xl">
                 <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <div>
@@ -582,8 +602,13 @@
             } else if(!document.getElementById('view-grid').classList.contains('hidden')) {
                 applyFilters();
             } else if(!document.getElementById('view-capture').classList.contains('hidden')) {
+                // EVITA RE-RENDERIZAR A ABA CAPTURA CASO O USUÁRIO ESTEJA DIGITANDO (PREVINE PERDA DE FOCO)
+                const activeEl = document.activeElement;
+                if (activeEl && activeEl.closest('#capture-grid')) return;
                 renderCaptureView();
             } else if(!document.getElementById('view-market').classList.contains('hidden')) {
+                const activeEl = document.activeElement;
+                if (activeEl && activeEl.closest('#market-cards-container')) return;
                 renderMarketTable();
             }
         }
@@ -729,6 +754,7 @@
             const filterBar = document.getElementById('filter-control-bar');
             const filtersSection = document.getElementById('filters-section');
             const mobileMenu = document.getElementById('mobile-menu');
+            const layoutSelect = document.getElementById('layout-select');
 
             dashSec.classList.add('hidden');
             gridSec.classList.add('hidden');
@@ -739,6 +765,15 @@
             if(mobileMenu) {
                 mobileMenu.classList.add('hidden');
                 mobileMenu.classList.remove('flex');
+            }
+
+            // Controla a visibilidade do seletor de layout (apenas na aba Coleção / grid)
+            if (layoutSelect) {
+                if (tab === 'grid') {
+                    layoutSelect.classList.remove('hidden');
+                } else {
+                    layoutSelect.classList.add('hidden');
+                }
             }
 
             const tabs = ['dashboard', 'grid', 'capture', 'market'];
@@ -1243,6 +1278,7 @@
             marketPricesMap[cardId][key] = value;
             localStorage.setItem('pokedex_market_prices_v1', JSON.stringify(marketPricesMap));
             saveToCloud();
+            calculateMarketTotals();
         };
 
         window.refreshMarketPrices = function() {
@@ -1252,8 +1288,33 @@
             setTimeout(() => {
                 if (icon) icon.classList.remove('animate-spin');
                 renderMarketTable();
-            }, 600);
+            }, 500);
         };
+
+        function calculateMarketTotals() {
+            let totalLiga = 0;
+            let totalEbay = 0;
+
+            allCards.forEach(card => {
+                const prices = marketPricesMap[card.id];
+                if (prices) {
+                    if (prices.liga) {
+                        const parsedLiga = parseFloat(prices.liga.toString().replace('R$', '').replace(/\./g, '').replace(',', '.').trim()) || 0;
+                        totalLiga += parsedLiga;
+                    }
+                    if (prices.ebay) {
+                        const parsedEbay = parseFloat(prices.ebay.toString().replace('$', '').replace(',', '').trim()) || 0;
+                        totalEbay += parsedEbay;
+                    }
+                }
+            });
+
+            const ligaEl = document.getElementById('market-total-liga');
+            const ebayEl = document.getElementById('market-total-ebay');
+
+            if (ligaEl) ligaEl.innerText = totalLiga.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+            if (ebayEl) ebayEl.innerText = totalEbay.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        }
 
         function renderMarketTable() {
             updateHeaderCounters();
@@ -1334,6 +1395,8 @@
                         <p class="text-sm font-bold">Nenhuma carta encontrada com os filtros atuais.</p>
                     </div>`;
             }
+
+            calculateMarketTotals();
         }
     </script>
 </body>
