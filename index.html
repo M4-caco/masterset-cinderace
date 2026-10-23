@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+=<!DOCTYPE html>
 <html lang="pt-br" class="dark">
 <head>
     <meta charset="UTF-8">
@@ -57,11 +57,11 @@
             border: 1px solid rgba(187, 73, 46, 0.2);
         }
         .dark .glass-panel {
-            background: rgba(24, 34, 52, 0.65);
+            background: rgba(24, 34, 52, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(187, 73, 46, 0.25);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(187, 73, 46, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.45);
         }
 
         .glass-card {
@@ -71,10 +71,10 @@
             border: 1px solid rgba(187, 73, 46, 0.15);
         }
         .dark .glass-card {
-            background: rgba(29, 42, 63, 0.55);
+            background: rgba(29, 42, 63, 0.75);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(187, 73, 46, 0.2);
+            border: 1px solid rgba(187, 73, 46, 0.25);
         }
 
         /* EFEITO DE REFLEXO / GLARE PADRÃO */
@@ -127,7 +127,7 @@
     </div>
 
     <!-- HEADER DE NAVEGAÇÃO COM GLASSMORPHISM -->
-    <header class="p-2.5 sm:p-3.5 glass-panel sticky top-0 z-50 transition-colors duration-200 border-b border-cinder-orange/30 shadow-xl">
+    <header class="p-2.5 sm:p-3.5 glass-panel sticky top-0 z-30 transition-colors duration-200 border-b border-cinder-orange/30 shadow-xl">
         <div class="max-w-7xl mx-auto flex flex-col gap-2">
             
             <div class="flex justify-between items-center w-full">
@@ -214,59 +214,62 @@
 
     <main class="p-2 sm:p-5 max-w-7xl mx-auto">
 
-        <!-- BARRA DE FILTROS COM GLASSMORPHISM -->
-        <div id="filter-control-bar" class="flex flex-wrap justify-between items-center mb-4 gap-2 relative hidden glass-panel py-3 px-3.5 rounded-3xl shadow-xl">
+        <!-- BARRA DE FILTROS COM Z-INDEX ADEQUADO E FLUIDEZ -->
+        <div id="filter-control-bar" class="flex flex-wrap justify-between items-center mb-4 gap-2 relative hidden glass-panel py-3 px-3.5 rounded-3xl shadow-xl z-20">
             <div class="flex items-center gap-2 flex-1 max-w-2xl relative">
-                <button onclick="toggleFilterDrawer()" class="glass-card hover:bg-white/80 dark:hover:bg-cinder-card text-slate-800 dark:text-cinder-white border border-cinder-orange/40 px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm shrink-0 cursor-pointer">
-                    <span>Filtros</span>
-                    <span id="drawer-arrow" class="transform transition duration-200 text-cinder-orange dark:text-cinder-yellow">▼</span>
-                </button>
+                
+                <!-- BOTÃO E MENU DE FILTROS COM Z-INDEX MUITO ALTO -->
+                <div class="relative">
+                    <button onclick="toggleFilterDrawer()" class="glass-card hover:bg-white/80 dark:hover:bg-cinder-card text-slate-800 dark:text-cinder-white border border-cinder-orange/40 px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm shrink-0 cursor-pointer">
+                        <span>Filtros</span>
+                        <span id="drawer-arrow" class="transform transition duration-200 text-cinder-orange dark:text-cinder-yellow">▼</span>
+                    </button>
+
+                    <section id="filters-section" class="absolute left-0 top-full mt-2 w-72 sm:w-80 glass-panel p-4 rounded-3xl space-y-3 hidden z-[999] shadow-2xl max-h-[75vh] overflow-y-auto custom-scroll border border-cinder-orange/40">
+                        <div class="flex flex-col gap-1">
+                            <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Pokémon:</span>
+                            <div class="flex flex-col gap-1">
+                                <button id="btn-poke-Scorbunny" onclick="filterPoke('Scorbunny')" class="poke-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Scorbunny</button>
+                                <button id="btn-poke-Raboot" onclick="filterPoke('Raboot')" class="poke-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Raboot</button>
+                                <button id="btn-poke-Cinderace" onclick="filterPoke('Cinderace')" class="poke-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Cinderace</button>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-1 pt-2 border-t border-cinder-orange/20">
+                            <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Língua:</span>
+                            <div class="grid grid-cols-2 gap-1">
+                                <button id="btn-lang-PT-BR" onclick="filterLang('PT-BR')" class="lang-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-center transition">PT-BR</button>
+                                <button id="btn-lang-EN" onclick="filterLang('EN')" class="lang-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-center transition">EN</button>
+                                <button id="btn-lang-JP" onclick="filterLang('JP')" class="lang-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-center transition">JP</button>
+                                <button id="btn-lang-CN" onclick="filterLang('CN')" class="lang-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-center transition">CN</button>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-1 pt-2 border-t border-cinder-orange/20">
+                            <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Característica:</span>
+                            <div class="flex flex-col gap-1">
+                                <button id="btn-var-Regular" onclick="filterVar('Regular')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Regular</button>
+                                <button id="btn-var-Holo" onclick="filterVar('Holográfica / Holo')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Holográfica / Holo</button>
+                                <button id="btn-var-Reverse" onclick="filterVar('Reverse Holo')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Reverse Holo</button>
+                                <button id="btn-var-Promo" onclick="filterVar('Promo')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Promo</button>
+                                <button id="btn-var-V" onclick="filterVar('V Card')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">V Card</button>
+                                <button id="btn-var-VMAX" onclick="filterVar('VMAX')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">VMAX</button>
+                                <button id="btn-var-FullArt" onclick="filterVar('Full Art')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Full Art</button>
+                                <button id="btn-var-AltArt" onclick="filterVar('Arte Alternativa (Alt Art)')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Arte Alternativa (Alt Art)</button>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-1 pt-2 border-t border-cinder-orange/20">
+                            <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Exibir Status:</span>
+                            <div class="flex flex-col gap-1">
+                                <button id="btn-status-MISSING" onclick="filterStatus('MISSING')" class="status-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Faltantes</button>
+                                <button id="btn-status-OWNED" onclick="filterStatus('OWNED')" class="status-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Tenho</button>
+                            </div>
+                        </div>
+                    </section>
+                </div>
 
                 <input id="search-input" oninput="handleSearchInput()" type="text" placeholder="Buscar por Nome, expansão ou variante..." class="w-full bg-white/50 dark:bg-cinder-bg/60 px-3.5 py-2 rounded-2xl text-xs outline-none border border-cinder-orange/30 focus:border-cinder-orange text-slate-800 dark:text-cinder-white shadow-inner backdrop-blur-md">
-
-                <section id="filters-section" class="absolute left-0 top-12 w-72 sm:w-80 glass-panel p-4 rounded-3xl space-y-3 hidden z-40 shadow-2xl max-h-[80vh] overflow-y-auto custom-scroll">
-                    
-                    <div class="flex flex-col gap-1">
-                        <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Pokémon:</span>
-                        <div class="flex flex-col gap-1">
-                            <button id="btn-poke-Scorbunny" onclick="filterPoke('Scorbunny')" class="poke-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Scorbunny</button>
-                            <button id="btn-poke-Raboot" onclick="filterPoke('Raboot')" class="poke-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Raboot</button>
-                            <button id="btn-poke-Cinderace" onclick="filterPoke('Cinderace')" class="poke-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Cinderace</button>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col gap-1 pt-2 border-t border-cinder-orange/20">
-                        <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Língua:</span>
-                        <div class="grid grid-cols-2 gap-1">
-                            <button id="btn-lang-PT-BR" onclick="filterLang('PT-BR')" class="lang-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-center transition">PT-BR</button>
-                            <button id="btn-lang-EN" onclick="filterLang('EN')" class="lang-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-center transition">EN</button>
-                            <button id="btn-lang-JP" onclick="filterLang('JP')" class="lang-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-center transition">JP</button>
-                            <button id="btn-lang-CN" onclick="filterLang('CN')" class="lang-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-center transition">CN</button>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col gap-1 pt-2 border-t border-cinder-orange/20">
-                        <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Característica:</span>
-                        <div class="flex flex-col gap-1">
-                            <button id="btn-var-Regular" onclick="filterVar('Regular')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Regular</button>
-                            <button id="btn-var-Holo" onclick="filterVar('Holográfica / Holo')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Holográfica / Holo</button>
-                            <button id="btn-var-Reverse" onclick="filterVar('Reverse Holo')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Reverse Holo</button>
-                            <button id="btn-var-Promo" onclick="filterVar('Promo')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Promo</button>
-                            <button id="btn-var-V" onclick="filterVar('V Card')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">V Card</button>
-                            <button id="btn-var-VMAX" onclick="filterVar('VMAX')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">VMAX</button>
-                            <button id="btn-var-FullArt" onclick="filterVar('Full Art')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Full Art</button>
-                            <button id="btn-var-AltArt" onclick="filterVar('Arte Alternativa (Alt Art)')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Arte Alternativa (Alt Art)</button>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col gap-1 pt-2 border-t border-cinder-orange/20">
-                        <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Exibir Status:</span>
-                        <div class="flex flex-col gap-1">
-                            <button id="btn-status-MISSING" onclick="filterStatus('MISSING')" class="status-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Faltantes</button>
-                            <button id="btn-status-OWNED" onclick="filterStatus('OWNED')" class="status-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Tenho</button>
-                        </div>
-                    </div>
-                </section>
             </div>
 
             <div class="flex items-center gap-2 shrink-0">
@@ -274,11 +277,19 @@
                     Limpar
                 </button>
 
-                <select id="layout-select" onchange="changeLayout(this.value)" class="glass-card hover:bg-white/80 dark:hover:bg-cinder-card text-slate-800 dark:text-cinder-white border border-cinder-orange/40 px-3 py-2 rounded-2xl text-xs font-bold outline-none focus:border-cinder-orange transition shadow-sm cursor-pointer">
-                    <option value="pequeno" class="bg-white dark:bg-cinder-dark">Pequeno</option>
-                    <option value="medio" class="bg-white dark:bg-cinder-dark">Médio</option>
-                    <option value="grande" class="bg-white dark:bg-cinder-dark">Grande</option>
-                </select>
+                <!-- DROPDOWN CUSTOMIZADO DE LAYOUT (PEQUENO / MÉDIO / GRANDE) -->
+                <div class="relative">
+                    <button onclick="toggleLayoutDropdown()" id="layout-btn" class="glass-card hover:bg-white/80 dark:hover:bg-cinder-card text-slate-800 dark:text-cinder-white border border-cinder-orange/40 px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 transition shadow-sm cursor-pointer">
+                        <span id="layout-btn-text">Médio</span>
+                        <span class="text-cinder-orange dark:text-cinder-yellow text-[10px]">▼</span>
+                    </button>
+
+                    <div id="layout-dropdown" class="absolute right-0 top-full mt-2 w-36 glass-panel rounded-2xl p-1.5 hidden z-[999] shadow-2xl border border-cinder-orange/40 space-y-1">
+                        <button onclick="changeLayout('pequeno')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">Pequeno</button>
+                        <button onclick="changeLayout('medio')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">Médio</button>
+                        <button onclick="changeLayout('grande')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">Grande</button>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -768,12 +779,27 @@
         window.toggleFilterDrawer = function() {
             const section = document.getElementById('filters-section');
             const arrow = document.getElementById('drawer-arrow');
+            const layoutDropdown = document.getElementById('layout-dropdown');
+            if(layoutDropdown) layoutDropdown.classList.add('hidden');
+
             if (section.classList.contains('hidden')) {
                 section.classList.remove('hidden');
                 if(arrow) arrow.style.transform = "rotate(180deg)";
             } else {
                 section.classList.add('hidden');
                 if(arrow) arrow.style.transform = "rotate(0deg)";
+            }
+        };
+
+        window.toggleLayoutDropdown = function() {
+            const dropdown = document.getElementById('layout-dropdown');
+            const filtersSection = document.getElementById('filters-section');
+            if(filtersSection) filtersSection.classList.add('hidden');
+            const arrow = document.getElementById('drawer-arrow');
+            if(arrow) arrow.style.transform = "rotate(0deg)";
+
+            if (dropdown) {
+                dropdown.classList.toggle('hidden');
             }
         };
 
@@ -784,6 +810,12 @@
                 section.classList.add('hidden');
                 const arrow = document.getElementById('drawer-arrow');
                 if(arrow) arrow.style.transform = "rotate(0deg)";
+            }
+
+            const layoutDropdown = document.getElementById('layout-dropdown');
+            const layoutBtn = document.getElementById('layout-btn');
+            if (layoutDropdown && layoutBtn && !layoutDropdown.contains(e.target) && !layoutBtn.contains(e.target)) {
+                layoutDropdown.classList.add('hidden');
             }
 
             const mobileMenu = document.getElementById('mobile-menu');
@@ -810,6 +842,15 @@
         window.changeLayout = function(value) {
             currentLayout = value;
             localStorage.setItem('pokedex_layout_v2', currentLayout);
+            
+            const layoutText = document.getElementById('layout-btn-text');
+            if (layoutText) {
+                layoutText.innerText = value.charAt(0).toUpperCase() + value.slice(1);
+            }
+            
+            const dropdown = document.getElementById('layout-dropdown');
+            if (dropdown) dropdown.classList.add('hidden');
+
             applyFilters();
         };
 
@@ -856,8 +897,10 @@
                 }
             });
 
-            const layoutSelect = document.getElementById('layout-select');
-            if(layoutSelect) layoutSelect.value = currentLayout;
+            const layoutText = document.getElementById('layout-btn-text');
+            if (layoutText) {
+                layoutText.innerText = currentLayout.charAt(0).toUpperCase() + currentLayout.slice(1);
+            }
         }
 
         window.switchTab = function(tab) {
@@ -867,8 +910,8 @@
             const marketSec = document.getElementById('view-market');
             const filterBar = document.getElementById('filter-control-bar');
             const filtersSection = document.getElementById('filters-section');
+            const layoutDropdown = document.getElementById('layout-dropdown');
             const mobileMenu = document.getElementById('mobile-menu');
-            const layoutSelect = document.getElementById('layout-select');
 
             dashSec.classList.add('hidden');
             gridSec.classList.add('hidden');
@@ -876,17 +919,10 @@
             marketSec.classList.add('hidden');
             filterBar.classList.add('hidden');
             if(filtersSection) filtersSection.classList.add('hidden');
+            if(layoutDropdown) layoutDropdown.classList.add('hidden');
             if(mobileMenu) {
                 mobileMenu.classList.add('hidden');
                 mobileMenu.classList.remove('flex');
-            }
-
-            if (layoutSelect) {
-                if (tab === 'grid') {
-                    layoutSelect.classList.remove('hidden');
-                } else {
-                    layoutSelect.classList.add('hidden');
-                }
             }
 
             const tabs = ['dashboard', 'grid', 'capture', 'market'];
