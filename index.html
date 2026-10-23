@@ -63,20 +63,14 @@
             mix-blend-mode: overlay;
         }
 
-        /* BARRA DE FILTROS STICKY COM TRANSIÇÃO SUAVE */
+        /* BARRA DE FILTROS STICKY TRADICIONAL */
         .filter-bar-sticky {
             position: sticky;
             top: 52px;
             z-index: 40;
-            transition: transform 0.25s ease-in-out, opacity 0.25s ease-in-out;
         }
         @media (min-width: 768px) {
             .filter-bar-sticky { top: 60px; }
-        }
-        .filter-bar-hidden {
-            transform: translateY(-130%);
-            opacity: 0;
-            pointer-events: none;
         }
 
         /* ESTILOS DO SWITCH TEMA LUA / SOL */
@@ -192,7 +186,7 @@
     <!-- PADDING REDUZIDO NO MAIN PARA EVITAR MARGENS DISPROPORCIONAIS -->
     <main class="p-2 sm:p-4 max-w-7xl mx-auto">
 
-        <!-- BARRA DE FILTROS COM COMPORTAMENTO STICKY E RETRÁTIL CORRIGIDO -->
+        <!-- BARRA DE FILTROS STICKY ESTÁVEL -->
         <div id="filter-control-bar" class="flex flex-wrap justify-between items-center mb-3 gap-2 relative hidden filter-bar-sticky bg-slate-100/95 dark:bg-cinder-bg/95 backdrop-blur-md py-1.5 px-1">
             <div class="flex items-center gap-2 flex-1 max-w-2xl relative">
                 <button onclick="toggleFilterDrawer()" class="bg-white dark:bg-cinder-dark hover:bg-slate-50 dark:hover:bg-cinder-card text-slate-800 dark:text-cinder-white border border-cinder-orange/40 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow shrink-0">
@@ -705,31 +699,6 @@
             }
         });
 
-        // COMPORTAMENTO ROBUSTO DO SCROLL PARA MOSTRAR/ESCONDER A BARRA DE FILTROS
-        let lastScrollY = window.scrollY;
-        const filterBar = document.getElementById('filter-control-bar');
-
-        window.addEventListener('scroll', () => {
-            if (!filterBar || filterBar.classList.contains('hidden')) return;
-
-            const currentScrollY = window.scrollY;
-
-            // Se estiver no topo da página, sempre exibe a barra
-            if (currentScrollY <= 10) {
-                filterBar.classList.remove('filter-bar-hidden');
-            } 
-            // Se rolar para baixo, oculta
-            else if (currentScrollY > lastScrollY && currentScrollY > 40) {
-                filterBar.classList.add('filter-bar-hidden');
-            } 
-            // Se rolar para cima (qualquer movimento), faz reaparecer imediatamente
-            else if (currentScrollY < lastScrollY) {
-                filterBar.classList.remove('filter-bar-hidden');
-            }
-
-            lastScrollY = currentScrollY <= 0 ? 0 : currentScrollY;
-        }, { passive: true });
-
         window.toggleMobileMenu = function() {
             const menu = document.getElementById('mobile-menu');
             if (menu) {
@@ -886,7 +855,6 @@
             } else if(tab === 'grid') {
                 gridSec.classList.remove('hidden');
                 filterBar.classList.remove('hidden');
-                filterBar.classList.remove('filter-bar-hidden');
                 updateFilterButtonsUI();
                 applyFilters();
             } else if(tab === 'capture') {
@@ -895,7 +863,6 @@
             } else if(tab === 'market') {
                 marketSec.classList.remove('hidden');
                 filterBar.classList.remove('hidden');
-                filterBar.classList.remove('filter-bar-hidden');
                 updateFilterButtonsUI();
                 renderMarketTable();
             }
