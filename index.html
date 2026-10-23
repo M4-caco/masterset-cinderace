@@ -930,9 +930,12 @@
                     <span class="text-xs font-extrabold ${isObtained ? 'text-cinder-orange dark:text-cinder-yellow' : 'text-slate-400'}">${isObtained ? 'TENHO' : 'FALTANTE'} (${currentZoomIndex + 1}/${allCards.length})</span>
                 </div>
                 
-                <div class="relative w-full flex items-center justify-center my-1">
-                    <div id="zoom-image-container" class="w-full max-w-[260px] sm:max-w-sm aspect-[2.5/3.5] max-h-[52vh] flex items-center justify-center bg-slate-100 dark:bg-cinder-bg rounded-2xl overflow-hidden border border-cinder-orange/20 shadow-inner p-1 sm:p-3 relative cursor-grab active:cursor-grabbing">
-                        <img src="${card.imagem}" class="max-h-full max-w-full object-contain pointer-events-none ${animDirection === 'left' ? 'slide-left' : animDirection === 'right' ? 'slide-right' : ''}" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                <div class="relative w-full flex items-center justify-center my-1 [perspective:1000px]">
+                    <div id="zoom-image-container" class="w-full max-w-[260px] sm:max-w-sm aspect-[2.5/3.5] max-h-[52vh] flex items-center justify-center bg-slate-100 dark:bg-cinder-bg rounded-2xl overflow-hidden border border-cinder-orange/20 shadow-2xl p-1 sm:p-3 relative cursor-grab active:cursor-grabbing transition-transform duration-100 ease-out transform-gpu">
+                        <img id="zoom-card-img" src="${card.imagem}" class="max-h-full max-w-full object-contain pointer-events-none rounded-xl ${animDirection === 'left' ? 'slide-left' : animDirection === 'right' ? 'slide-right' : ''}" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                        
+                        <!-- Camada de Brilho Reflexivo 3D -->
+                        <div id="card-glare" class="absolute inset-0 pointer-events-none rounded-2xl opacity-0 transition-opacity duration-300" style="background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 70%); mix-blend-mode: overlay;"></div>
                     </div>
                 </div>
 
@@ -952,33 +955,79 @@
                 content.classList.add('scale-100');
             }, 10);
 
-            setupSwipeGesture();
+            setupCard3DTiltAndSwipe();
         }
 
-        function setupSwipeGesture() {
-            const imgContainer = document.getElementById('zoom-image-container');
-            if (!imgContainer) return;
+        function setupCard3DTiltAndSwipe() {
+            const cardContainer = document.getElementById('zoom-image-container');
+            const glare = document.getElementById('card-glare');
+            if (!cardContainer) return;
 
             let touchStartX = 0;
             let touchEndX = 0;
+            let isTouching = false;
 
-            imgContainer.addEventListener('touchstart', (e) => {
-                touchStartX = e.changedTouches[0].screenX;
-            }, { passive: true });
+            function updateTilt(clientX, clientY) {
+                const rect = cardContainer.getBoundingClientRect();
+                const x = clientX - rect.left;
+                const y = clientY - rect.top;
 
-            imgContainer.addEventListener('touchend', (e) => {
-                touchEndX = e.changedTouches[0].screenX;
-                handleSwipe();
-            }, { passive: true });
+                const centerX = rect.width / 2;
+                const centerY = rect.height / 2;
 
-            function handleSwipe() {
-                const threshold = 50; 
-                if (touchEndX < touchStartX - threshold) {
-                    nextZoomCard();
-                } else if (touchEndX > touchStartX + threshold) {
-                    prevZoomCard();
+                const rotateX = ((y - centerY) / centerY) * -18;
+                const rotateY = ((x - centerX) / centerX) * 18;
+
+                cardContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
+
+                if (glare) {
+                    const percentX = (x / rect.width) * 100;
+                    const percentY = (y / rect.height) * 100;
+                    glare.style.opacity = '1';
+                    glare.style.background = `radial-gradient(circle at ${percentX}% ${percentY}%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 75%)`;
                 }
             }
+
+            function resetTilt() {
+                cardContainer.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+                if (glare) glare.style.opacity = '0';
+            }
+
+            cardContainer.addEventListener('mousemove', (e) => {
+                updateTilt(e.clientX, e.clientY);
+            });
+
+            cardContainer.addEventListener('mouseleave', () => {
+                resetTilt();
+            });
+
+            cardContainer.addEventListener('touchstart', (e) => {
+                isTouching = true;
+                touchStartX = e.touches[0].clientX;
+                const touch = e.touches[0];
+                updateTilt(touch.clientX, touch.clientY);
+            }, { passive: true });
+
+            cardContainer.addEventListener('touchmove', (e) => {
+                if (!isTouching) return;
+                const touch = e.touches[0];
+                touchEndX = touch.clientX;
+                updateTilt(touch.clientX, touch.clientY);
+            }, { passive: true });
+
+            cardContainer.addEventListener('touchend', () => {
+                isTouching = false;
+                resetTilt();
+
+                const threshold = 60;
+                if (touchEndX !== 0 && touchEndX < touchStartX - threshold) {
+                    nextZoomCard();
+                } else if (touchEndX !== 0 && touchEndX > touchStartX + threshold) {
+                    prevZoomCard();
+                }
+                touchStartX = 0;
+                touchEndX = 0;
+            }, { passive: true });
         }
 
         document.addEventListener('keydown', (e) => {
