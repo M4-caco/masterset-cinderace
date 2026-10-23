@@ -66,9 +66,9 @@
 </head>
 <body class="bg-slate-100 text-slate-800 dark:bg-cinder-bg dark:text-cinder-white min-h-screen font-sans transition-colors duration-200">
 
-    <!-- MODAL DE ZOOM CENTRALIZADO -->
-    <div id="zoom-modal" onclick="handleModalClick(event)" class="fixed inset-0 z-[9999] bg-black/70 backdrop-blur-sm flex items-center justify-center hidden opacity-0 pointer-events-none p-4">
-        <div id="zoom-modal-content" onclick="event.stopPropagation()" class="bg-white dark:bg-cinder-dark border border-cinder-orange/40 p-5 sm:p-8 rounded-3xl shadow-2xl max-w-md w-full max-h-[95vh] flex flex-col items-center relative transform scale-95 transition-transform duration-300">
+    <!-- MODAL DE ZOOM CENTRALIZADO (SEM RETÂNGULO DE FUNDO) -->
+    <div id="zoom-modal" onclick="handleModalClick(event)" class="fixed inset-0 z-[9999] bg-black/80 backdrop-blur-md flex items-center justify-center hidden opacity-0 pointer-events-none p-4">
+        <div id="zoom-modal-content" onclick="event.stopPropagation()" class="bg-transparent border-none shadow-none p-2 sm:p-4 max-w-md w-full max-h-[95vh] flex flex-col items-center relative transform scale-95 transition-transform duration-300">
             <!-- Conteúdo injetado via JS -->
         </div>
     </div>
@@ -921,30 +921,30 @@
 
             content.innerHTML = `
                 <!-- Botão Voltar (Desktop apenas) -->
-                <button onclick="event.stopPropagation(); prevZoomCard()" ${currentZoomIndex === 0 ? 'disabled' : ''} class="hidden sm:flex absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-30 bg-white dark:bg-cinder-dark/95 hover:bg-cinder-orange disabled:opacity-20 text-cinder-orange dark:text-cinder-yellow hover:text-white p-2.5 sm:p-3 rounded-full border border-cinder-orange/40 shadow-xl transition active:scale-95 items-center justify-center cursor-pointer select-none">
+                <button onclick="event.stopPropagation(); prevZoomCard()" ${currentZoomIndex === 0 ? 'disabled' : ''} class="hidden sm:flex absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 z-30 bg-white/80 dark:bg-cinder-dark/80 hover:bg-cinder-orange disabled:opacity-20 text-cinder-orange dark:text-cinder-yellow hover:text-white p-2.5 sm:p-3 rounded-full border border-cinder-orange/40 shadow-xl transition active:scale-95 items-center justify-center cursor-pointer select-none">
                     ‹
                 </button>
 
-                <div class="flex justify-between items-center w-full mb-3 px-1">
-                    <span class="px-2.5 py-1 rounded text-xs font-black uppercase bg-slate-100 dark:bg-cinder-bg text-cinder-orange dark:text-cinder-yellow border border-cinder-orange/30">${card.lingua}</span>
-                    <span class="text-xs font-extrabold ${isObtained ? 'text-cinder-orange dark:text-cinder-yellow' : 'text-slate-400'}">${isObtained ? 'TENHO' : 'FALTANTE'} (${currentZoomIndex + 1}/${allCards.length})</span>
+                <div class="flex justify-between items-center w-full mb-3 px-2 max-w-[280px] sm:max-w-sm">
+                    <span class="px-2.5 py-1 rounded text-xs font-black uppercase bg-white/80 dark:bg-cinder-dark/80 text-cinder-orange dark:text-cinder-yellow border border-cinder-orange/30 shadow">${card.lingua}</span>
+                    <span class="text-xs font-extrabold px-2.5 py-1 rounded bg-white/80 dark:bg-cinder-dark/80 shadow ${isObtained ? 'text-cinder-orange dark:text-cinder-yellow' : 'text-slate-400'}">${isObtained ? 'TENHO' : 'FALTANTE'} (${currentZoomIndex + 1}/${allCards.length})</span>
                 </div>
                 
                 <div class="relative w-full flex items-center justify-center my-1 [perspective:1000px]">
-                    <div id="zoom-image-container" class="w-full max-w-[260px] sm:max-w-sm aspect-[2.5/3.5] max-h-[52vh] flex items-center justify-center bg-slate-100 dark:bg-cinder-bg rounded-2xl overflow-hidden border border-cinder-orange/20 shadow-2xl p-1 sm:p-3 relative cursor-grab active:cursor-grabbing transition-transform duration-100 ease-out transform-gpu">
-                        <img id="zoom-card-img" src="${card.imagem}" class="max-h-full max-w-full object-contain pointer-events-none rounded-xl ${animDirection === 'left' ? 'slide-left' : animDirection === 'right' ? 'slide-right' : ''}" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                    <div id="zoom-image-container" class="w-full max-w-[260px] sm:max-w-sm aspect-[2.5/3.5] max-h-[52vh] flex items-center justify-center bg-transparent rounded-2xl overflow-visible relative cursor-grab active:cursor-grabbing transition-transform duration-75 ease-out transform-gpu select-none">
+                        <img id="zoom-card-img" src="${card.imagem}" class="max-h-full max-w-full object-contain pointer-events-none rounded-xl shadow-2xl ${animDirection === 'left' ? 'slide-left' : animDirection === 'right' ? 'slide-right' : ''}" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
                         
                         <!-- Camada de Brilho Reflexivo 3D -->
-                        <div id="card-glare" class="absolute inset-0 pointer-events-none rounded-2xl opacity-0 transition-opacity duration-300" style="background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.45) 0%, rgba(255,255,255,0) 70%); mix-blend-mode: overlay;"></div>
+                        <div id="card-glare" class="absolute inset-0 pointer-events-none rounded-xl opacity-0 transition-opacity duration-300" style="background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%); mix-blend-mode: overlay;"></div>
                     </div>
                 </div>
 
                 <!-- Botão Avançar (Desktop apenas) -->
-                <button onclick="event.stopPropagation(); nextZoomCard()" ${currentZoomIndex === allCards.length - 1 ? 'disabled' : ''} class="hidden sm:flex absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-30 bg-white dark:bg-cinder-dark/95 hover:bg-cinder-orange disabled:opacity-20 text-cinder-orange dark:text-cinder-yellow hover:text-white p-2.5 sm:p-3 rounded-full border border-cinder-orange/40 shadow-xl transition active:scale-95 items-center justify-center cursor-pointer select-none">
+                <button onclick="event.stopPropagation(); nextZoomCard()" ${currentZoomIndex === allCards.length - 1 ? 'disabled' : ''} class="hidden sm:flex absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 z-30 bg-white/80 dark:bg-cinder-dark/80 hover:bg-cinder-orange disabled:opacity-20 text-cinder-orange dark:text-cinder-yellow hover:text-white p-2.5 sm:p-3 rounded-full border border-cinder-orange/40 shadow-xl transition active:scale-95 items-center justify-center cursor-pointer select-none">
                     ›
                 </button>
 
-                <div class="mt-3 w-full text-center">
+                <div class="mt-4 w-full text-center bg-white/80 dark:bg-cinder-dark/80 backdrop-blur-md py-2 px-4 rounded-2xl border border-cinder-orange/20 shadow-lg max-w-[280px] sm:max-w-sm">
                     <p class="text-base sm:text-lg font-bold text-slate-800 dark:text-cinder-white">${card.nome}</p>
                     <p class="text-xs text-cinder-orange font-semibold mt-0.5">${card.set} — ${card.variante} (#${card.numero})</p>
                 </div>`;
@@ -966,33 +966,39 @@
             let touchStartX = 0;
             let touchEndX = 0;
             let isTouching = false;
+            let rafId = null;
 
             function updateTilt(clientX, clientY) {
-                const rect = cardContainer.getBoundingClientRect();
-                const x = clientX - rect.left;
-                const y = clientY - rect.top;
+                if (rafId) cancelAnimationFrame(rafId);
+                rafId = requestAnimationFrame(() => {
+                    const rect = cardContainer.getBoundingClientRect();
+                    const x = clientX - rect.left;
+                    const y = clientY - rect.top;
 
-                const centerX = rect.width / 2;
-                const centerY = rect.height / 2;
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
 
-                const rotateX = ((y - centerY) / centerY) * -18;
-                const rotateY = ((x - centerX) / centerX) * 18;
+                    const rotateX = ((y - centerY) / centerY) * -18;
+                    const rotateY = ((x - centerX) / centerX) * 18;
 
-                cardContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
+                    cardContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
 
-                if (glare) {
-                    const percentX = (x / rect.width) * 100;
-                    const percentY = (y / rect.height) * 100;
-                    glare.style.opacity = '1';
-                    glare.style.background = `radial-gradient(circle at ${percentX}% ${percentY}%, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0) 75%)`;
-                }
+                    if (glare) {
+                        const percentX = (x / rect.width) * 100;
+                        const percentY = (y / rect.height) * 100;
+                        glare.style.opacity = '1';
+                        glare.style.background = `radial-gradient(circle at ${percentX}% ${percentY}%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 75%)`;
+                    }
+                });
             }
 
             function resetTilt() {
+                if (rafId) cancelAnimationFrame(rafId);
                 cardContainer.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
                 if (glare) glare.style.opacity = '0';
             }
 
+            // Mouse events (Desktop)
             cardContainer.addEventListener('mousemove', (e) => {
                 updateTilt(e.clientX, e.clientY);
             });
@@ -1001,25 +1007,29 @@
                 resetTilt();
             });
 
+            // Touch events (Mobile) com { passive: false } para bloquear o scroll da página
             cardContainer.addEventListener('touchstart', (e) => {
                 isTouching = true;
                 touchStartX = e.touches[0].clientX;
+                touchEndX = touchStartX;
                 const touch = e.touches[0];
                 updateTilt(touch.clientX, touch.clientY);
             }, { passive: true });
 
             cardContainer.addEventListener('touchmove', (e) => {
                 if (!isTouching) return;
+                e.preventDefault(); // Impede o fundo de rolar ao mexer o dedo na carta
                 const touch = e.touches[0];
                 touchEndX = touch.clientX;
                 updateTilt(touch.clientX, touch.clientY);
-            }, { passive: true });
+            }, { passive: false });
 
             cardContainer.addEventListener('touchend', () => {
+                if (!isTouching) return;
                 isTouching = false;
                 resetTilt();
 
-                const threshold = 60;
+                const threshold = 50;
                 if (touchEndX !== 0 && touchEndX < touchStartX - threshold) {
                     nextZoomCard();
                 } else if (touchEndX !== 0 && touchEndX > touchStartX + threshold) {
