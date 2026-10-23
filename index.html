@@ -17,8 +17,8 @@
                             orange: '#BB492E',
                             red: '#83382A',
                             dark: '#182234',
-                            bg: '#0B0F17',
-                            card: '#151C2C'
+                            bg: '#0F1622',
+                            card: '#1D2A3F'
                         }
                     }
                 }
@@ -26,38 +26,11 @@
         }
     </script>
     <style>
-        /* GLASSMORPHISM BASE */
-        .glass-panel {
-            background: rgba(21, 28, 44, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-        .light .glass-panel {
-            background: rgba(255, 255, 255, 0.75);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(187, 73, 46, 0.15);
-            box-shadow: 0 8px 32px 0 rgba(187, 73, 46, 0.08);
-        }
-
-        .glass-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.01) 100%), rgba(21, 28, 44, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.07);
-        }
-        .light .glass-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
-            border: 1px solid rgba(187, 73, 46, 0.12);
-        }
-
         .card-not-owned img { filter: grayscale(100%) opacity(0.35); transition: all 0.2s ease; }
         .card-not-owned:hover img { filter: grayscale(30%) opacity(0.8); }
         .card-owned img { filter: grayscale(0%) opacity(1); transition: all 0.2s ease; }
-        .card-owned { border: 2px solid #22c55e !important; box-shadow: 0 0 20px rgba(34, 197, 94, 0.3); }
-        .card-not-owned { border: 1px solid rgba(187, 73, 46, 0.2) !important; }
+        .card-owned { border: 2px solid #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); }
+        .card-not-owned { border: 1px solid rgba(187, 73, 46, 0.3); }
         
         #zoom-modal { transition: opacity 0.2s ease-in-out; }
 
@@ -75,6 +48,34 @@
         .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; border-radius: 8px; }
         .custom-scroll::-webkit-scrollbar-thumb { background: #BB492E; border-radius: 8px; }
+
+        /* GLASSMORPHISM EFFECTS */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(187, 73, 46, 0.2);
+        }
+        .dark .glass-panel {
+            background: rgba(24, 34, 52, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(187, 73, 46, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(187, 73, 46, 0.15);
+        }
+        .dark .glass-card {
+            background: rgba(29, 42, 63, 0.55);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(187, 73, 46, 0.2);
+        }
 
         /* EFEITO DE REFLEXO / GLARE PADRÃO */
         .holo-glare-effect {
@@ -105,17 +106,13 @@
         }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 dark:bg-cinder-bg dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 relative overflow-x-hidden">
-
-    <!-- ELEMENTOS DE LUZ AMBIENTE GLASSMORPHISM DE FUNDO -->
-    <div class="fixed top-[-10%] left-[-10%] w-[40vw] h-[40vw] rounded-full bg-cinder-orange/15 blur-[120px] pointer-events-none"></div>
-    <div class="fixed bottom-[-10%] right-[-10%] w-[40vw] h-[40vw] rounded-full bg-cinder-yellow/10 blur-[140px] pointer-events-none"></div>
+<body class="bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300 dark:from-[#090e17] dark:via-cinder-bg dark:to-[#121926] text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200">
 
     <!-- MODAL DE ZOOM CENTRALIZADO COM SETAS EXTERNAS SEGURAS -->
     <div id="zoom-modal" onclick="handleModalClick(event)" class="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-xl flex items-center justify-center hidden opacity-0 pointer-events-none p-4">
         
         <!-- Botão Voltar Externo -->
-        <button id="zoom-prev-btn" onclick="event.stopPropagation(); prevZoomCard()" class="hidden sm:flex absolute left-4 sm:left-8 lg:left-16 top-1/2 -translate-y-1/2 z-40 glass-panel hover:bg-cinder-orange disabled:opacity-20 text-cinder-orange dark:text-cinder-yellow hover:text-white p-3 sm:p-4 rounded-full shadow-2xl transition active:scale-95 items-center justify-center cursor-pointer select-none">
+        <button id="zoom-prev-btn" onclick="event.stopPropagation(); prevZoomCard()" class="hidden sm:flex absolute left-4 sm:left-8 lg:left-16 top-1/2 -translate-y-1/2 z-40 bg-white/90 dark:bg-cinder-dark/90 hover:bg-cinder-orange disabled:opacity-20 text-cinder-orange dark:text-cinder-yellow hover:text-white p-3 sm:p-4 rounded-full border border-cinder-orange/40 shadow-2xl transition active:scale-95 items-center justify-center cursor-pointer select-none">
             ‹
         </button>
 
@@ -124,23 +121,22 @@
         </div>
 
         <!-- Botão Avançar Externo -->
-        <button id="zoom-next-btn" onclick="event.stopPropagation(); nextZoomCard()" class="hidden sm:flex absolute right-4 sm:right-8 lg:right-16 top-1/2 -translate-y-1/2 z-40 glass-panel hover:bg-cinder-orange disabled:opacity-20 text-cinder-orange dark:text-cinder-yellow hover:text-white p-3 sm:p-4 rounded-full shadow-2xl transition active:scale-95 items-center justify-center cursor-pointer select-none">
+        <button id="zoom-next-btn" onclick="event.stopPropagation(); nextZoomCard()" class="hidden sm:flex absolute right-4 sm:right-8 lg:right-16 top-1/2 -translate-y-1/2 z-40 bg-white/90 dark:bg-cinder-dark/90 hover:bg-cinder-orange disabled:opacity-20 text-cinder-orange dark:text-cinder-yellow hover:text-white p-3 sm:p-4 rounded-full border border-cinder-orange/40 shadow-2xl transition active:scale-95 items-center justify-center cursor-pointer select-none">
             ›
         </button>
     </div>
 
-    <!-- HEADER DE NAVEGAÇÃO GLASSMORPHISM -->
-    <header class="p-3 sm:p-4 glass-panel sticky top-0 z-50 transition-colors duration-200 border-b border-white/10">
-        <div class="max-w-7xl mx-auto flex flex-col gap-2.5">
+    <!-- HEADER DE NAVEGAÇÃO COM GLASSMORPHISM -->
+    <header class="p-2.5 sm:p-3.5 glass-panel sticky top-0 z-50 transition-colors duration-200 border-b border-cinder-orange/30 shadow-xl">
+        <div class="max-w-7xl mx-auto flex flex-col gap-2">
             
             <div class="flex justify-between items-center w-full">
                 
-                <h1 onclick="switchTab('dashboard')" class="text-lg sm:text-xl font-black text-cinder-orange tracking-tight cursor-pointer hover:opacity-85 transition flex items-center gap-2 select-none">
-                    <span class="w-3 h-3 rounded-full bg-gradient-to-r from-cinder-orange to-cinder-yellow shadow-lg shadow-cinder-orange/50"></span>
-                    MasterSet
+                <h1 onclick="switchTab('dashboard')" class="text-lg sm:text-xl font-black text-cinder-orange tracking-tight cursor-pointer hover:opacity-80 transition flex items-center gap-1.5 select-none drop-shadow-sm">
+                    <span class="text-cinder-orange dark:text-cinder-yellow">🔥</span> MasterSet
                 </h1>
 
-                <nav class="hidden md:flex items-center gap-1.5 glass-card p-1 rounded-2xl text-xs font-semibold">
+                <nav class="hidden md:flex items-center gap-1 bg-white/40 dark:bg-cinder-bg/50 p-1 rounded-2xl border border-cinder-orange/20 text-xs font-semibold shadow-inner">
                     <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-3.5 py-1.5 rounded-xl transition hover:text-cinder-orange dark:hover:text-cinder-yellow">
                         Resumo
                     </button>
@@ -155,10 +151,10 @@
                     </button>
                 </nav>
 
-                <div class="flex items-center gap-2 sm:gap-3">
+                <div class="flex items-center gap-1.5 sm:gap-2">
                     
                     <!-- TOGGLE SWITCH TEMA -->
-                    <button onclick="toggleTheme()" aria-label="Alternar Tema" class="theme-switch-track relative w-12 sm:w-14 h-6 sm:h-7 rounded-full bg-slate-200 dark:bg-[#121926] border border-slate-300 dark:border-white/10 transition-colors duration-300 flex items-center px-1 shrink-0 overflow-hidden cursor-pointer shadow-inner">
+                    <button onclick="toggleTheme()" aria-label="Alternar Tema" class="theme-switch-track relative w-12 sm:w-14 h-6 sm:h-7 rounded-full bg-white/70 dark:bg-[#121926]/80 border border-slate-300 dark:border-slate-800 transition-colors duration-300 flex items-center px-1 shrink-0 overflow-hidden cursor-pointer shadow-sm">
                         <svg class="absolute right-1.5 w-3.5 h-3.5 text-slate-400 dark:opacity-0 transition-opacity duration-300 pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3zm0-13C11.45 2 11 2.45 11 3v2c0 .55.45 1 1 1s1-.45 1-1V3c0-.55-.45-1-1-1zm0 16c-.55 0-1 .45-1 1v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1zm9-9c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1h2zM5 12c0-.55-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1zm14.36-6.36c.39-.39.39-1.02 0-1.41s-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41zM7.05 18.36c-.39-.39-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41c.39-.38.39-1.02 0-1.41zM18.36 18.36l1.41 1.41c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.41-1.41c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41zM6.34 5.64L4.93 4.23c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41z"/>
                         </svg>
@@ -169,45 +165,45 @@
                             </svg>
                         </div>
 
-                        <div class="theme-switch-thumb w-4.5 sm:w-5 h-4.5 sm:h-5 rounded-full bg-white dark:bg-[#253247] transform transition-transform duration-300 translate-x-0 dark:translate-x-6 sm:dark:translate-x-7 z-10"></div>
+                        <div class="theme-switch-thumb w-4.5 sm:w-5 h-4.5 sm:h-5 rounded-full bg-white dark:bg-[#34445c] transform transition-transform duration-300 translate-x-0 dark:translate-x-6 sm:dark:translate-x-7 z-10"></div>
                     </button>
 
-                    <div class="flex gap-1.5 sm:gap-2">
-                        <div class="glass-card px-2.5 py-1 rounded-xl text-center border border-white/10">
-                            <p class="text-[7px] sm:text-[9px] text-slate-400 uppercase font-bold">Total</p>
-                            <p id="total-count" class="text-xs sm:text-sm font-extrabold text-slate-800 dark:text-cinder-white">226</p>
+                    <div class="flex gap-1 sm:gap-2">
+                        <div class="glass-card px-2.5 py-1 rounded-2xl text-center border border-cinder-orange/20 shadow-sm">
+                            <p class="text-[7px] sm:text-[9px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">Total</p>
+                            <p id="total-count" class="text-xs sm:text-sm font-bold text-slate-800 dark:text-cinder-white">226</p>
                         </div>
-                        <div class="glass-card px-2.5 py-1 rounded-xl text-center border-l-2 border-green-500 shadow-sm">
-                            <p class="text-[7px] sm:text-[9px] text-slate-400 uppercase font-bold">Tenho</p>
-                            <p id="obtained-count" class="text-xs sm:text-sm font-extrabold text-green-600 dark:text-green-400">0</p>
+                        <div class="glass-card px-2.5 py-1 rounded-2xl text-center border-l-2 border-green-500 shadow-sm">
+                            <p class="text-[7px] sm:text-[9px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">Tenho</p>
+                            <p id="obtained-count" class="text-xs sm:text-sm font-bold text-green-600 dark:text-green-400">0</p>
                         </div>
-                        <div class="glass-card px-2.5 py-1 rounded-xl text-center border-l-2 border-cinder-orange shadow-sm">
-                            <p class="text-[7px] sm:text-[9px] text-slate-400 uppercase font-bold">Faltam</p>
-                            <p id="missing-count" class="text-xs sm:text-sm font-extrabold text-cinder-orange dark:text-cinder-yellow">226</p>
+                        <div class="glass-card px-2.5 py-1 rounded-2xl text-center border-l-2 border-cinder-orange dark:border-cinder-yellow shadow-sm">
+                            <p class="text-[7px] sm:text-[9px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">Faltam</p>
+                            <p id="missing-count" class="text-xs sm:text-sm font-bold text-cinder-orange dark:text-cinder-yellow">226</p>
                         </div>
                     </div>
 
-                    <button id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Abrir Menu" class="md:hidden glass-card hover:bg-slate-200 dark:hover:bg-white/10 active:scale-95 text-slate-800 dark:text-cinder-white p-2 rounded-xl transition flex flex-col justify-center items-center gap-1 w-8 h-8 shrink-0">
-                        <span class="w-4 h-0.5 bg-cinder-orange dark:bg-cinder-yellow rounded-full transition-all"></span>
-                        <span class="w-4 h-0.5 bg-cinder-orange dark:bg-cinder-yellow rounded-full transition-all"></span>
-                        <span class="w-4 h-0.5 bg-cinder-orange dark:bg-cinder-yellow rounded-full transition-all"></span>
+                    <button id="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Abrir Menu" class="md:hidden glass-card hover:bg-slate-300/50 dark:hover:bg-cinder-bg active:scale-95 text-slate-800 dark:text-cinder-white border border-cinder-orange/30 p-1.5 rounded-2xl transition flex flex-col justify-center items-center gap-1 w-7 h-7 sm:w-8 sm:h-8 shrink-0 ml-0.5 shadow-sm">
+                        <span class="w-3.5 sm:w-4 h-0.5 bg-cinder-orange dark:bg-cinder-yellow rounded-full transition-all"></span>
+                        <span class="w-3.5 sm:w-4 h-0.5 bg-cinder-orange dark:bg-cinder-yellow rounded-full transition-all"></span>
+                        <span class="w-3.5 sm:w-4 h-0.5 bg-cinder-orange dark:bg-cinder-yellow rounded-full transition-all"></span>
                     </button>
                 </div>
             </div>
 
-            <div id="mobile-menu" class="hidden md:hidden flex-col gap-1.5 pt-2 border-t border-white/10 animate-fade-in">
-                <p class="text-[10px] uppercase tracking-wider font-extrabold text-cinder-orange dark:text-cinder-yellow px-1">Navegação</p>
+            <div id="mobile-menu" class="hidden md:hidden flex-col gap-1.5 pt-2 border-t border-cinder-orange/20 animate-fade-in">
+                <p class="text-[10px] uppercase tracking-wider font-extrabold text-cinder-orange dark:text-cinder-yellow px-1">Navegação das Abas</p>
                 <div class="grid grid-cols-2 gap-1.5">
-                    <button id="mob-nav-dashboard" onclick="switchTab('dashboard')" class="glass-card p-2.5 rounded-xl text-xs font-bold text-left border border-white/10 transition">
+                    <button id="mob-nav-dashboard" onclick="switchTab('dashboard')" class="glass-card p-2.5 rounded-2xl text-xs font-bold text-left border border-cinder-orange/25 transition">
                         Resumo
                     </button>
-                    <button id="mob-nav-grid" onclick="switchTab('grid')" class="glass-card p-2.5 rounded-xl text-xs font-bold text-left border border-white/10 transition">
+                    <button id="mob-nav-grid" onclick="switchTab('grid')" class="glass-card p-2.5 rounded-2xl text-xs font-bold text-left border border-cinder-orange/25 transition">
                         Coleção
                     </button>
-                    <button id="mob-nav-capture" onclick="switchTab('capture')" class="glass-card p-2.5 rounded-xl text-xs font-bold text-left border border-white/10 transition">
+                    <button id="mob-nav-capture" onclick="switchTab('capture')" class="glass-card p-2.5 rounded-2xl text-xs font-bold text-left border border-cinder-orange/25 transition">
                         Captura
                     </button>
-                    <button id="mob-nav-market" onclick="switchTab('market')" class="glass-card p-2.5 rounded-xl text-xs font-bold text-left border border-white/10 transition">
+                    <button id="mob-nav-market" onclick="switchTab('market')" class="glass-card p-2.5 rounded-2xl text-xs font-bold text-left border border-cinder-orange/25 transition">
                         Mercado
                     </button>
                 </div>
@@ -216,16 +212,1242 @@
         </div>
     </header>
 
-    <main class="p-3 sm:p-6 max-w-7xl mx-auto">
+    <main class="p-2 sm:p-5 max-w-7xl mx-auto">
 
-        <!-- BARRA DE FILTROS GLASSMORPHISM -->
-        <div id="filter-control-bar" class="flex flex-wrap justify-between items-center mb-4 gap-2.5 relative hidden glass-panel py-3 px-4 rounded-3xl shadow-xl">
-            <div class="flex items-center gap-2.5 flex-1 max-w-2xl relative">
-                <button onclick="toggleFilterDrawer()" class="glass-card hover:bg-white/10 text-slate-800 dark:text-cinder-white px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 transition shadow-md shrink-0 cursor-pointer border border-white/10">
+        <!-- BARRA DE FILTROS COM GLASSMORPHISM -->
+        <div id="filter-control-bar" class="flex flex-wrap justify-between items-center mb-4 gap-2 relative hidden glass-panel py-3 px-3.5 rounded-3xl shadow-xl">
+            <div class="flex items-center gap-2 flex-1 max-w-2xl relative">
+                <button onclick="toggleFilterDrawer()" class="glass-card hover:bg-white/80 dark:hover:bg-cinder-card text-slate-800 dark:text-cinder-white border border-cinder-orange/40 px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-1.5 transition shadow-sm shrink-0 cursor-pointer">
                     <span>Filtros</span>
                     <span id="drawer-arrow" class="transform transition duration-200 text-cinder-orange dark:text-cinder-yellow">▼</span>
                 </button>
 
-                <input id="search-input" oninput="handleSearchInput()" type="text" placeholder="Buscar por Nome, expansão ou variante..." class="w-full glass-card px-4 py-2 rounded-2xl text-xs outline-none focus:border-cinder-orange text-slate-800 dark:text-cinder-white shadow-inner border border-white/10">
+                <input id="search-input" oninput="handleSearchInput()" type="text" placeholder="Buscar por Nome, expansão ou variante..." class="w-full bg-white/50 dark:bg-cinder-bg/60 px-3.5 py-2 rounded-2xl text-xs outline-none border border-cinder-orange/30 focus:border-cinder-orange text-slate-800 dark:text-cinder-white shadow-inner backdrop-blur-md">
 
-                <section id="filters
+                <section id="filters-section" class="absolute left-0 top-12 w-72 sm:w-80 glass-panel p-4 rounded-3xl space-y-3 hidden z-40 shadow-2xl max-h-[80vh] overflow-y-auto custom-scroll">
+                    
+                    <div class="flex flex-col gap-1">
+                        <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Pokémon:</span>
+                        <div class="flex flex-col gap-1">
+                            <button id="btn-poke-Scorbunny" onclick="filterPoke('Scorbunny')" class="poke-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Scorbunny</button>
+                            <button id="btn-poke-Raboot" onclick="filterPoke('Raboot')" class="poke-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Raboot</button>
+                            <button id="btn-poke-Cinderace" onclick="filterPoke('Cinderace')" class="poke-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Cinderace</button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1 pt-2 border-t border-cinder-orange/20">
+                        <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Língua:</span>
+                        <div class="grid grid-cols-2 gap-1">
+                            <button id="btn-lang-PT-BR" onclick="filterLang('PT-BR')" class="lang-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-center transition">PT-BR</button>
+                            <button id="btn-lang-EN" onclick="filterLang('EN')" class="lang-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-center transition">EN</button>
+                            <button id="btn-lang-JP" onclick="filterLang('JP')" class="lang-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-center transition">JP</button>
+                            <button id="btn-lang-CN" onclick="filterLang('CN')" class="lang-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-center transition">CN</button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1 pt-2 border-t border-cinder-orange/20">
+                        <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Característica:</span>
+                        <div class="flex flex-col gap-1">
+                            <button id="btn-var-Regular" onclick="filterVar('Regular')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Regular</button>
+                            <button id="btn-var-Holo" onclick="filterVar('Holográfica / Holo')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Holográfica / Holo</button>
+                            <button id="btn-var-Reverse" onclick="filterVar('Reverse Holo')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Reverse Holo</button>
+                            <button id="btn-var-Promo" onclick="filterVar('Promo')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Promo</button>
+                            <button id="btn-var-V" onclick="filterVar('V Card')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">V Card</button>
+                            <button id="btn-var-VMAX" onclick="filterVar('VMAX')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">VMAX</button>
+                            <button id="btn-var-FullArt" onclick="filterVar('Full Art')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Full Art</button>
+                            <button id="btn-var-AltArt" onclick="filterVar('Arte Alternativa (Alt Art)')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Arte Alternativa (Alt Art)</button>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1 pt-2 border-t border-cinder-orange/20">
+                        <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Exibir Status:</span>
+                        <div class="flex flex-col gap-1">
+                            <button id="btn-status-MISSING" onclick="filterStatus('MISSING')" class="status-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Faltantes</button>
+                            <button id="btn-status-OWNED" onclick="filterStatus('OWNED')" class="status-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Tenho</button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <button onclick="clearAllFilters()" class="bg-cinder-red/20 dark:bg-cinder-red/30 text-cinder-red dark:text-cinder-yellow hover:bg-cinder-red/40 border border-cinder-orange/30 px-3.5 py-2 rounded-2xl text-xs font-bold transition shadow-sm cursor-pointer">
+                    Limpar
+                </button>
+
+                <select id="layout-select" onchange="changeLayout(this.value)" class="glass-card hover:bg-white/80 dark:hover:bg-cinder-card text-slate-800 dark:text-cinder-white border border-cinder-orange/40 px-3 py-2 rounded-2xl text-xs font-bold outline-none focus:border-cinder-orange transition shadow-sm cursor-pointer">
+                    <option value="pequeno" class="bg-white dark:bg-cinder-dark">Pequeno</option>
+                    <option value="medio" class="bg-white dark:bg-cinder-dark">Médio</option>
+                    <option value="grande" class="bg-white dark:bg-cinder-dark">Grande</option>
+                </select>
+            </div>
+        </div>
+
+        <section id="view-dashboard" class="space-y-4">
+            <div class="glass-panel rounded-3xl p-4 sm:p-6 shadow-2xl">
+                <h2 class="text-base sm:text-lg font-black text-slate-800 dark:text-cinder-white mb-1 flex items-center gap-2">
+                    <span class="text-cinder-orange">📊</span> Resumo Geral da Coleção
+                </h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Acompanhe a conclusão por Pokémon, Idioma, Expansão e Característica.</p>
+                
+                <div class="mb-4 glass-card p-4 sm:p-5 rounded-2xl border border-cinder-orange/20 shadow-inner">
+                    <div class="flex justify-between items-center text-sm font-bold mb-2">
+                        <span class="text-slate-800 dark:text-cinder-white">Master Set Completo</span>
+                        <span id="dashboard-total-pct" class="text-cinder-orange font-extrabold text-base">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-200/60 dark:bg-cinder-dark/80 h-3 rounded-full overflow-hidden p-0.5 border border-cinder-orange/20">
+                        <div id="dashboard-total-bar" class="bg-gradient-to-r from-cinder-orange to-cinder-yellow h-full rounded-full transition-all duration-500 shadow-sm" style="width: 0%"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="glass-card p-4.5 rounded-2xl border border-cinder-orange/20 flex flex-col justify-between shadow-sm">
+                        <div>
+                            <div class="flex items-center gap-2 mb-3 border-b border-cinder-orange/10 pb-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-cinder-orange"></span>
+                                <h3 class="text-xs font-black text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Pokémon</h3>
+                            </div>
+                            <div id="stats-pokemon" class="space-y-2.5"></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-4.5 rounded-2xl border border-cinder-orange/20 flex flex-col justify-between shadow-sm">
+                        <div>
+                            <div class="flex items-center gap-2 mb-3 border-b border-cinder-orange/10 pb-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-cinder-yellow"></span>
+                                <h3 class="text-xs font-black text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Idioma</h3>
+                            </div>
+                            <div id="stats-lang" class="space-y-2.5"></div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-4.5 rounded-2xl border border-cinder-orange/20 shadow-sm">
+                        <div class="flex items-center gap-2 mb-3 border-b border-cinder-orange/10 pb-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-cinder-orange"></span>
+                            <h3 class="text-xs font-black text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Expansão</h3>
+                        </div>
+                        <div id="stats-set" class="space-y-2.5 max-h-60 overflow-y-auto pr-2 custom-scroll"></div>
+                    </div>
+
+                    <div class="glass-card p-4.5 rounded-2xl border border-cinder-orange/20 shadow-sm">
+                        <div class="flex items-center gap-2 mb-3 border-b border-cinder-orange/10 pb-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-cinder-yellow"></span>
+                            <h3 class="text-xs font-black text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Característica</h3>
+                        </div>
+                        <div id="stats-var" class="space-y-2.5 max-h-60 overflow-y-auto pr-2 custom-scroll"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="view-grid" class="hidden">
+            <div id="cards-grid" class="grid gap-2.5 sm:gap-4"></div>
+        </section>
+
+        <section id="view-capture" class="hidden space-y-4">
+            <div class="glass-panel rounded-3xl p-4 sm:p-6 shadow-2xl">
+                <h2 class="text-base sm:text-lg font-black text-slate-800 dark:text-cinder-white mb-1">Registro de Capturas</h2>
+                <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Cadastre como você obteve cada carta. Ative o <strong>cadeado (🔒)</strong> para travar a remoção na coleção.</p>
+                <div id="capture-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 sm:gap-4"></div>
+            </div>
+        </section>
+
+        <!-- ABA MERCADO / HUB DE BUSCA DIRETA SIMPLIFICADA (SEM ÍCONES NOS POKÉMON) -->
+        <section id="view-market" class="hidden space-y-4">
+            <div class="glass-panel rounded-3xl p-5 sm:p-7 shadow-2xl">
+                <div class="max-w-2xl mb-6">
+                    <span class="text-[10px] uppercase font-bold tracking-widest text-cinder-orange dark:text-cinder-yellow">Busca Rápida de Mercado</span>
+                    <h2 class="text-base sm:text-lg font-black text-slate-800 dark:text-cinder-white mt-0.5">Links Diretos para Pesquisa de Preços</h2>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">Acesse rapidamente as páginas de busca da Família Cinderace nas principais plataformas para conferir anúncios, cotações em tempo real e encontrar cartas com melhores preços.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    
+                    <!-- CINDERACE CARD -->
+                    <div class="glass-card border border-cinder-orange/25 rounded-3xl p-5 flex flex-col justify-between shadow-lg hover:border-cinder-orange transition group">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <h3 class="text-sm font-extrabold text-slate-800 dark:text-cinder-white tracking-wide">Cinderace</h3>
+                            </div>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-5">Busca focada em todas as variantes e expansões do Cinderace.</p>
+                        </div>
+                        <div class="flex flex-col gap-2.5">
+                            <a href="https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" target="_blank" class="bg-cinder-orange hover:bg-cinder-red text-white py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-md">
+                                Liga Pokémon
+                            </a>
+                            <a href="https://www.ebay.com/sch/i.html?_nkw=Pokemon+Cinderace+card" target="_blank" class="glass-card hover:bg-slate-200/80 dark:hover:bg-[#25364f]/80 text-slate-800 dark:text-cinder-white border border-cinder-orange/30 py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-sm">
+                                eBay
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- RABOOT CARD -->
+                    <div class="glass-card border border-cinder-orange/25 rounded-3xl p-5 flex flex-col justify-between shadow-lg hover:border-cinder-orange transition group">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <h3 class="text-sm font-extrabold text-slate-800 dark:text-cinder-white tracking-wide">Raboot</h3>
+                            </div>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-5">Busca focada em todas as cartas e raridades do Raboot.</p>
+                        </div>
+                        <div class="flex flex-col gap-2.5">
+                            <a href="https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" target="_blank" class="bg-cinder-orange hover:bg-cinder-red text-white py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-md">
+                                Liga Pokémon
+                            </a>
+                            <a href="https://www.ebay.com/sch/i.html?_nkw=Pokemon+Raboot+card" target="_blank" class="glass-card hover:bg-slate-200/80 dark:hover:bg-[#25364f]/80 text-slate-800 dark:text-cinder-white border border-cinder-orange/30 py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-sm">
+                                eBay
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- SCORBUNNY CARD -->
+                    <div class="glass-card border border-cinder-orange/25 rounded-3xl p-5 flex flex-col justify-between shadow-lg hover:border-cinder-orange transition group">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <h3 class="text-sm font-extrabold text-slate-800 dark:text-cinder-white tracking-wide">Scorbunny</h3>
+                            </div>
+                            <p class="text-[11px] text-slate-500 dark:text-slate-400 mb-5">Busca focada em todas as cartas e promos do Scorbunny.</p>
+                        </div>
+                        <div class="flex flex-col gap-2.5">
+                            <a href="https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" target="_blank" class="bg-cinder-orange hover:bg-cinder-red text-white py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-md">
+                                Liga Pokémon
+                            </a>
+                            <a href="https://www.ebay.com/sch/i.html?_nkw=Pokemon+Scorbunny+card" target="_blank" class="glass-card hover:bg-slate-200/80 dark:hover:bg-[#25364f]/80 text-slate-800 dark:text-cinder-white border border-cinder-orange/30 py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-sm">
+                                eBay
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+        // GERENCIAMENTO DE TEMA (MODO CLARO / ESCURO)
+        window.toggleTheme = function() {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('pokedex_theme', isDark ? 'dark' : 'light');
+        };
+
+        (function initTheme() {
+            const savedTheme = localStorage.getItem('pokedex_theme') || 'dark';
+            if (savedTheme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        })();
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyADGiKo9OxGKNbVaRB_-S8j1Yfi2f1Zt5k",
+            authDomain: "pokedex-colecao.firebaseapp.com",
+            projectId: "pokedex-colecao",
+            storageBucket: "pokedex-colecao.firebasestorage.app",
+            messagingSenderId: "612860563936",
+            appId: "1:612860563936:web:9e2c47620127cbb0e05b85",
+            measurementId: "G-T6QLNGKX4E"
+        };
+
+        const firebaseApp = initializeApp(firebaseConfig);
+        const db = getFirestore(firebaseApp);
+        const docRef = doc(db, "users_data", "cinderace_masterset");
+
+        let obtainedMap = {};
+        let captureDataMap = {};
+        let currentLayout = localStorage.getItem('pokedex_layout_v2') || 'medio';
+        let isInitialLoad = true;
+        let currentZoomIndex = 0;
+
+        const allCards = [
+            { id: "card-1", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "034/202", imagem: "SSH_034_R_PT.png" },
+            { id: "card-2", nome: "Cinderace", pokemon: "Cinderace", set: "Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "017/198", imagem: "CINDERACE_SV017_R_PT_H.png" },
+            { id: "card-3", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "035/202", imagem: "SSH_035_R_PT.png" },
+            { id: "card-4", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "036/202", imagem: "SSH_036_R_PT.png" },
+            { id: "card-5", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Regular", lingua: "PT-BR", numero: "028/198", imagem: "CRE_028_R_PT.png" },
+            { id: "card-6", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "PT-BR", numero: "SWSH112", imagem: "SP_112_R_PT.png" },
+            { id: "card-7", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "PT-BR", numero: "SWSH278", imagem: "SP_278_R_PT.png" },
+            { id: "card-8", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "V Card", lingua: "PT-BR", numero: "035/192", imagem: "RCL_035_R_PT.png" },
+            { id: "card-9", nome: "Cinderace V", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "018/073", imagem: "SHF_018_R_PT_H.png" },
+            { id: "card-10", nome: "Cinderace V", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "SWSH015", imagem: "SP_015_R_PT_H.png" },
+            { id: "card-11", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "Full Art", lingua: "PT-BR", numero: "178/192", imagem: "RCL_178_R_PT_H.png" },
+            { id: "card-12", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "PT-BR", numero: "043/264", imagem: "FST_043_R_PT.png" },
+            { id: "card-13", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "PT-BR", numero: "044/264", imagem: "FST_044_R_PT.png" },
+            { id: "card-14", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "VMAX", lingua: "PT-BR", numero: "036/192", imagem: "RCL_036_R_PT.png" },
+            { id: "card-15", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "019/073", imagem: "SHF_019_R_PT_H.png" },
+            { id: "card-16", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "Rainbow Rare", lingua: "PT-BR", numero: "194/192", imagem: "RCL_194_R_PT_H.png" },
+            { id: "card-17", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "PT-BR", numero: "045/264", imagem: "FST_045_R_PT.png" },
+            { id: "card-18", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "028/142", imagem: "SCR_028_R_PT_H.png" },
+            { id: "card-19", nome: "Cinderace ex", pokemon: "Cinderace", set: "Promos Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "SVP163", imagem: "SVP_163_R_PT_H.png" },
+            { id: "card-20", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "Special Illustration Rare", lingua: "PT-BR", numero: "157/142", imagem: "SCR_157_R_PT_H.png" },
+            { id: "card-21", nome: "Cinderace ex", pokemon: "Cinderace", set: "Heróis Ascendentes", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "038/195", imagem: "ASC_038_R_PT_H.png" },
+            { id: "card-22", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Regular", lingua: "PT-BR", numero: "028/132", imagem: "MEG_028_R_PT.png" },
+            { id: "card-23", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "PT-BR", numero: "036/202", imagem: "SSH_036_R_PT_RH.png" },
+            { id: "card-24", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Reverse Holo", lingua: "PT-BR", numero: "028/132", imagem: "MEG_028_R_PT_RH.png" },
+            { id: "card-25", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Reverse Holo", lingua: "PT-BR", numero: "028/198", imagem: "CRE_028_R_PT_RH.png" },
+            
+            // EN
+            { id: "card-26", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN.png" },
+            { id: "card-27", nome: "Cinderace", pokemon: "Cinderace", set: "Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "EN", numero: "017/198", imagem: "CINDERACE_SV017_R_EN_H.png" },
+            { id: "card-28", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "035/202", imagem: "SSH_035_R_EN.png" },
+            { id: "card-29", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "036/202", imagem: "SSH_036_R_EN.png" },
+            { id: "card-30", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Holográfica / Holo", lingua: "EN", numero: "036/202", imagem: "SSH_036_R_EN_H.png" },
+            { id: "card-31", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Regular", lingua: "EN", numero: "028/198", imagem: "CRE_028_R_EN.png" },
+            { id: "card-32", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "EN", numero: "SWSH112", imagem: "SP_112_R_EN.png" },
+            { id: "card-33", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "EN", numero: "SWSH278", imagem: "SP_278_R_EN.png" },
+            { id: "card-34", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "V Card", lingua: "EN", numero: "035/192", imagem: "RCL_035_R_EN.png" },
+            { id: "card-35", nome: "Cinderace V", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "Holográfica / Holo", lingua: "EN", numero: "018/073", imagem: "SHF_018_R_EN_H.png" },
+            { id: "card-36", nome: "Cinderace V", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Holográfica / Holo", lingua: "EN", numero: "SWSH015", imagem: "SP_015_R_EN_H.png" },
+            { id: "card-37", nome: "Cinderace V", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Jumbo / Gigante", lingua: "EN", numero: "SWSH015", imagem: "SP_015_R_EN_JUMBO_H.png" },
+            { id: "card-38", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "Holográfica / Holo", lingua: "EN", numero: "178/192", imagem: "RCL_178_R_EN_H.png" },
+            { id: "card-39", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "EN", numero: "043/264", imagem: "FST_043_R_EN.png" },
+            { id: "card-40", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "EN", numero: "044/264", imagem: "FST_044_R_EN.png" },
+            { id: "card-41", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "VMAX", lingua: "EN", numero: "036/192", imagem: "RCL_036_R_EN.png" },
+            { id: "card-42", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "Holográfica / Holo", lingua: "EN", numero: "019/073", imagem: "SHF_019_R_EN_H.png" },
+            { id: "card-43", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "Holográfica / Holo", lingua: "EN", numero: "194/192", imagem: "RCL_194_R_EN_H.png" },
+            { id: "card-44", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "EN", numero: "045/264", imagem: "FST_045_R_EN.png" },
+            { id: "card-45", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "Holográfica / Holo", lingua: "EN", numero: "028/142", imagem: "SCR_028_R_EN_H.png" },
+            { id: "card-46", nome: "Cinderace ex", pokemon: "Cinderace", set: "Promos Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "EN", numero: "SVP163", imagem: "SVP_163_R_EN_H.png" },
+            { id: "card-47", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "Holográfica / Holo", lingua: "EN", numero: "157/142", imagem: "SCR_157_R_EN_H.png" },
+            { id: "card-48", nome: "Cinderace ex", pokemon: "Cinderace", set: "Heróis Ascendentes", variante: "Holográfica / Holo", lingua: "EN", numero: "038/195", imagem: "ASC_038_R_EN_H.png" },
+            { id: "card-49", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Regular", lingua: "EN", numero: "028/132", imagem: "MEG_028_R_EN.png" },
+            { id: "card-50", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN_LEAGUE_RH.png" },
+            { id: "card-51", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Play Promo", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN_PLAY.png" },
+            { id: "card-52", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Play Promo", lingua: "EN", numero: "028/132", imagem: "MEG_028_R_EN_PLAY.png" },
+            { id: "card-53", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Holográfica / Holo", lingua: "EN", numero: "028/132", imagem: "MEG_028_R_EN_PLAY_H.png" },
+            { id: "card-54", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Prerelease / Staff", lingua: "EN", numero: "SWSH112", imagem: "SP_SWSH112_EN_STAFF_PRERELEASE.png" },
+            { id: "card-55", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "EN", numero: "036/202", imagem: "SSH_036_R_EN_RH.png" },
+            { id: "card-56", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Reverse Holo", lingua: "EN", numero: "028/132", imagem: "MEG_028_R_EN_RH.png" },
+            { id: "card-57", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Reverse Holo", lingua: "EN", numero: "028/198", imagem: "CRE_028_R_EN_RH.png" },
+            { id: "card-58", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Holográfica / Holo", lingua: "EN", numero: "043/264", imagem: "FST_043_R_EN_BATTLE_H.png" },
+            { id: "card-59", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Arte Alternativa (Alt Art)", lingua: "EN", numero: "028/198", imagem: "CRE_028_R_EN_ALT.png" },
+            { id: "card-60", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Arte Alternativa (Alt Art)", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN_ALT.png" },
+            { id: "card-61", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Holográfica / Holo", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN_COSMOS_H.png" },
+
+            // JP & CN
+            { id: "card-62", nome: "Cinderace", pokemon: "Cinderace", set: "Sword & Shield (JP)", variante: "Regular", lingua: "JP", numero: "009/060", imagem: "S1H_009_R_JP.png" },
+            { id: "card-63", nome: "Cinderace", pokemon: "Cinderace", set: "Shiny Star V (JP)", variante: "Holográfica / Holo", lingua: "JP", numero: "024/190", imagem: "S4A_024_R_JP_H.png" },
+            { id: "card-64", nome: "Cinderace", pokemon: "Cinderace", set: "Shiny Star V (JP)", variante: "Holográfica / Holo", lingua: "JP", numero: "216/190", imagem: "S4A_216_R_JP_H.png" },
+            { id: "card-65", nome: "Cinderace", pokemon: "Cinderace", set: "Scarlet & Violet (JP)", variante: "Regular", lingua: "JP", numero: "008/078", imagem: "SAR_008_R_JP.png" },
+            { id: "card-66", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "022/S-P", imagem: "SP_022_R_JP.png" },
+            { id: "card-67", nome: "Cinderace", pokemon: "Cinderace", set: "Chilling Reign (JP)", variante: "Regular", lingua: "JP", numero: "017/070", imagem: "S6H_017_R_JP.png" },
+            { id: "card-68", nome: "Cinderace", pokemon: "Cinderace", set: "Start Deck 100 (JP)", variante: "Regular", lingua: "JP", numero: "072/414", imagem: "SI_072_R_JP.png" },
+            { id: "card-69", nome: "Cinderace", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "Regular", lingua: "JP", numero: "016/070", imagem: "S1A_016_R_JP.png" },
+            { id: "card-70", nome: "Cinderace", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "Holográfica / Holo", lingua: "JP", numero: "072/070", imagem: "S1A_072_R_JP_H.png" },
+            { id: "card-71", nome: "Cinderace", pokemon: "Cinderace", set: "Shining Fates (JP)", variante: "Regular", lingua: "JP", numero: "010/050", imagem: "SH_010_R_JP.png" },
+            { id: "card-72", nome: "Cinderace", pokemon: "Cinderace", set: "Start Deck 100 (JP)", variante: "Regular", lingua: "JP", numero: "073/414", imagem: "SI_073_R_JP.png" },
+            { id: "card-73", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "168/S-P", imagem: "SP_168_R_JP.png" },
+            { id: "card-74", nome: "Cinderace", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "Regular", lingua: "JP", numero: "017/070", imagem: "S1A_017_R_JP.png" },
+            { id: "card-75", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Holográfica / Holo", lingua: "JP", numero: "002/020", imagem: "SP2_002_R_JP_H.png" },
+            { id: "card-76", nome: "Cinderace", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "Holográfica / Holo", lingua: "JP", numero: "080/070", imagem: "S1a_080_HR_JP_H.jpg" },
+            { id: "card-77", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "169/S-P", imagem: "SP_169_R_JP.png" },
+            { id: "card-78", nome: "Cinderace", pokemon: "Cinderace", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "018/102", imagem: "SV7_018_R_JP.png" },
+            { id: "card-79", nome: "Cinderace", pokemon: "Cinderace", set: "Promo (JP)", variante: "Regular", lingua: "JP", numero: "139/SV-P", imagem: "MC_139_R_JP.png" },
+            { id: "card-80", nome: "Cinderace", pokemon: "Cinderace", set: "Stellar Miracle (JP)", variante: "Holográfica / Holo", lingua: "JP", numero: "116/102", imagem: "SV7_116_R_JP_H.png" },
+            { id: "card-81", nome: "Cinderace", pokemon: "Cinderace", set: "Battle Partners (JP)", variante: "Regular", lingua: "JP", numero: "017/080", imagem: "M1L_017_R_JP.png" },
+            { id: "card-82", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "029/150", imagem: "CSV9C_029_CN.webp" },
+            { id: "card-83", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "218/150", imagem: "CSV9C_218_CN.webp" },
+            { id: "card-84", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "258/150", imagem: "CSV9C_258_CN_H.webp" },
+            { id: "card-85", nome: "Cinderace", pokemon: "Cinderace", set: "Start Deck 100 (CN)", variante: "Regular", lingua: "CN", numero: "072/414", imagem: "SD100_072_CN.webp" },
+            { id: "card-86", nome: "Cinderace", pokemon: "Cinderace", set: "Start Deck 100 (CN)", variante: "Regular", lingua: "CN", numero: "073/414", imagem: "SD100_073_CN.webp" },
+            { id: "card-87", nome: "Cinderace", pokemon: "Cinderace", set: "Family Pokémon (CN)", variante: "Regular", lingua: "CN", numero: "010/050", imagem: "FAMILY_010_CN.webp" },
+            { id: "card-88", nome: "Cinderace", pokemon: "Cinderace", set: "Paradise Dragona (CN)", variante: "Regular", lingua: "CN", numero: "023/064", imagem: "PAO_023_CN.webp" },
+            { id: "card-89", nome: "Cinderace", pokemon: "Cinderace", set: "Paradise Volunteer (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "025/080", imagem: "PAV_025_CN_H.webp" },
+            { id: "card-90", nome: "Cinderace", pokemon: "Cinderace", set: "Paradise Volunteer (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "026/080", imagem: "PAV_026_CN_H.webp" },
+            { id: "card-91", nome: "Cinderace", pokemon: "Cinderace", set: "Paradise Volunteer (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "027/080", imagem: "PAV_027_CN_H.webp" },
+            { id: "card-92", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "049/150", imagem: "DCF_049_CN.webp" },
+            { id: "card-93", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "050/150", imagem: "DCF_050_CN.webp" },
+            { id: "card-94", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "051/150", imagem: "DCF_051_CN.webp" },
+            { id: "card-95", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "142/150", imagem: "DCF_142_CN.webp" },
+            { id: "card-96", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "165/150", imagem: "DCF_165_CN.webp" },
+            { id: "card-97", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "184/150", imagem: "DCF_184_CN.webp" },
+            { id: "card-98", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Volunteer (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "039/080", imagem: "DCV_039_CN_H.webp" },
+            { id: "card-99", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "CN", numero: "026/S-P", imagem: "SP_026_CN.webp" },
+            
+            // SCORBUNNY
+            { id: "card-100", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "PT-BR", numero: "SWSH002", imagem: "SP_002_R_PT.png" },
+            { id: "card-101", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "030/202", imagem: "SSH_030_R_PT.png" },
+            { id: "card-102", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "PT-BR", numero: "030/202", imagem: "SSH_030_R_PT_RH.png" },
+            { id: "card-103", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "031/202", imagem: "SSH_031_R_PT.png" },
+            { id: "card-104", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "PT-BR", numero: "031/202", imagem: "SSH_031_R_PT_RH.png" },
+            { id: "card-105", nome: "Scorbunny", pokemon: "Scorbunny", set: "Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "015/198", imagem: "SCORBUNNY_SV015_R_PT_H.png" },
+            { id: "card-106", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "PT-BR", numero: "SWSH071", imagem: "SP_071_R_PT.png" },
+            { id: "card-107", nome: "Scorbunny", pokemon: "Scorbunny", set: "Reinado Glacial", variante: "Regular", lingua: "PT-BR", numero: "026/198", imagem: "CRE_026_R_PT.png" },
+            { id: "card-108", nome: "Scorbunny", pokemon: "Scorbunny", set: "Reinado Glacial", variante: "Reverse Holo", lingua: "PT-BR", numero: "026/198", imagem: "CRE_026_R_PT_RH.png" },
+            { id: "card-109", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "PT-BR", numero: "SWSH244", imagem: "SP_244_R_PT.png" },
+            { id: "card-110", nome: "Scorbunny", pokemon: "Scorbunny", set: "Coroa Estelar", variante: "Regular", lingua: "PT-BR", numero: "026/142", imagem: "SCR_026_R_PT.png" },
+            { id: "card-111", nome: "Scorbunny", pokemon: "Scorbunny", set: "Coroa Estelar", variante: "Reverse Holo", lingua: "PT-BR", numero: "026/142", imagem: "SCR_026_R_PT_RH.png" },
+            { id: "card-112", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Regular", lingua: "PT-BR", numero: "036/195", imagem: "ASC_036_R_PT.png" },
+            { id: "card-113", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "PT-BR", numero: "036/195", imagem: "ASC_036_PT_ES_RH.png" },
+            { id: "card-114", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "PT-BR", numero: "036/195", imagem: "ASC_036_PT_FB_RH.jpg" },
+            { id: "card-115", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "225/195", imagem: "ASC_225_R_PT_H.png" },
+            { id: "card-116", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Evolução", variante: "Regular", lingua: "PT-BR", numero: "026/132", imagem: "MEG_026_R_PT.png" },
+            { id: "card-117", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Evolução", variante: "Reverse Holo", lingua: "PT-BR", numero: "026/132", imagem: "MEG_026_R_PT_RH.png" },
+            { id: "card-118", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Promo", variante: "Regular", lingua: "PT-BR", numero: "MEP053", imagem: "MEP_053_R_PT.png" },
+            { id: "card-119", nome: "Scorbunny", pokemon: "Scorbunny", set: "McDonald's 2021", variante: "Regular", lingua: "PT-BR", numero: "16/25", imagem: "MCD21_16_PT.jpg" },
+            { id: "card-120", nome: "Scorbunny", pokemon: "Scorbunny", set: "McDonald's 2021", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "16/25", imagem: "MCD21_16_PT_CONFETTI_H.jpg" },
+            { id: "card-121", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "EN", numero: "SWSH002", imagem: "SP_002_R_EN.png" },
+            { id: "card-122", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "030/202", imagem: "SSH_030_R_EN.png" },
+            { id: "card-123", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "EN", numero: "030/202", imagem: "SSH_030_R_EN_RH.png" },
+            { id: "card-124", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "031/202", imagem: "SSH_031_R_EN.png" },
+            { id: "card-125", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "EN", numero: "031/202", imagem: "SSH_031_R_EN_RH.png" },
+            { id: "card-126", nome: "Scorbunny", pokemon: "Scorbunny", set: "Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "EN", numero: "015/198", imagem: "SCORBUNNY_SV015_R_EN_H.png" },
+            { id: "card-127", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "EN", numero: "SWSH071", imagem: "SP_071_R_EN.png" },
+            { id: "card-128", nome: "Scorbunny", pokemon: "Scorbunny", set: "Reinado Glacial", variante: "Regular", lingua: "EN", numero: "026/198", imagem: "CRE_026_R_EN.png" },
+            { id: "card-129", nome: "Scorbunny", pokemon: "Scorbunny", set: "Reinado Glacial", variante: "Reverse Holo", lingua: "EN", numero: "026/198", imagem: "CRE_026_R_EN_RH.png" },
+            { id: "card-130", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Holográfica / Holo", lingua: "EN", numero: "SWSH244", imagem: "SP_244_R_EN_COSMOS_H.png" },
+            { id: "card-131", nome: "Scorbunny", pokemon: "Scorbunny", set: "Coroa Estelar", variante: "Regular", lingua: "EN", numero: "026/142", imagem: "SCR_026_R_EN.png" },
+            { id: "card-132", nome: "Scorbunny", pokemon: "Scorbunny", set: "Coroa Estelar", variante: "Reverse Holo", lingua: "EN", numero: "026/142", imagem: "SCR_026_R_EN_RH.png" },
+            { id: "card-133", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Regular", lingua: "EN", numero: "036/195", imagem: "ASC_036_R_EN.png" },
+            { id: "card-134", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "EN", numero: "036/195", imagem: "ASC_036_EN_ES_RH.png" },
+            { id: "card-135", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "EN", numero: "036/195", imagem: "ASC_036_EN_FB_RH.jpg" },
+            { id: "card-136", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Holográfica / Holo", lingua: "EN", numero: "225/195", imagem: "ASC_225_R_EN_H.png" },
+            { id: "card-137", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Evolução", variante: "Regular", lingua: "EN", numero: "026/132", imagem: "MEG_026_R_EN.png" },
+            { id: "card-138", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Evolução", variante: "Reverse Holo", lingua: "EN", numero: "026/132", imagem: "MEG_026_R_EN_RH.png" },
+            { id: "card-139", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Promo", variante: "Regular", lingua: "EN", numero: "MEP053", imagem: "MEP_053_R_EN.png" },
+            { id: "card-140", nome: "Scorbunny", pokemon: "Scorbunny", set: "McDonald's 2021", variante: "Regular", lingua: "EN", numero: "16/25", imagem: "MCD21_16_EN.jpg" },
+            { id: "card-141", nome: "Scorbunny", pokemon: "Scorbunny", set: "McDonald's 2021", variante: "Holográfica / Holo", lingua: "EN", numero: "16/25", imagem: "MCD21_16_EN_CONFETTI_H.jpg" },
+            { id: "card-142", nome: "Scorbunny", pokemon: "Scorbunny", set: "Futsal Promo", variante: "Regular", lingua: "EN", numero: "004", imagem: "FUTSAL_004_R_EN.png" },
+            { id: "card-143", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Arte Alternativa (Alt Art)", lingua: "EN", numero: "SWSH002", imagem: "SP_002_R_EN_ALT.png" },
+            { id: "card-144", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Holográfica / Holo", lingua: "EN", numero: "030/202", imagem: "SSH_030_R_EN_COSMOS_BLISTER_H.png" },
+            { id: "card-145", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Holográfica / Holo", lingua: "EN", numero: "031/202", imagem: "SSH_031_R_EN_H.png" },
+            { id: "card-146", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promo (JP)", variante: "Regular", lingua: "JP", numero: "137/SV-P", imagem: "MC_137_R_JP.png" },
+            { id: "card-147", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promo (JP)", variante: "Regular", lingua: "JP", numero: "745/SV-P", imagem: "MC_745_R_JP.png" },
+            { id: "card-148", nome: "Scorbunny", pokemon: "Scorbunny", set: "Battle Partners (JP)", variante: "Regular", lingua: "JP", numero: "015/080", imagem: "M1L_015_R_JP.png" },
+            { id: "card-149", nome: "Scorbunny", pokemon: "Scorbunny", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "016/102", imagem: "SV7_016_R_JP.png" },
+            { id: "card-150", nome: "Scorbunny", pokemon: "Scorbunny", set: "Start Deck 100 (JP)", variante: "Regular", lingua: "JP", numero: "070/414", imagem: "SI_070_R_JP.png" },
+            { id: "card-151", nome: "Scorbunny", pokemon: "Scorbunny", set: "Chilling Reign (JP)", variante: "Regular", lingua: "JP", numero: "015/070", imagem: "S6H_015_R_JP.png" },
+            { id: "card-152", nome: "Scorbunny", pokemon: "Scorbunny", set: "Shiny Star V (JP)", variante: "Regular", lingua: "JP", numero: "022/190", imagem: "S4A_022_R_JP.png" },
+            { id: "card-153", nome: "Scorbunny", pokemon: "Scorbunny", set: "Shiny Star V (JP)", variante: "Regular", lingua: "JP", numero: "214/190", imagem: "S4A_214_R_JP.png" },
+            { id: "card-154", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "016/S-P", imagem: "SD_016_R_JP.png" },
+            { id: "card-155", nome: "Scorbunny", pokemon: "Scorbunny", set: "Sword & Shield (JP)", variante: "Regular", lingua: "JP", numero: "007/060", imagem: "S1H_007_R_JP.png" },
+            { id: "card-156", nome: "Scorbunny", pokemon: "Scorbunny", set: "Scarlet & Violet (JP)", variante: "Regular", lingua: "JP", numero: "006/078", imagem: "SAR_006_R_JP.png" },
+            { id: "card-157", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "006/S-P", imagem: "SP_006_R_JP.png" },
+            { id: "card-158", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "034/S-P", imagem: "SP_034_R_JP.png" },
+            { id: "card-159", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "130/S-P", imagem: "SP_130_R_JP.png" },
+            { id: "card-160", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "255/S-P", imagem: "SP_255_R_JP.png" },
+            { id: "card-161", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Holográfica / Holo", lingua: "JP", numero: "123/M-P", imagem: "M-P_123_P_JP_H.jpg" },
+            { id: "card-162", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "027/150", imagem: "CSV9C_027_CN.webp" },
+            { id: "card-163", nome: "Scorbunny", pokemon: "Scorbunny", set: "30th Anniversary", variante: "Regular", lingua: "CN", numero: "023/100", imagem: "30THP_023_CN.webp" },
+            { id: "card-164", nome: "Scorbunny", pokemon: "Scorbunny", set: "Start Deck 100 (CN)", variante: "Regular", lingua: "CN", numero: "070/414", imagem: "SD100_070_CN.webp" },
+            { id: "card-165", nome: "Scorbunny", pokemon: "Scorbunny", set: "Paradise Dragona (CN)", variante: "Regular", lingua: "CN", numero: "021/064", imagem: "PAO_021_CN.webp" },
+            { id: "card-166", nome: "Scorbunny", pokemon: "Scorbunny", set: "Paradise Volunteer (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "023/080", imagem: "PAV_023_CN_H.webp" },
+            { id: "card-167", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "047/150", imagem: "DCF_047_CN.webp" },
+            { id: "card-168", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "140/150", imagem: "DCF_140_CN.webp" },
+            { id: "card-169", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Volunteer (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "037/080", imagem: "DCV_037_CN_H.webp" },
+            { id: "card-170", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "CN", numero: "013/S-P", imagem: "SP_013_CN.webp" },
+            { id: "card-171", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "CN", numero: "053/S-P", imagem: "SP_053_CN.webp" },
+            { id: "card-172", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "CN", numero: "125/S-P", imagem: "SP_125_CN.webp" },
+            
+            // RABOOT
+            { id: "card-173", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "032/202", imagem: "SSH_032_R_PT.png" },
+            { id: "card-174", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "PT-BR", numero: "032/202", imagem: "SSH_032_R_PT_RH.png" },
+            { id: "card-175", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "033/202", imagem: "SSH_033_R_PT.png" },
+            { id: "card-176", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "PT-BR", numero: "033/202", imagem: "SSH_033_R_PT_RH.png" },
+            { id: "card-177", nome: "Raboot", pokemon: "Raboot", set: "Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "016/198", imagem: "RABOOT_SV016_R_PT_H.png" },
+            { id: "card-178", nome: "Raboot", pokemon: "Raboot", set: "Reinado Glacial", variante: "Regular", lingua: "PT-BR", numero: "027/198", imagem: "CRE_027_R_PT.png" },
+            { id: "card-179", nome: "Raboot", pokemon: "Raboot", set: "Reinado Glacial", variante: "Reverse Holo", lingua: "PT-BR", numero: "027/198", imagem: "CRE_027_R_PT_RH.png" },
+            { id: "card-180", nome: "Raboot", pokemon: "Raboot", set: "Coroa Estelar", variante: "Regular", lingua: "PT-BR", numero: "027/142", imagem: "SCR_027_R_PT.png" },
+            { id: "card-181", nome: "Raboot", pokemon: "Raboot", set: "Coroa Estelar", variante: "Reverse Holo", lingua: "PT-BR", numero: "027/142", imagem: "SCR_027_R_PT_RH.png" },
+            { id: "card-182", nome: "Raboot", pokemon: "Raboot", set: "Coroa Estelar", variante: "Holográfica / Holo", lingua: "PT-BR", numero: "147/142", imagem: "SCR_147_R_PT_H.png" },
+            { id: "card-183", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Regular", lingua: "PT-BR", numero: "037/195", imagem: "ASC_037_R_PT.png" },
+            { id: "card-184", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "PT-BR", numero: "037/195", imagem: "ASC_037_R_PT_ES_RH.png" },
+            { id: "card-185", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "PT-BR", numero: "037/195", imagem: "ASC_037_PT_FB_RH.jpg" },
+            { id: "card-186", nome: "Raboot", pokemon: "Raboot", set: "Mega Evolução", variante: "Regular", lingua: "PT-BR", numero: "027/132", imagem: "MEG_027_R_PT.png" },
+            { id: "card-187", nome: "Raboot", pokemon: "Raboot", set: "Mega Evolução", variante: "Reverse Holo", lingua: "PT-BR", numero: "027/132", imagem: "MEG_027_R_PT_RH.png" },
+            { id: "card-188", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "032/202", imagem: "SSH_032_R_EN.png" },
+            { id: "card-189", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "EN", numero: "032/202", imagem: "SSH_032_R_EN_RH.png" },
+            { id: "card-190", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "033/202", imagem: "SSH_033_R_EN.png" },
+            { id: "card-191", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Reverse Holo", lingua: "EN", numero: "033/202", imagem: "SSH_033_R_EN_RH.png" },
+            { id: "card-192", nome: "Raboot", pokemon: "Raboot", set: "Escarlate e Violeta", variante: "Holográfica / Holo", lingua: "EN", numero: "016/198", imagem: "RABOOT_SV016_R_EN_H.png" },
+            { id: "card-193", nome: "Raboot", pokemon: "Raboot", set: "Reinado Glacial", variante: "Regular", lingua: "EN", numero: "027/198", imagem: "CRE_027_R_EN.png" },
+            { id: "card-194", nome: "Raboot", pokemon: "Raboot", set: "Reinado Glacial", variante: "Reverse Holo", lingua: "EN", numero: "027/198", imagem: "CRE_027_R_EN_RH.png" },
+            { id: "card-195", nome: "Raboot", pokemon: "Raboot", set: "Coroa Estelar", variante: "Regular", lingua: "EN", numero: "027/142", imagem: "SCR_027_R_EN.png" },
+            { id: "card-196", nome: "Raboot", pokemon: "Raboot", set: "Coroa Estelar", variante: "Reverse Holo", lingua: "EN", numero: "027/142", imagem: "SCR_027_R_EN_RH.png" },
+            { id: "card-197", nome: "Raboot", pokemon: "Raboot", set: "Coroa Estelar", variante: "Holográfica / Holo", lingua: "EN", numero: "147/142", imagem: "SCR_147_R_EN_H.png" },
+            { id: "card-198", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Regular", lingua: "EN", numero: "037/195", imagem: "ASC_037_R_EN.png" },
+            { id: "card-199", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "EN", numero: "037/195", imagem: "ASC_037_R_EN_ES_RH.png" },
+            { id: "card-200", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Reverse Holo", lingua: "EN", numero: "037/195", imagem: "ASC_037_EN_FB_RH.jpg" },
+            { id: "card-201", nome: "Raboot", pokemon: "Raboot", set: "Mega Evolução", variante: "Regular", lingua: "EN", numero: "027/132", imagem: "MEG_027_R_EN.png" },
+            { id: "card-202", nome: "Raboot", pokemon: "Raboot", set: "Mega Evolução", variante: "Reverse Holo", lingua: "EN", numero: "027/132", imagem: "MEG_027_R_EN_RH.png" },
+            { id: "card-203", nome: "Raboot", pokemon: "Raboot", set: "Promo (JP)", variante: "Regular", lingua: "JP", numero: "138/SV-P", imagem: "MC_138_R_JP.png" },
+            { id: "card-204", nome: "Raboot", pokemon: "Raboot", set: "Battle Partners (JP)", variante: "Regular", lingua: "JP", numero: "016/080", imagem: "M1L_016_R_JP.png" },
+            { id: "card-205", nome: "Raboot", pokemon: "Raboot", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "017/102", imagem: "SV7_017_R_JP.png" },
+            { id: "card-206", nome: "Raboot", pokemon: "Raboot", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "106/102", imagem: "SV7_106_R_JP.png" },
+            { id: "card-207", nome: "Raboot", pokemon: "Raboot", set: "Start Deck 100 (JP)", variante: "Regular", lingua: "JP", numero: "071/414", imagem: "SI_071_R_JP.png" },
+            { id: "card-208", nome: "Raboot", pokemon: "Raboot", set: "Chilling Reign (JP)", variante: "Regular", lingua: "JP", numero: "016/070", imagem: "S6H_016_R_JP.png" },
+            { id: "card-209", nome: "Raboot", pokemon: "Raboot", set: "Shiny Star V (JP)", variante: "Regular", lingua: "JP", numero: "023/190", imagem: "S4A_023_R_JP.png" },
+            { id: "card-210", nome: "Raboot", pokemon: "Raboot", set: "Shiny Star V (JP)", variante: "Regular", lingua: "JP", numero: "215/190", imagem: "S4A_215_R_JP.png" },
+            { id: "card-211", nome: "Raboot", pokemon: "Raboot", set: "Sword & Shield (JP)", variante: "Regular", lingua: "JP", numero: "008/060", imagem: "S1H_008_R_JP.png" },
+            { id: "card-212", nome: "Raboot", pokemon: "Raboot", set: "Scarlet & Violet (JP)", variante: "Regular", lingua: "JP", numero: "007/078", imagem: "SAR_007_R_JP.png" },
+            { id: "card-213", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "028/150", imagem: "CSV9C_028_CN.webp" },
+            { id: "card-214", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1901", imagem: "GP5_1901_CN.webp" },
+            { id: "card-215", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1902", imagem: "GP5_1902_CN.webp" },
+            { id: "card-216", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1903", imagem: "GP5_1903_CN.webp" },
+            { id: "card-217", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1904", imagem: "GP5_1904_CN.webp" },
+            { id: "card-218", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1905", imagem: "GP5_1905_CN.webp" },
+            { id: "card-219", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1906", imagem: "GP5_1906_CN.webp" },
+            { id: "card-220", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1907", imagem: "GP5_1907_CN.webp" },
+            { id: "card-221", nome: "Raboot", pokemon: "Raboot", set: "Start Deck 100 (CN)", variante: "Regular", lingua: "CN", numero: "071/414", imagem: "SD100_071_CN.webp" },
+            { id: "card-222", nome: "Raboot", pokemon: "Raboot", set: "Paradise Dragona (CN)", variante: "Regular", lingua: "CN", numero: "022/064", imagem: "PAO_022_CN.webp" },
+            { id: "card-223", nome: "Raboot", pokemon: "Raboot", set: "Paradise Volunteer (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "024/080", imagem: "PAV_024_CN_H.webp" },
+            { id: "card-224", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "048/150", imagem: "DCF_048_CN.webp" },
+            { id: "card-225", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "141/150", imagem: "DCF_141_CN.webp" },
+            { id: "card-226", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Holográfica / Holo", lingua: "CN", numero: "038/080", imagem: "DCV_038_CN_H.webp" }
+        ];
+        
+        let selectedPokes = new Set();
+        let selectedLangs = new Set();
+        let selectedVars = new Set();
+        let selectedStatus = new Set();
+
+        const uniqueSets = Array.from(new Set(allCards.map(c => c.set))).sort();
+
+        async function saveToCloud() {
+            try {
+                await setDoc(docRef, {
+                    obtainedMap,
+                    captureDataMap,
+                    updatedAt: new Date().toISOString()
+                });
+            } catch (e) {
+                console.error("Erro ao salvar no Firestore:", e);
+            }
+        }
+
+        function refreshCurrentView() {
+            updateHeaderCounters();
+            if(!document.getElementById('view-dashboard').classList.contains('hidden')) {
+                renderDashboard();
+            } else if(!document.getElementById('view-grid').classList.contains('hidden')) {
+                applyFilters();
+            } else if(!document.getElementById('view-capture').classList.contains('hidden')) {
+                const activeEl = document.activeElement;
+                if (activeEl && activeEl.closest('#capture-grid')) return;
+                renderCaptureView();
+            }
+        }
+
+        onSnapshot(docRef, (docSnap) => {
+            if (docSnap.exists()) {
+                const cloudData = docSnap.data();
+                obtainedMap = cloudData.obtainedMap || {};
+                captureDataMap = cloudData.captureDataMap || {};
+                
+                localStorage.setItem('pokedex_obtained_v2', JSON.stringify(obtainedMap));
+                localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
+            } else {
+                obtainedMap = JSON.parse(localStorage.getItem('pokedex_obtained_v2') || '{}');
+                captureDataMap = JSON.parse(localStorage.getItem('pokedex_capture_data_v1') || '{}');
+                saveToCloud();
+            }
+            
+            if (isInitialLoad) {
+                isInitialLoad = false;
+                switchTab('dashboard');
+            } else {
+                refreshCurrentView();
+            }
+        });
+
+        window.toggleMobileMenu = function() {
+            const menu = document.getElementById('mobile-menu');
+            if (menu) {
+                if (menu.classList.contains('hidden')) {
+                    menu.classList.remove('hidden');
+                    menu.classList.add('flex');
+                } else {
+                    menu.classList.add('hidden');
+                    menu.classList.remove('flex');
+                }
+            }
+        };
+
+        window.toggleFilterDrawer = function() {
+            const section = document.getElementById('filters-section');
+            const arrow = document.getElementById('drawer-arrow');
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                if(arrow) arrow.style.transform = "rotate(180deg)";
+            } else {
+                section.classList.add('hidden');
+                if(arrow) arrow.style.transform = "rotate(0deg)";
+            }
+        };
+
+        window.addEventListener('click', function(e) {
+            const section = document.getElementById('filters-section');
+            const btn = document.querySelector('button[onclick="toggleFilterDrawer()"]');
+            if (section && btn && !section.contains(e.target) && !btn.contains(e.target)) {
+                section.classList.add('hidden');
+                const arrow = document.getElementById('drawer-arrow');
+                if(arrow) arrow.style.transform = "rotate(0deg)";
+            }
+
+            const mobileMenu = document.getElementById('mobile-menu');
+            const hambBtn = document.getElementById('hamburger-btn');
+            if (mobileMenu && hambBtn && !mobileMenu.contains(e.target) && !hambBtn.contains(e.target)) {
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('flex');
+            }
+        });
+
+        window.clearAllFilters = function() {
+            selectedPokes.clear();
+            selectedLangs.clear();
+            selectedVars.clear();
+            selectedStatus.clear();
+            
+            const searchInput = document.getElementById('search-input');
+            if(searchInput) searchInput.value = "";
+            
+            updateFilterButtonsUI();
+            handleSearchInput();
+        };
+
+        window.changeLayout = function(value) {
+            currentLayout = value;
+            localStorage.setItem('pokedex_layout_v2', currentLayout);
+            applyFilters();
+        };
+
+        function updateFilterButtonsUI() {
+            ['Scorbunny', 'Raboot', 'Cinderace'].forEach(p => {
+                const btn = document.getElementById(`btn-poke-${p}`);
+                if(btn) {
+                    btn.className = selectedPokes.has(p) 
+                        ? "poke-btn bg-cinder-orange text-white px-3 py-1.5 rounded-xl text-xs font-bold text-left transition shadow-md cursor-pointer" 
+                        : "poke-btn glass-card text-slate-800 dark:text-cinder-white hover:bg-cinder-red hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold text-left transition cursor-pointer";
+                }
+            });
+
+            ['PT-BR', 'EN', 'JP', 'CN'].forEach(l => {
+                const btn = document.getElementById(`btn-lang-${l}`);
+                if(btn) {
+                    btn.className = selectedLangs.has(l) 
+                        ? "lang-btn bg-cinder-orange text-white px-3 py-1.5 rounded-xl text-xs font-bold text-center transition shadow-md cursor-pointer" 
+                        : "lang-btn glass-card text-slate-800 dark:text-cinder-white hover:bg-cinder-red hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold text-center transition cursor-pointer";
+                }
+            });
+
+            const mapping = {'Regular': 'Regular', 'Holográfica / Holo': 'Holo', 'Reverse Holo': 'Reverse', 'Promo': 'Promo', 'V Card': 'V', 'VMAX': 'VMAX', 'Full Art': 'FullArt', 'Arte Alternativa (Alt Art)': 'AltArt'};
+            Object.keys(mapping).forEach(key => {
+                const idKey = mapping[key];
+                const btn = document.getElementById(`btn-var-${idKey}`);
+                if(btn) {
+                    btn.className = selectedVars.has(key) 
+                        ? "var-btn bg-cinder-orange text-white px-3 py-1.5 rounded-xl text-xs font-bold text-left transition shadow-md cursor-pointer" 
+                        : "var-btn glass-card text-slate-800 dark:text-cinder-white hover:bg-cinder-red hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold text-left transition cursor-pointer";
+                }
+            });
+
+            ['MISSING', 'OWNED'].forEach(s => {
+                const btn = document.getElementById(`btn-status-${s}`);
+                if(btn) {
+                    if (selectedStatus.has(s)) {
+                        btn.className = s === 'MISSING' 
+                            ? "status-btn bg-cinder-orange dark:bg-cinder-yellow text-white dark:text-cinder-dark px-3 py-1.5 rounded-xl text-xs font-bold text-left transition shadow-md cursor-pointer" 
+                            : "status-btn bg-cinder-orange text-white px-3 py-1.5 rounded-xl text-xs font-bold text-left transition shadow-md cursor-pointer";
+                    } else {
+                        btn.className = "status-btn glass-card text-slate-800 dark:text-cinder-white hover:bg-cinder-red hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold text-left transition cursor-pointer";
+                    }
+                }
+            });
+
+            const layoutSelect = document.getElementById('layout-select');
+            if(layoutSelect) layoutSelect.value = currentLayout;
+        }
+
+        window.switchTab = function(tab) {
+            const dashSec = document.getElementById('view-dashboard');
+            const gridSec = document.getElementById('view-grid');
+            const captureSec = document.getElementById('view-capture');
+            const marketSec = document.getElementById('view-market');
+            const filterBar = document.getElementById('filter-control-bar');
+            const filtersSection = document.getElementById('filters-section');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const layoutSelect = document.getElementById('layout-select');
+
+            dashSec.classList.add('hidden');
+            gridSec.classList.add('hidden');
+            captureSec.classList.add('hidden');
+            marketSec.classList.add('hidden');
+            filterBar.classList.add('hidden');
+            if(filtersSection) filtersSection.classList.add('hidden');
+            if(mobileMenu) {
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('flex');
+            }
+
+            if (layoutSelect) {
+                if (tab === 'grid') {
+                    layoutSelect.classList.remove('hidden');
+                } else {
+                    layoutSelect.classList.add('hidden');
+                }
+            }
+
+            const tabs = ['dashboard', 'grid', 'capture', 'market'];
+            tabs.forEach(t => {
+                const navDesk = document.getElementById(`nav-${t}`);
+                const navMob = document.getElementById(`mob-nav-${t}`);
+                if (navDesk) navDesk.className = "px-3.5 py-1.5 rounded-xl transition hover:text-cinder-orange dark:hover:text-cinder-yellow text-slate-600 dark:text-slate-400 font-semibold cursor-pointer";
+                if (navMob) navMob.className = "glass-card p-2.5 rounded-2xl text-xs font-bold text-left border border-cinder-orange/20 transition text-slate-700 dark:text-slate-300 cursor-pointer";
+            });
+
+            const activeDesk = document.getElementById(`nav-${tab}`);
+            const activeMob = document.getElementById(`mob-nav-${tab}`);
+            if (activeDesk) activeDesk.className = "px-3.5 py-1.5 rounded-xl transition bg-cinder-orange/20 dark:bg-cinder-orange/30 text-cinder-orange dark:text-cinder-yellow border border-cinder-orange/40 font-extrabold shadow-sm cursor-pointer backdrop-blur-md";
+            if (activeMob) activeMob.className = "bg-cinder-orange/20 dark:bg-cinder-orange/30 text-cinder-orange dark:text-cinder-yellow p-2.5 rounded-2xl text-xs font-extrabold text-left border border-cinder-orange shadow-sm cursor-pointer backdrop-blur-md";
+
+            if(tab === 'dashboard') {
+                dashSec.classList.remove('hidden');
+                renderDashboard();
+            } else if(tab === 'grid') {
+                gridSec.classList.remove('hidden');
+                filterBar.classList.remove('hidden');
+                updateFilterButtonsUI();
+                applyFilters();
+            } else if(tab === 'capture') {
+                captureSec.classList.remove('hidden');
+                renderCaptureView();
+            } else if(tab === 'market') {
+                marketSec.classList.remove('hidden');
+            }
+        };
+
+        window.handleSearchInput = function() {
+            if(!document.getElementById('view-grid').classList.contains('hidden')) {
+                applyFilters();
+            }
+        };
+
+        window.filterPoke = function(poke) {
+            if(selectedPokes.has(poke)) selectedPokes.delete(poke);
+            else selectedPokes.add(poke);
+            updateFilterButtonsUI();
+            handleSearchInput();
+        };
+
+        window.filterLang = function(lang) {
+            if(selectedLangs.has(lang)) selectedLangs.delete(lang);
+            else selectedLangs.add(lang);
+            updateFilterButtonsUI();
+            handleSearchInput();
+        };
+
+        window.filterVar = function(variante) {
+            if(selectedVars.has(variante)) selectedVars.delete(variante);
+            else selectedVars.add(variante);
+            updateFilterButtonsUI();
+            handleSearchInput();
+        };
+
+        window.filterStatus = function(status) {
+            if(selectedStatus.has(status)) selectedStatus.delete(status);
+            else selectedStatus.add(status);
+            updateFilterButtonsUI();
+            handleSearchInput();
+        };
+
+        window.toggleCard = function(id) {
+            const isLocked = captureDataMap[id] && captureDataMap[id].locked;
+            if (obtainedMap[id] && isLocked) {
+                alert("🔒 Esta carta está BLOQUEADA pela aba Captura!\nPara desmarcar, desative o cadeado na aba Captura primeiro.");
+                return;
+            }
+
+            obtainedMap[id] = !obtainedMap[id];
+            localStorage.setItem('pokedex_obtained_v2', JSON.stringify(obtainedMap));
+            saveToCloud();
+            refreshCurrentView();
+        };
+
+        window.showZoomModal = function(cardId) {
+            const index = allCards.findIndex(c => c.id === cardId);
+            if (index !== -1) {
+                currentZoomIndex = index;
+                renderZoomContent('none');
+            }
+        };
+
+        window.nextZoomCard = function() {
+            if (currentZoomIndex < allCards.length - 1) {
+                currentZoomIndex++;
+                renderZoomContent('left');
+            }
+        };
+
+        window.prevZoomCard = function() {
+            if (currentZoomIndex > 0) {
+                currentZoomIndex--;
+                renderZoomContent('right');
+            }
+        };
+
+        function renderZoomContent(animDirection = 'none') {
+            const card = allCards[currentZoomIndex];
+            const modal = document.getElementById('zoom-modal');
+            const content = document.getElementById('zoom-modal-content');
+            const prevBtn = document.getElementById('zoom-prev-btn');
+            const nextBtn = document.getElementById('zoom-next-btn');
+            const isObtained = !!obtainedMap[card.id];
+
+            if (prevBtn) prevBtn.disabled = currentZoomIndex === 0;
+            if (nextBtn) nextBtn.disabled = currentZoomIndex === allCards.length - 1;
+
+            content.innerHTML = `
+                <div class="flex justify-between items-center w-full mb-3 px-2 max-w-[280px] sm:max-w-sm">
+                    <span class="px-3 py-1 rounded-xl text-xs font-black uppercase glass-card text-cinder-orange dark:text-cinder-yellow border border-cinder-orange/30 shadow">${card.lingua}</span>
+                    <span class="text-xs font-extrabold px-3 py-1 rounded-xl glass-card shadow ${isObtained ? 'text-cinder-orange dark:text-cinder-yellow' : 'text-slate-400'}">${isObtained ? 'TENHO' : 'FALTANTE'} (${currentZoomIndex + 1}/${allCards.length})</span>
+                </div>
+                
+                <div class="relative w-full flex items-center justify-center my-1 [perspective:1000px]">
+                    <div id="zoom-image-container" class="w-full max-w-[260px] sm:max-w-sm aspect-[2.5/3.5] max-h-[52vh] flex items-center justify-center bg-transparent rounded-2xl overflow-visible relative cursor-grab active:cursor-grabbing transition-transform duration-75 ease-out transform-gpu select-none">
+                        <img id="zoom-card-img" src="${card.imagem}" class="max-h-full max-w-full object-contain pointer-events-none rounded-xl shadow-2xl ${animDirection === 'left' ? 'slide-left' : animDirection === 'right' ? 'slide-right' : ''}" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                        
+                        <!-- Camada Holográfica Padrão -->
+                        <div id="card-glare" class="absolute inset-0 pointer-events-none rounded-xl opacity-0 transition-opacity duration-300 holo-glare-effect"></div>
+                    </div>
+                </div>
+
+                <div class="mt-4 w-full text-center glass-card backdrop-blur-md py-2.5 px-4 rounded-2xl border border-cinder-orange/20 shadow-xl max-w-[280px] sm:max-w-sm">
+                    <p class="text-base sm:text-lg font-bold text-slate-800 dark:text-cinder-white">${card.nome}</p>
+                    <p class="text-xs text-cinder-orange font-semibold mt-0.5">${card.set} — ${card.variante} (#${card.numero})</p>
+                </div>`;
+
+            modal.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                content.classList.remove('scale-95');
+                content.classList.add('scale-100');
+            }, 10);
+
+            setupCard3DTiltAndSwipe();
+        }
+
+        function setupCard3DTiltAndSwipe() {
+            const cardContainer = document.getElementById('zoom-image-container');
+            const glare = document.getElementById('card-glare');
+            if (!cardContainer) return;
+
+            let touchStartX = 0;
+            let touchEndX = 0;
+            let isTouching = false;
+            let rafId = null;
+
+            function updateTilt(clientX, clientY) {
+                if (rafId) cancelAnimationFrame(rafId);
+                rafId = requestAnimationFrame(() => {
+                    const rect = cardContainer.getBoundingClientRect();
+                    const x = clientX - rect.left;
+                    const y = clientY - rect.top;
+
+                    const centerX = rect.width / 2;
+                    const centerY = rect.height / 2;
+
+                    const rotateX = ((y - centerY) / centerY) * -15;
+                    const rotateY = ((x - centerX) / centerX) * 15;
+
+                    cardContainer.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.03, 1.03, 1.03)`;
+
+                    if (glare) {
+                        const percentX = (x / rect.width) * 100;
+                        const percentY = (y / rect.height) * 100;
+                        glare.style.opacity = '1';
+                        glare.style.backgroundPosition = `${percentX}% ${percentY}%`;
+                    }
+                });
+            }
+
+            function resetTilt() {
+                if (rafId) cancelAnimationFrame(rafId);
+                cardContainer.style.transform = `rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+                if (glare) glare.style.opacity = '0';
+            }
+
+            cardContainer.addEventListener('mousemove', (e) => {
+                updateTilt(e.clientX, e.clientY);
+            });
+
+            cardContainer.addEventListener('mouseleave', () => {
+                resetTilt();
+            });
+
+            cardContainer.addEventListener('touchstart', (e) => {
+                isTouching = true;
+                touchStartX = e.touches[0].clientX;
+                touchEndX = touchStartX;
+                const touch = e.touches[0];
+                updateTilt(touch.clientX, touch.clientY);
+            }, { passive: true });
+
+            cardContainer.addEventListener('touchmove', (e) => {
+                if (!isTouching) return;
+                e.preventDefault();
+                const touch = e.touches[0];
+                touchEndX = touch.clientX;
+                updateTilt(touch.clientX, touch.clientY);
+            }, { passive: false });
+
+            cardContainer.addEventListener('touchend', () => {
+                if (!isTouching) return;
+                isTouching = false;
+                resetTilt();
+
+                const threshold = 50;
+                if (touchEndX !== 0 && touchEndX < touchStartX - threshold) {
+                    nextZoomCard();
+                } else if (touchEndX !== 0 && touchEndX > touchStartX + threshold) {
+                    prevZoomCard();
+                }
+                touchStartX = 0;
+                touchEndX = 0;
+            }, { passive: true });
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const modal = document.getElementById('zoom-modal');
+            if (modal && !modal.classList.contains('hidden')) {
+                if (e.key === 'ArrowRight') {
+                    nextZoomCard();
+                } else if (e.key === 'ArrowLeft') {
+                    prevZoomCard();
+                } else if (e.key === 'Escape') {
+                    hideZoomModal();
+                }
+            }
+        });
+
+        window.hideZoomModal = function() {
+            const modal = document.getElementById('zoom-modal');
+            const content = document.getElementById('zoom-modal-content');
+            content.classList.remove('scale-100');
+            content.classList.add('scale-95');
+            modal.classList.add('opacity-0');
+            setTimeout(() => {
+                modal.classList.add('hidden', 'pointer-events-none');
+            }, 300);
+        };
+
+        window.handleModalClick = function(event) {
+            const content = document.getElementById('zoom-modal-content');
+            if (!content.contains(event.target)) {
+                hideZoomModal();
+            }
+        };
+
+        function updateHeaderCounters() {
+            let totalObtainedCount = 0;
+            allCards.forEach(card => {
+                if(obtainedMap[card.id]) totalObtainedCount++;
+            });
+            document.getElementById('total-count').innerText = allCards.length;
+            document.getElementById('obtained-count').innerText = totalObtainedCount;
+            document.getElementById('missing-count').innerText = allCards.length - totalObtainedCount;
+        }
+
+        function renderDashboard() {
+            updateHeaderCounters();
+            let totalObtained = 0;
+            const totalCards = allCards.length;
+
+            let pokes = {};
+            let langs = {};
+            let sets = {};
+            let vars = {};
+
+            allCards.forEach(card => {
+                const obtained = !!obtainedMap[card.id];
+                if(obtained) totalObtained++;
+
+                if(!pokes[card.pokemon]) pokes[card.pokemon] = { total: 0, obtained: 0 };
+                pokes[card.pokemon].total++;
+                if(obtained) pokes[card.pokemon].obtained++;
+
+                if(!langs[card.lingua]) langs[card.lingua] = { total: 0, obtained: 0 };
+                langs[card.lingua].total++;
+                if(obtained) langs[card.lingua].obtained++;
+
+                if(!sets[card.set]) sets[card.set] = { total: 0, obtained: 0 };
+                sets[card.set].total++;
+                if(obtained) sets[card.set].obtained++;
+
+                if(!vars[card.variante]) vars[card.variante] = { total: 0, obtained: 0 };
+                vars[card.variante].total++;
+                if(obtained) vars[card.variante].obtained++;
+            });
+
+            const totalPct = Math.round((totalObtained / totalCards) * 100) || 0;
+            document.getElementById('dashboard-total-pct').innerText = `${totalPct}% (${totalObtained}/${totalCards})`;
+            document.getElementById('dashboard-total-bar').style.width = `${totalPct}%`;
+
+            const createStatRow = (label, data, colorClass = 'bg-cinder-orange') => {
+                const pct = Math.round((data.obtained / data.total) * 100) || 0;
+                return `
+                    <div>
+                        <div class="flex justify-between items-center text-xs font-semibold mb-1">
+                            <span class="text-slate-800 dark:text-cinder-white truncate pr-2 max-w-[180px] sm:max-w-[200px]" title="${label}">${label}</span>
+                            <span class="text-slate-500 dark:text-slate-400 text-[11px] font-mono">${pct}% <span class="text-slate-400 dark:text-slate-500">(${data.obtained}/${data.total})</span></span>
+                        </div>
+                        <div class="w-full bg-slate-200/60 dark:bg-cinder-dark/80 h-2 rounded-full overflow-hidden border border-cinder-orange/20">
+                            <div class="${colorClass} h-full rounded-full transition-all duration-300" style="width: ${pct}%"></div>
+                        </div>
+                    </div>`;
+            };
+
+            document.getElementById('stats-pokemon').innerHTML = Object.keys(pokes).sort().map(p => createStatRow(p, pokes[p], 'bg-cinder-orange')).join('');
+            document.getElementById('stats-lang').innerHTML = Object.keys(langs).sort().map(l => createStatRow(l, langs[l], 'bg-cinder-yellow')).join('');
+            document.getElementById('stats-set').innerHTML = Object.keys(sets).sort().map(s => createStatRow(s, sets[s], 'bg-cinder-orange')).join('');
+            document.getElementById('stats-var').innerHTML = Object.keys(vars).sort().map(v => createStatRow(v, vars[v], 'bg-cinder-yellow')).join('');
+        }
+
+        function applyFilters() {
+            updateHeaderCounters();
+            const searchInput = document.getElementById('search-input');
+            const search = searchInput ? searchInput.value.toLowerCase() : '';
+            const grid = document.getElementById('cards-grid');
+            
+            if (currentLayout === 'pequeno') {
+                grid.className = "grid grid-cols-4 sm:grid-cols-6 lg:grid-cols-8 gap-2.5 sm:gap-3";
+            } else if (currentLayout === 'grande') {
+                grid.className = "grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4.5";
+            } else {
+                grid.className = "grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2.5 sm:gap-3.5";
+            }
+
+            grid.innerHTML = '';
+
+            allCards.forEach(card => {
+                const isObtained = !!obtainedMap[card.id];
+
+                const matchesPoke = selectedPokes.size === 0 || selectedPokes.has(card.pokemon);
+                const matchesLang = selectedLangs.size === 0 || selectedLangs.has(card.lingua);
+                const matchesVar = selectedVars.size === 0 || selectedVars.has(card.variante);
+                
+                let matchesStatus = true;
+                if(selectedStatus.size > 0) {
+                    const hasOwned = selectedStatus.has('OWNED');
+                    const hasMissing = selectedStatus.has('MISSING');
+                    if (hasOwned && !hasMissing) matchesStatus = isObtained;
+                    else if (!hasOwned && hasMissing) matchesStatus = !isObtained;
+                }
+
+                const matchesSearch = card.nome.toLowerCase().includes(search) || 
+                                      card.set.toLowerCase().includes(search) || 
+                                      card.variante.toLowerCase().includes(search) ||
+                                      card.numero.toLowerCase().includes(search);
+
+                if (matchesPoke && matchesLang && matchesVar && matchesStatus && matchesSearch) {
+                    const cardEl = document.createElement('div');
+                    cardEl.className = 'cursor-pointer select-none';
+
+                    let pressTimer = null;
+                    let longPressTriggered = false;
+                    let startX = 0;
+                    let startY = 0;
+
+                    cardEl.onpointerdown = (e) => {
+                        longPressTriggered = false;
+                        startX = e.clientX;
+                        startY = e.clientY;
+                        if (pressTimer) clearTimeout(pressTimer);
+                        pressTimer = setTimeout(() => {
+                            longPressTriggered = true;
+                            showZoomModal(card.id);
+                        }, 1000);
+                    };
+
+                    cardEl.onpointermove = (e) => {
+                        if (Math.abs(e.clientX - startX) > 8 || Math.abs(e.clientY - startY) > 8) {
+                            if (pressTimer) {
+                                clearTimeout(pressTimer);
+                                pressTimer = null;
+                            }
+                        }
+                    };
+
+                    cardEl.onpointerup = () => {
+                        if (pressTimer) {
+                            clearTimeout(pressTimer);
+                            pressTimer = null;
+                        }
+                    };
+
+                    cardEl.onclick = (e) => {
+                        if (longPressTriggered) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            return;
+                        }
+                        toggleCard(card.id);
+                    };
+
+                    const isLocked = captureDataMap[card.id] && captureDataMap[card.id].locked;
+
+                    cardEl.innerHTML = `
+                        <div class="relative overflow-hidden rounded-2xl glass-card p-2 ${isObtained ? 'card-owned' : 'card-not-owned'} transition duration-200 shadow-md hover:scale-[1.02]">
+                            <div class="flex justify-between items-center mb-1.5 px-0.5">
+                                <span class="px-1.5 py-0.5 rounded-lg text-[8px] font-black uppercase glass-card text-cinder-orange dark:text-cinder-yellow border border-cinder-orange/20">${card.lingua}</span>
+                                <div class="flex items-center gap-0.5">
+                                    ${isLocked ? '<span title="Bloqueado na aba Captura" class="text-[9px]">🔒</span>' : ''}
+                                    <span class="text-[9px] font-extrabold ${isObtained ? 'text-cinder-orange dark:text-cinder-yellow' : 'text-slate-400'}">${isObtained ? 'TENHO' : 'FALTANTE'}</span>
+                                </div>
+                            </div>
+                            <div class="aspect-[2.5/3.5] w-full rounded-xl overflow-hidden bg-slate-100/50 dark:bg-cinder-bg/50 flex items-center justify-center border border-cinder-orange/10 p-0.5 shadow-inner">
+                                <img src="${card.imagem}" class="w-full h-full object-contain pointer-events-none drop-shadow-md" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                            </div>
+                            <div class="mt-1.5 px-0.5">
+                                <p class="text-[11px] font-bold text-slate-800 dark:text-cinder-white truncate">${card.nome}</p>
+                                <p class="text-[9px] text-cinder-orange font-semibold truncate">${card.set}</p>
+                                <div class="flex justify-between text-[8px] text-slate-500 dark:text-slate-400 mt-0.5">
+                                    <span class="truncate max-w-[60px] sm:max-w-[80px]">${card.variante}</span>
+                                    <span class="font-bold text-slate-600 dark:text-slate-300">#${card.numero}</span>
+                                </div>
+                            </div>
+                        </div>`;
+                    grid.appendChild(cardEl);
+                }
+            });
+        }
+
+        window.saveCaptureData = function(cardId, key, value) {
+            if(!captureDataMap[cardId]) captureDataMap[cardId] = {};
+            captureDataMap[cardId][key] = value;
+            localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
+            saveToCloud();
+        };
+
+        window.toggleLock = function(cardId) {
+            if(!captureDataMap[cardId]) captureDataMap[cardId] = {};
+            captureDataMap[cardId].locked = !captureDataMap[cardId].locked;
+            localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
+            saveToCloud();
+            renderCaptureView();
+        };
+
+        function updateCaptureFieldsUI(cardId) {
+            const data = captureDataMap[cardId] || {};
+            const typeSelect = document.getElementById(`cap-type-${cardId}`);
+            const selectedType = typeSelect ? typeSelect.value : '';
+
+            const boosterDiv = document.getElementById(`cap-booster-div-${cardId}`);
+            const textDiv = document.getElementById(`cap-text-div-${cardId}`);
+            const textLabel = document.getElementById(`cap-text-label-${cardId}`);
+            const priceDiv = document.getElementById(`cap-price-div-${cardId}`);
+
+            if (boosterDiv) boosterDiv.classList.add('hidden');
+            if (textDiv) textDiv.classList.add('hidden');
+            if (priceDiv) priceDiv.classList.add('hidden');
+
+            if (selectedType === 'booster') {
+                if (boosterDiv) boosterDiv.classList.remove('hidden');
+            } else if (selectedType === 'troca') {
+                if (textDiv) {
+                    textDiv.classList.remove('hidden');
+                    if (textLabel) textLabel.innerText = "Pessoa / Loja trocada:";
+                }
+            } else if (selectedType === 'doada') {
+                if (textDiv) {
+                    textDiv.classList.remove('hidden');
+                    if (textLabel) textLabel.innerText = "Doador (Pessoa / Loja):";
+                }
+            } else if (selectedType === 'compra') {
+                if (textDiv) {
+                    textDiv.classList.remove('hidden');
+                    if (textLabel) textLabel.innerText = "Local / Pessoa que comprou:";
+                }
+                if (priceDiv) priceDiv.classList.remove('hidden');
+            }
+        }
+
+        window.handleCaptureTypeChange = function(cardId, value) {
+            saveCaptureData(cardId, 'type', value);
+            updateCaptureFieldsUI(cardId);
+        };
+
+        function renderCaptureView() {
+            updateHeaderCounters();
+            const captureGrid = document.getElementById('capture-grid');
+            captureGrid.innerHTML = '';
+
+            const ownedCards = allCards.filter(card => !!obtainedMap[card.id]);
+
+            if (ownedCards.length === 0) {
+                captureGrid.innerHTML = `
+                    <div class="col-span-full py-12 text-center text-slate-500 dark:text-slate-400 glass-card rounded-3xl border border-cinder-orange/20 shadow-inner">
+                        <p class="text-sm font-bold">Nenhuma carta marcada na sua coleção ainda.</p>
+                        <p class="text-xs mt-1">Marque cartas como "TENHO" na aba <strong>Minha Coleção</strong> para cadastrar a origem delas aqui.</p>
+                    </div>`;
+                return;
+            }
+
+            ownedCards.forEach(card => {
+                const data = captureDataMap[card.id] || {};
+                const currentType = data.type || '';
+                const currentBooster = data.booster || card.set;
+                const currentEntity = data.entity || '';
+                const currentPrice = data.price || '';
+                const isLocked = !!data.locked;
+
+                const cardBox = document.createElement('div');
+                cardBox.className = "glass-card border border-cinder-orange/20 rounded-3xl p-4 flex gap-3.5 items-start shadow-xl relative backdrop-blur-md";
+
+                const boosterOptionsHtml = uniqueSets.map(s => 
+                    `<option value="${s}" ${s === currentBooster ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">${s}</option>`
+                ).join('');
+
+                cardBox.innerHTML = `
+                    <div class="w-16 sm:w-20 h-22 sm:h-28 glass-card rounded-2xl overflow-hidden border border-cinder-orange/20 shrink-0 flex items-center justify-center p-1 relative shadow-sm">
+                        <img src="${card.imagem}" class="max-h-full max-w-full object-contain drop-shadow" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                    </div>
+                    
+                    <div class="flex-1 space-y-2.5 min-w-0">
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="truncate">
+                                <p class="text-xs font-bold text-slate-800 dark:text-cinder-white truncate">${card.nome}</p>
+                                <p class="text-[10px] text-cinder-orange font-semibold truncate">${card.set} — ${card.variante}</p>
+                            </div>
+                            <button onclick="toggleLock('${card.id}')" title="${isLocked ? 'Cadeado Ativo' : 'Cadeado Inativo'}" class="p-1.5 rounded-xl border transition shrink-0 cursor-pointer ${isLocked ? 'bg-cinder-red/25 text-cinder-red dark:text-cinder-yellow border-cinder-orange/60 shadow-sm' : 'glass-card text-slate-400 border-cinder-orange/15 hover:text-slate-700 dark:hover:text-cinder-white'}">
+                                ${isLocked ? '🔒' : '🔓'}
+                            </button>
+                        </div>
+
+                        <div>
+                            <label class="block text-[9px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase mb-1 tracking-wider">Origem da Carta:</label>
+                            <select id="cap-type-${card.id}" onchange="handleCaptureTypeChange('${card.id}', this.value)" class="w-full glass-card border border-cinder-orange/30 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange cursor-pointer shadow-sm">
+                                <option value="" ${currentType === '' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">-- Selecione a origem --</option>
+                                <option value="booster" ${currentType === 'booster' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">Booster</option>
+                                <option value="troca" ${currentType === 'troca' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">Troca</option>
+                                <option value="doada" ${currentType === 'doada' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">Doada</option>
+                                <option value="compra" ${currentType === 'compra' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">Compra</option>
+                            </select>
+                        </div>
+
+                        <div id="cap-booster-div-${card.id}" class="hidden">
+                            <label class="block text-[9px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase mb-1 tracking-wider">Qual Booster / Coleção?</label>
+                            <select onchange="saveCaptureData('${card.id}', 'booster', this.value)" class="w-full glass-card border border-cinder-orange/30 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange cursor-pointer shadow-sm">
+                                ${boosterOptionsHtml}
+                            </select>
+                        </div>
+
+                        <div id="cap-text-div-${card.id}" class="hidden">
+                            <label id="cap-text-label-${card.id}" class="block text-[9px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase mb-1 tracking-wider">Pessoa / Loja:</label>
+                            <input type="text" value="${currentEntity}" oninput="saveCaptureData('${card.id}', 'entity', this.value)" placeholder="Digite o nome..." class="w-full glass-card border border-cinder-orange/30 rounded-xl px-3 py-1.5 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange shadow-sm">
+                        </div>
+
+                        <div id="cap-price-div-${card.id}" class="hidden">
+                            <label class="block text-[9px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase mb-1 tracking-wider">Preço Pago (R$):</label>
+                            <input type="text" value="${currentPrice}" oninput="saveCaptureData('${card.id}', 'price', this.value)" placeholder="Ex: 25,00" class="w-full glass-card border border-cinder-orange/30 rounded-xl px-3 py-1.5 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange shadow-sm">
+                        </div>
+                    </div>
+                `;
+
+                captureGrid.appendChild(cardBox);
+                updateCaptureFieldsUI(card.id);
+            });
+        }
+    </script>
+</body>
+</html>
