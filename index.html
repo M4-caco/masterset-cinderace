@@ -63,16 +63,6 @@
             mix-blend-mode: overlay;
         }
 
-        /* BARRA DE FILTROS STICKY TRADICIONAL */
-        .filter-bar-sticky {
-            position: sticky;
-            top: 52px;
-            z-index: 40;
-        }
-        @media (min-width: 768px) {
-            .filter-bar-sticky { top: 60px; }
-        }
-
         /* ESTILOS DO SWITCH TEMA LUA / SOL */
         .theme-switch-track {
             box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
@@ -194,18 +184,17 @@
         </div>
     </header>
 
-    <!-- PADDING REDUZIDO NO MAIN PARA EVITAR MARGENS DISPROPORCIONAIS -->
     <main class="p-2 sm:p-4 max-w-7xl mx-auto">
 
-        <!-- BARRA DE FILTROS STICKY ESTÁVEL -->
-        <div id="filter-control-bar" class="flex flex-wrap justify-between items-center mb-3 gap-2 relative hidden filter-bar-sticky bg-slate-100/95 dark:bg-cinder-bg/95 backdrop-blur-md py-1.5 px-1">
+        <!-- BARRA DE FILTROS FIXA NO FLUXO (SEM SOBREPOSIÇÃO) -->
+        <div id="filter-control-bar" class="flex flex-wrap justify-between items-center mb-4 gap-2 relative hidden bg-white dark:bg-cinder-dark py-2.5 px-3 rounded-2xl border border-cinder-orange/25 shadow-md">
             <div class="flex items-center gap-2 flex-1 max-w-2xl relative">
-                <button onclick="toggleFilterDrawer()" class="bg-white dark:bg-cinder-dark hover:bg-slate-50 dark:hover:bg-cinder-card text-slate-800 dark:text-cinder-white border border-cinder-orange/40 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow shrink-0">
+                <button onclick="toggleFilterDrawer()" class="bg-slate-100 dark:bg-cinder-bg hover:bg-slate-200 dark:hover:bg-cinder-card text-slate-800 dark:text-cinder-white border border-cinder-orange/40 px-3 py-1.5 rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow shrink-0 cursor-pointer">
                     <span>Filtros</span>
                     <span id="drawer-arrow" class="transform transition duration-200 text-cinder-orange dark:text-cinder-yellow">▼</span>
                 </button>
 
-                <input id="search-input" oninput="handleSearchInput()" type="text" placeholder="Buscar por Nome, expansão ou variante..." class="w-full bg-white dark:bg-cinder-dark px-3 py-1.5 rounded-xl text-xs outline-none border border-cinder-orange/30 focus:border-cinder-orange text-slate-800 dark:text-cinder-white shadow">
+                <input id="search-input" oninput="handleSearchInput()" type="text" placeholder="Buscar por Nome, expansão ou variante..." class="w-full bg-slate-50 dark:bg-cinder-bg px-3 py-1.5 rounded-xl text-xs outline-none border border-cinder-orange/30 focus:border-cinder-orange text-slate-800 dark:text-cinder-white shadow">
 
                 <section id="filters-section" class="absolute left-0 top-11 w-72 sm:w-80 bg-white dark:bg-cinder-dark p-3.5 rounded-2xl border border-cinder-orange/30 space-y-3 hidden z-40 shadow-2xl max-h-[80vh] overflow-y-auto custom-scroll">
                     
@@ -253,11 +242,11 @@
             </div>
 
             <div class="flex items-center gap-2 shrink-0">
-                <button onclick="clearAllFilters()" class="bg-cinder-red/20 dark:bg-cinder-red/30 text-cinder-red dark:text-cinder-yellow hover:bg-cinder-red/40 border border-cinder-orange/30 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow">
+                <button onclick="clearAllFilters()" class="bg-cinder-red/20 dark:bg-cinder-red/30 text-cinder-red dark:text-cinder-yellow hover:bg-cinder-red/40 border border-cinder-orange/30 px-3 py-1.5 rounded-xl text-xs font-bold transition shadow cursor-pointer">
                     Limpar
                 </button>
 
-                <select id="layout-select" onchange="changeLayout(this.value)" class="bg-white dark:bg-cinder-dark hover:bg-slate-50 dark:hover:bg-cinder-card text-slate-800 dark:text-cinder-white border border-cinder-orange/40 px-2.5 py-1.5 rounded-xl text-xs font-bold outline-none focus:border-cinder-orange transition shadow cursor-pointer">
+                <select id="layout-select" onchange="changeLayout(this.value)" class="bg-slate-50 dark:bg-cinder-bg hover:bg-slate-100 dark:hover:bg-cinder-card text-slate-800 dark:text-cinder-white border border-cinder-orange/40 px-2.5 py-1.5 rounded-xl text-xs font-bold outline-none focus:border-cinder-orange transition shadow cursor-pointer">
                     <option value="pequeno">Pequeno</option>
                     <option value="medio">Médio</option>
                     <option value="grande">Grande</option>
@@ -359,7 +348,7 @@
                         <h2 class="text-sm sm:text-base font-bold text-slate-800 dark:text-cinder-white">Painel de Cotações & Mercado</h2>
                         <p class="text-xs text-slate-500 dark:text-slate-400">Consulte os links diretos ou atualize os valores estimados da sua coleção.</p>
                     </div>
-                    <button onclick="refreshMarketPrices()" class="w-full sm:w-auto bg-cinder-orange hover:bg-cinder-red text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow">
+                    <button onclick="refreshMarketPrices()" class="w-full sm:w-auto bg-cinder-orange hover:bg-cinder-red text-white px-3.5 py-2 rounded-xl text-xs font-bold transition flex items-center justify-center gap-2 shadow cursor-pointer">
                         <span id="refresh-icon">🔄</span>
                         <span>Atualizar Preços</span>
                     </button>
@@ -776,8 +765,8 @@
                 const btn = document.getElementById(`btn-poke-${p}`);
                 if(btn) {
                     btn.className = selectedPokes.has(p) 
-                        ? "poke-btn bg-cinder-orange text-white px-2.5 py-1 rounded-lg text-xs font-bold text-left transition shadow" 
-                        : "poke-btn bg-slate-100 dark:bg-cinder-card text-slate-800 dark:text-cinder-white hover:bg-cinder-red hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold text-left transition";
+                        ? "poke-btn bg-cinder-orange text-white px-2.5 py-1 rounded-lg text-xs font-bold text-left transition shadow cursor-pointer" 
+                        : "poke-btn bg-slate-100 dark:bg-cinder-card text-slate-800 dark:text-cinder-white hover:bg-cinder-red hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold text-left transition cursor-pointer";
                 }
             });
 
@@ -785,8 +774,8 @@
                 const btn = document.getElementById(`btn-lang-${l}`);
                 if(btn) {
                     btn.className = selectedLangs.has(l) 
-                        ? "lang-btn bg-cinder-orange text-white px-2.5 py-1 rounded-lg text-xs font-bold text-center transition shadow" 
-                        : "lang-btn bg-slate-100 dark:bg-cinder-card text-slate-800 dark:text-cinder-white hover:bg-cinder-red hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold text-center transition";
+                        ? "lang-btn bg-cinder-orange text-white px-2.5 py-1 rounded-lg text-xs font-bold text-center transition shadow cursor-pointer" 
+                        : "lang-btn bg-slate-100 dark:bg-cinder-card text-slate-800 dark:text-cinder-white hover:bg-cinder-red hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold text-center transition cursor-pointer";
                 }
             });
 
@@ -796,8 +785,8 @@
                 const btn = document.getElementById(`btn-var-${idKey}`);
                 if(btn) {
                     btn.className = selectedVars.has(key) 
-                        ? "var-btn bg-cinder-orange text-white px-2.5 py-1 rounded-lg text-xs font-bold text-left transition shadow" 
-                        : "var-btn bg-slate-100 dark:bg-cinder-card text-slate-800 dark:text-cinder-white hover:bg-cinder-red hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold text-left transition";
+                        ? "var-btn bg-cinder-orange text-white px-2.5 py-1 rounded-lg text-xs font-bold text-left transition shadow cursor-pointer" 
+                        : "var-btn bg-slate-100 dark:bg-cinder-card text-slate-800 dark:text-cinder-white hover:bg-cinder-red hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold text-left transition cursor-pointer";
                 }
             });
 
@@ -806,10 +795,10 @@
                 if(btn) {
                     if (selectedStatus.has(s)) {
                         btn.className = s === 'MISSING' 
-                            ? "status-btn bg-cinder-orange dark:bg-cinder-yellow text-white dark:text-cinder-dark px-2.5 py-1 rounded-lg text-xs font-bold text-left transition shadow" 
-                            : "status-btn bg-cinder-orange text-white px-2.5 py-1 rounded-lg text-xs font-bold text-left transition shadow";
+                            ? "status-btn bg-cinder-orange dark:bg-cinder-yellow text-white dark:text-cinder-dark px-2.5 py-1 rounded-lg text-xs font-bold text-left transition shadow cursor-pointer" 
+                            : "status-btn bg-cinder-orange text-white px-2.5 py-1 rounded-lg text-xs font-bold text-left transition shadow cursor-pointer";
                     } else {
-                        btn.className = "status-btn bg-slate-100 dark:bg-cinder-card text-slate-800 dark:text-cinder-white hover:bg-cinder-red hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold text-left transition";
+                        btn.className = "status-btn bg-slate-100 dark:bg-cinder-card text-slate-800 dark:text-cinder-white hover:bg-cinder-red hover:text-white px-2.5 py-1 rounded-lg text-xs font-bold text-left transition cursor-pointer";
                     }
                 }
             });
@@ -851,14 +840,14 @@
             tabs.forEach(t => {
                 const navDesk = document.getElementById(`nav-${t}`);
                 const navMob = document.getElementById(`mob-nav-${t}`);
-                if (navDesk) navDesk.className = "px-3 py-1.5 rounded-lg transition hover:text-cinder-orange dark:hover:text-cinder-yellow text-slate-600 dark:text-slate-400 font-semibold";
-                if (navMob) navMob.className = "bg-slate-200 dark:bg-cinder-card p-2 rounded-xl text-xs font-bold text-left border border-cinder-orange/20 flex items-center gap-2 transition text-slate-700 dark:text-slate-300";
+                if (navDesk) navDesk.className = "px-3 py-1.5 rounded-lg transition hover:text-cinder-orange dark:hover:text-cinder-yellow text-slate-600 dark:text-slate-400 font-semibold cursor-pointer";
+                if (navMob) navMob.className = "bg-slate-200 dark:bg-cinder-card p-2 rounded-xl text-xs font-bold text-left border border-cinder-orange/20 flex items-center gap-2 transition text-slate-700 dark:text-slate-300 cursor-pointer";
             });
 
             const activeDesk = document.getElementById(`nav-${tab}`);
             const activeMob = document.getElementById(`mob-nav-${tab}`);
-            if (activeDesk) activeDesk.className = "px-3 py-1.5 rounded-lg transition bg-cinder-orange/15 dark:bg-cinder-orange/20 text-cinder-orange dark:text-cinder-yellow border-b-2 border-cinder-orange font-extrabold flex items-center gap-1.5 shadow-sm";
-            if (activeMob) activeMob.className = "bg-cinder-orange/15 dark:bg-cinder-orange/20 text-cinder-orange dark:text-cinder-yellow p-2 rounded-xl text-xs font-extrabold text-left border border-cinder-orange flex items-center gap-2 shadow-sm";
+            if (activeDesk) activeDesk.className = "px-3 py-1.5 rounded-lg transition bg-cinder-orange/15 dark:bg-cinder-orange/20 text-cinder-orange dark:text-cinder-yellow border-b-2 border-cinder-orange font-extrabold flex items-center gap-1.5 shadow-sm cursor-pointer";
+            if (activeMob) activeMob.className = "bg-cinder-orange/15 dark:bg-cinder-orange/20 text-cinder-orange dark:text-cinder-yellow p-2 rounded-xl text-xs font-extrabold text-left border border-cinder-orange flex items-center gap-2 shadow-sm cursor-pointer";
 
             if(tab === 'dashboard') {
                 dashSec.classList.remove('hidden');
@@ -1372,14 +1361,14 @@
                                 <p class="text-xs font-bold text-slate-800 dark:text-cinder-white truncate">${card.nome}</p>
                                 <p class="text-[10px] text-cinder-orange font-semibold truncate">${card.set} — ${card.variante}</p>
                             </div>
-                            <button onclick="toggleLock('${card.id}')" title="${isLocked ? 'Cadeado Ativo' : 'Cadeado Inativo'}" class="p-1 rounded-lg border transition shrink-0 ${isLocked ? 'bg-cinder-red/20 text-cinder-red dark:text-cinder-yellow border-cinder-orange/50' : 'bg-slate-100 dark:bg-cinder-bg text-slate-400 border-cinder-orange/10 hover:text-slate-700 dark:hover:text-cinder-white'}">
+                            <button onclick="toggleLock('${card.id}')" title="${isLocked ? 'Cadeado Ativo' : 'Cadeado Inativo'}" class="p-1 rounded-lg border transition shrink-0 cursor-pointer ${isLocked ? 'bg-cinder-red/20 text-cinder-red dark:text-cinder-yellow border-cinder-orange/50' : 'bg-slate-100 dark:bg-cinder-bg text-slate-400 border-cinder-orange/10 hover:text-slate-700 dark:hover:text-cinder-white'}">
                                 ${isLocked ? '🔒' : '🔓'}
                             </button>
                         </div>
 
                         <div>
                             <label class="block text-[9px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase mb-1">Origem da Carta:</label>
-                            <select id="cap-type-${card.id}" onchange="handleCaptureTypeChange('${card.id}', this.value)" class="w-full bg-slate-50 dark:bg-cinder-bg border border-cinder-orange/30 rounded-lg px-2 py-1 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange">
+                            <select id="cap-type-${card.id}" onchange="handleCaptureTypeChange('${card.id}', this.value)" class="w-full bg-slate-50 dark:bg-cinder-bg border border-cinder-orange/30 rounded-lg px-2 py-1 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange cursor-pointer">
                                 <option value="" ${currentType === '' ? 'selected' : ''}>-- Selecione a origem --</option>
                                 <option value="booster" ${currentType === 'booster' ? 'selected' : ''}>Booster</option>
                                 <option value="troca" ${currentType === 'troca' ? 'selected' : ''}>Troca</option>
@@ -1390,7 +1379,7 @@
 
                         <div id="cap-booster-div-${card.id}" class="hidden">
                             <label class="block text-[9px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase mb-1">Qual Booster / Coleção?</label>
-                            <select onchange="saveCaptureData('${card.id}', 'booster', this.value)" class="w-full bg-slate-50 dark:bg-cinder-bg border border-cinder-orange/30 rounded-lg px-2 py-1 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange">
+                            <select onchange="saveCaptureData('${card.id}', 'booster', this.value)" class="w-full bg-slate-50 dark:bg-cinder-bg border border-cinder-orange/30 rounded-lg px-2 py-1 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange cursor-pointer">
                                 ${boosterOptionsHtml}
                             </select>
                         </div>
