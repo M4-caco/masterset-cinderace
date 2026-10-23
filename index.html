@@ -102,20 +102,16 @@
                     
                     <!-- TOGGLE SWITCH TEMA (SOL / LUA) ESTILIZADO -->
                     <button onclick="toggleTheme()" aria-label="Alternar Tema" class="theme-switch-track relative w-16 h-8 rounded-full bg-slate-200 dark:bg-[#121926] border border-slate-300 dark:border-slate-800 transition-colors duration-300 flex items-center px-1 shrink-0 overflow-hidden cursor-pointer">
-                        
-                        <!-- Ícone do Sol (Modo Claro) à direita -->
                         <svg class="absolute right-2 w-4 h-4 text-slate-400 dark:opacity-0 transition-opacity duration-300 pointer-events-none" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3zm0-13C11.45 2 11 2.45 11 3v2c0 .55.45 1 1 1s1-.45 1-1V3c0-.55-.45-1-1-1zm0 16c-.55 0-1 .45-1 1v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1zm9-9c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1h2zM5 12c0-.55-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1zm14.36-6.36c.39-.39.39-1.02 0-1.41s-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41zM7.05 18.36c-.39-.39-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41c.39-.38.39-1.02 0-1.41zM18.36 18.36l1.41 1.41c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.41-1.41c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41zM6.34 5.64L4.93 4.23c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41z"/>
                         </svg>
 
-                        <!-- Ícone da Lua e Estrelas (Modo Escuro) à esquerda -->
                         <div class="absolute left-1.5 opacity-0 dark:opacity-100 transition-opacity duration-300 pointer-events-none flex items-center gap-0.5 text-slate-400">
                             <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M12.3 2a10 10 0 0 0-1.9 20 10 10 0 0 0 10-10 10 10 0 0 0-8.1-10zm-1.1 17.9a8 8 0 1 1 6.7-11.2 8.05 8.05 0 0 1-6.7 11.2z"/>
                             </svg>
                         </div>
 
-                        <!-- Botão deslizante (Knob) -->
                         <div class="theme-switch-thumb w-6 h-6 rounded-full bg-white dark:bg-[#34445c] transform transition-transform duration-300 translate-x-0 dark:translate-x-8 z-10"></div>
                     </button>
 
@@ -272,7 +268,7 @@
 
                     <div class="bg-slate-100 dark:bg-cinder-bg p-4 sm:p-5 rounded-2xl border border-cinder-orange/20">
                         <div class="flex items-center gap-2 mb-4 border-b border-cinder-orange/10 pb-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-cinder-red"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-cinder-orange"></span>
                             <h3 class="text-xs font-black text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Expansão</h3>
                         </div>
                         <div id="stats-set" class="space-y-3 max-h-72 overflow-y-auto pr-2 custom-scroll"></div>
@@ -280,7 +276,7 @@
 
                     <div class="bg-slate-100 dark:bg-cinder-bg p-4 sm:p-5 rounded-2xl border border-cinder-orange/20">
                         <div class="flex items-center gap-2 mb-4 border-b border-cinder-orange/10 pb-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-green-500"></span>
+                            <span class="w-2.5 h-2.5 rounded-full bg-cinder-yellow"></span>
                             <h3 class="text-xs font-black text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Característica</h3>
                         </div>
                         <div id="stats-var" class="space-y-3 max-h-72 overflow-y-auto pr-2 custom-scroll"></div>
@@ -302,7 +298,6 @@
         </section>
 
         <section id="view-market" class="hidden space-y-4">
-            <!-- BANNER DE VALORIZAÇÃO DA COLEÇÃO -->
             <div id="market-summary-banner" class="bg-white dark:bg-cinder-dark border border-cinder-orange/20 rounded-3xl p-4 sm:p-6 shadow-xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
                     <span class="text-[10px] uppercase font-bold tracking-wider text-cinder-orange dark:text-cinder-yellow">Valuation do Master Set</span>
@@ -312,11 +307,11 @@
                 <div class="flex gap-4 bg-slate-100 dark:bg-cinder-bg px-4 py-3 rounded-2xl border border-cinder-orange/20 w-full sm:w-auto justify-around">
                     <div>
                         <p class="text-[9px] text-slate-500 dark:text-slate-400 uppercase font-bold">Total Liga (BR)</p>
-                        <p id="market-total-liga" class="text-sm sm:text-base font-black text-green-600 dark:text-green-400 font-mono">R$ 0,00</p>
+                        <p id="market-total-liga" class="text-sm sm:text-base font-black text-cinder-orange dark:text-cinder-yellow font-mono">R$ 0,00</p>
                     </div>
                     <div class="border-l border-cinder-orange/20 pl-4">
                         <p class="text-[9px] text-slate-500 dark:text-slate-400 uppercase font-bold">Total eBay (INT)</p>
-                        <p id="market-total-ebay" class="text-sm sm:text-base font-black text-blue-600 dark:text-blue-400 font-mono">$ 0.00</p>
+                        <p id="market-total-ebay" class="text-sm sm:text-base font-black text-cinder-orange dark:text-cinder-yellow font-mono">$ 0.00</p>
                     </div>
                 </div>
             </div>
@@ -775,7 +770,7 @@
                     if (selectedStatus.has(s)) {
                         btn.className = s === 'MISSING' 
                             ? "status-btn bg-cinder-orange dark:bg-cinder-yellow text-white dark:text-cinder-dark px-3 py-1.5 rounded-lg text-xs font-bold text-left transition shadow" 
-                            : "status-btn bg-green-500 text-white px-3 py-1.5 rounded-lg text-xs font-bold text-left transition shadow";
+                            : "status-btn bg-cinder-orange text-white px-3 py-1.5 rounded-lg text-xs font-bold text-left transition shadow";
                     } else {
                         btn.className = "status-btn bg-slate-100 dark:bg-cinder-card text-slate-800 dark:text-cinder-white hover:bg-cinder-red hover:text-white px-3 py-1.5 rounded-lg text-xs font-bold text-left transition";
                     }
@@ -927,7 +922,7 @@
             content.innerHTML = `
                 <div class="flex justify-between items-center w-full mb-4 px-1">
                     <span class="px-2.5 py-1 rounded text-xs font-black uppercase bg-slate-100 dark:bg-cinder-bg text-cinder-orange dark:text-cinder-yellow border border-cinder-orange/30">${card.lingua}</span>
-                    <span class="text-xs font-extrabold ${isObtained ? 'text-green-600 dark:text-green-400' : 'text-cinder-orange dark:text-cinder-yellow'}">${isObtained ? 'TENHO' : 'FALTANTE'} (${currentZoomIndex + 1}/${allCards.length})</span>
+                    <span class="text-xs font-extrabold ${isObtained ? 'text-cinder-orange dark:text-cinder-yellow' : 'text-slate-400'}">${isObtained ? 'TENHO' : 'FALTANTE'} (${currentZoomIndex + 1}/${allCards.length})</span>
                 </div>
                 
                 <div class="relative w-full md:px-12 my-1 flex items-center justify-center">
@@ -1060,7 +1055,8 @@
             document.getElementById('dashboard-total-pct').innerText = `${totalPct}% (${totalObtained}/${totalCards})`;
             document.getElementById('dashboard-total-bar').style.width = `${totalPct}%`;
 
-            const createStatRow = (label, data, colorClass) => {
+            // PADRONIZADO COM AS CORES DA MARCA (cinder-orange e cinder-yellow)
+            const createStatRow = (label, data, colorClass = 'bg-cinder-orange') => {
                 const pct = Math.round((data.obtained / data.total) * 100) || 0;
                 return `
                     <div>
@@ -1075,9 +1071,9 @@
             };
 
             document.getElementById('stats-pokemon').innerHTML = Object.keys(pokes).sort().map(p => createStatRow(p, pokes[p], 'bg-cinder-orange')).join('');
-            document.getElementById('stats-lang').innerHTML = Object.keys(langs).sort().map(l => createStatRow(l, langs[l], 'bg-cinder-orange dark:bg-cinder-yellow')).join('');
-            document.getElementById('stats-set').innerHTML = Object.keys(sets).sort().map(s => createStatRow(s, sets[s], 'bg-cinder-red')).join('');
-            document.getElementById('stats-var').innerHTML = Object.keys(vars).sort().map(v => createStatRow(v, vars[v], 'bg-green-500')).join('');
+            document.getElementById('stats-lang').innerHTML = Object.keys(langs).sort().map(l => createStatRow(l, langs[l], 'bg-cinder-yellow')).join('');
+            document.getElementById('stats-set').innerHTML = Object.keys(sets).sort().map(s => createStatRow(s, sets[s], 'bg-cinder-orange')).join('');
+            document.getElementById('stats-var').innerHTML = Object.keys(vars).sort().map(v => createStatRow(v, vars[v], 'bg-cinder-yellow')).join('');
         }
 
         function applyFilters() {
@@ -1122,22 +1118,27 @@
                     cardEl.onclick = () => toggleCard(card.id);
 
                     let pressTimer = null;
-                    let isScrolling = false;
+                    let isLongPressTriggered = false;
 
-                    cardEl.onmouseenter = () => { pressTimer = setTimeout(() => { showZoomModal(card.id); }, 1000); };
-                    cardEl.onmouseleave = () => { clearTimeout(pressTimer); };
+                    // PAIRAR NO DESKTOP (1 segundo)
+                    cardEl.onmouseenter = () => { 
+                        pressTimer = setTimeout(() => { showZoomModal(card.id); }, 1000); 
+                    };
+                    cardEl.onmouseleave = () => { 
+                        if (pressTimer) clearTimeout(pressTimer); 
+                    };
 
-                    cardEl.ontouchstart = (e) => {
-                        isScrolling = false;
+                    // GESTÃO DE MANTER PRESSIONADO EM DISPOSITIVOS MÓVEIS (Evita abrir ao soltar rápido)
+                    cardEl.ontouchstart = () => {
+                        isLongPressTriggered = false;
+                        if (pressTimer) clearTimeout(pressTimer);
                         pressTimer = setTimeout(() => {
-                            if (!isScrolling) {
-                                showZoomModal(card.id);
-                            }
-                        }, 1000);
+                            isLongPressTriggered = true;
+                            showZoomModal(card.id);
+                        }, 1000); // 1000ms cravados
                     };
 
                     cardEl.ontouchmove = () => {
-                        isScrolling = true;
                         if (pressTimer) clearTimeout(pressTimer);
                     };
 
@@ -1153,7 +1154,7 @@
                                 <span class="px-1 py-0.5 rounded text-[8px] sm:text-[9px] font-black uppercase bg-slate-100 dark:bg-cinder-bg text-cinder-orange dark:text-cinder-yellow border border-cinder-orange/20">${card.lingua}</span>
                                 <div class="flex items-center gap-0.5">
                                     ${isLocked ? '<span title="Bloqueado na aba Captura" class="text-[10px]">🔒</span>' : ''}
-                                    <span class="text-[9px] sm:text-[10px] font-extrabold ${isObtained ? 'text-green-600 dark:text-green-400' : 'text-slate-400'}">${isObtained ? 'TENHO' : 'FALTANTE'}</span>
+                                    <span class="text-[9px] sm:text-[10px] font-extrabold ${isObtained ? 'text-cinder-orange dark:text-cinder-yellow' : 'text-slate-400'}">${isObtained ? 'TENHO' : 'FALTANTE'}</span>
                                 </div>
                             </div>
                             <div class="aspect-[2.5/3.5] w-full rounded-xl overflow-hidden bg-slate-100 dark:bg-cinder-bg flex items-center justify-center border border-cinder-orange/10 p-0.5">
@@ -1398,7 +1399,7 @@
                             <div class="min-w-0 flex-1">
                                 <div class="flex items-center gap-2">
                                     <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-slate-200 dark:bg-cinder-dark text-cinder-orange dark:text-cinder-yellow border border-cinder-orange/20">${card.lingua}</span>
-                                    <span class="text-xs font-bold ${isObtained ? 'text-green-600 dark:text-green-400' : 'text-cinder-orange dark:text-cinder-yellow'}">${isObtained ? 'Tenho' : 'Faltante'}</span>
+                                    <span class="text-xs font-bold ${isObtained ? 'text-cinder-orange dark:text-cinder-yellow' : 'text-slate-400'}">${isObtained ? 'Tenho' : 'Faltante'}</span>
                                 </div>
                                 <p class="text-xs font-bold text-slate-800 dark:text-cinder-white truncate mt-0.5">${card.nome} <span class="text-cinder-orange font-normal">(${card.pokemon})</span></p>
                                 <p class="text-[10px] text-slate-500 dark:text-slate-400 truncate">${card.set} — ${card.variante} (#${card.numero})</p>
@@ -1418,7 +1419,7 @@
                             </div>
                             <div class="flex items-center gap-1.5 mt-2 sm:mt-0">
                                 <a href="${card.linkLiga}" target="_blank" class="bg-cinder-orange/20 text-cinder-orange hover:bg-cinder-orange/40 border border-cinder-orange/30 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition inline-block text-center">Liga</a>
-                                <a href="${card.linkEbay}" target="_blank" class="bg-blue-600/20 text-blue-600 dark:text-blue-400 hover:bg-blue-600/40 border border-blue-500/30 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition inline-block text-center">eBay</a>
+                                <a href="${card.linkEbay}" target="_blank" class="bg-cinder-orange/20 text-cinder-orange dark:text-cinder-yellow hover:bg-cinder-orange/40 border border-cinder-orange/30 px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition inline-block text-center">eBay</a>
                             </div>
                         </div>
                     `;
