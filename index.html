@@ -134,7 +134,7 @@
 
                 <div class="flex items-center gap-2 sm:gap-3">
                     <button onclick="toggleTheme()" aria-label="Alternar Tema" class="theme-switch-track relative w-11 sm:w-14 h-6 sm:h-7 rounded-full bg-white/70 dark:bg-[#121926]/80 border border-slate-300 dark:border-slate-800 transition-colors duration-300 flex items-center px-1 shrink-0 overflow-hidden cursor-pointer shadow-sm">
-                        <svg class="absolute right-1.5 w-3.5 h-3.5 text-slate-400 dark:opacity-0 transition-opacity duration-300 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3zm0-13C11.45 2 11 2.45 11 3v2c0 .55.45 1 1 1s1-.45 1-1V3c0-.55-.45-1-1-1zm0 16c-.55 0-1 .45-1 1v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1zm9-9c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1h2zM5 12c0-.55-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1zm14.36-6.36c.39-.39.39-1.02 0-1.41s-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41zM7.05 18.36c-.39-.39-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41c.39-.38.39-1.02 0-1.41zM18.36 18.36l1.41 1.41c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.41-1.41c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41zM6.34 5.64L4.93 4.23c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0s-.39-1.02 0-1.41z"/></svg>
+                        <svg class="absolute right-1.5 w-3.5 h-3.5 text-slate-400 dark:opacity-0 transition-opacity duration-300 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3zm0-13C11.45 2 11 2.45 11 3v2c0 .55.45 1 1 1s1-.45 1-1V3c0-.55-.45-1-1-1zm0 16c-.55 0-1 .45-1 1v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1zm9-9c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1h2zM5 12c0-.55-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1zm14.36-6.36c.39-.39.39-1.02 0-1.41s-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41zM7.05 18.36c-.39-.39-1.02-.39-1.41 0l-1.41 1.41c-.39.39-1.02.39 1.41 0l1.41-1.41c.39-.38.39-1.02 0-1.41zM18.36 18.36l1.41 1.41c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.41-1.41c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41zM6.34 5.64L4.93 4.23c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0s-.39-1.02 0-1.41z"/></svg>
                         <div class="absolute left-1 opacity-0 dark:opacity-100 transition-opacity duration-300 pointer-events-none flex items-center gap-0.5 text-slate-400">
                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.3 2a10 10 0 0 0-1.9 20 10 10 0 0 0 10-10 10 10 0 0 0-8.1-10zm-1.1 17.9a8 8 0 1 1 6.7-11.2 8.05 8.05 0 0 1-6.7 11.2z"/></svg>
                         </div>
@@ -207,16 +207,19 @@
                         </div>
 
                         <div class="flex flex-col gap-1 pt-2 border-t border-cinder-orange/20">
-                            <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Característica:</span>
+                            <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Característica / Raridade:</span>
                             <div class="flex flex-col gap-1">
                                 <button id="btn-var-Regular" onclick="filterVar('Regular')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Regular</button>
                                 <button id="btn-var-Foil" onclick="filterVar('Foil')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Foil</button>
                                 <button id="btn-var-Reverse" onclick="filterVar('Reverse Foil')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Reverse Foil</button>
+                                <button id="btn-var-PokeballFoil" onclick="filterVar('Pokeball Foil')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Pokeball Foil</button>
+                                <button id="btn-var-MasterballFoil" onclick="filterVar('Masterball Foil')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Masterball Foil</button>
                                 <button id="btn-var-Promo" onclick="filterVar('Promo')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Promo</button>
-                                <button id="btn-var-V" onclick="filterVar('V Card')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">V Card</button>
-                                <button id="btn-var-VMAX" onclick="filterVar('VMAX')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">VMAX</button>
-                                <button id="btn-var-FullArt" onclick="filterVar('Full Art')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Full Art</button>
-                                <button id="btn-var-AltArt" onclick="filterVar('Arte Alternativa (Alt Art)')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Arte Alternativa (Alt Art)</button>
+                                <button id="btn-var-VRegular" onclick="filterVar('V Regular')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">V Regular</button>
+                                <button id="btn-var-VFullArt" onclick="filterVar('V Full Art')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">V Full Art</button>
+                                <button id="btn-var-VMAXRegular" onclick="filterVar('VMAX Regular')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">VMAX Regular</button>
+                                <button id="btn-var-exRegular" onclick="filterVar('ex Regular')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">ex Regular</button>
+                                <button id="btn-var-exAltArt" onclick="filterVar('ex Alt Art')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">ex Alt Art</button>
                             </div>
                         </div>
 
@@ -473,20 +476,20 @@
             { id: "card-5", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Regular", lingua: "PT-BR", numero: "028/198", imagem: "CRE_028_R_PT.png" },
             { id: "card-6", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "PT-BR", numero: "SWSH112", imagem: "SP_112_R_PT.png" },
             { id: "card-7", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "PT-BR", numero: "SWSH278", imagem: "SP_278_R_PT.png" },
-            { id: "card-8", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "V Card", lingua: "PT-BR", numero: "035/192", imagem: "RCL_035_R_PT.png" },
-            { id: "card-9", nome: "Cinderace V", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "Foil", lingua: "PT-BR", numero: "018/073", imagem: "SHF_018_R_PT_H.png" },
-            { id: "card-10", nome: "Cinderace V", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Foil", lingua: "PT-BR", numero: "SWSH015", imagem: "SP_015_R_PT_H.png" },
-            { id: "card-11", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "Full Art", lingua: "PT-BR", numero: "178/192", imagem: "RCL_178_R_PT_H.png" },
+            { id: "card-8", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "V Regular", lingua: "PT-BR", numero: "035/192", imagem: "RCL_035_R_PT.png" },
+            { id: "card-9", nome: "Cinderace V", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "V Regular", lingua: "PT-BR", numero: "018/073", imagem: "SHF_018_R_PT_H.png" },
+            { id: "card-10", nome: "Cinderace V", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "V Regular", lingua: "PT-BR", numero: "SWSH015", imagem: "SP_015_R_PT_H.png" },
+            { id: "card-11", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "V Full Art", lingua: "PT-BR", numero: "178/192", imagem: "RCL_178_R_PT_H.png" },
             { id: "card-12", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "PT-BR", numero: "043/264", imagem: "FST_043_R_PT.png" },
             { id: "card-13", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "PT-BR", numero: "044/264", imagem: "FST_044_R_PT.png" },
-            { id: "card-14", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "VMAX", lingua: "PT-BR", numero: "036/192", imagem: "RCL_036_R_PT.png" },
-            { id: "card-15", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "Foil", lingua: "PT-BR", numero: "019/073", imagem: "SHF_019_R_PT_H.png" },
+            { id: "card-14", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "VMAX Regular", lingua: "PT-BR", numero: "036/192", imagem: "RCL_036_R_PT.png" },
+            { id: "card-15", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "VMAX Regular", lingua: "PT-BR", numero: "019/073", imagem: "SHF_019_R_PT_H.png" },
             { id: "card-16", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "Rainbow Rare", lingua: "PT-BR", numero: "194/192", imagem: "RCL_194_R_PT_H.png" },
             { id: "card-17", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "PT-BR", numero: "045/264", imagem: "FST_045_R_PT.png" },
-            { id: "card-18", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "Foil", lingua: "PT-BR", numero: "028/142", imagem: "SCR_028_R_PT_H.png" },
-            { id: "card-19", nome: "Cinderace ex", pokemon: "Cinderace", set: "Promos Escarlate e Violeta", variante: "Foil", lingua: "PT-BR", numero: "SVP163", imagem: "SVP_163_R_PT_H.png" },
-            { id: "card-20", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "Special Illustration Rare", lingua: "PT-BR", numero: "157/142", imagem: "SCR_157_R_PT_H.png" },
-            { id: "card-21", nome: "Cinderace ex", pokemon: "Cinderace", set: "Heróis Ascendentes", variante: "Foil", lingua: "PT-BR", numero: "038/217", imagem: "ASC_038_R_PT_H.png" },
+            { id: "card-18", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "ex Regular", lingua: "PT-BR", numero: "028/142", imagem: "SCR_028_R_PT_H.png" },
+            { id: "card-19", nome: "Cinderace ex", pokemon: "Cinderace", set: "Promos Escarlate e Violeta", variante: "ex Regular", lingua: "PT-BR", numero: "SVP163", imagem: "SVP_163_R_PT_H.png" },
+            { id: "card-20", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "ex Alt Art", lingua: "PT-BR", numero: "157/142", imagem: "SCR_157_R_PT_H.png" },
+            { id: "card-21", nome: "Cinderace ex", pokemon: "Cinderace", set: "Heróis Ascendentes", variante: "ex Regular", lingua: "PT-BR", numero: "038/217", imagem: "ASC_038_R_PT_H.png" },
             { id: "card-22", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Foil", lingua: "PT-BR", numero: "028/132", imagem: "MEG_028_R_PT.png" },
             { id: "card-23", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Reverse Foil", lingua: "PT-BR", numero: "036/202", imagem: "SSH_036_R_PT_RH.png" },
             { id: "card-24", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Reverse Foil", lingua: "PT-BR", numero: "028/132", imagem: "MEG_028_R_PT_RH.png" },
@@ -500,23 +503,23 @@
             { id: "card-30", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "036/202", imagem: "SSH_036_R_EN.png" },
             { id: "card-31", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Foil", lingua: "EN", numero: "036/202", imagem: "SSH_036_R_EN_H.png" },
             { id: "card-32", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Regular", lingua: "EN", numero: "028/198", imagem: "CRE_028_R_EN.png" },
-            { id: "card-33", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "EN", numero: "SWSH112", imagem: "SP_112_R_EN.png" },
-            { id: "card-34", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "EN", numero: "SWSH278", imagem: "SP_278_R_EN.png" },
-            { id: "card-35", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "V Card", lingua: "EN", numero: "035/192", imagem: "RCL_035_R_EN.png" },
-            { id: "card-36", nome: "Cinderace V", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "Foil", lingua: "EN", numero: "018/073", imagem: "SHF_018_R_EN_H.png" },
-            { id: "card-37", nome: "Cinderace V", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Foil", lingua: "EN", numero: "SWSH015", imagem: "SP_015_R_EN_H.png" },
+            { id: "card-33", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "EN", numero: "SWSH112", imagem: "SP_112_R_EN.png" },
+            { id: "card-34", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "EN", numero: "SWSH278", imagem: "SP_278_R_EN.png" },
+            { id: "card-35", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "V Regular", lingua: "EN", numero: "035/192", imagem: "RCL_035_R_EN.png" },
+            { id: "card-36", nome: "Cinderace V", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "V Regular", lingua: "EN", numero: "018/073", imagem: "SHF_018_R_EN_H.png" },
+            { id: "card-37", nome: "Cinderace V", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "V Regular", lingua: "EN", numero: "SWSH015", imagem: "SP_015_R_EN_H.png" },
             { id: "card-38", nome: "Cinderace V", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Jumbo / Gigante", lingua: "EN", numero: "SWSH015", imagem: "SP_015_R_EN_JUMBO_H.png" },
-            { id: "card-39", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "Foil", lingua: "EN", numero: "178/192", imagem: "RCL_178_R_EN_H.png" },
+            { id: "card-39", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "V Full Art", lingua: "EN", numero: "178/192", imagem: "RCL_178_R_EN_H.png" },
             { id: "card-40", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "EN", numero: "043/264", imagem: "FST_043_R_EN.png" },
             { id: "card-41", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "EN", numero: "044/264", imagem: "FST_044_R_EN.png" },
-            { id: "card-42", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "VMAX", lingua: "EN", numero: "036/192", imagem: "RCL_036_R_EN.png" },
-            { id: "card-43", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "Foil", lingua: "EN", numero: "019/073", imagem: "SHF_019_R_EN_H.png" },
-            { id: "card-44", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "Foil", lingua: "EN", numero: "194/192", imagem: "RCL_194_R_EN_H.png" },
+            { id: "card-42", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "VMAX Regular", lingua: "EN", numero: "036/192", imagem: "RCL_036_R_EN.png" },
+            { id: "card-43", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "VMAX Regular", lingua: "EN", numero: "019/073", imagem: "SHF_019_R_EN_H.png" },
+            { id: "card-44", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "Rainbow Rare", lingua: "EN", numero: "194/192", imagem: "RCL_194_R_EN_H.png" },
             { id: "card-45", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Regular", lingua: "EN", numero: "045/264", imagem: "FST_045_R_EN.png" },
-            { id: "card-46", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "Foil", lingua: "EN", numero: "028/142", imagem: "SCR_028_R_EN_H.png" },
-            { id: "card-47", nome: "Cinderace ex", pokemon: "Cinderace", set: "Promos Escarlate e Violeta", variante: "Foil", lingua: "EN", numero: "SVP163", imagem: "SVP_163_R_EN_H.png" },
-            { id: "card-48", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "Foil", lingua: "EN", numero: "157/142", imagem: "SCR_157_R_EN_H.png" },
-            { id: "card-49", nome: "Cinderace ex", pokemon: "Cinderace", set: "Heróis Ascendentes", variante: "Foil", lingua: "EN", numero: "038/217", imagem: "ASC_038_R_EN_H.png" },
+            { id: "card-46", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "ex Regular", lingua: "EN", numero: "028/142", imagem: "SCR_028_R_EN_H.png" },
+            { id: "card-47", nome: "Cinderace ex", pokemon: "Cinderace", set: "Promos Escarlate e Violeta", variante: "ex Regular", lingua: "EN", numero: "SVP163", imagem: "SVP_163_R_EN_H.png" },
+            { id: "card-48", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "ex Alt Art", lingua: "EN", numero: "157/142", imagem: "SCR_157_R_EN_H.png" },
+            { id: "card-49", nome: "Cinderace ex", pokemon: "Cinderace", set: "Heróis Ascendentes", variante: "ex Regular", lingua: "EN", numero: "038/217", imagem: "ASC_038_R_EN_H.png" },
             { id: "card-50", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Foil", lingua: "EN", numero: "028/132", imagem: "MEG_028_R_EN.png" },
             { id: "card-51", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Reverse Foil", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN_LEAGUE_RH.png" },
             { id: "card-52", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Play Promo", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN_PLAY.png" },
@@ -527,8 +530,8 @@
             { id: "card-57", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Evolução", variante: "Reverse Foil", lingua: "EN", numero: "028/132", imagem: "MEG_028_R_EN_RH.png" },
             { id: "card-58", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Reverse Foil", lingua: "EN", numero: "028/198", imagem: "CRE_028_R_EN_RH.png" },
             { id: "card-59", nome: "Cinderace", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "Foil", lingua: "EN", numero: "043/264", imagem: "FST_043_R_EN_BATTLE_H.png" },
-            { id: "card-60", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Arte Alternativa (Alt Art)", lingua: "EN", numero: "028/198", imagem: "CRE_028_R_EN_ALT.png" },
-            { id: "card-61", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Arte Alternativa (Alt Art)", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN_ALT.png" },
+            { id: "card-60", nome: "Cinderace", pokemon: "Cinderace", set: "Reinado Glacial", variante: "Foil", lingua: "EN", numero: "028/198", imagem: "CRE_028_R_EN_ALT.png" },
+            { id: "card-61", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Foil", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN_ALT.png" },
             { id: "card-62", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Foil", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN_COSMOS_H.png" },
 
             // JP & CN
@@ -536,25 +539,25 @@
             { id: "card-64", nome: "Cinderace", pokemon: "Cinderace", set: "Shiny Star V (JP)", variante: "Foil", lingua: "JP", numero: "024/190", imagem: "S4A_024_R_JP_H.png" },
             { id: "card-65", nome: "Cinderace", pokemon: "Cinderace", set: "Shiny Star V (JP)", variante: "Foil", lingua: "JP", numero: "216/190", imagem: "S4A_216_R_JP_H.png" },
             { id: "card-66", nome: "Cinderace", pokemon: "Cinderace", set: "Scarlet & Violet (JP)", variante: "Regular", lingua: "JP", numero: "008/078", imagem: "SAR_008_R_JP.png" },
-            { id: "card-67", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "022/S-P", imagem: "SP_022_R_JP.png" },
+            { id: "card-67", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "022/S-P", imagem: "SP_022_R_JP.png" },
             { id: "card-68", nome: "Cinderace", pokemon: "Cinderace", set: "Chilling Reign (JP)", variante: "Regular", lingua: "JP", numero: "017/070", imagem: "S6H_017_R_JP.png" },
             { id: "card-69", nome: "Cinderace", pokemon: "Cinderace", set: "Start Deck 100 (JP)", variante: "Regular", lingua: "JP", numero: "072/414", imagem: "SI_072_R_JP.png" },
             { id: "card-70", nome: "Cinderace", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "Regular", lingua: "JP", numero: "016/070", imagem: "S1A_016_R_JP.png" },
             { id: "card-71", nome: "Cinderace", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "Foil", lingua: "JP", numero: "072/070", imagem: "S1A_072_R_JP_H.png" },
             { id: "card-72", nome: "Cinderace", pokemon: "Cinderace", set: "Shining Fates (JP)", variante: "Regular", lingua: "JP", numero: "010/050", imagem: "SH_010_R_JP.png" },
             { id: "card-73", nome: "Cinderace", pokemon: "Cinderace", set: "Start Deck 100 (JP)", variante: "Regular", lingua: "JP", numero: "073/414", imagem: "SI_073_R_JP.png" },
-            { id: "card-74", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "168/S-P", imagem: "SP_168_R_JP.png" },
+            { id: "card-74", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "168/S-P", imagem: "SP_168_R_JP.png" },
             { id: "card-75", nome: "Cinderace", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "Regular", lingua: "JP", numero: "017/070", imagem: "S1A_017_R_JP.png" },
             { id: "card-76", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Foil", lingua: "JP", numero: "002/020", imagem: "SP2_002_R_JP_H.png" },
             { id: "card-77", nome: "Cinderace", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "Foil", lingua: "JP", numero: "080/070", imagem: "S1a_080_HR_JP_H.jpg" },
-            { id: "card-78", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "169/S-P", imagem: "SP_169_R_JP.png" },
+            { id: "card-78", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "169/S-P", imagem: "SP_169_R_JP.png" },
             { id: "card-79", nome: "Cinderace", pokemon: "Cinderace", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "018/102", imagem: "SV7_018_R_JP.png" },
-            { id: "card-80", nome: "Cinderace", pokemon: "Cinderace", set: "Promo (JP)", variante: "Regular", lingua: "JP", numero: "139/SV-P", imagem: "MC_139_R_JP.png" },
-            { id: "card-81", nome: "Cinderace", pokemon: "Cinderace", set: "Stellar Miracle (JP)", variante: "Foil", lingua: "JP", numero: "116/102", imagem: "SV7_116_R_JP_H.png" },
+            { id: "card-80", nome: "Cinderace", pokemon: "Cinderace", set: "Promo (JP)", variante: "Promo", lingua: "JP", numero: "139/SV-P", imagem: "MC_139_R_JP.png" },
+            { id: "card-81", nome: "Cinderace", pokemon: "Cinderace", set: "Stellar Miracle (JP)", variante: "Pokeball Foil", lingua: "JP", numero: "116/102", imagem: "SV7_116_R_JP_H.png" },
             { id: "card-82", nome: "Cinderace", pokemon: "Cinderace", set: "Battle Partners (JP)", variante: "Regular", lingua: "JP", numero: "017/080", imagem: "M1L_017_R_JP.png" },
             { id: "card-83", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "029/150", imagem: "CSV9C_029_CN.webp" },
             { id: "card-84", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "218/150", imagem: "CSV9C_218_CN.webp" },
-            { id: "card-85", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Foil", lingua: "CN", numero: "258/150", imagem: "CSV9C_258_CN_H.webp" },
+            { id: "card-85", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Pokeball Foil", lingua: "CN", numero: "258/150", imagem: "CSV9C_258_CN_H.webp" },
             { id: "card-86", nome: "Cinderace", pokemon: "Cinderace", set: "Start Deck 100 (CN)", variante: "Regular", lingua: "CN", numero: "072/414", imagem: "SD100_072_CN.webp" },
             { id: "card-87", nome: "Cinderace", pokemon: "Cinderace", set: "Start Deck 100 (CN)", variante: "Regular", lingua: "CN", numero: "073/414", imagem: "SD100_073_CN.webp" },
             { id: "card-88", nome: "Cinderace", pokemon: "Cinderace", set: "Family Pokémon (CN)", variante: "Regular", lingua: "CN", numero: "010/050", imagem: "FAMILY_010_CN.webp" },
@@ -569,37 +572,37 @@
             { id: "card-97", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "165/150", imagem: "DCF_165_CN.webp" },
             { id: "card-98", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "184/150", imagem: "DCF_184_CN.webp" },
             { id: "card-99", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Volunteer (CN)", variante: "Foil", lingua: "CN", numero: "039/080", imagem: "DCV_039_CN_H.webp" },
-            { id: "card-100", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "CN", numero: "026/S-P", imagem: "SP_026_CN.webp" },
+            { id: "card-100", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "CN", numero: "026/S-P", imagem: "SP_026_CN.webp" },
             
             // SCORBUNNY
-            { id: "card-101", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "PT-BR", numero: "SWSH002", imagem: "SP_002_R_PT.png" },
+            { id: "card-101", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "PT-BR", numero: "SWSH002", imagem: "SP_002_R_PT.png" },
             { id: "card-102", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "030/202", imagem: "SSH_030_R_PT.png" },
             { id: "card-103", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Reverse Foil", lingua: "PT-BR", numero: "030/202", imagem: "SSH_030_R_PT_RH.png" },
             { id: "card-104", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "031/202", imagem: "SSH_031_R_PT.png" },
             { id: "card-105", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Reverse Foil", lingua: "PT-BR", numero: "031/202", imagem: "SSH_031_R_PT_RH.png" },
             { id: "card-106", nome: "Scorbunny", pokemon: "Scorbunny", set: "Escarlate e Violeta", variante: "Foil", lingua: "PT-BR", numero: "015/198", imagem: "SCORBUNNY_SV015_R_PT_H.png" },
-            { id: "card-107", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "PT-BR", numero: "SWSH071", imagem: "SP_071_R_PT.png" },
+            { id: "card-107", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "PT-BR", numero: "SWSH071", imagem: "SP_071_R_PT.png" },
             { id: "card-108", nome: "Scorbunny", pokemon: "Scorbunny", set: "Reinado Glacial", variante: "Regular", lingua: "PT-BR", numero: "026/198", imagem: "CRE_026_R_PT.png" },
             { id: "card-109", nome: "Scorbunny", pokemon: "Scorbunny", set: "Reinado Glacial", variante: "Reverse Foil", lingua: "PT-BR", numero: "026/198", imagem: "CRE_026_R_PT_RH.png" },
-            { id: "card-110", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "PT-BR", numero: "SWSH244", imagem: "SP_244_R_PT.png" },
+            { id: "card-110", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "PT-BR", numero: "SWSH244", imagem: "SP_244_R_PT.png" },
             { id: "card-111", nome: "Scorbunny", pokemon: "Scorbunny", set: "Coroa Estelar", variante: "Regular", lingua: "PT-BR", numero: "026/142", imagem: "SCR_026_R_PT.png" },
             { id: "card-112", nome: "Scorbunny", pokemon: "Scorbunny", set: "Coroa Estelar", variante: "Reverse Foil", lingua: "PT-BR", numero: "026/142", imagem: "SCR_026_R_PT_RH.png" },
             { id: "card-113", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Regular", lingua: "PT-BR", numero: "036/217", imagem: "ASC_036_R_PT.png" },
             { id: "card-114", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Reverse Foil", lingua: "PT-BR", numero: "036/217", imagem: "ASC_036_PT_ES_RH.png" },
-            { id: "card-115", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Reverse Foil", lingua: "PT-BR", numero: "036/217", imagem: "ASC_036_PT_FB_RH.jpg" },
+            { id: "card-115", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Pokeball Foil", lingua: "PT-BR", numero: "036/217", imagem: "ASC_036_PT_FB_RH.jpg" },
             { id: "card-116", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Foil", lingua: "PT-BR", numero: "225/217", imagem: "ASC_225_R_PT_H.png" },
             { id: "card-117", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Evolução", variante: "Regular", lingua: "PT-BR", numero: "026/132", imagem: "MEG_026_R_PT.png" },
             { id: "card-118", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Evolução", variante: "Reverse Foil", lingua: "PT-BR", numero: "026/132", imagem: "MEG_026_R_PT_RH.png" },
-            { id: "card-119", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Promo", variante: "Regular", lingua: "PT-BR", numero: "MEP053", imagem: "MEP_053_R_PT.png" },
+            { id: "card-119", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Promo", variante: "Promo", lingua: "PT-BR", numero: "MEP053", imagem: "MEP_053_R_PT.png" },
             { id: "card-120", nome: "Scorbunny", pokemon: "Scorbunny", set: "McDonald's 2021", variante: "Regular", lingua: "PT-BR", numero: "16/25", imagem: "MCD21_16_PT.jpg" },
             { id: "card-121", nome: "Scorbunny", pokemon: "Scorbunny", set: "McDonald's 2021", variante: "Foil", lingua: "PT-BR", numero: "16/25", imagem: "MCD21_16_PT_CONFETTI_H.jpg" },
-            { id: "card-122", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "EN", numero: "SWSH002", imagem: "SP_002_R_EN.png" },
+            { id: "card-122", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "EN", numero: "SWSH002", imagem: "SP_002_R_EN.png" },
             { id: "card-123", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "030/202", imagem: "SSH_030_R_EN.png" },
             { id: "card-124", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Reverse Foil", lingua: "EN", numero: "030/202", imagem: "SSH_030_R_EN_RH.png" },
             { id: "card-125", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "031/202", imagem: "SSH_031_R_EN.png" },
             { id: "card-126", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Reverse Foil", lingua: "EN", numero: "031/202", imagem: "SSH_031_R_EN_RH.png" },
             { id: "card-127", nome: "Scorbunny", pokemon: "Scorbunny", set: "Escarlate e Violeta", variante: "Foil", lingua: "EN", numero: "015/198", imagem: "SCORBUNNY_SV015_R_EN_H.png" },
-            { id: "card-128", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "EN", numero: "SWSH071", imagem: "SP_071_R_EN.png" },
+            { id: "card-128", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "EN", numero: "SWSH071", imagem: "SP_071_R_EN.png" },
             { id: "card-129", nome: "Scorbunny", pokemon: "Scorbunny", set: "Reinado Glacial", variante: "Regular", lingua: "EN", numero: "026/198", imagem: "CRE_026_R_EN.png" },
             { id: "card-130", nome: "Scorbunny", pokemon: "Scorbunny", set: "Reinado Glacial", variante: "Reverse Foil", lingua: "EN", numero: "026/198", imagem: "CRE_026_R_EN_RH.png" },
             { id: "card-131", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Foil", lingua: "EN", numero: "SWSH244", imagem: "SP_244_R_EN_COSMOS_H.png" },
@@ -607,32 +610,32 @@
             { id: "card-133", nome: "Scorbunny", pokemon: "Scorbunny", set: "Coroa Estelar", variante: "Reverse Foil", lingua: "EN", numero: "026/142", imagem: "SCR_026_R_EN_RH.png" },
             { id: "card-134", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Regular", lingua: "EN", numero: "036/217", imagem: "ASC_036_R_EN.png" },
             { id: "card-135", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Reverse Foil", lingua: "EN", numero: "036/217", imagem: "ASC_036_EN_ES_RH.png" },
-            { id: "card-136", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Reverse Foil", lingua: "EN", numero: "036/217", imagem: "ASC_036_EN_FB_RH.jpg" },
+            { id: "card-136", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Pokeball Foil", lingua: "EN", numero: "036/217", imagem: "ASC_036_EN_FB_RH.jpg" },
             { id: "card-137", nome: "Scorbunny", pokemon: "Scorbunny", set: "Heróis Ascendentes", variante: "Foil", lingua: "EN", numero: "225/217", imagem: "ASC_225_R_EN_H.png" },
             { id: "card-138", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Evolução", variante: "Regular", lingua: "EN", numero: "026/132", imagem: "MEG_026_R_EN.png" },
             { id: "card-139", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Evolução", variante: "Reverse Foil", lingua: "EN", numero: "026/132", imagem: "MEG_026_R_EN_RH.png" },
-            { id: "card-140", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Promo", variante: "Regular", lingua: "EN", numero: "MEP053", imagem: "MEP_053_R_EN.png" },
+            { id: "card-140", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Promo", variante: "Promo", lingua: "EN", numero: "MEP053", imagem: "MEP_053_R_EN.png" },
             { id: "card-141", nome: "Scorbunny", pokemon: "Scorbunny", set: "McDonald's 2021", variante: "Regular", lingua: "EN", numero: "16/25", imagem: "MCD21_16_EN.jpg" },
             { id: "card-142", nome: "Scorbunny", pokemon: "Scorbunny", set: "McDonald's 2021", variante: "Foil", lingua: "EN", numero: "16/25", imagem: "MCD21_16_EN_CONFETTI_H.jpg" },
-            { id: "card-143", nome: "Scorbunny", pokemon: "Scorbunny", set: "Futsal Promo", variante: "Regular", lingua: "EN", numero: "004", imagem: "FUTSAL_004_R_EN.png" },
-            { id: "card-144", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Arte Alternativa (Alt Art)", lingua: "EN", numero: "SWSH002", imagem: "SP_002_R_EN_ALT.png" },
+            { id: "card-143", nome: "Scorbunny", pokemon: "Scorbunny", set: "Futsal Promo", variante: "Promo", lingua: "EN", numero: "004", imagem: "FUTSAL_004_R_EN.png" },
+            { id: "card-144", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Foil", lingua: "EN", numero: "SWSH002", imagem: "SP_002_R_EN_ALT.png" },
             { id: "card-145", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Foil", lingua: "EN", numero: "030/202", imagem: "SSH_030_R_EN_COSMOS_BLISTER_H.png" },
             { id: "card-146", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Foil", lingua: "EN", numero: "031/202", imagem: "SSH_031_R_EN_H.png" },
-            { id: "card-147", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promo (JP)", variante: "Regular", lingua: "JP", numero: "137/SV-P", imagem: "MC_137_R_JP.png" },
-            { id: "card-148", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promo (JP)", variante: "Regular", lingua: "JP", numero: "745/SV-P", imagem: "MC_745_R_JP.png" },
+            { id: "card-147", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promo (JP)", variante: "Promo", lingua: "JP", numero: "137/SV-P", imagem: "MC_137_R_JP.png" },
+            { id: "card-148", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promo (JP)", variante: "Promo", lingua: "JP", numero: "745/SV-P", imagem: "MC_745_R_JP.png" },
             { id: "card-149", nome: "Scorbunny", pokemon: "Scorbunny", set: "Battle Partners (JP)", variante: "Regular", lingua: "JP", numero: "015/080", imagem: "M1L_015_R_JP.png" },
             { id: "card-150", nome: "Scorbunny", pokemon: "Scorbunny", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "016/102", imagem: "SV7_016_R_JP.png" },
             { id: "card-151", nome: "Scorbunny", pokemon: "Scorbunny", set: "Start Deck 100 (JP)", variante: "Regular", lingua: "JP", numero: "070/414", imagem: "SI_070_R_JP.png" },
             { id: "card-152", nome: "Scorbunny", pokemon: "Scorbunny", set: "Chilling Reign (JP)", variante: "Regular", lingua: "JP", numero: "015/070", imagem: "S6H_015_R_JP.png" },
             { id: "card-153", nome: "Scorbunny", pokemon: "Scorbunny", set: "Shiny Star V (JP)", variante: "Regular", lingua: "JP", numero: "022/190", imagem: "S4A_022_R_JP.png" },
             { id: "card-154", nome: "Scorbunny", pokemon: "Scorbunny", set: "Shiny Star V (JP)", variante: "Regular", lingua: "JP", numero: "214/190", imagem: "S4A_214_R_JP.png" },
-            { id: "card-155", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "016/S-P", imagem: "SD_016_R_JP.png" },
+            { id: "card-155", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "016/S-P", imagem: "SD_016_R_JP.png" },
             { id: "card-156", nome: "Scorbunny", pokemon: "Scorbunny", set: "Sword & Shield (JP)", variante: "Regular", lingua: "JP", numero: "007/060", imagem: "S1H_007_R_JP.png" },
             { id: "card-157", nome: "Scorbunny", pokemon: "Scorbunny", set: "Scarlet & Violet (JP)", variante: "Regular", lingua: "JP", numero: "006/078", imagem: "SAR_006_R_JP.png" },
-            { id: "card-158", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "006/S-P", imagem: "SP_006_R_JP.png" },
-            { id: "card-159", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "034/S-P", imagem: "SP_034_R_JP.png" },
-            { id: "card-160", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "130/S-P", imagem: "SP_130_R_JP.png" },
-            { id: "card-161", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "JP", numero: "255/S-P", imagem: "SP_255_R_JP.png" },
+            { id: "card-158", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "006/S-P", imagem: "SP_006_R_JP.png" },
+            { id: "card-159", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "034/S-P", imagem: "SP_034_R_JP.png" },
+            { id: "card-160", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "130/S-P", imagem: "SP_130_R_JP.png" },
+            { id: "card-161", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "255/S-P", imagem: "SP_255_R_JP.png" },
             { id: "card-162", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Foil", lingua: "JP", numero: "123/M-P", imagem: "M-P_123_P_JP_H.jpg" },
             { id: "card-163", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "027/150", imagem: "CSV9C_027_CN.webp" },
             { id: "card-164", nome: "Scorbunny", pokemon: "Scorbunny", set: "30th Anniversary", variante: "Regular", lingua: "CN", numero: "023/100", imagem: "30THP_023_CN.webp" },
@@ -642,9 +645,9 @@
             { id: "card-168", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "047/150", imagem: "DCF_047_CN.webp" },
             { id: "card-169", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "140/150", imagem: "DCF_140_CN.webp" },
             { id: "card-170", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Volunteer (CN)", variante: "Foil", lingua: "CN", numero: "037/080", imagem: "DCV_037_CN_H.webp" },
-            { id: "card-171", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "CN", numero: "013/S-P", imagem: "SP_013_CN.webp" },
-            { id: "card-172", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "CN", numero: "053/S-P", imagem: "SP_053_CN.webp" },
-            { id: "card-173", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Regular", lingua: "CN", numero: "125/S-P", imagem: "SP_125_CN.webp" },
+            { id: "card-171", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "CN", numero: "013/S-P", imagem: "SP_013_CN.webp" },
+            { id: "card-172", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "CN", numero: "053/S-P", imagem: "SP_053_CN.webp" },
+            { id: "card-173", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "CN", numero: "125/S-P", imagem: "SP_125_CN.webp" },
             
             // RABOOT
             { id: "card-174", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Regular", lingua: "PT-BR", numero: "032/202", imagem: "SSH_032_R_PT.png" },
@@ -659,7 +662,7 @@
             { id: "card-183", nome: "Raboot", pokemon: "Raboot", set: "Coroa Estelar", variante: "Foil", lingua: "PT-BR", numero: "147/142", imagem: "SCR_147_R_PT_H.png" },
             { id: "card-184", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Regular", lingua: "PT-BR", numero: "037/217", imagem: "ASC_037_R_PT.png" },
             { id: "card-185", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Reverse Foil", lingua: "PT-BR", numero: "037/217", imagem: "ASC_037_R_PT_ES_RH.png" },
-            { id: "card-186", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Reverse Foil", lingua: "PT-BR", numero: "037/217", imagem: "ASC_037_PT_FB_RH.jpg" },
+            { id: "card-186", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Pokeball Foil", lingua: "PT-BR", numero: "037/217", imagem: "ASC_037_PT_FB_RH.jpg" },
             { id: "card-187", nome: "Raboot", pokemon: "Raboot", set: "Mega Evolução", variante: "Regular", lingua: "PT-BR", numero: "027/132", imagem: "MEG_027_R_PT.png" },
             { id: "card-188", nome: "Raboot", pokemon: "Raboot", set: "Mega Evolução", variante: "Reverse Foil", lingua: "PT-BR", numero: "027/132", imagem: "MEG_027_R_PT_RH.png" },
             { id: "card-189", nome: "Raboot", pokemon: "Raboot", set: "Espada e Escudo", variante: "Regular", lingua: "EN", numero: "032/202", imagem: "SSH_032_R_EN.png" },
@@ -674,10 +677,10 @@
             { id: "card-198", nome: "Raboot", pokemon: "Raboot", set: "Coroa Estelar", variante: "Foil", lingua: "EN", numero: "147/142", imagem: "SCR_147_R_EN_H.png" },
             { id: "card-199", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Regular", lingua: "EN", numero: "037/217", imagem: "ASC_037_R_EN.png" },
             { id: "card-200", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Reverse Foil", lingua: "EN", numero: "037/217", imagem: "ASC_037_R_EN_ES_RH.png" },
-            { id: "card-201", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Reverse Foil", lingua: "EN", numero: "037/217", imagem: "ASC_037_EN_FB_RH.jpg" },
+            { id: "card-201", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Pokeball Foil", lingua: "EN", numero: "037/217", imagem: "ASC_037_EN_FB_RH.jpg" },
             { id: "card-202", nome: "Raboot", pokemon: "Raboot", set: "Mega Evolução", variante: "Regular", lingua: "EN", numero: "027/132", imagem: "MEG_027_R_EN.png" },
             { id: "card-203", nome: "Raboot", pokemon: "Raboot", set: "Mega Evolução", variante: "Reverse Foil", lingua: "EN", numero: "027/132", imagem: "MEG_027_R_EN_RH.png" },
-            { id: "card-204", nome: "Raboot", pokemon: "Raboot", set: "Promo (JP)", variante: "Regular", lingua: "JP", numero: "138/SV-P", imagem: "MC_138_R_JP.png" },
+            { id: "card-204", nome: "Raboot", pokemon: "Raboot", set: "Promo (JP)", variante: "Promo", lingua: "JP", numero: "138/SV-P", imagem: "MC_138_R_JP.png" },
             { id: "card-205", nome: "Raboot", pokemon: "Raboot", set: "Battle Partners (JP)", variante: "Regular", lingua: "JP", numero: "016/080", imagem: "M1L_016_R_JP.png" },
             { id: "card-206", nome: "Raboot", pokemon: "Raboot", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "017/102", imagem: "SV7_017_R_JP.png" },
             { id: "card-207", nome: "Raboot", pokemon: "Raboot", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "106/102", imagem: "SV7_106_R_JP.png" },
@@ -688,13 +691,13 @@
             { id: "card-212", nome: "Raboot", pokemon: "Raboot", set: "Sword & Shield (JP)", variante: "Regular", lingua: "JP", numero: "008/060", imagem: "S1H_008_R_JP.png" },
             { id: "card-213", nome: "Raboot", pokemon: "Raboot", set: "Scarlet & Violet (JP)", variante: "Regular", lingua: "JP", numero: "007/078", imagem: "SAR_007_R_JP.png" },
             { id: "card-214", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "028/150", imagem: "CSV9C_028_CN.webp" },
-            { id: "card-215", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1901", imagem: "GP5_1901_CN.webp" },
-            { id: "card-216", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1902", imagem: "GP5_1902_CN.webp" },
-            { id: "card-217", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1903", imagem: "GP5_1903_CN.webp" },
-            { id: "card-218", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1904", imagem: "GP5_1904_CN.webp" },
-            { id: "card-219", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1905", imagem: "GP5_1905_CN.webp" },
-            { id: "card-220", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1906", imagem: "GP5_1906_CN.webp" },
-            { id: "card-221", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Regular", lingua: "CN", numero: "1907", imagem: "GP5_1907_CN.webp" },
+            { id: "card-215", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Promo", lingua: "CN", numero: "1901", imagem: "GP5_1901_CN.webp" },
+            { id: "card-216", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Promo", lingua: "CN", numero: "1902", imagem: "GP5_1902_CN.webp" },
+            { id: "card-217", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Promo", lingua: "CN", numero: "1903", imagem: "GP5_1903_CN.webp" },
+            { id: "card-218", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Promo", lingua: "CN", numero: "1904", imagem: "GP5_1904_CN.webp" },
+            { id: "card-219", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Promo", lingua: "CN", numero: "1905", imagem: "GP5_1905_CN.webp" },
+            { id: "card-220", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Promo", lingua: "CN", numero: "1906", imagem: "GP5_1906_CN.webp" },
+            { id: "card-221", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Promo", lingua: "CN", numero: "1907", imagem: "GP5_1907_CN.webp" },
             { id: "card-222", nome: "Raboot", pokemon: "Raboot", set: "Start Deck 100 (CN)", variante: "Regular", lingua: "CN", numero: "071/414", imagem: "SD100_071_CN.webp" },
             { id: "card-223", nome: "Raboot", pokemon: "Raboot", set: "Paradise Dragona (CN)", variante: "Regular", lingua: "CN", numero: "022/064", imagem: "PAO_022_CN.webp" },
             { id: "card-224", nome: "Raboot", pokemon: "Raboot", set: "Paradise Volunteer (CN)", variante: "Foil", lingua: "CN", numero: "024/080", imagem: "PAV_024_CN_H.webp" },
@@ -907,7 +910,20 @@
                 }
             });
 
-            const mapping = {'Regular': 'Regular', 'Foil': 'Foil', 'Reverse Foil': 'Reverse', 'Promo': 'Promo', 'V Card': 'V', 'VMAX': 'VMAX', 'Full Art': 'FullArt', 'Arte Alternativa (Alt Art)': 'AltArt'};
+            const mapping = {
+                'Regular': 'Regular',
+                'Foil': 'Foil',
+                'Reverse Foil': 'Reverse',
+                'Pokeball Foil': 'PokeballFoil',
+                'Masterball Foil': 'MasterballFoil',
+                'Promo': 'Promo',
+                'V Regular': 'VRegular',
+                'V Full Art': 'VFullArt',
+                'VMAX Regular': 'VMAXRegular',
+                'ex Regular': 'exRegular',
+                'ex Alt Art': 'exAltArt'
+            };
+
             Object.keys(mapping).forEach(key => {
                 const idKey = mapping[key];
                 const btn = document.getElementById(`btn-var-${idKey}`);
