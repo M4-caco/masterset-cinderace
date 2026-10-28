@@ -207,22 +207,18 @@
                         </div>
 
                         <div class="flex flex-col gap-1 pt-2 border-t border-cinder-orange/20">
-                            <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Característica / Raridade:</span>
-                            <div class="flex flex-col gap-1">
-                                <button id="btn-var-Regular" onclick="filterVar('Regular')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Regular</button>
-                                <button id="btn-var-Foil" onclick="filterVar('Foil')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Foil</button>
-                                <button id="btn-var-ReverseFoil" onclick="filterVar('Reverse Foil')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Reverse Foil</button>
-                                <button id="btn-var-EnergyHolo" onclick="filterVar('Energy Holo')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Energy Holo</button>
-                                <button id="btn-var-PokeballHolo" onclick="filterVar('Poké Ball Holo')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Poké Ball Holo</button>
-                                <button id="btn-var-MasterballHolo" onclick="filterVar('Master Ball Holo')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Master Ball Holo</button>
-                                <button id="btn-var-GlitterFoil" onclick="filterVar('Glitter Foil')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Glitter Foil</button>
-                                <button id="btn-var-Promo" onclick="filterVar('Promo')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">Promo</button>
-                                <button id="btn-var-VRegular" onclick="filterVar('V Regular')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">V Regular</button>
-                                <button id="btn-var-VFullArt" onclick="filterVar('V Full Art')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">V Full Art</button>
-                                <button id="btn-var-VMAXRegular" onclick="filterVar('VMAX Regular')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">VMAX Regular</button>
-                                <button id="btn-var-exRegular" onclick="filterVar('ex Regular')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">ex Regular</button>
-                                <button id="btn-var-exAltArt" onclick="filterVar('ex Alt Art')" class="var-btn glass-card hover:bg-cinder-red px-3 py-1.5 rounded-xl text-xs font-bold text-left transition">ex Alt Art</button>
-                            </div>
+                            <span class="text-[10px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Classificação da carta:</span>
+                            <p class="text-[10px] text-slate-500 dark:text-slate-400">Acabamento, padrão e apresentação são categorias diferentes. Dentro de uma categoria, os filtros somam; entre categorias, combinam.</p>
+                            <div id="classification-filters" class="space-y-3"></div>
+                            <details class="text-xs"><summary class="cursor-pointer font-bold">Como identificar o foil</summary>
+                            <div class="space-y-2 mt-2 text-slate-500 dark:text-slate-300">
+                            <p><b>Não foil:</b> sem acabamento holográfico. <b>Holo / Foil:</b> acabamento holográfico; nas cartas tradicionais, geralmente na ilustração. <b>Reverse holo:</b> acabamento paralelo, geralmente fora da ilustração.</p>
+                            <p><b>Poké Ball e Master Ball:</b> padrões do acabamento paralelo, disponíveis apenas em determinadas coleções e idiomas. Não são raridades.</p>
+                            <p><b>Great Ball:</b> não aplicar como tipo genérico de foil. O nome de uma carta de Treinador não identifica seu acabamento. Friend Ball é outro nome e outra bola.</p>
+                            <p><b>Energy, Cosmos, Confetti e Glitter:</b> padrões do brilho. V, VMAX, ex, Full Art, Rainbow e Shiny descrevem outras características. Promo indica distribuição.</p>
+                            <p>Esta revisão separa os campos e corrige casos identificáveis no índice. Dados sem confirmação ficam como “A conferir”. Os arquivos das imagens não vieram com o HTML; o nome de arquivo é apenas uma pista, não comprovação visual.</p>
+                            <a class="underline" href="https://press.pokemon.com/en/New-Pokemon-Trading-Card-Game-Scarlet-VioletPrismatic-Evolutions-Expan" target="_blank" rel="noopener noreferrer">Referência oficial: paralelos Poké Ball e Master Ball</a>
+                            </div></details>
                         </div>
 
                         <div class="flex flex-col gap-1 pt-2 border-t border-cinder-orange/20">
@@ -709,6 +705,84 @@
             { id: "card-226", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "141/150", imagem: "DCF_141_CN.webp" }
         ];
         
+        // Keep original ids and catalog values to preserve collection/capture history.
+        // Unknown printing details must not be inferred from rarity or language alone.
+        function classifyCard(card) {
+            const old = card.variante;
+            card.varianteOriginal = old;
+            card.acabamento = 'A conferir';
+            card.padrao = 'A conferir';
+            card.apresentacao = 'Padrão';
+            card.distribuicao = /promo/i.test(card.set) || old === 'Promo' ? 'Promo' : 'Coleção / produto';
+            card.mecanica = /VMAX/.test(card.nome + old) ? 'VMAX' : /\bV\b/.test(card.nome + ' ' + old) ? 'V' : /\bex\b/.test(card.nome + ' ' + old) ? 'ex' : 'Sem V / VMAX / ex';
+            card.revisao = [];
+            if (old === 'Regular') { card.acabamento = 'Não foil'; card.padrao = 'Sem padrão foil'; }
+            if (old === 'Foil' || /^(V |VMAX |ex )/.test(old)) { card.acabamento = 'Holo / Foil'; }
+            if (old === 'Reverse Foil') { card.acabamento = 'Reverse holo'; card.padrao = 'Reverse padrão'; }
+            if (old === 'V Full Art') card.apresentacao = 'Full Art';
+            if (old === 'ex Alt Art') { card.apresentacao = 'Arte a conferir'; card.revisao.push('Alt Art não determina a raridade; conferir a impressão.'); }
+            if (old === 'Energy Holo') { card.acabamento = 'Foil (posição a conferir)'; card.padrao = 'Símbolos de Energia'; }
+            if (old === 'Glitter Foil') { card.acabamento = 'Foil (posição a conferir)'; card.padrao = 'Glitter (a conferir)'; }
+            if (/^(Poké Ball|Master Ball) Holo$/.test(old)) {
+                card.acabamento = 'Foil (posição a conferir)'; card.padrao = old.replace(' Holo', '') + ' (a conferir)';
+                card.revisao.push('Padrão herdado do índice; confirmar a coleção e a impressão.');
+            }
+            if (/COSMOS/i.test(card.imagem)) { card.acabamento = 'Holo / Foil'; card.padrao = 'Cosmos (indicado no arquivo)'; }
+            if (/CONFETTI/i.test(card.imagem)) { card.acabamento = 'Holo / Foil'; card.padrao = 'Confetti (indicado no arquivo)'; }
+            if (card.set === 'Heróis Ascendentes' && /_(ES|FB)_RH/i.test(card.imagem)) {
+                card.acabamento = 'Reverse holo';
+                card.padrao = /_ES_RH/i.test(card.imagem) ? 'Símbolos de Energia' : 'Friend Ball (indicado no arquivo)';
+                card.revisao.push('Padrão indicado pelo nome do arquivo; confirmar na carta.');
+            }
+            // Specific, recognizable presentations; do not infer a pattern from a secret number.
+            if (['card-20','card-48'].includes(card.id)) card.apresentacao = 'Full Art';
+            if (['card-16','card-44'].includes(card.id)) card.apresentacao = 'Rainbow';
+            if (['card-116','card-137','card-183','card-198','card-207'].includes(card.id)) {
+                card.apresentacao = 'Ilustração (IR / AR)'; card.acabamento = 'Holo / Foil'; card.padrao = 'A conferir';
+            }
+            if (['card-65','card-154','card-211'].includes(card.id)) {
+                card.apresentacao = 'Shiny'; card.acabamento = 'Holo / Foil'; card.padrao = 'A conferir';
+            }
+            if (card.id === 'card-88') {
+                card.acabamento = 'A conferir'; card.padrao = 'A conferir'; card.apresentacao = 'Arte a conferir';
+                card.revisao = ['Cadastro inconsistente: Stellar Miracle 116/102 não comprova Cinderace nem padrão Poké Ball. Conferir identidade, número e coleção.'];
+            }
+            if (['card-2','card-27','card-106','card-127','card-178','card-193'].includes(card.id)) {
+                card.revisao.push('Possível confusão entre Shiny Vault (SV) e Escarlate e Violeta: conferir coleção e numeração.');
+            }
+            if (card.lingua === 'CN') card.revisao.push('Cadastro chinês ainda não auditado por edição; confirmar número, coleção e acabamento.');
+            if (card.padrao.includes('indicado no arquivo')) card.revisao.push('Classificação baseada no nome do arquivo; imagem não fornecida.');
+            if (card.acabamento === 'A conferir' || card.padrao === 'A conferir') card.revisao.push('O índice não identifica com segurança todos os detalhes do acabamento.');
+            card.formato = /JUMBO/i.test(card.imagem) ? 'Jumbo' : 'Tamanho padrão';
+            card.selo = /STAFF/i.test(card.imagem) ? 'Staff / Prerelease (arquivo)' : /PLAY/i.test(card.imagem) ? 'Play! Pokémon (arquivo)' : /LEAGUE/i.test(card.imagem) ? 'League (arquivo)' : 'Sem selo informado';
+            card.variante = [card.acabamento, card.padrao !== 'Sem padrão foil' && card.padrao !== 'A conferir' ? card.padrao : '', card.apresentacao !== 'Padrão' ? card.apresentacao : ''].filter(Boolean).join(' · ');
+            card.classificacao = card.revisao.length ? 'Conferir detalhes' : 'Sem pendência sinalizada';
+            return card;
+        }
+        allCards.forEach(classifyCard);
+        const classificationAxes = [
+            ['acabamento', 'Acabamento'], ['padrao', 'Padrão do foil'], ['mecanica', 'Mecânica'],
+            ['apresentacao', 'Apresentação / arte'], ['distribuicao', 'Distribuição'], ['formato', 'Formato'], ['selo', 'Selo'], ['classificacao', 'Revisão']
+        ];
+        const classificationOptions = classificationAxes.flatMap(([field]) => [...new Set(allCards.map(c => c[field]))].sort().map(value => ({field, value, key: field + ':' + value})));
+        document.getElementById('classification-filters').innerHTML = classificationAxes.map(([field, label]) =>
+            `<fieldset><legend class="text-[10px] font-bold uppercase mb-1">${label}</legend><div class="flex flex-col gap-1">${classificationOptions.filter(o => o.field === field).map(o => {
+                const i = classificationOptions.indexOf(o);
+                const count = allCards.filter(c => c[field] === o.value).length;
+                return `<button id="btn-var-${i}" onclick="filterVar(classificationOptions[${i}].key)" class="var-btn glass-card px-3 py-1.5 rounded-xl text-xs font-bold text-left">${o.value} (${count})</button>`;
+            }).join('')}</div></fieldset>`
+        ).join('');
+        function matchesClassification(card) {
+            return classificationAxes.every(([field]) => {
+                const active = classificationOptions.filter(o => o.field === field && selectedVars.has(o.key));
+                return !active.length || active.some(o => card[field] === o.value);
+            });
+        }
+        function classificationDetail(card) {
+            return [card.variante, card.mecanica, card.distribuicao, card.formato, card.selo].join(' · ') +
+                (card.revisao.length ? ' — ⚠ ' + card.revisao.join(' ') : '');
+        }
+
         let selectedPokes = new Set();
         let selectedLangs = new Set();
         let selectedVars = new Set();
@@ -913,30 +987,12 @@
                 }
             });
 
-            const mapping = {
-                'Regular': 'Regular',
-                'Foil': 'Foil',
-                'Reverse Foil': 'ReverseFoil',
-                'Energy Holo': 'EnergyHolo',
-                'Poké Ball Holo': 'PokeballHolo',
-                'Master Ball Holo': 'MasterballHolo',
-                'Glitter Foil': 'GlitterFoil',
-                'Promo': 'Promo',
-                'V Regular': 'VRegular',
-                'V Full Art': 'VFullArt',
-                'VMAX Regular': 'VMAXRegular',
-                'ex Regular': 'exRegular',
-                'ex Alt Art': 'exAltArt'
-            };
-
-            Object.keys(mapping).forEach(key => {
-                const idKey = mapping[key];
-                const btn = document.getElementById(`btn-var-${idKey}`);
-                if(btn) {
-                    btn.className = selectedVars.has(key) 
-                        ? "var-btn bg-cinder-orange text-white px-3 py-1.5 rounded-xl text-xs font-bold text-left transition shadow-md cursor-pointer" 
-                        : "var-btn glass-card text-slate-800 dark:text-cinder-white hover:bg-cinder-red hover:text-white px-3 py-1.5 rounded-xl text-xs font-bold text-left transition cursor-pointer";
-                }
+            classificationOptions.forEach((option, i) => {
+                const btn = document.getElementById(`btn-var-${i}`);
+                btn.className = selectedVars.has(option.key)
+                    ? "var-btn bg-cinder-orange text-white px-3 py-1.5 rounded-xl text-xs font-bold text-left transition shadow-md"
+                    : "var-btn glass-card text-slate-800 dark:text-cinder-white px-3 py-1.5 rounded-xl text-xs font-bold text-left transition";
+                btn.setAttribute('aria-pressed', String(selectedVars.has(option.key)));
             });
 
             ['MISSING', 'OWNED'].forEach(s => {
@@ -1098,14 +1154,14 @@
                 
                 <div class="relative w-full flex items-center justify-center my-1 [perspective:1000px]">
                     <div id="zoom-image-container" class="w-full max-w-[260px] sm:max-w-sm aspect-[2.5/3.5] max-h-[52vh] flex items-center justify-center bg-transparent rounded-2xl overflow-visible relative cursor-grab active:cursor-grabbing transition-transform duration-75 ease-out transform-gpu select-none">
-                        <img id="zoom-card-img" src="${card.imagem}" class="max-h-full max-w-full object-contain pointer-events-none rounded-xl shadow-2xl ${animDirection === 'left' ? 'slide-left' : animDirection === 'right' ? 'slide-right' : ''}" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                        <img id="zoom-card-img" src="${card.imagem}" class="max-h-full max-w-full object-contain pointer-events-none rounded-xl shadow-2xl ${animDirection === 'left' ? 'slide-left' : animDirection === 'right' ? 'slide-right' : ''}" alt="${card.nome} — imagem não disponível" onerror="this.onerror=null; this.removeAttribute('src')">
                         <div id="card-glare" class="absolute inset-0 pointer-events-none rounded-xl opacity-0 transition-opacity duration-300 holo-glare-effect"></div>
                     </div>
                 </div>
 
                 <div class="mt-4 w-full text-center glass-card backdrop-blur-md py-2.5 px-4 rounded-2xl border border-cinder-orange/20 shadow-xl max-w-[280px] sm:max-w-sm">
                     <p class="text-base sm:text-lg font-bold text-slate-800 dark:text-cinder-white">${card.nome}</p>
-                    <p class="text-xs text-cinder-orange font-semibold mt-0.5">${card.set} — ${card.variante} (#${card.numero})</p>
+                    <p class="text-xs text-cinder-orange font-semibold mt-0.5">${card.set} — ${classificationDetail(card)} (#${card.numero})</p>
                 </div>`;
 
             modal.classList.remove('hidden', 'opacity-0', 'pointer-events-none');
@@ -1264,9 +1320,9 @@
                 sets[card.set].total++;
                 if(obtained) sets[card.set].obtained++;
 
-                if(!vars[card.variante]) vars[card.variante] = { total: 0, obtained: 0 };
-                vars[card.variante].total++;
-                if(obtained) vars[card.variante].obtained++;
+                if(!vars[card.acabamento]) vars[card.acabamento] = { total: 0, obtained: 0 };
+                vars[card.acabamento].total++;
+                if(obtained) vars[card.acabamento].obtained++;
             });
 
             const totalPct = Math.round((totalObtained / totalCards) * 100) || 0;
@@ -1314,7 +1370,7 @@
 
                 const matchesPoke = selectedPokes.size === 0 || selectedPokes.has(card.pokemon);
                 const matchesLang = selectedLangs.size === 0 || selectedLangs.has(card.lingua);
-                const matchesVar = selectedVars.size === 0 || selectedVars.has(card.variante);
+                const matchesVar = matchesClassification(card);
                 
                 let matchesStatus = true;
                 if(selectedStatus.size > 0) {
@@ -1326,7 +1382,7 @@
 
                 const matchesSearch = card.nome.toLowerCase().includes(search) || 
                                       card.set.toLowerCase().includes(search) || 
-                                      card.variante.toLowerCase().includes(search) ||
+                                      classificationDetail(card).toLowerCase().includes(search) ||
                                       card.numero.toLowerCase().includes(search);
 
                 if (matchesPoke && matchesLang && matchesVar && matchesStatus && matchesSearch) {
@@ -1386,13 +1442,13 @@
                                 </div>
                             </div>
                             <div class="aspect-[2.5/3.5] w-full rounded-xl overflow-hidden bg-slate-100/50 dark:bg-cinder-bg/50 flex items-center justify-center border border-cinder-orange/10 p-0.5 shadow-inner">
-                                <img src="${card.imagem}" class="w-full h-full object-contain pointer-events-none drop-shadow-md" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                                <img src="${card.imagem}" class="w-full h-full object-contain pointer-events-none drop-shadow-md" alt="${card.nome} — imagem não disponível" onerror="this.onerror=null; this.removeAttribute('src')">
                             </div>
                             <div class="mt-1.5 px-0.5">
                                 <p class="text-[11px] font-bold text-slate-800 dark:text-cinder-white truncate">${card.nome}</p>
                                 <p class="text-[9px] text-cinder-orange font-semibold truncate">${card.set}</p>
                                 <div class="flex justify-between text-[8px] text-slate-500 dark:text-slate-400 mt-0.5">
-                                    <span class="truncate max-w-[60px] sm:max-w-[80px]">${card.variante}</span>
+                                    <span title="${classificationDetail(card)}" class="truncate max-w-[90px] sm:max-w-[130px]">${card.revisao.length ? "⚠ " : ""}${card.variante}</span>
                                     <span class="font-bold text-slate-600 dark:text-slate-300">#${card.numero}</span>
                                 </div>
                             </div>
@@ -1504,11 +1560,11 @@
                 cardBox.innerHTML = `
                     <div class="shrink-0 flex flex-col items-center gap-1.5 w-16 sm:w-20">
                         <div class="w-full h-22 sm:h-28 glass-card rounded-2xl overflow-hidden border border-cinder-orange/25 flex items-center justify-center p-1 relative shadow-sm">
-                            <img src="${card.imagem}" class="max-h-full max-w-full object-contain drop-shadow" onerror="this.onerror=null; this.src='https://images.pokemontcg.io/swsh1/34_hires.png'">
+                            <img src="${card.imagem}" class="max-h-full max-w-full object-contain drop-shadow" alt="${card.nome} — imagem não disponível" onerror="this.onerror=null; this.removeAttribute('src')">
                         </div>
                         <div class="flex items-center gap-1 w-full justify-center">
                             <span class="px-1 py-0.5 rounded-md text-[8px] font-black uppercase glass-card text-cinder-orange dark:text-cinder-yellow border border-cinder-orange/30">${card.lingua}</span>
-                            <span class="text-[8px] font-extrabold text-slate-500 dark:text-slate-400 bg-slate-200/60 dark:bg-cinder-bg px-1 py-0.5 rounded-md truncate max-w-[48px]" title="${card.variante}">${card.variante}</span>
+                            <span class="text-[8px] font-extrabold text-slate-500 dark:text-slate-400 bg-slate-200/60 dark:bg-cinder-bg px-1 py-0.5 rounded-md truncate max-w-[48px]" title="${classificationDetail(card)}">${card.variante}</span>
                         </div>
                     </div>
                     
