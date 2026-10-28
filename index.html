@@ -761,21 +761,50 @@
         }
         allCards.forEach(classifyCard);
         const classificationAxes = [
-            ['acabamento', 'Acabamento'], ['padrao', 'Padrão do foil'], ['mecanica', 'Mecânica'],
-            ['apresentacao', 'Apresentação / arte'], ['distribuicao', 'Distribuição'], ['formato', 'Formato'], ['selo', 'Selo'], ['classificacao', 'Revisão']
+            ['tipo', 'Tipo de carta e arte'], ['acabamento', 'Acabamento'], ['padrao', 'Padrão do foil'], ['distribuicao', 'Distribuição'], ['formato', 'Formato'], ['selo', 'Selo'], ['classificacao', 'Revisão']
         ];
-        const classificationOptions = classificationAxes.flatMap(([field]) => [...new Set(allCards.map(c => c[field]))].sort().map(value => ({field, value, key: field + ':' + value})));
-        document.getElementById('classification-filters').innerHTML = classificationAxes.map(([field, label]) =>
-            `<fieldset><legend class="text-[10px] font-bold uppercase mb-1">${label}</legend><div class="flex flex-col gap-1">${classificationOptions.filter(o => o.field === field).map(o => {
-                const i = classificationOptions.indexOf(o);
-                const count = allCards.filter(c => c[field] === o.value).length;
-                return `<button id="btn-var-${i}" onclick="filterVar(classificationOptions[${i}].key)" class="var-btn glass-card px-3 py-1.5 rounded-xl text-xs font-bold text-left">${o.value} (${count})</button>`;
-            }).join('')}</div></fieldset>`
-        ).join('');
+        const classificationOptions = classificationAxes.flatMap(([field]) => {
+            if (field !== 'tipo') return [...new Set(allCards.map(c => c[field]))].sort().map(value => ({field, value, key: field + ':' + value}));
+            return ['Sem V / VMAX / ex', 'V', 'VMAX', 'ex'].flatMap(family => [
+                {field, value: family, family, key: 'tipo:' + family},
+                ...[...new Set(allCards.filter(c => c.mecanica === family).map(c => c.apresentacao))].sort().map(art =>
+                    ({field, value: art, family, art, key: 'tipo:' + family + '|' + art}))
+            ]);
+        });
+        function matchesClassificationOption(card, option) {
+            return option.field === 'tipo'
+                ? card.mecanica === option.family && (!option.art || card.apresentacao === option.art)
+                : card[option.field] === option.value;
+        }
+        const filterButton = (option, label) => {
+            const index = classificationOptions.indexOf(option);
+            const count = allCards.filter(c => matchesClassificationOption(c, option)).length;
+            return `<button type="button" id="btn-var-${index}" data-option-index="${index}" aria-pressed="false" class="var-btn glass-card px-3 py-1.5 rounded-xl text-xs font-bold text-left">${label || option.value} <span class="opacity-60">(${count})</span></button>`;
+        };
+        document.getElementById('classification-filters').innerHTML = classificationAxes.map(([field, label]) => {
+            const options = classificationOptions.filter(o => o.field === field);
+            const contents = field === 'tipo' ? options.filter(o => !o.art).map(parent =>
+                `<details class="filter-family border border-cinder-orange/20 rounded-xl p-2" data-family="${parent.family}">
+                    <summary class="cursor-pointer text-xs font-bold select-none">${parent.family === 'Sem V / VMAX / ex' ? 'Cartas sem V / VMAX / ex' : 'Cartas ' + parent.family}<span class="family-selected text-cinder-orange ml-1"></span></summary>
+                    <div class="flex flex-col gap-1 mt-2 pl-2">${filterButton(parent, 'Todas deste tipo')}${options.filter(o => o.art && o.family === parent.family).map(o => filterButton(o, o.art === 'Padrão' ? 'Arte padrão' : o.art)).join('')}</div>
+                </details>`
+            ).join('') : options.map(o => filterButton(o)).join('');
+            return `<details class="filter-axis border border-cinder-orange/25 rounded-2xl p-2.5" data-axis="${field}">
+                <summary class="cursor-pointer text-xs font-bold select-none">${label}<span class="axis-selected text-cinder-orange ml-1"></span></summary>
+                <div class="flex flex-col gap-1.5 mt-2">${contents}</div>
+            </details>`;
+        }).join('');
+        // Bind in module scope: inline handlers cannot access module-local constants.
+        document.getElementById('classification-filters').addEventListener('click', event => {
+            const button = event.target.closest('button[data-option-index]');
+            if (!button) return;
+            const option = classificationOptions[Number(button.dataset.optionIndex)];
+            window.filterVar(option.key);
+        });
         function matchesClassification(card) {
             return classificationAxes.every(([field]) => {
                 const active = classificationOptions.filter(o => o.field === field && selectedVars.has(o.key));
-                return !active.length || active.some(o => card[field] === o.value);
+                return !active.length || active.some(o => matchesClassificationOption(card, o));
             });
         }
         function classificationDetail(card) {
@@ -995,6 +1024,15 @@
                 btn.setAttribute('aria-pressed', String(selectedVars.has(option.key)));
             });
 
+            document.querySelectorAll('.filter-axis').forEach(drawer => {
+                const count = classificationOptions.filter(o => o.field === drawer.dataset.axis && selectedVars.has(o.key)).length;
+                drawer.querySelector('.axis-selected').textContent = count ? ` · ${count} selecionado(s)` : '';
+            });
+            document.querySelectorAll('.filter-family').forEach(drawer => {
+                const count = classificationOptions.filter(o => o.field === 'tipo' && o.family === drawer.dataset.family && selectedVars.has(o.key)).length;
+                drawer.querySelector('.family-selected').textContent = count ? ` · ${count}` : '';
+            });
+
             ['MISSING', 'OWNED'].forEach(s => {
                 const btn = document.getElementById(`btn-status-${s}`);
                 if(btn) {
@@ -1088,7 +1126,13 @@
 
         window.filterVar = function(variante) {
             if(selectedVars.has(variante)) selectedVars.delete(variante);
-            else selectedVars.add(variante);
+            else {
+                const option = classificationOptions.find(o => o.key === variante);
+                if (option && option.field === 'tipo') {
+                    classificationOptions.filter(o => o.field === 'tipo' && o.family === option.family && (!option.art || !o.art)).forEach(o => selectedVars.delete(o.key));
+                }
+                selectedVars.add(variante);
+            }
             updateFilterButtonsUI();
             handleSearchInput();
         };
