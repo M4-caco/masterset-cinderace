@@ -415,6 +415,10 @@
             .collection-no-card {padding:20px 1px;font-size:15px;}
             .collection-no-card small {font-size:8px;overflow-wrap:anywhere;}
         }
+    
+        .market-workspace h2{font-size:26px;font-weight:750;margin:6px 0 18px}.market-modes,.market-actions{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}.market-workspace button{padding:9px 13px;border:1px solid var(--line);border-radius:10px;font-size:12px;font-weight:650;background:#80808010}.market-modes button[aria-pressed="true"],#market-confirm{background:#bb392c;color:#fff;border-color:transparent}.market-workspace [hidden]{display:none!important}.market-note{font-size:11px;line-height:1.65;color:var(--subtle);margin:9px 0}.market-workspace textarea,.market-workspace select,.market-workspace input:not([type="checkbox"]){width:100%;padding:10px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font-size:12px;min-width:0}.market-workspace textarea{resize:vertical}.market-version{display:block;font-size:11px;margin:10px 0}.market-version select{margin-top:5px}.market-row{padding:18px 0;border-top:1px solid var(--line)}.market-row-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:13px}.market-row-heading label{display:flex;gap:8px;align-items:center}.market-row-heading button{font-size:10px;padding:6px 9px}.market-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.market-badges span{padding:4px 8px;border-radius:6px;background:#80808020;font-size:10px}.market-badges .market-duplicate{color:#b87815;background:#f4d66418}.dark .market-badges .market-duplicate{color:#f4d664}.market-fields{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}.market-fields label{font-size:10px}.market-fields input{margin-top:5px}.market-excluded{opacity:.55}.market-summary{font-size:13px;font-weight:650;padding:15px 0}.market-workspace input[type="checkbox"]{accent-color:#c43b30}.market-workspace button:focus-visible,.market-workspace select:focus-visible,.market-workspace input:focus-visible{outline:2px solid #f4d664;outline-offset:2px}#market-confirm{margin-top:18px}@media(max-width:640px){.market-workspace h2{font-size:22px}.market-fields{grid-template-columns:1fr 1fr}.market-fields label:first-child{grid-column:1/-1}.market-modes button{flex:1}.market-row{padding:14px 0}}
+    
+        .capture-filter-drawer{position:relative;z-index:25}.capture-filter-drawer summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;padding:10px 15px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:12px;font-weight:650}.capture-filter-drawer summary::-webkit-details-marker{display:none}.capture-filter-drawer summary:focus-visible{outline:2px solid #f4d664;outline-offset:3px}.capture-filter-options{position:absolute;right:0;top:calc(100% + 8px);width:300px;max-width:calc(100vw - 48px);max-height:65dvh;overflow:auto;display:grid;gap:13px;padding:18px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 45px #0005}.capture-filter-options label{display:grid;gap:6px;font-size:11px;font-weight:600}.capture-filter-options select{width:100%;min-width:0;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:12px}.capture-filter-options button{font-size:11px;padding:8px;color:#c43b30;text-align:left}.capture-filter-options [hidden]{display:none!important}@media(max-width:640px){.capture-filter-drawer{align-self:flex-start}.capture-filter-options{left:0;right:auto;width:min(300px,calc(100vw - 64px))}}
     </style>
 </head>
 <body class="text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
@@ -588,46 +592,16 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400">Cadastre a origem das suas cartas obtidas. Ative o <strong>cadeado (🔒)</strong> para travá-las.</p>
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-2 w-full md:w-auto relative">
-                        <div class="relative">
-                            <button onclick="toggleCaptureDropdown('status')" id="cap-drop-btn-status" class="glass-card hover:bg-white/80 dark:hover:bg-cinder-card text-slate-800 dark:text-cinder-white border border-cinder-orange/40 px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 transition shadow-sm cursor-pointer">
-                                <span id="cap-label-status">Status: Todos</span>
-                                <span class="text-cinder-orange dark:text-cinder-yellow text-[10px]">▼</span>
-                            </button>
-                            <div id="cap-menu-status" class="absolute right-0 top-full mt-2 w-48 glass-panel rounded-2xl p-1.5 hidden z-[999] shadow-2xl border border-cinder-orange/40 space-y-1">
-                                <button onclick="setCaptureFilter('status', 'all', 'Status: Todos')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">Todos</button>
-                                <button onclick="setCaptureFilter('status', 'locked', 'Status: Trancadas 🔒')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">Trancadas 🔒</button>
-                                <button onclick="setCaptureFilter('status', 'unlocked', 'Status: Abertas 🔓')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">Abertas 🔓</button>
-                            </div>
-                        </div>
-
-                        <div class="relative">
-                            <button onclick="toggleCaptureDropdown('poke')" id="cap-drop-btn-poke" class="glass-card hover:bg-white/80 dark:hover:bg-cinder-card text-slate-800 dark:text-cinder-white border border-cinder-orange/40 px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 transition shadow-sm cursor-pointer">
-                                <span id="cap-label-poke">Pokémon: Todos</span>
-                                <span class="text-cinder-orange dark:text-cinder-yellow text-[10px]">▼</span>
-                            </button>
-                            <div id="cap-menu-poke" class="absolute right-0 top-full mt-2 w-44 glass-panel rounded-2xl p-1.5 hidden z-[999] shadow-2xl border border-cinder-orange/40 space-y-1">
-                                <button onclick="setCaptureFilter('poke', 'all', 'Pokémon: Todos')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">Todos</button>
-                                <button onclick="setCaptureFilter('poke', 'Scorbunny', 'Scorbunny')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">Scorbunny</button>
-                                <button onclick="setCaptureFilter('poke', 'Raboot', 'Raboot')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">Raboot</button>
-                                <button onclick="setCaptureFilter('poke', 'Cinderace', 'Cinderace')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">Cinderace</button>
-                            </div>
-                        </div>
-
-                        <div class="relative">
-                            <button onclick="toggleCaptureDropdown('lang')" id="cap-drop-btn-lang" class="glass-card hover:bg-white/80 dark:hover:bg-cinder-card text-slate-800 dark:text-cinder-white border border-cinder-orange/40 px-3.5 py-2 rounded-2xl text-xs font-bold flex items-center gap-2 transition shadow-sm cursor-pointer">
-                                <span id="cap-label-lang">Idioma: Todos</span>
-                                <span class="text-cinder-orange dark:text-cinder-yellow text-[10px]">▼</span>
-                            </button>
-                            <div id="cap-menu-lang" class="absolute right-0 top-full mt-2 w-40 glass-panel rounded-2xl p-1.5 hidden z-[999] shadow-2xl border border-cinder-orange/40 space-y-1">
-                                <button onclick="setCaptureFilter('lang', 'all', 'Idioma: Todos')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">Todos</button>
-                                <button onclick="setCaptureFilter('lang', 'PT-BR', 'PT-BR')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">PT-BR</button>
-                                <button onclick="setCaptureFilter('lang', 'EN', 'EN')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">EN</button>
-                                <button onclick="setCaptureFilter('lang', 'JP', 'JP')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">JP</button>
-                                <button onclick="setCaptureFilter('lang', 'CN', 'CN')" class="w-full text-left px-3 py-2 rounded-xl text-xs font-bold glass-card hover:bg-cinder-orange hover:text-white transition cursor-pointer">CN</button>
-                            </div>
-                        </div>
-                    </div>
+                    <details id="capture-filter-drawer" class="capture-filter-drawer">
+                      <summary>Filtros <span id="capture-filter-count"></span><span aria-hidden="true">⌄</span></summary>
+                      <div class="capture-filter-options">
+                        <label>Status<select id="cap-filter-status" onchange="setCaptureFilter('status',this.value)"><option value="all">Todos</option><option value="locked">Trancadas 🔒</option><option value="unlocked">Abertas 🔓</option></select></label>
+                        <label>Pokémon<select id="cap-filter-poke" onchange="setCaptureFilter('poke',this.value)"><option value="all">Todos</option><option>Scorbunny</option><option>Raboot</option><option>Cinderace</option></select></label>
+                        <label>Idioma<select id="cap-filter-lang" onchange="setCaptureFilter('lang',this.value)"><option value="all">Todos</option><option value="PT-BR">Português</option><option value="EN">Inglês</option><option value="JP">Japonês</option><option value="CN">Chinês</option></select></label>
+                        <label>Captura · pessoa / loja<select id="cap-filter-entity" onchange="setCaptureFilter('entity',this.value)"><option value="all">Todas</option></select></label>
+                        <button id="capture-clear-filters" type="button" hidden onclick="clearCaptureFilters()">Limpar filtros</button>
+                      </div>
+                    </details>
                 </div>
 
                 <div id="capture-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"></div>
@@ -635,6 +609,18 @@
         </section>
 
         <section id="view-market" class="hidden space-y-4">
+            <div class="glass-panel rounded-3xl p-5 sm:p-7 market-workspace">
+              <p class="section-kicker">Planeje e registre suas compras</p><h2>Conferência de cartas</h2>
+              <div class="market-modes"><button id="market-mode-check" type="button" aria-pressed="true" onclick="marketSetMode('check')">Conferir antes de comprar</button><button id="market-mode-import" type="button" aria-pressed="false" onclick="marketSetMode('import')">Importar compras</button></div>
+              <p class="market-note">Copie os itens da Liga e cole abaixo. Inclua loja, número, idioma, acabamento, quantidade e preços. Links de pedidos privados não importam os dados.</p>
+              <label class="market-version" for="market-paste">Texto do pedido ou lista de lojas</label><textarea id="market-paste" rows="6" placeholder="Cole aqui uma ou várias listas…"></textarea>
+              <div class="market-actions"><button type="button" onclick="marketAnalyze(false)">Analisar nova lista</button><button type="button" onclick="marketAnalyze(true)">Acrescentar à lista</button><button type="button" onclick="marketAdd()">+ Adicionar carta</button><button type="button" id="market-undo-remove" hidden onclick="marketUndoRemove()">Desfazer remoção</button></div>
+              <p class="market-note">Já tem: marcada na sua coleção. Comprar: versão identificada e ainda não marcada. Não identificada: número ausente do catálogo. Conferir versão: idioma, acabamento ou selo ambíguo.</p>
+              <p class="market-note">Repetições consideram a mesma versão. Sugestões comparam o preço unitário, sem frete, e não alteram pedidos nas lojas. Remover aqui só remove da lista de conferência.</p>
+              <p id="market-summary" class="market-summary" aria-live="polite">Cole uma lista ou adicione uma carta para começar.</p><p id="market-message" class="market-note" role="status"></p>
+              <div id="market-review"></div><button id="market-confirm" type="button" hidden onclick="marketConfirm()">Confirmar importação dos itens selecionados</button>
+            </div>
+
             <div class="glass-panel rounded-3xl p-5 sm:p-7 shadow-2xl">
                 <div class="max-w-2xl mb-6">
                     <span class="text-[10px] uppercase font-bold tracking-widest text-cinder-orange dark:text-cinder-yellow">Busca Rápida de Mercado</span>
@@ -728,7 +714,8 @@
         let captureFilterState = {
             status: 'all',
             poke: 'all',
-            lang: 'all'
+            lang: 'all',
+            entity: 'all'
         };
 
         // MATRIZ COMPLETA DE CARTAS COM AS CORREÇÕES DOS SEUS PRINTS
@@ -1479,36 +1466,39 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             }
         };
 
-        window.toggleCaptureDropdown = function(type) {
-            const menuStatus = document.getElementById('cap-menu-status');
-            const menuPoke = document.getElementById('cap-menu-poke');
-            const menuLang = document.getElementById('cap-menu-lang');
-            
-            const targetMenu = document.getElementById(`cap-menu-${type}`);
-            
-            if(type !== 'status') menuStatus?.classList.add('hidden');
-            if(type !== 'poke') menuPoke?.classList.add('hidden');
-            if(type !== 'lang') menuLang?.classList.add('hidden');
-            
-            document.getElementById('filters-section')?.classList.add('hidden');
-            document.getElementById('layout-dropdown')?.classList.add('hidden');
-
-            targetMenu?.classList.toggle('hidden');
-        };
-
-        function hideAllCaptureDropdowns() {
-            document.getElementById('cap-menu-status')?.classList.add('hidden');
-            document.getElementById('cap-menu-poke')?.classList.add('hidden');
-            document.getElementById('cap-menu-lang')?.classList.add('hidden');
+        const captureEntityKey = name => String(name || '').trim().replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
+        function captureEntityOptions() {
+            const names = new Map();
+            Object.values(captureDataMap).forEach(data=>{
+                if(data.type==='booster')return;
+                const label=String(data.entity || '').trim().replace(/\s+/g,' '), key=captureEntityKey(label);
+                if(key && !names.has(key)) names.set(key,label);
+            });
+            return [...names].sort((a,b)=>a[1].localeCompare(b[1],'pt-BR'));
         }
-
-        window.setCaptureFilter = function(filterType, value, labelText) {
-            captureFilterState[filterType] = value;
-            document.getElementById(`cap-label-${filterType}`).innerText = labelText;
-            hideAllCaptureDropdowns();
+        function updateCaptureFilterOptions() {
+            const select=document.getElementById('cap-filter-entity');
+            if(!select)return;
+            const names=captureEntityOptions();
+            if(captureFilterState.entity!=='all'&&!names.some(([key])=>key===captureFilterState.entity))captureFilterState.entity='all';
+            select.innerHTML='<option value="all">Todas as pessoas e lojas</option>'+names.map(([key,label])=>`<option value="${escapeLabel(key)}">${escapeLabel(label)}</option>`).join('');
+            ['status','poke','lang','entity'].forEach(key=>{const element=document.getElementById('cap-filter-'+key);if(element)element.value=captureFilterState[key];});
+            const count=Object.values(captureFilterState).filter(value=>value!=='all').length;
+            document.getElementById('capture-filter-count').textContent=count?'('+count+')':'';
+            document.getElementById('capture-clear-filters').hidden=!count;
+        }
+        function hideAllCaptureDropdowns() {
+            const drawer=document.getElementById('capture-filter-drawer');if(drawer)drawer.open=false;
+        }
+        window.setCaptureFilter = function(key,value) {
+            if(!Object.hasOwn(captureFilterState,key))return;
+            captureFilterState[key]=value;
             renderCaptureView();
         };
-
+        window.clearCaptureFilters = function() {
+            Object.keys(captureFilterState).forEach(key=>captureFilterState[key]='all');
+            renderCaptureView();
+        };
         window.addEventListener('click', function(e) {
             const section = document.getElementById('filters-section');
             const btn = document.querySelector('button[onclick="toggleFilterDrawer()"]');
@@ -1524,6 +1514,8 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 layoutDropdown.classList.add('hidden');
             }
 
+            const captureDrawer=document.getElementById('capture-filter-drawer');
+            if(captureDrawer && !captureDrawer.contains(e.target))captureDrawer.open=false;
             ['status', 'poke', 'lang'].forEach(t => {
                 const menu = document.getElementById(`cap-menu-${t}`);
                 const dropBtn = document.getElementById(`cap-drop-btn-${t}`);
@@ -1631,6 +1623,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         }
 
         window.switchTab = function(tab) {
+            if(tab==='market') renderMarketReview();
             const dashSec = document.getElementById('view-dashboard');
             const gridSec = document.getElementById('view-grid');
             const captureSec = document.getElementById('view-capture');
@@ -1918,6 +1911,136 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             }
         };
 
+        // Shopping review only mutates the collection after an explicit confirmation.
+        let marketRows = [];
+        let marketMode = 'check';
+        let marketRemoved = null;
+        const marketMoney = value => Number(String(value ?? '').trim().replace(/R\$\s*/g,'').replace(/\s/g,'').replace(/\.(?=.*[,])/g,'').replace(',','.'));
+        const marketCurrency = value => Number.isFinite(value) ? value.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : 'Preço não informado';
+        const marketNorm = value => String(value || '').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+        function marketNumber(value) {
+            return marketNorm(value).replace(/\s/g,'').replace(/^(\d+)-07\/196$/,'$1/07').split('/').map(v=>v.replace(/^([a-z]*?)0+(?=\d)/,'$1')).join('/');
+        }
+        function parseMarketText(text) {
+            const lines=text.split(/\r?\n/).map(raw=>{
+                const edition=(raw.match(/(?:\\?&|\?)ed=(SVP|MEP|SWSH)\b/i)||[])[1];
+                let line=raw.replace(/\[([^\]]*)\]\((?:\\.|[^\\)])*\)/g,'$1').replace(/\*\*|__|&#xA0;|&nbsp;/gi,'').replace(/\\([()&])/g,'$1').trim();
+                if(edition)line=line.replace(/\((\d+)\/∞\)/,(_,n)=>'('+edition.toUpperCase()+n.padStart(3,'0')+')');
+                return line;
+            }).filter(Boolean);
+            const rows=[];let shop='',order='',status='';
+            const stockListing=/\bEstoque\b/i.test(text);
+            const isCard=line=>/^(Scorbunny|Raboot|Cinderace)\b/i.test(line)&&/\([^()]*\d[^()]*\)\s*$/.test(line);
+            for(let i=0;i<lines.length;i++) {
+                const line=lines[i];
+                if(/Loja Verificada|#\d{6,}/i.test(line)) {
+                    shop=line.split(/Loja Verificada|#\d/)[0].trim();order=(line.match(/#(\d+)/)||[])[1]||'';status='';continue;
+                }
+                if(/^Status\s/i.test(line)) {status=line.replace(/^Status\s*/i,'');continue;}
+                if(!isCard(line))continue;
+                let number=line.match(/\(([^()]*)\)\s*$/)[1];
+                const name=line.slice(0,line.lastIndexOf('(')).trim();
+                let j=i+1;while(j<lines.length&&!isCard(lines[j])&&!/Loja Verificada|#\d{6,}|^\d+ itens$|^Total:|^Frete:|^Valor Total:/i.test(lines[j]))j++;
+                const detail=lines.slice(i+1,j).join(' '), full=name+' '+detail;
+                if(/\/∞$/.test(number)){const prefix=/Mega Evolution Promos/i.test(detail)?'MEP':/Escarlate e Violeta Promos/i.test(detail)?'SVP':/Sword.*Shield.*Promo|Espada.*Escudo.*Promo/i.test(detail)?'SWSH':'';if(prefix)number=prefix+number.split('/')[0].padStart(3,'0');}
+                const condition=(detail.match(/(?:^|[\s|])(NM|SP|MP|HP|LP|DMG|D)(?=[\s|]|$)/i)||[])[1]||'';
+                const lang=/chin[eê]s simplificado/i.test(detail)?'CN':/portugu[eê]s|\bPT\b/i.test(detail)?'PT-BR':/ingl[eê]s|\bEN\b/i.test(detail)?'EN':/japon[eê]s|\bJP\b/i.test(detail)?'JP':'';
+                const prices=[...detail.matchAll(/R\$\s*([\d.]+,\d{2})/g)].map(m=>marketMoney(m[1]));
+                const quantity=stockListing?1:Number((detail.match(/(\d+)\s*unid/i)||[])[1]||1);
+                rows.push({name,number,lang,condition,quantityNeedsReview:stockListing,detail:full,shop,order,status,quantity,price:prices.length?prices[0]:null,chosen:'',include:true,replace:false,manual:false});
+                i=j-1;
+            }
+            return rows;
+        }
+        function marketMatch(row) {
+            const normalized=marketNumber(row.number);
+            const suffix=/^\d+[ep]\//.test(normalized);
+            const base=normalized.replace(/^(\d+)[ep]\//,'$1/');
+            const species=(row.name.match(/Scorbunny|Raboot|Cinderace/i)||[''])[0].toLowerCase();
+            let numbered=allCards.filter(c=>marketNumber(c.numero)===base&&(!species||c.pokemon.toLowerCase()===species));
+            if(!numbered.length)return {state:'Não identificada',candidates:[],id:'',reason:'Número não encontrado no catálogo para este Pokémon.'};
+            let candidates=numbered.filter(c=>!row.lang||c.lingua===row.lang);
+            const text=marketNorm(row.detail), mechanic=/vmax/.test(text)?'VMAX':/\bex\b/.test(text)?'ex':/cinderace\s*-?\s*v\b/.test(text)?'V':'';
+            candidates=candidates.filter(c=>mechanic?c.mecanica===mechanic:!['V','VMAX','ex'].includes(c.mecanica));
+            const stamp=/play!|pokemon league|staff/i.test(text);
+            if(!stamp)candidates=candidates.filter(c=>!(/play!|pokemon league|staff/i.test(c.selo)));
+            else candidates=candidates.filter(c=>/staff/.test(text)?/staff/i.test(c.selo):/league/.test(text)?/league/i.test(c.selo):/play!/i.test(c.selo));
+            const uncertain=suffix||/pok[eé]?ball foil|poke ball foil/.test(text);
+            if(/reverse|energy holo|ball holo|glitter/.test(text)||uncertain) {
+                candidates=candidates.filter(c=>/reverse|foil/i.test(c.acabamento));
+                if(/master ball/.test(text))candidates=candidates.filter(c=>/master ball/i.test(c.padrao));
+                else if(/poke ball holo/.test(text))candidates=candidates.filter(c=>/pok[eé] ball/i.test(c.padrao));
+                else if(/energy holo/.test(text))candidates=candidates.filter(c=>/energia/i.test(c.padrao));
+                else if(/glitter/.test(text))candidates=candidates.filter(c=>/glitter/i.test(c.padrao));
+                else candidates=candidates.filter(c=>/reverse/i.test(c.acabamento));
+            } else if(/\bfoil\b|\bholo\b/.test(text)) candidates=candidates.filter(c=>/holo|foil/i.test(c.acabamento)&&!/reverse|não foil/i.test(c.acabamento));
+            else candidates=candidates.filter(c=>c.acabamento==='Não foil');
+            if(candidates.length===1&&row.lang&&!uncertain) {const id=candidates[0].id;return {state:obtainedMap[id]?'Já tem':'Comprar',id,candidates,reason:''};}
+            return {state:'Conferir versão',id:'',candidates:candidates.length?candidates:numbered.filter(c=>!row.lang||c.lingua===row.lang),reason:uncertain?'O sufixo ou padrão usado pela loja precisa de confirmação.':!row.lang?'Idioma não identificado.':'Idioma, acabamento ou selo não permitem uma identificação única.'};
+        }
+        function marketResolved(row) {
+            if(row.chosen) {const card=allCards.find(c=>c.id===row.chosen);if(card)return {id:card.id,state:obtainedMap[card.id]?'Já tem':'Comprar',candidates:[card],reason:'Versão escolhida por você.'};}
+            return marketMatch(row);
+        }
+        function marketDuplicates(rows) {
+            const groups=new Map();rows.forEach((row,index)=>{if(!row.include)return;const match=marketResolved(row);if(!match.id)return;if(!groups.has(match.id))groups.set(match.id,[]);groups.get(match.id).push({row,index});});
+            const notes=new Map();for(const group of groups.values()) {
+                if(group.length<2&&group[0].row.quantity<2)continue;
+                const conditions=new Set(group.map(x=>x.row.condition||'Não informado'));
+                const priced=group.filter(x=>x.row.price!==null&&Number.isFinite(x.row.price));priced.sort((a,b)=>a.row.price-b.row.price||a.index-b.index);const best=priced[0];
+                for(const item of group){let note='Repetida na lista';if(item.row.quantity>1)note+=' · '+item.row.quantity+' unidades';if(conditions.size>1)note+=' · conservação diferente: '+[...conditions].join(' / ')+'; confira antes de remover';
+                else if(best&&group.length>1) note+=item.index===best.index?' · menor preço unitário (ou empate)':' · pode remover esta e manter '+(best.row.shop||'o item '+(best.index+1))+' por '+marketCurrency(best.row.price);notes.set(item.index,note);}
+            }return notes;
+        }
+        function marketCardLabel(c) {return [c.nome,c.numero,c.lingua,c.acabamento,c.padrao,c.selo].filter(x=>x&&x!=='A conferir'&&x!=='Sem selo informado'&&x!=='Sem padrão foil').join(' · ');}
+        function persistMarketDraft(){try{localStorage.setItem('scorace_market_draft_v1',JSON.stringify({rows:marketRows,mode:marketMode}));}catch(e){/* Collection remains untouched if draft storage is full. */}}
+        window.marketSetMode=function(mode){marketMode=mode==='import'?'import':'check';persistMarketDraft();renderMarketReview();};
+        window.marketAnalyze=function(append=false){const input=document.getElementById('market-paste');const parsed=parseMarketText(input.value);const message=document.getElementById('market-message');if(!parsed.length){message.textContent='Nenhuma carta reconhecida. Cole os itens da página, com nome, número, idioma e preço; um link sozinho não contém os pedidos.';return;}marketRows=append?[...marketRows,...parsed]:parsed;marketRemoved=null;persistMarketDraft();renderMarketReview();message.textContent=parsed.length+' itens lidos. Revise as versões e os preços antes de importar.';};
+        window.marketAdd=function(){marketRows.push({name:'Carta adicionada manualmente',number:'',lang:'',detail:'',shop:'',order:'',status:'',quantity:1,price:null,chosen:'',include:true,replace:false,manual:true});persistMarketDraft();renderMarketReview();};
+        window.marketEdit=function(index,field,value){const row=marketRows[index];if(!row)return; if(field==='quantity')value=Math.max(1,parseInt(value)||1);if(field==='price')value=value.trim()===''?null:marketMoney(value);if(!['shop','quantity','price','include','replace','chosen'].includes(field))return;row[field]=value;persistMarketDraft();renderMarketReview();};
+        window.marketRemove=function(index){marketRemoved={row:marketRows[index],index};marketRows.splice(index,1);persistMarketDraft();renderMarketReview();};
+        window.marketUndoRemove=function(){if(marketRemoved){marketRows.splice(marketRemoved.index,0,marketRemoved.row);marketRemoved=null;persistMarketDraft();renderMarketReview();}};
+        function renderMarketReview(){
+            const host=document.getElementById('market-review');if(!host)return;
+            document.getElementById('market-mode-check').setAttribute('aria-pressed',String(marketMode==='check'));
+            document.getElementById('market-mode-import').setAttribute('aria-pressed',String(marketMode==='import'));
+            document.getElementById('market-confirm').hidden=marketMode!=='import'||!marketRows.length;
+            document.getElementById('market-undo-remove').hidden=!marketRemoved;
+            const duplicates=marketDuplicates(marketRows);const counts={};let cost=0;
+            host.innerHTML=marketRows.map((row,index)=>{
+                const match=marketResolved(row);counts[match.state]=(counts[match.state]||0)+1;
+                if(row.include&&Number.isFinite(row.price))cost+=row.price*row.quantity;
+                // A complete selector allows deliberate manual correction even outside parser candidates.
+                const candidates=match.candidates||[],others=allCards.filter(c=>!candidates.some(x=>x.id===c.id));
+                const option=c=>`<option value="${c.id}" ${row.chosen===c.id?'selected':''}>${escapeLabel(marketCardLabel(c))}</option>`;
+                const locked=match.id&&captureDataMap[match.id]?.locked;
+                return `<article class="market-row ${row.include?'':'market-excluded'}"><div class="market-row-heading"><label><input type="checkbox" ${row.include?'checked':''} onchange="marketEdit(${index},'include',this.checked)"> <strong>${escapeLabel(row.name)} ${escapeLabel(row.number)}</strong></label><button type="button" onclick="marketRemove(${index})" aria-label="Remover item ${index+1}">Remover</button></div>
+                <div class="market-badges"><span>${escapeLabel(match.state)}</span>${duplicates.has(index)?`<span class="market-duplicate">${escapeLabel(duplicates.get(index))}</span>`:''}${locked?'<span>Captura bloqueada · não será alterada</span>':''}</div>
+                <p class="market-note">${escapeLabel(row.lang||'Idioma a conferir')}${row.condition?' · Estado: '+escapeLabel(row.condition):''}${row.order?' · Pedido #'+escapeLabel(row.order):''}${row.status?' · '+escapeLabel(row.status):''} ${escapeLabel(match.reason)}${row.quantityNeedsReview?' · Lista de estoque: quantidade iniciada em 1; ajuste se necessário.':''}</p>
+                <label class="market-version">Carta no seu catálogo<select onchange="marketEdit(${index},'chosen',this.value)"><option value="">${match.id&&!row.chosen?'Identificada: '+escapeLabel(marketCardLabel(allCards.find(c=>c.id===match.id))):'Escolha a versão correta'}</option><optgroup label="Correspondências possíveis">${candidates.map(option).join('')}</optgroup><optgroup label="Todas as cartas">${others.map(option).join('')}</optgroup></select></label>
+                <div class="market-fields"><label>Loja<input value="${escapeLabel(row.shop)}" onchange="marketEdit(${index},'shop',this.value)"></label><label>Quantidade<input type="number" min="1" step="1" value="${row.quantity}" onchange="marketEdit(${index},'quantity',this.value)"></label><label>Preço unitário (R$)<input inputmode="decimal" value="${Number.isFinite(row.price)?row.price.toFixed(2).replace('.',','):''}" placeholder="0,00" onchange="marketEdit(${index},'price',this.value)"></label></div>
+                ${marketMode==='import'&&match.id&&obtainedMap[match.id]&&!locked?`<label class="market-note"><input type="checkbox" ${row.replace?'checked':''} onchange="marketEdit(${index},'replace',this.checked)"> Atualizar loja e valor já registrados para esta carta</label>`:''}</article>`;
+            }).join('');
+            document.getElementById('market-summary').textContent=marketRows.length?Object.entries(counts).map(([k,v])=>v+' '+k.toLowerCase()).join(' · ')+' | Seleção: '+marketCurrency(cost)+' (sem frete)':'Cole uma lista ou adicione uma carta para começar.';
+        }
+        window.marketConfirm=function(){
+            if(marketMode!=='import')return;
+            const seen=new Set(),updates=[];let skipped=0;
+            for(const row of marketRows){if(!row.include)continue;const match=marketResolved(row),id=match.id;
+                if(!id||seen.has(id)||captureDataMap[id]?.locked||(obtainedMap[id]&&!row.replace)||!row.shop.trim()||row.price===null||!Number.isFinite(row.price)||row.price<0){skipped++;continue;}
+                seen.add(id);updates.push({id,row});
+            }
+            const message=document.getElementById('market-message');
+            if(!updates.length){message.textContent='Nada foi alterado. Confirme as versões, preencha loja e preço e selecione itens novos ou autorize atualizar os já adquiridos.';return;}
+            if(!window.confirm(`Confirmar ${updates.length} cartas como Tenho e salvar loja e preço unitário em Captura? ${skipped} itens ficarão sem alteração. A quantidade não cria novos registros no master set.`))return;
+            const beforeOwned={...obtainedMap},beforeCaptures=JSON.parse(JSON.stringify(captureDataMap));
+            updates.forEach(({id,row})=>{obtainedMap[id]=true;captureDataMap[id]={...captureDataMap[id],type:'compra',entity:row.shop.trim(),price:row.price.toFixed(2).replace('.',','),quantity:row.quantity,order:row.order,orderStatus:row.status,condition:row.condition||''};row.replace=false;});
+            try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(obtainedMap));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(captureDataMap));}
+            catch(error){obtainedMap=beforeOwned;captureDataMap=beforeCaptures;try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(beforeOwned));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(beforeCaptures));}catch(e){}message.textContent='Não foi possível salvar no navegador. Nenhuma importação foi enviada à nuvem.';return;}
+            saveToCloud();updateHeaderCounters();persistMarketDraft();renderMarketReview();message.textContent=updates.length+' cartas atualizadas em Tenho e Captura. '+skipped+' itens sem alteração. Você pode editar as aquisições na aba Captura e desmarcar cartas na aba Coleção.';
+        };
+        try{const draft=JSON.parse(localStorage.getItem('scorace_market_draft_v1')||'null');if(draft&&Array.isArray(draft.rows)){marketRows=draft.rows;marketMode=draft.mode==='import'?'import':'check';}}catch(error){}
+
         function updateHeaderCounters() {
             let totalObtainedCount = 0;
             allCards.forEach(card => {
@@ -2176,6 +2299,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         window.saveCaptureData = function(cardId, key, value) {
             if(!captureDataMap[cardId]) captureDataMap[cardId] = {};
             captureDataMap[cardId][key] = value;
+            if(key==='entity'||key==='type')updateCaptureFilterOptions();
             renderAcquisitionChart();
             localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
             saveToCloud();
@@ -2230,6 +2354,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         };
 
         function renderCaptureView() {
+            updateCaptureFilterOptions();
             updateHeaderCounters();
             const captureGrid = document.getElementById('capture-grid');
             captureGrid.innerHTML = '';
@@ -2245,6 +2370,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
 
                 if (captureFilterState.poke !== 'all' && card.pokemon !== captureFilterState.poke) return false;
                 if (captureFilterState.lang !== 'all' && card.lingua !== captureFilterState.lang) return false;
+                if (captureFilterState.entity !== 'all' && (data.type === 'booster' || captureEntityKey(data.entity) !== captureFilterState.entity)) return false;
 
                 return true;
             });
