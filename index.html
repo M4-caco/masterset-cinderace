@@ -338,9 +338,14 @@
         @media(max-width:640px){:root{--hero-height:270px}.brand-logo{width:112px;height:49px}.dashboard-shell{padding:22px 15px;border-radius:20px}.dashboard-heading{align-items:start;gap:15px}.dashboard-heading h2{font-size:26px}.section-kicker{font-size:8px}.collection-total{min-width:110px}.collection-total strong{font-size:13px}.collection-total>span{font-size:9px}.evolution-stage{padding-top:18px}.image-progress>strong,.dark .image-progress>strong{font-size:29px}.image-progress p{font-size:9px}.image-progress h4{font-size:10px}.country-section{padding:24px 0}.horizontal .progress-art{width:48px;height:31px}.horizontal>strong,.dark .horizontal>strong{font-size:23px}.expansion-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.expansion-progress{padding:15px 8px}.expansion-logo{height:72px}.stamps .expansion-grid,.generic .expansion-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.section-heading h3{font-size:23px}.acquisition-layout{grid-template-columns:1fr;gap:24px}.acquisition-detail,.dark .acquisition-detail{border-left:0;border-top:1px solid var(--line);padding:24px 0 0}.acquisition-pie{max-width:250px}.collection-section{padding-top:30px}}
         @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 
+    /* Background supplied by the collector; filename matches the GitHub asset. */
+        body { position:relative; isolation:isolate; background:#181614; }
+        body::before { content:""; position:fixed; inset:0; z-index:-1; pointer-events:none;
+            background-image:url("image(20261029-192333).png");
+            background-position:center; background-size:cover; background-repeat:no-repeat; }
     </style>
 </head>
-<body class="bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300 dark:from-[#0e0e0e] dark:via-cinder-bg dark:to-[#181818] text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
+<body class="text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
 
     <div id="zoom-modal" onclick="handleModalClick(event)" class="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-xl flex items-center justify-center hidden opacity-0 pointer-events-none p-4">
         <button id="zoom-prev-btn" onclick="event.stopPropagation(); prevZoomCard()" class="hidden sm:flex absolute left-4 sm:left-8 lg:left-16 top-1/2 -translate-y-1/2 z-40 bg-white/90 dark:bg-cinder-dark/90 hover:bg-cinder-orange disabled:opacity-20 text-cinder-orange dark:text-cinder-yellow hover:text-white p-3 sm:p-4 rounded-full border border-cinder-orange/40 shadow-2xl transition active:scale-95 items-center justify-center cursor-pointer select-none">
