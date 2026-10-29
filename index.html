@@ -171,6 +171,23 @@
         .dark .regional-logo-cell {background:#202e41;border-color:#38475b;}
         .dark .regional-explanation,.dark .regional-locale {color:#b3c0d2;}
         @media(max-width:480px){#expansion-logos-dialog{padding:18px}.regional-art{height:90px}.regional-logo-cell{padding:14px 8px}.regional-header h2{font-size:21px}}
+
+        .expansion-caption {justify-content:center;gap:9px;margin-top:9px;align-items:baseline;}
+        .expansion-caption strong {font-size:38px;font-weight:900;line-height:1.1;letter-spacing:-1.5px;font-variant-numeric:tabular-nums;color:#dc6818;}
+        .expansion-caption strong span {font-size:21px;letter-spacing:-.5px;margin-left:2px;}
+        .expansion-status {font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#64748b;}
+        .expansion-name {font-size:12px;font-weight:800;text-align:center;margin:0 0 7px;}
+        .expansion-meter {height:5px;background:#e2e8f0;border-radius:99px;overflow:hidden;margin:12px 0 9px;}
+        .expansion-meter span {display:block;height:100%;background:#ea7c20;border-radius:inherit;transition:width .3s;}
+        .is-complete .expansion-meter span {background:#16a34a;}
+        .is-complete .expansion-status {color:#16a34a;}
+        .dark .expansion-caption strong {color:#ffad51;}
+        .dark .is-complete .expansion-caption strong {color:#4ade80;}
+        .dark .expansion-status {color:#a6b5c7;}
+        .dark .expansion-meter {background:#334155;}
+        .regional-logo-grid[data-count="1"] {grid-template-columns:1fr;max-width:420px;margin-inline:auto;}
+        .regional-logo-grid[data-count="3"] > :last-child {grid-column:1 / -1;}
+        @media(max-width:640px){.expansion-caption strong{font-size:32px}.expansion-status{font-size:9px}.expansion-caption{gap:6px}}
 </style>
 </head>
 <body class="bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300 dark:from-[#090e17] dark:via-cinder-bg dark:to-[#121926] text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
@@ -955,23 +972,26 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         }
 
         // Agrupamento visual: não altera número, idioma, selo ou ID da carta.
-        const expansionGroups = {"espada-escudo": {"nome": "Espada e Escudo", "logo": "espada-escudo-pt.png", "logoOficial": true}, "rixa-rebelde": {"nome": "Rixa Rebelde", "logo": "rixa-rebelde-pt.png", "logoOficial": true}, "destinos-brilhantes": {"nome": "Destinos Brilhantes", "logo": "destinos-brilhantes-pt.png", "logoOficial": true}, "reinado-arrepiante": {"nome": "Reinado Arrepiante", "logo": "reinado-arrepiante-pt.png", "logoOficial": true}, "golpe-fusao": {"nome": "Golpe Fusão", "logo": "golpe-fusao-pt.png", "logoOficial": true}, "coroa-estelar": {"nome": "Coroa Estelar", "logo": "coroa-estelar-pt.png", "logoOficial": true}, "herois-excelsos": {"nome": "Heróis Excelsos", "logo": "herois-excelsos-pt.png", "logoOficial": true}, "megaevolucao": {"nome": "Megaevolução", "logo": "megaevolucao-pt.png", "logoOficial": true}, "dynamax": {"nome": "Dynamax Clash", "logo": "dynamax-cn.png", "logoOficial": true}, "artes-marciais": {"nome": "Artes Marciais Primordiais", "logo": "artes-marciais-cn.png", "logoOficial": true}, "gem-pack": {"nome": "Gem Pack Vol. 5", "logo": "gem-pack-cn.png", "logoOficial": true}, "decks": {"nome": "Decks e conjuntos especiais", "logo": "grupo-decks.svg", "logoOficial": false}, "mcdonalds": {"nome": "McDonald’s 2021", "logo": "grupo-mcdonalds.svg", "logoOficial": false}, "promos": {"nome": "Promos", "logo": "grupo-promos.svg", "logoOficial": false}, "outros": {"nome": "Outros", "logo": "grupo-outros.svg", "logoOficial": false}};
+        const expansionGroups = {"espada-escudo": {"nome": "Espada e Escudo", "logo": "espada-escudo-pt.png", "logoOficial": true}, "rixa-rebelde": {"nome": "Rixa Rebelde", "logo": "rixa-rebelde-pt.png", "logoOficial": true}, "destinos-brilhantes": {"nome": "Destinos Brilhantes", "logo": "destinos-brilhantes-pt.png", "logoOficial": true}, "reinado-arrepiante": {"nome": "Reinado Arrepiante", "logo": "reinado-arrepiante-pt.png", "logoOficial": true}, "golpe-fusao": {"nome": "Golpe Fusão", "logo": "golpe-fusao-pt.png", "logoOficial": true}, "coroa-estelar": {"nome": "Coroa Estelar", "logo": "coroa-estelar-pt.png", "logoOficial": true}, "herois-excelsos": {"nome": "Heróis Excelsos", "logo": "herois-excelsos-pt.png", "logoOficial": true}, "megaevolucao": {"nome": "Megaevolução", "logo": "megaevolucao-pt.png", "logoOficial": true}, "dynamax": {"nome": "Dynamax Clash", "logo": "dynamax-cn.webp", "logoOficial": true, "showName": true}, "artes-marciais": {"nome": "Artes Marciais Primordiais", "logo": "artes-marciais-cn.png", "logoOficial": true, "showName": true}, "gem-pack": {"nome": "Gem Pack Vol. 5", "logo": "gem-pack-cn.png", "logoOficial": true, "showName": true}, "decks": {"nome": "Decks e conjuntos especiais", "logo": "grupo-decks.svg", "logoOficial": false}, "mcdonalds": {"nome": "McDonald’s 2021", "logo": "logo-mcdonalds.svg", "logoOficial": true, "brand": true}, "promos": {"nome": "Promos", "logo": "grupo-promos.svg", "logoOficial": false}, "outros": {"nome": "Outros", "logo": "grupo-outros.svg", "logoOficial": false}, "play-pokemon": {"nome": "Play! Pokémon", "logo": "logo-play-pokemon.png", "logoOficial": true, "brand": true}, "pokemon-league": {"nome": "Pokemon League", "logo": "logo-pokemon-league.png", "logoOficial": true, "brand": true}};
         const expansionMembership = {"1": "espada-escudo", "3": "espada-escudo", "4": "espada-escudo", "23": "espada-escudo", "26": "espada-escudo", "28": "espada-escudo", "29": "espada-escudo", "30": "espada-escudo", "31": "espada-escudo", "51": "espada-escudo", "52": "espada-escudo", "56": "espada-escudo", "61": "espada-escudo", "62": "espada-escudo", "63": "espada-escudo", "102": "espada-escudo", "103": "espada-escudo", "104": "espada-escudo", "105": "espada-escudo", "123": "espada-escudo", "124": "espada-escudo", "125": "espada-escudo", "126": "espada-escudo", "145": "espada-escudo", "146": "espada-escudo", "156": "espada-escudo", "174": "espada-escudo", "175": "espada-escudo", "176": "espada-escudo", "177": "espada-escudo", "189": "espada-escudo", "190": "espada-escudo", "191": "espada-escudo", "192": "espada-escudo", "212": "espada-escudo", "8": "rixa-rebelde", "11": "rixa-rebelde", "14": "rixa-rebelde", "16": "rixa-rebelde", "35": "rixa-rebelde", "39": "rixa-rebelde", "42": "rixa-rebelde", "44": "rixa-rebelde", "70": "rixa-rebelde", "73": "rixa-rebelde", "90": "rixa-rebelde", "93": "rixa-rebelde", "2": "destinos-brilhantes", "9": "destinos-brilhantes", "15": "destinos-brilhantes", "27": "destinos-brilhantes", "36": "destinos-brilhantes", "43": "destinos-brilhantes", "64": "destinos-brilhantes", "65": "destinos-brilhantes", "106": "destinos-brilhantes", "127": "destinos-brilhantes", "153": "destinos-brilhantes", "154": "destinos-brilhantes", "178": "destinos-brilhantes", "193": "destinos-brilhantes", "210": "destinos-brilhantes", "211": "destinos-brilhantes", "5": "reinado-arrepiante", "6": "reinado-arrepiante", "25": "reinado-arrepiante", "32": "reinado-arrepiante", "33": "reinado-arrepiante", "58": "reinado-arrepiante", "60": "reinado-arrepiante", "68": "reinado-arrepiante", "108": "reinado-arrepiante", "109": "reinado-arrepiante", "129": "reinado-arrepiante", "130": "reinado-arrepiante", "152": "reinado-arrepiante", "179": "reinado-arrepiante", "180": "reinado-arrepiante", "194": "reinado-arrepiante", "195": "reinado-arrepiante", "209": "reinado-arrepiante", "12": "golpe-fusao", "13": "golpe-fusao", "17": "golpe-fusao", "40": "golpe-fusao", "41": "golpe-fusao", "45": "golpe-fusao", "71": "golpe-fusao", "80": "golpe-fusao", "18": "coroa-estelar", "20": "coroa-estelar", "46": "coroa-estelar", "48": "coroa-estelar", "74": "coroa-estelar", "76": "coroa-estelar", "77": "coroa-estelar", "88": "coroa-estelar", "89": "coroa-estelar", "111": "coroa-estelar", "112": "coroa-estelar", "132": "coroa-estelar", "133": "coroa-estelar", "150": "coroa-estelar", "163": "coroa-estelar", "181": "coroa-estelar", "182": "coroa-estelar", "183": "coroa-estelar", "196": "coroa-estelar", "197": "coroa-estelar", "198": "coroa-estelar", "206": "coroa-estelar", "207": "coroa-estelar", "214": "coroa-estelar", "21": "herois-excelsos", "49": "herois-excelsos", "95": "herois-excelsos", "113": "herois-excelsos", "114": "herois-excelsos", "115": "herois-excelsos", "116": "herois-excelsos", "134": "herois-excelsos", "135": "herois-excelsos", "136": "herois-excelsos", "137": "herois-excelsos", "147": "herois-excelsos", "148": "herois-excelsos", "184": "herois-excelsos", "185": "herois-excelsos", "186": "herois-excelsos", "199": "herois-excelsos", "200": "herois-excelsos", "201": "herois-excelsos", "204": "herois-excelsos", "22": "megaevolucao", "24": "megaevolucao", "50": "megaevolucao", "53": "megaevolucao", "54": "megaevolucao", "57": "megaevolucao", "75": "megaevolucao", "117": "megaevolucao", "118": "megaevolucao", "138": "megaevolucao", "139": "megaevolucao", "149": "megaevolucao", "187": "megaevolucao", "188": "megaevolucao", "202": "megaevolucao", "203": "megaevolucao", "205": "megaevolucao", "82": "dynamax", "83": "dynamax", "84": "dynamax", "85": "dynamax", "86": "dynamax", "87": "dynamax", "168": "dynamax", "169": "dynamax", "225": "dynamax", "226": "dynamax", "81": "artes-marciais", "166": "artes-marciais", "223": "artes-marciais", "215": "gem-pack", "216": "gem-pack", "217": "gem-pack", "218": "gem-pack", "219": "gem-pack", "220": "gem-pack", "221": "gem-pack", "59": "decks", "66": "decks", "69": "decks", "72": "decks", "78": "decks", "79": "decks", "92": "decks", "96": "decks", "97": "decks", "98": "decks", "99": "decks", "151": "decks", "155": "decks", "157": "decks", "165": "decks", "167": "decks", "170": "decks", "208": "decks", "213": "decks", "222": "decks", "224": "decks", "227": "decks", "120": "mcdonalds", "121": "mcdonalds", "141": "mcdonalds", "142": "mcdonalds", "55": "outros", "143": "outros"};
         allCards.forEach(card => {
             card.grupoExpansao = expansionMembership[card.id.replace('card-', '')] || 'promos';
             card.expansao = expansionGroups[card.grupoExpansao].nome;
+            card.grupoProgresso = card.selo === 'Play! Pokémon' ? 'play-pokemon' : card.selo === 'Pokemon League' ? 'pokemon-league' : card.grupoExpansao;
         });
         function expansionProgress(key, data) {
             const group = expansionGroups[key];
             const value = data.total ? Math.max(0, Math.min(100, data.obtained / data.total * 100)) : 0;
-            const percent = Math.round(value);
+            const percent = value >= 100 ? 100 : Math.floor(value);
             const regions = [...data.languages].sort().join(' · ');
             return `<article class="expansion-progress ${percent === 100 ? 'is-complete' : ''}" aria-label="${escapeLabel(group.nome)}: ${data.obtained} de ${data.total} cartas, ${percent}%" style="--filled:${value}%">
-                <button type="button" class="expansion-logo" onclick="openExpansionLogos('${key}')" aria-label="Ver logos regionais de ${escapeLabel(group.nome)}">
+                <button type="button" class="expansion-logo" onclick="openExpansionLogos('${key}')" title="${escapeLabel(group.nome)}" aria-label="Ver logos de ${escapeLabel(group.nome)}">
                     <img class="expansion-gray" src="${encodeURI(group.logo)}" alt="">
                     <img class="expansion-color" src="${encodeURI(group.logo)}" alt="">
                 </button>
-                <div class="expansion-caption"><h4>${escapeLabel(group.nome)}</h4><strong>${percent}%${percent === 100 ? ' ✓' : ''}</strong></div>
+                ${group.showName ? `<h4 class="expansion-name">${escapeLabel(group.nome)}</h4>` : ''}
+                <div class="expansion-caption"><strong>${percent}<span>%</span></strong><span class="expansion-status">${percent === 100 ? '✓ Completa' : 'concluído'}</span></div>
+                <div class="expansion-meter" aria-hidden="true"><span style="width:${value}%"></span></div>
                 <p class="expansion-detail"><span>${data.obtained} / ${data.total} cartas</span><span>${regions}</span></p>
             </article>`;
         }
@@ -980,7 +1000,8 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         const regionalLogoAssets = {
   "reinado-arrepiante": {
     "PT-BR": "reinado-arrepiante-pt.png",
-    "EN": "reinado-arrepiante-en.png"
+    "EN": "reinado-arrepiante-en.png",
+    "JP": "reinado-arrepiante-jp.webp"
   },
   "megaevolucao": {
     "JP": "megaevolucao-jp.png",
@@ -1005,18 +1026,22 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
   },
   "espada-escudo": {
     "EN": "espada-escudo-en.png",
-    "PT-BR": "espada-escudo-pt.png"
+    "PT-BR": "espada-escudo-pt.png",
+    "JP": "espada-escudo-jp.webp"
   },
   "herois-excelsos": {
     "PT-BR": "herois-excelsos-pt.png",
-    "EN": "herois-excelsos-en.png"
+    "EN": "herois-excelsos-en.png",
+    "JP": "herois-excelsos-jp.png"
   },
   "dynamax": {
-    "CN": "dynamax-cn.png"
+    "CN": "dynamax-cn.webp"
   },
   "golpe-fusao": {
     "PT-BR": "golpe-fusao-pt.png",
-    "EN": "golpe-fusao-en.png"
+    "EN": "golpe-fusao-en.png",
+    "JP": "golpe-fusao-jp.webp",
+    "CN": "golpe-fusao-cn.webp"
   },
   "gem-pack": {
     "CN": "gem-pack-cn.png"
@@ -1043,13 +1068,20 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             if (!group) return;
             const dialog = document.getElementById('expansion-logos-dialog');
             document.getElementById('expansion-logos-title').textContent = group.nome;
-            const cells = [['EN','Inglês'],['PT-BR','Português'],['JP','Japonês'],['CN','Chinês simplificado']];
             const names = regionalNames[key] || {};
-            document.getElementById('regional-logo-grid').innerHTML = cells.map(([locale,label]) => {
-                const name = names[locale];
-                const asset = (regionalLogoAssets[key] || {})[locale];
-                return `<section class="regional-logo-cell"><span class="regional-locale">${label}</span><div class="regional-art">${asset ? `<img src="${encodeURI(asset)}" alt="Logo ${escapeLabel(name || group.nome)}">` : `<span class="regional-empty">${name ? 'Logo pendente' : 'Sem logo regional definida'}</span>`}</div><h3>${escapeLabel(name || '—')}</h3></section>`;
-            }).join('');
+            const assets = regionalLogoAssets[key] || {};
+            const order = [['EN','Inglês'],['PT-BR','Português'],['JP','Japonês'],['CN','Chinês simplificado']];
+            const cells = order.filter(([locale]) => names[locale] || assets[locale]);
+            const grid = document.getElementById('regional-logo-grid');
+            const explanation = document.querySelector('.regional-explanation');
+            explanation.textContent = group.brand ? 'Cartas desta distribuição, reunidas pela marca ou pelo selo.' : 'Versões regionais relacionadas às cartas deste grupo.';
+            const onlyAsia = cells.length > 0 && cells.every(([locale]) => locale === 'JP' || locale === 'CN');
+            grid.dataset.count = String(cells.length || 1);
+            grid.innerHTML = cells.length ? cells.map(([locale,label]) => {
+                const name = names[locale] || group.nome;
+                const asset = assets[locale];
+                return `<section class="regional-logo-cell"><span class="regional-locale">${label}</span><div class="regional-art">${asset ? `<img src="${encodeURI(asset)}" alt="Logo ${escapeLabel(name)}">` : `<span class="regional-empty">Logo ainda não disponível</span>`}</div>${onlyAsia ? `<h3>${escapeLabel(group.nome)}</h3>` : ''}</section>`;
+            }).join('') : `<section class="regional-logo-cell"><div class="regional-art"><img src="${encodeURI(group.logo)}" alt="${escapeLabel(group.nome)}"></div></section>`;
             if(!dialog.open) dialog.showModal();
         };
         document.getElementById('close-expansion-logos').addEventListener('click', () => document.getElementById('expansion-logos-dialog').close());
@@ -1681,7 +1713,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 langs[card.lingua].total++;
                 if(obtained) langs[card.lingua].obtained++;
 
-                const groupKey = card.grupoExpansao;
+                const groupKey = card.grupoProgresso;
                 if(!sets[groupKey]) sets[groupKey] = { total: 0, obtained: 0, languages: new Set() };
                 sets[groupKey].total++;
                 sets[groupKey].languages.add(card.lingua);
