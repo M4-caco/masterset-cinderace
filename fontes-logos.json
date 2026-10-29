@@ -1,0 +1,106 @@
+[
+  {
+    "key": "espada-escudo-pt",
+    "source": "https://archives.bulbagarden.net/wiki/File:SWSH1_Logo_BR.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/d/d2/SWSH1_Logo_BR.png",
+    "bytes": 343088
+  },
+  {
+    "key": "rixa-rebelde-pt",
+    "source": "https://archives.bulbagarden.net/wiki/File:SWSH2_Logo_BR.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/3/33/SWSH2_Logo_BR.png",
+    "bytes": 376912
+  },
+  {
+    "key": "destinos-brilhantes-pt",
+    "source": "https://archives.bulbagarden.net/wiki/File:Shining_Fates_Logo_BR.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/a/a2/Shining_Fates_Logo_BR.png",
+    "bytes": 650048
+  },
+  {
+    "key": "espada-escudo-en",
+    "source": "https://archives.bulbagarden.net/wiki/File:SWSH1_Logo_EN.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/5/50/SWSH1_Logo_EN.png",
+    "bytes": 408210
+  },
+  {
+    "key": "rixa-rebelde-en",
+    "source": "https://archives.bulbagarden.net/wiki/File:SWSH2_Logo_EN.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/2/29/SWSH2_Logo_EN.png",
+    "bytes": 340736
+  },
+  {
+    "key": "destinos-brilhantes-en",
+    "source": "https://archives.bulbagarden.net/wiki/File:Shining_Fates_Logo_EN.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/6/63/Shining_Fates_Logo_EN.png",
+    "bytes": 521977
+  },
+  {
+    "key": "reinado-arrepiante-en",
+    "source": "https://archives.bulbagarden.net/wiki/File:SWSH6_Logo_EN.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/0/01/SWSH6_Logo_EN.png",
+    "bytes": 902863
+  },
+  {
+    "key": "golpe-fusao-en",
+    "source": "https://archives.bulbagarden.net/wiki/File:SWSH8_Logo_EN.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/9/94/SWSH8_Logo_EN.png",
+    "bytes": 503930
+  },
+  {
+    "key": "rixa-rebelde-jp",
+    "source": "https://archives.bulbagarden.net/wiki/File:S1a_Logo.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/2/22/S1a_Logo.png",
+    "bytes": 28065
+  },
+  {
+    "key": "destinos-brilhantes-jp",
+    "source": "https://archives.bulbagarden.net/wiki/File:S4a_Logo.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/1/10/S4a_Logo.png",
+    "bytes": 239894
+  },
+  {
+    "key": "dynamax-cn",
+    "source": "https://archives.bulbagarden.net/wiki/File:Dynamax_Clash_Logo.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/5/52/Dynamax_Clash_Logo.png",
+    "bytes": 1622924
+  },
+  {
+    "key": "artes-marciais-cn",
+    "source": "https://archives.bulbagarden.net/wiki/File:Primordial_Arts_Logo.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/3/3f/Primordial_Arts_Logo.png",
+    "bytes": 508543
+  },
+  {
+    "key": "coroa-estelar-cn",
+    "source": "https://archives.bulbagarden.net/wiki/File:CSV9_Logo_SC.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/4/45/CSV9_Logo_SC.png",
+    "bytes": 89327
+  },
+  {
+    "key": "herois-excelsos-en",
+    "source": "https://archives.bulbagarden.net/wiki/File:ME2.5_Logo_EN.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/b/b9/ME2.5_Logo_EN.png",
+    "bytes": 2228729
+  },
+  {
+    "key": "gem-pack-cn",
+    "source": "https://archives.bulbagarden.net/wiki/File:CBB5_Logo.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/3/31/CBB5_Logo.png",
+    "bytes": 53679
+  },
+  {
+    "key": "megaevolucao-jp",
+    "source": "https://archives.bulbagarden.net/wiki/File:M1L_Logo_JP.png",
+    "asset": "https://archives.bulbagarden.net/media/upload/7/79/M1L_Logo_JP.png",
+    "bytes": 94350
+  },
+  {
+    "source": "https://archives.bulbagarden.net/wiki/File:SV7_Logo_JP.png",
+    "file": "coroa-estelar-jp.png"
+  },
+  {
+    "source": "https://press.pokemon.com/pt-BR/Items/Schedule?period=All&types=3",
+    "note": "Logos oficiais PT/EN de Reinado Arrepiante, Golpe Fusão, Coroa Estelar, Megaevolução e Heróis Excelsos, das galerias de cada produto."
+  }
+]
