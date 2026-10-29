@@ -131,7 +131,47 @@
             object-fit: cover;
             clip-path: inset(0.25% round 4.8% / 3.4%);
         }
-    </style>
+    
+        .expansion-intro {font-size:12px;line-height:1.6;color:#64748b;margin:0 0 18px;}
+        .expansion-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 30px;}
+        .expansion-progress {min-width:0;padding:14px 4px 18px;border-bottom:1px solid rgba(148,163,184,.2);}
+        .expansion-logo {height:104px;position:relative;margin:0 4px 15px;}
+        .expansion-logo img {position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
+        .expansion-gray {filter:grayscale(1);opacity:.48;}
+        .expansion-color {clip-path:inset(0 calc(100% - var(--filled)) 0 0);animation:expansion-reveal .7s ease-out both;}
+        @keyframes expansion-reveal {from {clip-path:inset(0 100% 0 0);} to {clip-path:inset(0 calc(100% - var(--filled)) 0 0);}}
+        .expansion-caption {display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
+        .expansion-caption h4 {font-size:12px;font-weight:800;line-height:1.35;}
+        .expansion-caption strong {font-size:13px;color:#ea7c20;white-space:nowrap;}
+        .expansion-detail {display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px;font-size:10px;color:#64748b;margin-top:5px;}
+        .dark .expansion-gray {opacity:.65;filter:grayscale(1) brightness(1.2);}
+        .dark .expansion-intro,.dark .expansion-detail {color:#94a3b8;}
+        .is-complete .expansion-caption strong {color:#16a34a;}
+        @media(max-width:640px){.expansion-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}.expansion-logo{height:78px}.expansion-detail{font-size:9px}.expansion-caption h4{font-size:11px}}
+        @media(prefers-reduced-motion:reduce){.expansion-color{animation:none}}
+
+        button.expansion-logo {display:block;width:calc(100% - 8px);border:0;background:none;cursor:pointer;border-radius:10px;transition:transform .18s;}
+        button.expansion-logo:hover {transform:translateY(-3px);}
+        button.expansion-logo:focus-visible {outline:3px solid #f8a72e;outline-offset:5px;}
+        #expansion-logos-dialog {padding:26px;border:1px solid #e2e8f0;border-radius:24px;width:min(740px,calc(100vw - 28px));max-height:90vh;overflow:auto;background:#f8fafc;color:#17283e;box-shadow:0 28px 100px #0005;}
+        #expansion-logos-dialog::backdrop {background:rgba(10,18,30,.72);backdrop-filter:blur(7px);}
+        .regional-header {display:flex;align-items:center;justify-content:space-between;gap:16px;}
+        .regional-eyebrow {font-size:10px;letter-spacing:.15em;text-transform:uppercase;font-weight:800;color:#bd6725;}
+        .regional-header h2 {font-size:25px;font-weight:900;margin:6px 0;}
+        #close-expansion-logos {width:38px;height:38px;font-size:27px;border-radius:50%;background:#e7edf3;color:#334155;cursor:pointer;}
+        .regional-explanation {font-size:12px;line-height:1.5;color:#64748b;margin:8px 0 22px;}
+        .regional-logo-grid {display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+        .regional-logo-cell {min-width:0;padding:18px 12px;background:white;border:1px solid #e2e8f0;border-radius:16px;text-align:center;}
+        .regional-locale {font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#64748b;}
+        .regional-art {height:120px;display:flex;align-items:center;justify-content:center;margin:12px 0;}
+        .regional-art img {width:100%;height:100%;object-fit:contain;}
+        .regional-empty {font-size:12px;color:#94a3b8;}
+        .regional-logo-cell h3 {font-size:12px;font-weight:750;line-height:1.5;}
+        .dark #expansion-logos-dialog {background:#182332;color:#f1f5f9;border-color:#334155;}
+        .dark .regional-logo-cell {background:#202e41;border-color:#38475b;}
+        .dark .regional-explanation,.dark .regional-locale {color:#b3c0d2;}
+        @media(max-width:480px){#expansion-logos-dialog{padding:18px}.regional-art{height:90px}.regional-logo-cell{padding:14px 8px}.regional-header h2{font-size:21px}}
+</style>
 </head>
 <body class="bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300 dark:from-[#090e17] dark:via-cinder-bg dark:to-[#121926] text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
 
@@ -322,12 +362,12 @@
                         </div>
                     </div>
 
-                    <div class="glass-card p-4 sm:p-5 rounded-2xl border border-cinder-orange/20 shadow-sm">
+                    <div class="md:col-span-2 glass-card p-4 sm:p-5 rounded-2xl border border-cinder-orange/20 shadow-sm">
                         <div class="flex items-center gap-2 mb-3.5 border-b border-cinder-orange/10 pb-2.5">
                             <span class="w-2.5 h-2.5 rounded-full bg-cinder-orange"></span>
                             <h3 class="text-xs font-black text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Expansão</h3>
                         </div>
-                        <div id="stats-set" class="space-y-3.5 max-h-60 overflow-y-auto pr-2 custom-scroll"></div>
+                        <p class="expansion-intro">Cada carta conquistada revela mais cor. Idiomas e versões reunidos por família de expansão.</p><div id="stats-set" class="expansion-grid"></div>
                     </div>
 
                     <div class="glass-card p-4 sm:p-5 rounded-2xl border border-cinder-orange/20 shadow-sm">
@@ -913,12 +953,118 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             if (!tags.length) add('A confirmar');
             return `<div class="variant-tags">${tags.join('')}</div>`;
         }
+
+        // Agrupamento visual: não altera número, idioma, selo ou ID da carta.
+        const expansionGroups = {"espada-escudo": {"nome": "Espada e Escudo", "logo": "espada-escudo-pt.png", "logoOficial": true}, "rixa-rebelde": {"nome": "Rixa Rebelde", "logo": "rixa-rebelde-pt.png", "logoOficial": true}, "destinos-brilhantes": {"nome": "Destinos Brilhantes", "logo": "destinos-brilhantes-pt.png", "logoOficial": true}, "reinado-arrepiante": {"nome": "Reinado Arrepiante", "logo": "reinado-arrepiante-pt.png", "logoOficial": true}, "golpe-fusao": {"nome": "Golpe Fusão", "logo": "golpe-fusao-pt.png", "logoOficial": true}, "coroa-estelar": {"nome": "Coroa Estelar", "logo": "coroa-estelar-pt.png", "logoOficial": true}, "herois-excelsos": {"nome": "Heróis Excelsos", "logo": "herois-excelsos-pt.png", "logoOficial": true}, "megaevolucao": {"nome": "Megaevolução", "logo": "megaevolucao-pt.png", "logoOficial": true}, "dynamax": {"nome": "Dynamax Clash", "logo": "dynamax-cn.png", "logoOficial": true}, "artes-marciais": {"nome": "Artes Marciais Primordiais", "logo": "artes-marciais-cn.png", "logoOficial": true}, "gem-pack": {"nome": "Gem Pack Vol. 5", "logo": "gem-pack-cn.png", "logoOficial": true}, "decks": {"nome": "Decks e conjuntos especiais", "logo": "grupo-decks.svg", "logoOficial": false}, "mcdonalds": {"nome": "McDonald’s 2021", "logo": "grupo-mcdonalds.svg", "logoOficial": false}, "promos": {"nome": "Promos", "logo": "grupo-promos.svg", "logoOficial": false}, "outros": {"nome": "Outros", "logo": "grupo-outros.svg", "logoOficial": false}};
+        const expansionMembership = {"1": "espada-escudo", "3": "espada-escudo", "4": "espada-escudo", "23": "espada-escudo", "26": "espada-escudo", "28": "espada-escudo", "29": "espada-escudo", "30": "espada-escudo", "31": "espada-escudo", "51": "espada-escudo", "52": "espada-escudo", "56": "espada-escudo", "61": "espada-escudo", "62": "espada-escudo", "63": "espada-escudo", "102": "espada-escudo", "103": "espada-escudo", "104": "espada-escudo", "105": "espada-escudo", "123": "espada-escudo", "124": "espada-escudo", "125": "espada-escudo", "126": "espada-escudo", "145": "espada-escudo", "146": "espada-escudo", "156": "espada-escudo", "174": "espada-escudo", "175": "espada-escudo", "176": "espada-escudo", "177": "espada-escudo", "189": "espada-escudo", "190": "espada-escudo", "191": "espada-escudo", "192": "espada-escudo", "212": "espada-escudo", "8": "rixa-rebelde", "11": "rixa-rebelde", "14": "rixa-rebelde", "16": "rixa-rebelde", "35": "rixa-rebelde", "39": "rixa-rebelde", "42": "rixa-rebelde", "44": "rixa-rebelde", "70": "rixa-rebelde", "73": "rixa-rebelde", "90": "rixa-rebelde", "93": "rixa-rebelde", "2": "destinos-brilhantes", "9": "destinos-brilhantes", "15": "destinos-brilhantes", "27": "destinos-brilhantes", "36": "destinos-brilhantes", "43": "destinos-brilhantes", "64": "destinos-brilhantes", "65": "destinos-brilhantes", "106": "destinos-brilhantes", "127": "destinos-brilhantes", "153": "destinos-brilhantes", "154": "destinos-brilhantes", "178": "destinos-brilhantes", "193": "destinos-brilhantes", "210": "destinos-brilhantes", "211": "destinos-brilhantes", "5": "reinado-arrepiante", "6": "reinado-arrepiante", "25": "reinado-arrepiante", "32": "reinado-arrepiante", "33": "reinado-arrepiante", "58": "reinado-arrepiante", "60": "reinado-arrepiante", "68": "reinado-arrepiante", "108": "reinado-arrepiante", "109": "reinado-arrepiante", "129": "reinado-arrepiante", "130": "reinado-arrepiante", "152": "reinado-arrepiante", "179": "reinado-arrepiante", "180": "reinado-arrepiante", "194": "reinado-arrepiante", "195": "reinado-arrepiante", "209": "reinado-arrepiante", "12": "golpe-fusao", "13": "golpe-fusao", "17": "golpe-fusao", "40": "golpe-fusao", "41": "golpe-fusao", "45": "golpe-fusao", "71": "golpe-fusao", "80": "golpe-fusao", "18": "coroa-estelar", "20": "coroa-estelar", "46": "coroa-estelar", "48": "coroa-estelar", "74": "coroa-estelar", "76": "coroa-estelar", "77": "coroa-estelar", "88": "coroa-estelar", "89": "coroa-estelar", "111": "coroa-estelar", "112": "coroa-estelar", "132": "coroa-estelar", "133": "coroa-estelar", "150": "coroa-estelar", "163": "coroa-estelar", "181": "coroa-estelar", "182": "coroa-estelar", "183": "coroa-estelar", "196": "coroa-estelar", "197": "coroa-estelar", "198": "coroa-estelar", "206": "coroa-estelar", "207": "coroa-estelar", "214": "coroa-estelar", "21": "herois-excelsos", "49": "herois-excelsos", "95": "herois-excelsos", "113": "herois-excelsos", "114": "herois-excelsos", "115": "herois-excelsos", "116": "herois-excelsos", "134": "herois-excelsos", "135": "herois-excelsos", "136": "herois-excelsos", "137": "herois-excelsos", "147": "herois-excelsos", "148": "herois-excelsos", "184": "herois-excelsos", "185": "herois-excelsos", "186": "herois-excelsos", "199": "herois-excelsos", "200": "herois-excelsos", "201": "herois-excelsos", "204": "herois-excelsos", "22": "megaevolucao", "24": "megaevolucao", "50": "megaevolucao", "53": "megaevolucao", "54": "megaevolucao", "57": "megaevolucao", "75": "megaevolucao", "117": "megaevolucao", "118": "megaevolucao", "138": "megaevolucao", "139": "megaevolucao", "149": "megaevolucao", "187": "megaevolucao", "188": "megaevolucao", "202": "megaevolucao", "203": "megaevolucao", "205": "megaevolucao", "82": "dynamax", "83": "dynamax", "84": "dynamax", "85": "dynamax", "86": "dynamax", "87": "dynamax", "168": "dynamax", "169": "dynamax", "225": "dynamax", "226": "dynamax", "81": "artes-marciais", "166": "artes-marciais", "223": "artes-marciais", "215": "gem-pack", "216": "gem-pack", "217": "gem-pack", "218": "gem-pack", "219": "gem-pack", "220": "gem-pack", "221": "gem-pack", "59": "decks", "66": "decks", "69": "decks", "72": "decks", "78": "decks", "79": "decks", "92": "decks", "96": "decks", "97": "decks", "98": "decks", "99": "decks", "151": "decks", "155": "decks", "157": "decks", "165": "decks", "167": "decks", "170": "decks", "208": "decks", "213": "decks", "222": "decks", "224": "decks", "227": "decks", "120": "mcdonalds", "121": "mcdonalds", "141": "mcdonalds", "142": "mcdonalds", "55": "outros", "143": "outros"};
+        allCards.forEach(card => {
+            card.grupoExpansao = expansionMembership[card.id.replace('card-', '')] || 'promos';
+            card.expansao = expansionGroups[card.grupoExpansao].nome;
+        });
+        function expansionProgress(key, data) {
+            const group = expansionGroups[key];
+            const value = data.total ? Math.max(0, Math.min(100, data.obtained / data.total * 100)) : 0;
+            const percent = Math.round(value);
+            const regions = [...data.languages].sort().join(' · ');
+            return `<article class="expansion-progress ${percent === 100 ? 'is-complete' : ''}" aria-label="${escapeLabel(group.nome)}: ${data.obtained} de ${data.total} cartas, ${percent}%" style="--filled:${value}%">
+                <button type="button" class="expansion-logo" onclick="openExpansionLogos('${key}')" aria-label="Ver logos regionais de ${escapeLabel(group.nome)}">
+                    <img class="expansion-gray" src="${encodeURI(group.logo)}" alt="">
+                    <img class="expansion-color" src="${encodeURI(group.logo)}" alt="">
+                </button>
+                <div class="expansion-caption"><h4>${escapeLabel(group.nome)}</h4><strong>${percent}%${percent === 100 ? ' ✓' : ''}</strong></div>
+                <p class="expansion-detail"><span>${data.obtained} / ${data.total} cartas</span><span>${regions}</span></p>
+            </article>`;
+        }
+
+
+        const regionalLogoAssets = {
+  "reinado-arrepiante": {
+    "PT-BR": "reinado-arrepiante-pt.png",
+    "EN": "reinado-arrepiante-en.png"
+  },
+  "megaevolucao": {
+    "JP": "megaevolucao-jp.png",
+    "PT-BR": "megaevolucao-pt.png",
+    "EN": "megaevolucao-en.png"
+  },
+  "destinos-brilhantes": {
+    "JP": "destinos-brilhantes-jp.png",
+    "EN": "destinos-brilhantes-en.png",
+    "PT-BR": "destinos-brilhantes-pt.png"
+  },
+  "coroa-estelar": {
+    "PT-BR": "coroa-estelar-pt.png",
+    "CN": "coroa-estelar-cn.png",
+    "JP": "coroa-estelar-jp.png",
+    "EN": "coroa-estelar-en.png"
+  },
+  "rixa-rebelde": {
+    "JP": "rixa-rebelde-jp.png",
+    "PT-BR": "rixa-rebelde-pt.png",
+    "EN": "rixa-rebelde-en.png"
+  },
+  "espada-escudo": {
+    "EN": "espada-escudo-en.png",
+    "PT-BR": "espada-escudo-pt.png"
+  },
+  "herois-excelsos": {
+    "PT-BR": "herois-excelsos-pt.png",
+    "EN": "herois-excelsos-en.png"
+  },
+  "dynamax": {
+    "CN": "dynamax-cn.png"
+  },
+  "golpe-fusao": {
+    "PT-BR": "golpe-fusao-pt.png",
+    "EN": "golpe-fusao-en.png"
+  },
+  "gem-pack": {
+    "CN": "gem-pack-cn.png"
+  },
+  "artes-marciais": {
+    "CN": "artes-marciais-cn.png"
+  }
+};
+        const regionalNames = {
+            'coroa-estelar': {'EN':'Stellar Crown', 'PT-BR':'Coroa Estelar', 'JP':'Stellar Miracle', 'CN':'Stellar Crystal'},
+            'espada-escudo': {'EN':'Sword & Shield','PT-BR':'Espada e Escudo','JP':'Shield'},
+            'rixa-rebelde': {'EN':'Rebel Clash','PT-BR':'Rixa Rebelde','JP':'VMAX Rising'},
+            'destinos-brilhantes': {'EN':'Shining Fates','PT-BR':'Destinos Brilhantes','JP':'Shiny Star V'},
+            'reinado-arrepiante': {'EN':'Chilling Reign','PT-BR':'Reinado Arrepiante','JP':'Silver Lance'},
+            'golpe-fusao': {'EN':'Fusion Strike','PT-BR':'Golpe Fusão','JP':'Family Pokémon Card Game','CN':'Family Pokémon Card Game'},
+            'herois-excelsos': {'EN':'Ascended Heroes','PT-BR':'Heróis Excelsos','JP':'Start Deck 100 Battle Collection'},
+            'megaevolucao': {'EN':'Mega Evolution','PT-BR':'Megaevolução','JP':'Mega Brave'},
+            'dynamax': {'CN':'Dynamax Clash — Flame'},
+            'artes-marciais': {'CN':'Primordial Martial Arts — Overgrowth'},
+            'gem-pack': {'CN':'Gem Pack Vol. 5'}
+        };
+        window.openExpansionLogos = function(key) {
+            const group = expansionGroups[key];
+            if (!group) return;
+            const dialog = document.getElementById('expansion-logos-dialog');
+            document.getElementById('expansion-logos-title').textContent = group.nome;
+            const cells = [['EN','Inglês'],['PT-BR','Português'],['JP','Japonês'],['CN','Chinês simplificado']];
+            const names = regionalNames[key] || {};
+            document.getElementById('regional-logo-grid').innerHTML = cells.map(([locale,label]) => {
+                const name = names[locale];
+                const asset = (regionalLogoAssets[key] || {})[locale];
+                return `<section class="regional-logo-cell"><span class="regional-locale">${label}</span><div class="regional-art">${asset ? `<img src="${encodeURI(asset)}" alt="Logo ${escapeLabel(name || group.nome)}">` : `<span class="regional-empty">${name ? 'Logo pendente' : 'Sem logo regional definida'}</span>`}</div><h3>${escapeLabel(name || '—')}</h3></section>`;
+            }).join('');
+            if(!dialog.open) dialog.showModal();
+        };
+        document.getElementById('close-expansion-logos').addEventListener('click', () => document.getElementById('expansion-logos-dialog').close());
+        document.getElementById('expansion-logos-dialog').addEventListener('click', event => {
+            if (event.target !== event.currentTarget) return;
+            const rect = event.currentTarget.getBoundingClientRect();
+            if(event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) event.currentTarget.close();
+        });
+
         const normalizeSearch = value => String(value).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
         function matchesCardSearch(card, query) {
             const tokens = normalizeSearch(query).replace(/\s*\/\s*/g, '/').split(/\s+/).filter(Boolean);
             const numberParts = card.numero.toLowerCase().split('/');
             const normalizeNumber = n => n.replace(/^([a-z]*?)0+(?=\d)/, '$1');
-            const text = normalizeSearch([card.nome,card.pokemon,card.set,card.lingua,card.acabamento,card.padrao,card.apresentacao,card.distribuicao,card.selo].join(' '));
+            const text = normalizeSearch([card.nome,card.pokemon,card.set,card.expansao,card.lingua,card.acabamento,card.padrao,card.apresentacao,card.distribuicao,card.selo].join(' '));
             return tokens.every(token => {
                 token = token.replace(/^#/, '');
                 if (['ex','v','vmax'].includes(token)) return card.mecanica.toLowerCase() === token;
@@ -1376,7 +1522,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
 
                 <div class="mt-4 w-full text-center glass-card backdrop-blur-md py-2.5 px-4 rounded-2xl border border-cinder-orange/20 shadow-xl max-w-[280px] sm:max-w-sm">
                     <p class="text-base sm:text-lg font-bold text-slate-800 dark:text-cinder-white">${card.nome}</p>
-                    <p class="text-xs text-cinder-orange font-semibold mt-0.5">${card.set} · #${card.numero}</p>
+                    <p class="text-xs text-cinder-orange font-semibold mt-0.5">${escapeLabel(card.expansao)} · #${card.numero}</p><p class="text-[10px] text-slate-500 mt-1">Cadastro regional: ${escapeLabel(card.set)}</p>
                     <div class="zoom-tags">${variantTags(card)}</div>
                     ${card.imagemIlustrativa ? `<p class="text-xs mt-2">Imagem ilustrativa: selo aplicado por edição; não é foto da impressão original.</p>` : ""}
                     <details class="classification-notes"><summary>Detalhes da impressão${card.revisao.length ? ' · a conferir' : ''}</summary><p>${escapeLabel(classificationDetail(card))}</p></details>
@@ -1535,9 +1681,11 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 langs[card.lingua].total++;
                 if(obtained) langs[card.lingua].obtained++;
 
-                if(!sets[card.set]) sets[card.set] = { total: 0, obtained: 0 };
-                sets[card.set].total++;
-                if(obtained) sets[card.set].obtained++;
+                const groupKey = card.grupoExpansao;
+                if(!sets[groupKey]) sets[groupKey] = { total: 0, obtained: 0, languages: new Set() };
+                sets[groupKey].total++;
+                sets[groupKey].languages.add(card.lingua);
+                if(obtained) sets[groupKey].obtained++;
 
                 if(!vars[card.acabamento]) vars[card.acabamento] = { total: 0, obtained: 0 };
                 vars[card.acabamento].total++;
@@ -1564,7 +1712,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
 
             document.getElementById('stats-pokemon').innerHTML = Object.keys(pokes).sort().map(p => createStatRow(p, pokes[p], 'bg-cinder-orange')).join('');
             document.getElementById('stats-lang').innerHTML = Object.keys(langs).sort().map(l => createStatRow(l, langs[l], 'bg-cinder-yellow')).join('');
-            document.getElementById('stats-set').innerHTML = Object.keys(sets).sort().map(s => createStatRow(s, sets[s], 'bg-cinder-orange')).join('');
+            document.getElementById('stats-set').innerHTML = Object.keys(expansionGroups).filter(key => sets[key]).map(key => expansionProgress(key, sets[key])).join('');
             document.getElementById('stats-var').innerHTML = Object.keys(vars).sort().map(v => createStatRow(v, vars[v], 'bg-cinder-yellow')).join('');
         }
 
@@ -1662,7 +1810,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                             </div>
                             <div class="mt-1.5 px-0.5">
                                 <p class="text-[11px] font-bold text-slate-800 dark:text-cinder-white truncate">${card.nome}</p>
-                                <p class="text-[9px] text-cinder-orange font-semibold truncate">${card.set}</p>
+                                <p class="text-[9px] text-cinder-orange font-semibold truncate">${escapeLabel(card.expansao)}</p>
                                 ${variantTags(card)}
                                 <div class="variant-footer">
                                     <span class="variant-review" title="${escapeLabel(classificationDetail(card))}">${card.revisao.length ? 'Detalhes a conferir' : ''}</span>
@@ -1790,7 +1938,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                         <div class="flex justify-between items-start gap-2">
                             <div class="truncate">
                                 <p class="text-xs font-bold text-slate-800 dark:text-cinder-white truncate mt-0.5">${card.nome} <span class="text-[10px] font-normal text-slate-400">#${card.numero}</span></p>
-                                <p class="text-[10px] text-cinder-orange font-semibold truncate">${card.set}</p>
+                                <p class="text-[10px] text-cinder-orange font-semibold truncate">${escapeLabel(card.expansao)}</p>
                             </div>
                             <button onclick="toggleLock('${card.id}')" title="${isLocked ? 'Cadeado Ativo' : 'Cadeado Inativo'}" class="p-1.5 rounded-xl border transition shrink-0 cursor-pointer ${isLocked ? 'bg-cinder-red/25 text-cinder-red dark:text-cinder-yellow border-cinder-orange/60 shadow-sm' : 'glass-card text-slate-400 border-cinder-orange/15 hover:text-slate-700 dark:hover:text-cinder-white'}">
                                 ${isLocked ? '🔒' : '🔓'}
@@ -1832,5 +1980,11 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             });
         }
     </script>
+
+    <dialog id="expansion-logos-dialog" aria-labelledby="expansion-logos-title">
+        <div class="regional-header"><div><p class="regional-eyebrow">A coleção pelo mundo</p><h2 id="expansion-logos-title"></h2></div><button type="button" id="close-expansion-logos" aria-label="Fechar logos regionais">×</button></div>
+        <p class="regional-explanation">Identidades regionais relacionadas ao grupo. As edições podem ter listas de cartas diferentes.</p>
+        <div id="regional-logo-grid" class="regional-logo-grid"></div>
+    </dialog>
 </body>
 </html>
