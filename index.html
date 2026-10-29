@@ -306,8 +306,8 @@
         .vertical .progress-art{height:var(--hero-height);margin:0 auto 18px;width:100%}
         .vertical .progress-art img{top:auto;bottom:0;object-position:center bottom;height:var(--sprite-height);filter:drop-shadow(0 8px 12px #0002)}
         .vertical .progress-art .progress-muted{filter:grayscale(1);opacity:.22}
-        .vertical[data-pokemon="Scorbunny"]{--sprite-height:calc(var(--hero-height)*.2142857)}
-        .vertical[data-pokemon="Raboot"]{--sprite-height:calc(var(--hero-height)*.4285714)}
+        .vertical[data-pokemon="Scorbunny"]{--sprite-height:calc(var(--hero-height)*.4285714)}
+        .vertical[data-pokemon="Raboot"]{--sprite-height:calc(var(--hero-height)*.70)}
         .vertical[data-pokemon="Cinderace"]{--sprite-height:var(--hero-height)}
         .image-progress h4{font-size:12px;color:var(--subtle);font-weight:600;letter-spacing:.02em}
         .image-progress>strong,.dark .image-progress>strong{font-size:35px;font-weight:700;color:var(--ink);letter-spacing:-.06em}
@@ -348,6 +348,22 @@
         .dashboard-shell.glass-panel {background:rgba(250,250,248,.72);backdrop-filter:none;-webkit-backdrop-filter:none;}
         .dark #view-capture > .glass-panel,.dark #view-market > .glass-panel {background:rgba(18,18,18,.64);}
         .dark header.glass-panel {background:rgba(16,16,16,.80);}
+        /* Borderless acquisition ring and understated selection states. */
+        .acquisition-slice,.dark .acquisition-slice,
+        .acquisition-slice.is-selected,.dark .acquisition-slice.is-selected,
+        .acquisition-slice:focus-visible,.dark .acquisition-slice:focus-visible {
+            stroke:none;stroke-width:0;outline:none;filter:none;
+            -webkit-tap-highlight-color:transparent;
+        }
+        .acquisition-slice {opacity:.82;transition:opacity .16s;}
+        .acquisition-slice.is-selected,.acquisition-slice:focus-visible {opacity:1;}
+        .acquisition-legend button,.dark .acquisition-legend button,
+        .acquisition-legend button.is-selected,.dark .acquisition-legend button.is-selected {
+            border:0;background:transparent;box-shadow:none;outline:none;
+            -webkit-tap-highlight-color:transparent;
+        }
+        .acquisition-legend button.is-selected span {color:var(--ink);font-weight:700;}
+        .acquisition-legend button:focus-visible span {text-decoration:underline;text-underline-offset:5px;}
     </style>
 </head>
 <body class="text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
@@ -1892,9 +1908,11 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             return [...groups.values()].map(group => ({...group, entities:[...group.entities.values()].sort((a,b) => b.count-a.count || a.name.localeCompare(b.name,'pt-BR'))})).sort((a,b) => b.count-a.count || a.label.localeCompare(b.label,'pt-BR'));
         }
         function pieSegment(start, end) {
-            const point = angle => [120 + 106*Math.cos(angle),120 + 106*Math.sin(angle)];
-            const a=point(start),b=point(end);
-            return `M120 120 L${a[0]} ${a[1]} A106 106 0 ${end-start>Math.PI?1:0} 1 ${b[0]} ${b[1]} Z`;
+            // True ring segments leave the center transparent, without a dark overlay.
+            const point=(r,a)=>`${120+r*Math.cos(a)} ${120+r*Math.sin(a)}`;
+            if(end-start>=Math.PI*2-1e-8) return 'M120 14 A106 106 0 1 1 120 226 A106 106 0 1 1 120 14 Z M120 42 A78 78 0 1 0 120 198 A78 78 0 1 0 120 42 Z';
+            const large=end-start>Math.PI?1:0;
+            return `M${point(106,start)} A106 106 0 ${large} 1 ${point(106,end)} L${point(78,end)} A78 78 0 ${large} 0 ${point(78,start)} Z`;
         }
         window.selectAcquisition = function(key) {
             const group = acquisitionSummary.find(item=>item.key===key);
@@ -1924,12 +1942,12 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             let angle=-Math.PI/2;
             const slices = acquisitionSummary.map(group=>{
                 const next=angle+group.count/total*Math.PI*2;
-                const shape=acquisitionSummary.length===1?`<circle cx="120" cy="120" r="106"`:`<path d="${pieSegment(angle,next)}"`;
+                const shape=`<path d="${pieSegment(angle,next)}"`;
                 angle=next;
                 const label=escapeLabel(`${group.label}: ${group.count} ${group.count===1?'carta':'cartas'}`);
-                return `${shape} fill="${group.color}" class="acquisition-slice" role="button" tabindex="0" aria-label="${label}" aria-pressed="false" data-acquisition="${group.key}" onpointerenter="selectAcquisition('${group.key}')" onfocus="selectAcquisition('${group.key}')" onclick="selectAcquisition('${group.key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectAcquisition('${group.key}')}" ><title>${label}</title></${acquisitionSummary.length===1?'circle':'path'}>`;
+                return `${shape} fill="${group.color}" class="acquisition-slice" role="button" tabindex="0" aria-label="${label}" aria-pressed="false" data-acquisition="${group.key}" onpointerenter="selectAcquisition('${group.key}')" onfocus="selectAcquisition('${group.key}')" onclick="selectAcquisition('${group.key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectAcquisition('${group.key}')}" ><title>${label}</title></path>`;
             }).join('');
-            host.innerHTML=`<div class="acquisition-layout"><div class="acquisition-overview"><svg class="acquisition-pie" viewBox="0 0 240 240" role="group" aria-label="Meios de aquisição das ${total} cartas obtidas">${slices}<circle class="donut-center" cx="120" cy="120" r="78" pointer-events="none"/><text class="donut-count" x="120" y="119" text-anchor="middle" pointer-events="none">${total}</text><text class="donut-label" x="120" y="140" text-anchor="middle" pointer-events="none">CARTAS OBTIDAS</text></svg><div class="acquisition-legend">${acquisitionSummary.map(group=>`<button type="button" data-acquisition="${group.key}" aria-pressed="false" onpointerenter="selectAcquisition('${group.key}')" onfocus="selectAcquisition('${group.key}')" onclick="selectAcquisition('${group.key}')"><i style="background:${group.color}"></i><span>${escapeLabel(group.label)}</span><strong>${group.count}</strong></button>`).join('')}</div></div><div id="acquisition-detail" class="acquisition-detail" aria-live="polite"></div></div>`;
+            host.innerHTML=`<div class="acquisition-layout"><div class="acquisition-overview"><svg class="acquisition-pie" viewBox="0 0 240 240" role="group" aria-label="Meios de aquisição das ${total} cartas obtidas">${slices}<text class="donut-count" x="120" y="119" text-anchor="middle" pointer-events="none">${total}</text><text class="donut-label" x="120" y="140" text-anchor="middle" pointer-events="none">CARTAS OBTIDAS</text></svg><div class="acquisition-legend">${acquisitionSummary.map(group=>`<button type="button" data-acquisition="${group.key}" aria-pressed="false" onpointerenter="selectAcquisition('${group.key}')" onfocus="selectAcquisition('${group.key}')" onclick="selectAcquisition('${group.key}')"><i style="background:${group.color}"></i><span>${escapeLabel(group.label)}</span><strong>${group.count}</strong></button>`).join('')}</div></div><div id="acquisition-detail" class="acquisition-detail" aria-live="polite"></div></div>`;
             window.selectAcquisition(acquisitionSummary.some(item=>item.key===selectedAcquisition)?selectedAcquisition:acquisitionSummary[0].key);
         }
 
