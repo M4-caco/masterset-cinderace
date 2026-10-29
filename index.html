@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pokédex Master Set Tracker - Cinderace Family</title>
+    <title>Scorace — Minha coleção</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -11,14 +11,15 @@
             theme: {
                 extend: {
                     colors: {
+                        slate: {50:"#fafafa",100:"#f5f5f5",200:"#e5e5e5",300:"#d4d4d4",400:"#a3a3a3",500:"#737373",600:"#525252",700:"#404040",800:"#262626",900:"#171717",950:"#0a0a0a"},
                         cinder: {
                             white: '#EFEFEF',
                             yellow: '#F4D664',
-                            orange: '#BB492E',
-                            red: '#83382A',
-                            dark: '#182234',
-                            bg: '#0F1622',
-                            card: '#1D2A3F'
+                            orange: '#bf3026',
+                            red: '#8c2923',
+                            dark: '#181818',
+                            bg: '#101010',
+                            card: '#202020'
                         }
                     }
                 }
@@ -27,31 +28,31 @@
     </script>
     <style>
         .variant-tags { display:flex; flex-wrap:wrap; gap:4px; margin:7px 0 5px; min-height:20px; align-content:flex-start; }
-        .variant-tag { display:inline-flex; align-items:center; gap:4px; padding:3px 6px; border-radius:6px; font-size:9px; line-height:1.3; font-weight:700; border:1px solid #94a3b840; color:#475569; background:#94a3b812; }
-        .dark .variant-tag { color:#cbd5e1; background:#94a3b810; }
+        .variant-tag { display:inline-flex; align-items:center; gap:4px; padding:3px 6px; border-radius:6px; font-size:9px; line-height:1.3; font-weight:700; border:1px solid #a1a1a140; color:#535353; background:#a1a1a112; }
+        .dark .variant-tag { color:#d4d4d4; background:#a1a1a110; }
         .variant-tag.gold { color:#886008; border-color:#d7ad4655; background:linear-gradient(110deg,#e7bc4928,#e7bc4909); }
         .dark .variant-tag.gold { color:#f4d664; }
-        .variant-tag.art { color:#7e3cb2; border-color:#a78bfa55; background:#a78bfa15; }
-        .dark .variant-tag.art { color:#d5bbff; }
-        .variant-tag.foil { color:#247a8b; border-color:#67c9db40; background:#67c9db12; }
-        .dark .variant-tag.foil { color:#91dce7; }
+        .variant-tag.art { color:#535353; border-color:#99999955; background:#99999915; }
+        .dark .variant-tag.art { color:#c5c5c5; }
+        .variant-tag.foil { color:#696969; border-color:#b5b5b540; background:#b5b5b512; }
+        .dark .variant-tag.foil { color:#cdcdcd; }
         .variant-tag.league { color:#a13435; border-color:#dd666660; background:#dd666615; }
         .dark .variant-tag.league { color:#ffb2ab; }
-        .variant-tag.master { color:#954cb6; border-color:#c084fc60; background:#c084fc18; }
-        .dark .variant-tag.master { color:#deb2ff; }
+        .variant-tag.master { color:#636363; border-color:#99999960; background:#99999918; }
+        .dark .variant-tag.master { color:#c1c1c1; }
         .ball-symbol { width:10px; height:10px; border:1px solid currentColor; border-radius:50%; position:relative; background:linear-gradient(transparent 42%,currentColor 43%,currentColor 56%,transparent 57%); flex-shrink:0; }
         .ball-symbol:after { content:''; position:absolute; width:3px; height:3px; background:currentColor; border-radius:50%; left:2.5px; top:2.5px; }
-        .variant-footer { display:flex; align-items:center; justify-content:space-between; gap:6px; font-size:9px; color:#64748b; margin-top:7px; padding-top:6px; border-top:1px solid #94a3b820; }
-        .dark .variant-footer { color:#94a3b8; }
+        .variant-footer { display:flex; align-items:center; justify-content:space-between; gap:6px; font-size:9px; color:#727272; margin-top:7px; padding-top:6px; border-top:1px solid #a1a1a120; }
+        .dark .variant-footer { color:#a1a1a1; }
         .variant-review { font-size:8px; opacity:.8; }
         .zoom-tags .variant-tags { justify-content:center; }
         .zoom-tags .variant-tag { font-size:11px; padding:4px 8px; }
-        .classification-notes { margin-top:10px; font-size:11px; text-align:left; line-height:1.6; color:#94a3b8; }
+        .classification-notes { margin-top:10px; font-size:11px; text-align:left; line-height:1.6; color:#a1a1a1; }
 
         .card-not-owned img { filter: grayscale(100%) opacity(0.35); transition: all 0.2s ease; }
         .card-not-owned:hover img { filter: grayscale(30%) opacity(0.8); }
         .card-owned img { filter: grayscale(0%) opacity(1); transition: all 0.2s ease; }
-        .card-owned { border: 2px solid #22c55e; box-shadow: 0 0 15px rgba(34, 197, 94, 0.4); }
+        .card-owned { border: 2px solid #9b9b9b; box-shadow: 0 0 15px rgba(244, 214, 100, 0.4); }
         .card-not-owned { border: 1px solid rgba(187, 73, 46, 0.3); }
         
         #zoom-modal { transition: opacity 0.2s ease-in-out; }
@@ -69,7 +70,7 @@
 
         .custom-scroll::-webkit-scrollbar { width: 5px; height: 5px; }
         .custom-scroll::-webkit-scrollbar-track { background: transparent; border-radius: 8px; }
-        .custom-scroll::-webkit-scrollbar-thumb { background: #BB492E; border-radius: 8px; }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #bf3026; border-radius: 8px; }
 
         .glass-panel {
             background: rgba(255, 255, 255, 0.75);
@@ -78,7 +79,7 @@
             border: 1px solid rgba(187, 73, 46, 0.2);
         }
         .dark .glass-panel {
-            background: rgba(24, 34, 52, 0.85);
+            background: rgba(24, 24, 24, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(187, 73, 46, 0.3);
@@ -92,7 +93,7 @@
             border: 1px solid rgba(187, 73, 46, 0.15);
         }
         .dark .glass-card {
-            background: rgba(29, 42, 63, 0.75);
+            background: rgba(30, 30, 30, 0.75);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(187, 73, 46, 0.25);
@@ -103,8 +104,8 @@
                 125deg,
                 transparent 15%,
                 rgba(255, 255, 255, 0.65) 35%,
-                rgba(255, 100, 200, 0.35) 45%,
-                rgba(0, 220, 255, 0.35) 55%,
+                rgba(196, 59, 48, 0.35) 45%,
+                rgba(239, 239, 239, 0.35) 55%,
                 rgba(255, 230, 100, 0.35) 65%,
                 transparent 85%
             );
@@ -132,9 +133,9 @@
             clip-path: inset(0.25% round 4.8% / 3.4%);
         }
     
-        .expansion-intro {font-size:12px;line-height:1.6;color:#64748b;margin:0 0 18px;}
+        .expansion-intro {font-size:12px;line-height:1.6;color:#727272;margin:0 0 18px;}
         .expansion-grid {display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 30px;}
-        .expansion-progress {min-width:0;padding:14px 4px 18px;border-bottom:1px solid rgba(148,163,184,.2);}
+        .expansion-progress {min-width:0;padding:14px 4px 18px;border-bottom:1px solid rgba(160,160,160,.2);}
         .expansion-logo {height:104px;position:relative;margin:0 4px 15px;}
         .expansion-logo img {position:absolute;inset:0;width:100%;height:100%;object-fit:contain;}
         .expansion-gray {filter:grayscale(1);opacity:.48;}
@@ -143,44 +144,44 @@
         .expansion-caption {display:flex;align-items:baseline;justify-content:space-between;gap:8px;}
         .expansion-caption h4 {font-size:12px;font-weight:800;line-height:1.35;}
         .expansion-caption strong {font-size:13px;color:#ea7c20;white-space:nowrap;}
-        .expansion-detail {display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px;font-size:10px;color:#64748b;margin-top:5px;}
+        .expansion-detail {display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px;font-size:10px;color:#727272;margin-top:5px;}
         .dark .expansion-gray {opacity:.65;filter:grayscale(1) brightness(1.2);}
-        .dark .expansion-intro,.dark .expansion-detail {color:#94a3b8;}
-        .is-complete .expansion-caption strong {color:#16a34a;}
+        .dark .expansion-intro,.dark .expansion-detail {color:#a1a1a1;}
+        .is-complete .expansion-caption strong {color:#7f7f7f;}
         @media(max-width:640px){.expansion-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px 16px}.expansion-logo{height:78px}.expansion-detail{font-size:9px}.expansion-caption h4{font-size:11px}}
         @media(prefers-reduced-motion:reduce){.expansion-color{animation:none}}
 
         button.expansion-logo {display:block;width:calc(100% - 8px);border:0;background:none;cursor:pointer;border-radius:10px;transition:transform .18s;}
         button.expansion-logo:hover {transform:translateY(-3px);}
         button.expansion-logo:focus-visible {outline:3px solid #f8a72e;outline-offset:5px;}
-        #expansion-logos-dialog {padding:26px;border:1px solid #e2e8f0;border-radius:24px;width:min(740px,calc(100vw - 28px));max-height:90vh;overflow:auto;background:#f8fafc;color:#17283e;box-shadow:0 28px 100px #0005;}
-        #expansion-logos-dialog::backdrop {background:rgba(10,18,30,.72);backdrop-filter:blur(7px);}
+        #expansion-logos-dialog {padding:26px;border:1px solid #e7e7e7;border-radius:24px;width:min(740px,calc(100vw - 28px));max-height:90vh;overflow:auto;background:#fafafa;color:#262626;box-shadow:0 28px 100px #0005;}
+        #expansion-logos-dialog::backdrop {background:rgba(10,10,10,.72);backdrop-filter:blur(7px);}
         .regional-header {display:flex;align-items:center;justify-content:space-between;gap:16px;}
         .regional-eyebrow {font-size:10px;letter-spacing:.15em;text-transform:uppercase;font-weight:800;color:#bd6725;}
         .regional-header h2 {font-size:25px;font-weight:900;margin:6px 0;}
-        #close-expansion-logos {width:38px;height:38px;font-size:27px;border-radius:50%;background:#e7edf3;color:#334155;cursor:pointer;}
-        .regional-explanation {font-size:12px;line-height:1.5;color:#64748b;margin:8px 0 22px;}
+        #close-expansion-logos {width:38px;height:38px;font-size:27px;border-radius:50%;background:#ececec;color:#3f3f3f;cursor:pointer;}
+        .regional-explanation {font-size:12px;line-height:1.5;color:#727272;margin:8px 0 22px;}
         .regional-logo-grid {display:grid;grid-template-columns:1fr 1fr;gap:14px;}
-        .regional-logo-cell {min-width:0;padding:18px 12px;background:white;border:1px solid #e2e8f0;border-radius:16px;text-align:center;}
-        .regional-locale {font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#64748b;}
+        .regional-logo-cell {min-width:0;padding:18px 12px;background:white;border:1px solid #e7e7e7;border-radius:16px;text-align:center;}
+        .regional-locale {font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#727272;}
         .regional-art {height:120px;display:flex;align-items:center;justify-content:center;margin:12px 0;}
         .regional-art img {width:100%;height:100%;object-fit:contain;}
-        .regional-empty {font-size:12px;color:#94a3b8;}
+        .regional-empty {font-size:12px;color:#a1a1a1;}
         .regional-logo-cell h3 {font-size:12px;font-weight:750;line-height:1.5;}
-        .dark #expansion-logos-dialog {background:#182332;color:#f1f5f9;border-color:#334155;}
-        .dark .regional-logo-cell {background:#202e41;border-color:#38475b;}
-        .dark .regional-explanation,.dark .regional-locale {color:#b3c0d2;}
+        .dark #expansion-logos-dialog {background:#222222;color:#f4f4f4;border-color:#3f3f3f;}
+        .dark .regional-logo-cell {background:#2c2c2c;border-color:#454545;}
+        .dark .regional-explanation,.dark .regional-locale {color:#bfbfbf;}
         @media(max-width:480px){#expansion-logos-dialog{padding:18px}.regional-art{height:90px}.regional-logo-cell{padding:14px 8px}.regional-header h2{font-size:21px}}
 
         .expansion-caption {justify-content:center;gap:9px;margin-top:9px;align-items:baseline;}
         .expansion-caption strong {font-size:38px;font-weight:900;line-height:1.1;letter-spacing:-1.5px;font-variant-numeric:tabular-nums;color:#dc6818;}
         .expansion-caption strong span {font-size:21px;letter-spacing:-.5px;margin-left:2px;}
-        .expansion-status {font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#64748b;}
+        .expansion-status {font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:#727272;}
         .expansion-name {font-size:12px;font-weight:800;text-align:center;margin:0 0 7px;}
-        .is-complete .expansion-status {color:#16a34a;}
+        .is-complete .expansion-status {color:#7f7f7f;}
         .dark .expansion-caption strong {color:#ffad51;}
-        .dark .is-complete .expansion-caption strong {color:#4ade80;}
-        .dark .expansion-status {color:#a6b5c7;}
+        .dark .is-complete .expansion-caption strong {color:#b8b8b8;}
+        .dark .expansion-status {color:#b3b3b3;}
         .regional-logo-grid[data-count="1"] {grid-template-columns:1fr;max-width:420px;margin-inline:auto;}
         .regional-logo-grid[data-count="3"] > :last-child {grid-column:1 / -1;}
         @media(max-width:640px){.expansion-caption strong{font-size:32px}.expansion-status{font-size:9px}.expansion-caption{gap:6px}}
@@ -195,97 +196,151 @@
         .vertical .progress-filled {clip-path:inset(calc(100% - var(--filled)) 0 0 0);}
         .horizontal .progress-filled {clip-path:inset(0 calc(100% - var(--filled)) 0 0);}
         .horizontal .progress-art {height:65px;width:100px;margin:8px auto 10px;}
-        .image-progress h4 {font-size:11px;font-weight:800;color:#475569;margin-bottom:4px;}
+        .image-progress h4 {font-size:11px;font-weight:800;color:#535353;margin-bottom:4px;}
         .image-progress>strong {font-size:30px;font-weight:900;line-height:1.2;color:#dc6818;letter-spacing:-1px;}
         .image-progress>strong span {font-size:17px;margin-left:2px;}
-        .image-progress p {font-size:11px;font-weight:800;margin:4px 0;color:#475569;}
-        .image-progress p span {font-weight:500;color:#64748b;}
-        .acquisition-hint {font-size:12px;line-height:1.6;color:#64748b;margin-bottom:20px;}
+        .image-progress p {font-size:11px;font-weight:800;margin:4px 0;color:#535353;}
+        .image-progress p span {font-weight:500;color:#727272;}
+        .acquisition-hint {font-size:12px;line-height:1.6;color:#727272;margin-bottom:20px;}
         .acquisition-layout {display:grid;grid-template-columns:minmax(220px, .85fr) minmax(0,1.15fr);gap:30px;align-items:start;}
         .acquisition-overview {text-align:center;min-width:0;}
         .acquisition-pie {width:100%;max-width:270px;display:block;margin:0 auto;overflow:visible;}
         .acquisition-slice {cursor:pointer;stroke:#fff;stroke-width:2;transition:filter .15s;}
-        .acquisition-slice.is-selected {filter:brightness(1.12);stroke:#1e293b;stroke-width:3;}
-        .acquisition-slice:focus-visible {outline:none;stroke:#1e293b;stroke-width:5;}
-        .acquisition-total {font-size:12px;color:#64748b;margin:8px 0 15px;}
+        .acquisition-slice.is-selected {filter:brightness(1.12);stroke:#282828;stroke-width:3;}
+        .acquisition-slice:focus-visible {outline:none;stroke:#282828;stroke-width:5;}
+        .acquisition-total {font-size:12px;color:#727272;margin:8px 0 15px;}
         .acquisition-total strong {font-size:22px;font-weight:900;color:#dc6818;margin-right:4px;}
         .acquisition-legend {display:flex;flex-wrap:wrap;gap:8px;justify-content:center;}
-        .acquisition-legend button {display:flex;gap:7px;align-items:center;border:1px solid #cbd5e1;border-radius:20px;padding:7px 10px;font-size:11px;background:transparent;color:#475569;cursor:pointer;}
+        .acquisition-legend button {display:flex;gap:7px;align-items:center;border:1px solid #d4d4d4;border-radius:20px;padding:7px 10px;font-size:11px;background:transparent;color:#535353;cursor:pointer;}
         .acquisition-legend button.is-selected {border-color:#dc6818;background:#fff3e5;color:#9a4511;}
         .acquisition-legend button:focus-visible {outline:2px solid #f88b38;outline-offset:3px;}
         .acquisition-legend i,.acquisition-detail-heading i {display:inline-block;width:10px;height:10px;border-radius:50%;flex-shrink:0;}
-        .acquisition-detail {background:#f1f5f9;border:1px solid #e2e8f0;padding:20px;border-radius:18px;min-width:0;}
+        .acquisition-detail {background:#f4f4f4;border:1px solid #e7e7e7;padding:20px;border-radius:18px;min-width:0;}
         .acquisition-detail-heading {display:flex;align-items:center;justify-content:space-between;gap:12px;}
         .acquisition-detail-heading h4 {display:flex;align-items:center;gap:8px;font-size:17px;font-weight:900;}
         .acquisition-detail-heading>strong {font-size:12px;white-space:nowrap;}
-        .acquisition-share {font-size:11px;color:#64748b;line-height:1.5;margin-top:8px;}
+        .acquisition-share {font-size:11px;color:#727272;line-height:1.5;margin-top:8px;}
         .acquisition-entities {margin:16px 0 0;padding:0;list-style:none;max-height:300px;overflow:auto;}
-        .acquisition-entities li {display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:12px 0;border-top:1px solid #cbd5e1;font-size:12px;}
+        .acquisition-entities li {display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:12px 0;border-top:1px solid #d4d4d4;font-size:12px;}
         .acquisition-entities li span {overflow-wrap:anywhere;}
         .acquisition-entities strong {white-space:nowrap;font-variant-numeric:tabular-nums;}
-        .acquisition-empty {text-align:center;padding:12px 20px 24px;color:#64748b;}
-        .empty-pie {height:110px;width:110px;border-radius:50%;background:#cbd5e1;margin:0 auto 16px;}
+        .acquisition-empty {text-align:center;padding:12px 20px 24px;color:#727272;}
+        .empty-pie {height:110px;width:110px;border-radius:50%;background:#d4d4d4;margin:0 auto 16px;}
         .acquisition-empty h4 {font-size:16px;font-weight:800;margin-bottom:8px;}
         .acquisition-empty p {font-size:12px;line-height:1.6;}
         .dark .progress-muted {opacity:.35;}
-        .dark .image-progress h4,.dark .image-progress p {color:#e2e8f0;}
-        .dark .image-progress p span,.dark .acquisition-hint,.dark .acquisition-total,.dark .acquisition-share {color:#a6b5c7;}
+        .dark .image-progress h4,.dark .image-progress p {color:#e7e7e7;}
+        .dark .image-progress p span,.dark .acquisition-hint,.dark .acquisition-total,.dark .acquisition-share {color:#b3b3b3;}
         .dark .image-progress>strong,.dark .acquisition-total strong {color:#ffad51;}
-        .dark .acquisition-detail {background:#192637;border-color:#334155;color:#e2e8f0;}
-        .dark .acquisition-entities li {border-color:#334155;}
-        .dark .acquisition-legend button {border-color:#475569;color:#cbd5e1;}
+        .dark .acquisition-detail {background:#242424;border-color:#3f3f3f;color:#e7e7e7;}
+        .dark .acquisition-entities li {border-color:#3f3f3f;}
+        .dark .acquisition-legend button {border-color:#535353;color:#d4d4d4;}
         .dark .acquisition-legend button.is-selected {border-color:#fb923c;background:#493126;color:#fed7aa;}
-        .dark .acquisition-slice {stroke:#172333;}
-        .dark .acquisition-slice.is-selected,.dark .acquisition-slice:focus-visible {stroke:#f8fafc;}
-        .dark .empty-pie {background:#334155;}
+        .dark .acquisition-slice {stroke:#222222;}
+        .dark .acquisition-slice.is-selected,.dark .acquisition-slice:focus-visible {stroke:#fafafa;}
+        .dark .empty-pie {background:#3f3f3f;}
         @media(max-width:640px){.progress-art{height:155px}.pokemon-progress-grid{gap:6px}.image-progress>strong{font-size:27px}.acquisition-layout{grid-template-columns:1fr;gap:20px}.acquisition-detail{padding:16px}.acquisition-pie{max-width:230px}}
         @media(prefers-reduced-motion:reduce){.progress-filled{transition:none}}
 
         #expansion-logos-dialog {width:min(1220px,calc(100vw - 24px));padding:24px;}
         .collection-scroll {overflow:auto;max-height:65vh;overscroll-behavior:contain;scrollbar-width:thin;}
         #collection-comparison {min-width:calc(var(--collection-columns) * 190px);}
-        #regional-logo-grid.regional-logo-grid {display:grid;grid-template-columns:repeat(var(--collection-columns),minmax(0,1fr));gap:0;max-width:none;margin:0;position:sticky;top:0;z-index:2;background:#f8fafc;border-bottom:1px solid #cbd5e1;}
+        #regional-logo-grid.regional-logo-grid {display:grid;grid-template-columns:repeat(var(--collection-columns),minmax(0,1fr));gap:0;max-width:none;margin:0;position:sticky;top:0;z-index:2;background:#fafafa;border-bottom:1px solid #d4d4d4;}
         #regional-logo-grid .collection-locale {grid-column:auto;}
-        .collection-locale {text-align:center;padding:10px 12px 12px;border-right:1px solid #e2e8f0;}
+        .collection-locale {text-align:center;padding:10px 12px 12px;border-right:1px solid #e7e7e7;}
         .collection-locale:last-child {border-right:0;}
         .collection-locale-art {height:85px;display:flex;align-items:center;justify-content:center;}
         .collection-locale-art img {max-width:100%;max-height:100%;object-fit:contain;}
-        .collection-locale>span {display:block;font-size:10px;font-weight:800;margin-top:8px;color:#64748b;text-transform:uppercase;letter-spacing:.07em;}
-        .collection-art-row {padding:18px 0;border-bottom:1px solid #cbd5e1;}
-        .collection-art-row>h3 {font-size:13px;font-weight:900;padding:0 10px 12px;color:#334155;}
-        .collection-art-row>h3 span {font-size:11px;font-weight:500;color:#64748b;}
+        .collection-locale>span {display:block;font-size:10px;font-weight:800;margin-top:8px;color:#727272;text-transform:uppercase;letter-spacing:.07em;}
+        .collection-art-row {padding:18px 0;border-bottom:1px solid #d4d4d4;}
+        .collection-art-row>h3 {font-size:13px;font-weight:900;padding:0 10px 12px;color:#3f3f3f;}
+        .collection-art-row>h3 span {font-size:11px;font-weight:500;color:#727272;}
         .collection-aligned-row {display:grid;grid-template-columns:repeat(var(--collection-columns),minmax(0,1fr));}
-        .collection-locale-cards {display:flex;flex-wrap:wrap;align-content:start;align-items:start;justify-content:center;gap:12px 8px;padding:0 8px;border-right:1px solid #e2e8f0;}
+        .collection-locale-cards {display:flex;flex-wrap:wrap;align-content:start;align-items:start;justify-content:center;gap:12px 8px;padding:0 8px;border-right:1px solid #e7e7e7;}
         .collection-locale-cards:last-child {border-right:0;}
-        .collection-card {display:flex;flex:0 1 122px;min-width:0;flex-direction:column;align-items:center;gap:5px;border:1px solid #cbd5e1;border-radius:12px;padding:7px;background:#fff;text-align:center;color:#334155;cursor:pointer;transition:transform .15s,border-color .15s;}
+        .collection-card {display:flex;flex:0 1 122px;min-width:0;flex-direction:column;align-items:center;gap:5px;border:1px solid #d4d4d4;border-radius:12px;padding:7px;background:#fff;text-align:center;color:#3f3f3f;cursor:pointer;transition:transform .15s,border-color .15s;}
         .collection-card:hover {transform:translateY(-3px);border-color:#f88b38;}
         .collection-card:focus-visible {outline:3px solid #f88b38;outline-offset:3px;}
-        .collection-card.owned {border-color:#22c55e;}
+        .collection-card.owned {border-color:#9b9b9b;}
         .collection-card img {width:100%;aspect-ratio:63/88;object-fit:contain;border-radius:5%;}
-        .collection-card img.image-unavailable {background:#e2e8f0;}
+        .collection-card img.image-unavailable {background:#e7e7e7;}
         .collection-number {font-size:11px;font-weight:900;}
         .collection-finish {font-size:9px;line-height:1.35;overflow-wrap:anywhere;}
-        .collection-owned {font-size:9px;font-weight:800;color:#64748b;}
-        .owned .collection-owned {color:#16a34a;}
-        .collection-no-card {display:block;text-align:center;padding:35px 8px;color:#94a3b8;font-size:22px;}
+        .collection-owned {font-size:9px;font-weight:800;color:#727272;}
+        .owned .collection-owned {color:#7f7f7f;}
+        .collection-no-card {display:block;text-align:center;padding:35px 8px;color:#a1a1a1;font-size:22px;}
         .collection-no-card small {display:block;font-size:10px;}
-        .collection-scroll-hint {font-size:11px;color:#64748b;margin:0 0 10px;}
-        #collection-card-preview {padding:22px;border-radius:20px;border:1px solid #cbd5e1;max-height:92vh;width:min(460px,calc(100vw - 28px));background:#f8fafc;color:#1e293b;}
-        #collection-card-preview::backdrop {background:#101b2be0;}
+        .collection-scroll-hint {font-size:11px;color:#727272;margin:0 0 10px;}
+        #collection-card-preview {padding:22px;border-radius:20px;border:1px solid #d4d4d4;max-height:92vh;width:min(460px,calc(100vw - 28px));background:#fafafa;color:#282828;}
+        #collection-card-preview::backdrop {background:#1a1a1ae0;}
         #collection-preview-image {display:block;max-width:100%;max-height:65vh;margin:14px auto;object-fit:contain;border-radius:4%;}
         #collection-preview-title {font-size:14px;font-weight:800;padding-right:28px;}
         #collection-preview-caption {font-size:11px;line-height:1.6;text-align:center;}
         .collection-preview-close {position:absolute;right:12px;top:8px;font-size:28px;background:none;border:0;cursor:pointer;}
-        .dark #regional-logo-grid.regional-logo-grid {background:#182332;border-color:#334155;}
-        .dark .collection-art-row,.dark .collection-locale,.dark .collection-locale-cards {border-color:#334155;}
-        .dark .collection-art-row>h3 {color:#e2e8f0;}
-        .dark .collection-card,.dark #collection-card-preview {background:#202e41;color:#e2e8f0;border-color:#475569;}
-        .dark .collection-card.owned {border-color:#4ade80;}
-        .dark .collection-locale>span,.dark .collection-scroll-hint,.dark .collection-art-row>h3 span {color:#a6b5c7;}
+        .dark #regional-logo-grid.regional-logo-grid {background:#222222;border-color:#3f3f3f;}
+        .dark .collection-art-row,.dark .collection-locale,.dark .collection-locale-cards {border-color:#3f3f3f;}
+        .dark .collection-art-row>h3 {color:#e7e7e7;}
+        .dark .collection-card,.dark #collection-card-preview {background:#2c2c2c;color:#e7e7e7;border-color:#535353;}
+        .dark .collection-card.owned {border-color:#b8b8b8;}
+        .dark .collection-locale>span,.dark .collection-scroll-hint,.dark .collection-art-row>h3 span {color:#b3b3b3;}
         @media(max-width:640px){#expansion-logos-dialog{padding:16px}.collection-locale-art{height:64px}.collection-scroll{max-height:68vh}.regional-header h2{font-size:20px}.collection-card{flex-basis:138px}}
-</style>
+
+        /* Scorace — charcoal, chalk and the colors of Cinderace. */
+        :root{--surface:#f5f5f3;--ink:#222;--subtle:#666;--line:#00000018;--hero-height:350px}
+        .dark{--surface:#191919;--ink:#f0efeb;--subtle:#aaa9a4;--line:#ffffff16}
+        body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,sans-serif;letter-spacing:-.015em}
+        .brand-logo{width:160px;height:69px;object-fit:contain}.brand-heading{line-height:0;flex-shrink:0}
+        .brand-heading button{border-radius:8px}.brand-heading button:focus-visible{outline:2px solid #f4d664;outline-offset:6px}
+        .glass-panel,.glass-card{border-color:var(--line)!important;box-shadow:none}
+        .dark .glass-panel{background:rgba(20,20,20,.94)}.dark .glass-card{background:rgba(31,31,31,.88)}
+        header.glass-panel{background:rgba(245,245,243,.95);backdrop-filter:blur(20px)}.dark header.glass-panel{background:rgba(16,16,16,.96)}
+        .dashboard-shell{padding:clamp(20px,4vw,52px);border-radius:28px;overflow:hidden}
+        .dashboard-heading{display:flex;align-items:center;justify-content:space-between;gap:24px}
+        .section-kicker{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;color:var(--subtle)}
+        .dashboard-heading h2{font-size:clamp(26px,4vw,44px);font-weight:800;letter-spacing:-.05em;margin-top:5px;color:var(--ink)}
+        .collection-total{min-width:200px;text-align:right}.collection-total>span{display:block;font-size:11px;color:var(--subtle);margin-bottom:6px}
+        .collection-total strong{font-size:19px;letter-spacing:-.035em;color:var(--ink)}
+        .total-track{height:3px;background:var(--line);margin-top:12px;border-radius:4px;overflow:hidden}.total-track>div{height:100%;background:#c43b30;transition:width .4s}
+        .evolution-stage{padding:28px 0 24px;position:relative;background:radial-gradient(ellipse at 50% 70%,#f4d66409,transparent 65%)}
+        .pokemon-progress-grid{grid-template-columns:1fr 1.35fr 1fr;align-items:end;gap:0;max-width:800px;margin:auto}
+        .vertical .progress-art{height:var(--hero-height);margin:0 auto 18px;width:100%}
+        .vertical .progress-art img{top:auto;bottom:0;object-position:center bottom;height:var(--sprite-height);filter:drop-shadow(0 8px 12px #0002)}
+        .vertical .progress-art .progress-muted{filter:grayscale(1);opacity:.22}
+        .vertical[data-pokemon="Scorbunny"]{--sprite-height:calc(var(--hero-height)*.2142857)}
+        .vertical[data-pokemon="Raboot"]{--sprite-height:calc(var(--hero-height)*.4285714)}
+        .vertical[data-pokemon="Cinderace"]{--sprite-height:var(--hero-height)}
+        .image-progress h4{font-size:12px;color:var(--subtle);font-weight:600;letter-spacing:.02em}
+        .image-progress>strong,.dark .image-progress>strong{font-size:35px;font-weight:700;color:var(--ink);letter-spacing:-.06em}
+        .image-progress>strong span{font-size:16px;color:var(--subtle);font-weight:500}
+        .image-progress p{font-size:11px;margin-top:4px;color:var(--subtle)}
+        .country-section{padding:28px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+        .language-progress-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;max-width:760px;margin:auto}
+        .horizontal .progress-art{height:40px;width:64px;margin:0 auto 12px}.horizontal>strong,.dark .horizontal>strong{font-size:25px}
+        .collection-section{padding-top:40px}.section-heading{margin-bottom:25px}.section-heading h3{font-size:25px;font-weight:750;color:var(--ink);letter-spacing:-.035em;margin-top:6px}.section-heading p{font-size:12px;color:var(--subtle);line-height:1.6;margin-top:8px}
+        .expansion-category{font-size:11px;color:var(--subtle);font-weight:600;letter-spacing:.09em;text-transform:uppercase;margin:0 0 14px}
+        .expansion-section.sets>.expansion-category{display:none}.expansion-section+.expansion-section{margin-top:30px;padding-top:26px;border-top:1px solid var(--line)}
+        .expansion-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+        .expansion-progress{padding:20px 12px;border:1px solid var(--line);border-radius:18px;background:#80808005;transition:background .2s,border-color .2s}
+        .expansion-progress:hover{background:#8080800c;border-color:#80808050}.expansion-logo{height:88px;margin-bottom:20px}
+        .expansion-caption strong,.dark .expansion-caption strong,.dark .is-complete .expansion-caption strong{font-size:29px;font-weight:650;color:var(--ink)}
+        .expansion-caption strong span{font-size:14px;font-weight:400;color:var(--subtle)}.expansion-status{font-size:8px}.expansion-detail{justify-content:center;gap:8px;font-size:9px}.expansion-name{font-size:10px;font-weight:600;color:var(--subtle)}
+        .generic .expansion-logo{height:65px;filter:grayscale(1)}.stamps .expansion-grid,.generic .expansion-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+        .acquisition-section{margin-top:36px;border-top:1px solid var(--line)}
+        .acquisition-layout{grid-template-columns:1fr 1.15fr;gap:50px;align-items:center;padding:10px 0 15px}
+        .acquisition-pie{max-width:280px}.acquisition-slice,.dark .acquisition-slice{stroke:var(--surface);stroke-width:3}.acquisition-slice.is-selected,.dark .acquisition-slice.is-selected{stroke:var(--surface);stroke-width:6;filter:brightness(1.1)}
+        .donut-center{fill:var(--surface)}.donut-count{fill:var(--ink);font-size:38px;font-weight:650;letter-spacing:-2px}.donut-label{fill:var(--subtle);font-size:8px;letter-spacing:1.1px}
+        .acquisition-legend{margin-top:22px;gap:6px}.acquisition-legend button,.dark .acquisition-legend button{border-color:transparent;color:var(--subtle);padding:6px 9px;font-size:10px;border-radius:6px}
+        .acquisition-legend button.is-selected,.dark .acquisition-legend button.is-selected{background:#80808015;border-color:var(--line);color:var(--ink)}
+        .acquisition-detail,.dark .acquisition-detail{background:none;border:0;border-left:1px solid var(--line);border-radius:0;padding:12px 0 12px 30px;min-height:190px;color:var(--ink)}
+        .acquisition-detail-heading h4{font-size:23px;font-weight:650;letter-spacing:-.04em}.acquisition-detail-heading>strong{color:var(--subtle);font-weight:500}.acquisition-share,.dark .acquisition-share{color:var(--subtle)}.acquisition-entities li,.dark .acquisition-entities li{border-color:var(--line);padding:15px 0;font-size:13px}.acquisition-entities strong{font-weight:550}
+        .empty-pie,.dark .empty-pie{background:none;border:17px solid var(--line);width:150px;height:150px}.acquisition-empty{padding:25px;color:var(--subtle)}
+        .card-owned{border-color:#f4d664;box-shadow:0 0 0 1px #f4d66420}.variant-tag.art,.variant-tag.foil,.variant-tag.master,.dark .variant-tag.art,.dark .variant-tag.foil,.dark .variant-tag.master{color:var(--subtle);background:#80808010;border-color:#80808035}
+        @media(max-width:640px){:root{--hero-height:270px}.brand-logo{width:112px;height:49px}.dashboard-shell{padding:22px 15px;border-radius:20px}.dashboard-heading{align-items:start;gap:15px}.dashboard-heading h2{font-size:26px}.section-kicker{font-size:8px}.collection-total{min-width:110px}.collection-total strong{font-size:13px}.collection-total>span{font-size:9px}.evolution-stage{padding-top:18px}.image-progress>strong,.dark .image-progress>strong{font-size:29px}.image-progress p{font-size:9px}.image-progress h4{font-size:10px}.country-section{padding:24px 0}.horizontal .progress-art{width:48px;height:31px}.horizontal>strong,.dark .horizontal>strong{font-size:23px}.expansion-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.expansion-progress{padding:15px 8px}.expansion-logo{height:72px}.stamps .expansion-grid,.generic .expansion-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.section-heading h3{font-size:23px}.acquisition-layout{grid-template-columns:1fr;gap:24px}.acquisition-detail,.dark .acquisition-detail{border-left:0;border-top:1px solid var(--line);padding:24px 0 0}.acquisition-pie{max-width:250px}.collection-section{padding-top:30px}}
+        @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+    </style>
 </head>
-<body class="bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300 dark:from-[#090e17] dark:via-cinder-bg dark:to-[#121926] text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
+<body class="bg-gradient-to-br from-slate-200 via-slate-100 to-slate-300 dark:from-[#0e0e0e] dark:via-cinder-bg dark:to-[#181818] text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
 
     <div id="zoom-modal" onclick="handleModalClick(event)" class="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-xl flex items-center justify-center hidden opacity-0 pointer-events-none p-4">
         <button id="zoom-prev-btn" onclick="event.stopPropagation(); prevZoomCard()" class="hidden sm:flex absolute left-4 sm:left-8 lg:left-16 top-1/2 -translate-y-1/2 z-40 bg-white/90 dark:bg-cinder-dark/90 hover:bg-cinder-orange disabled:opacity-20 text-cinder-orange dark:text-cinder-yellow hover:text-white p-3 sm:p-4 rounded-full border border-cinder-orange/40 shadow-2xl transition active:scale-95 items-center justify-center cursor-pointer select-none">
@@ -303,9 +358,7 @@
     <header class="px-3.5 py-3 sm:px-6 sm:py-4 glass-panel sticky top-0 z-30 transition-colors duration-200 border-b border-cinder-orange/30 shadow-xl">
         <div class="max-w-7xl mx-auto flex flex-col gap-2.5">
             <div class="flex justify-between items-center w-full gap-2">
-                <h1 onclick="switchTab('dashboard')" class="text-lg sm:text-xl font-black text-cinder-orange tracking-tight cursor-pointer hover:opacity-80 transition flex items-center gap-1.5 select-none drop-shadow-sm shrink-0">
-                    <span class="text-cinder-orange dark:text-cinder-yellow">🔥</span> MasterSet
-                </h1>
+                <h1 class="brand-heading"><button type="button" onclick="switchTab('dashboard')" aria-label="Scorace — abrir resumo"><img class="brand-logo" src="scorace.png" alt="Scorace" width="833" height="359"></button></h1>
 
                 <nav class="hidden md:flex items-center gap-1 bg-white/40 dark:bg-cinder-bg/50 p-1 rounded-2xl border border-cinder-orange/20 text-xs font-semibold shadow-inner">
                     <button id="nav-dashboard" onclick="switchTab('dashboard')" class="px-3.5 py-1.5 rounded-xl transition hover:text-cinder-orange dark:hover:text-cinder-yellow">Resumo</button>
@@ -315,12 +368,12 @@
                 </nav>
 
                 <div class="flex items-center gap-2 sm:gap-3">
-                    <button onclick="toggleTheme()" aria-label="Alternar Tema" class="theme-switch-track relative w-11 sm:w-14 h-6 sm:h-7 rounded-full bg-white/70 dark:bg-[#121926]/80 border border-slate-300 dark:border-slate-800 transition-colors duration-300 flex items-center px-1 shrink-0 overflow-hidden cursor-pointer shadow-sm">
+                    <button onclick="toggleTheme()" aria-label="Alternar Tema" class="theme-switch-track relative w-11 sm:w-14 h-6 sm:h-7 rounded-full bg-white/70 dark:bg-[#181818]/80 border border-slate-300 dark:border-slate-800 transition-colors duration-300 flex items-center px-1 shrink-0 overflow-hidden cursor-pointer shadow-sm">
                         <svg class="absolute right-1.5 w-3.5 h-3.5 text-slate-400 dark:opacity-0 transition-opacity duration-300 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3zm0-13C11.45 2 11 2.45 11 3v2c0 .55.45 1 1 1s1-.45 1-1V3c0-.55-.45-1-1-1zm0 16c-.55 0-1 .45-1 1v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1zm9-9c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1h2zM5 12c0-.55-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1zm14.36-6.36c.39-.39.39-1.02 0-1.41s-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41zM7.05 18.36c-.39-.39-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41c.39-.38.39-1.02 0-1.41zM18.36 18.36l1.41 1.41c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.41-1.41c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41zM6.34 5.64L4.93 4.23c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0s-.39-1.02 0-1.41z"/></svg>
                         <div class="absolute left-1 opacity-0 dark:opacity-100 transition-opacity duration-300 pointer-events-none flex items-center gap-0.5 text-slate-400">
                             <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12.3 2a10 10 0 0 0-1.9 20 10 10 0 0 0 10-10 10 10 0 0 0-8.1-10zm-1.1 17.9a8 8 0 1 1 6.7-11.2 8.05 8.05 0 0 1-6.7 11.2z"/></svg>
                         </div>
-                        <div class="theme-switch-thumb w-4 sm:w-5 h-4 sm:h-5 rounded-full bg-white dark:bg-[#34445c] transform transition-transform duration-300 translate-x-0 dark:translate-x-5 sm:dark:translate-x-7 z-10"></div>
+                        <div class="theme-switch-thumb w-4 sm:w-5 h-4 sm:h-5 rounded-full bg-white dark:bg-[#424242] transform transition-transform duration-300 translate-x-0 dark:translate-x-5 sm:dark:translate-x-7 z-10"></div>
                     </button>
 
                     <div class="flex gap-1.5 sm:gap-2">
@@ -328,9 +381,9 @@
                             <p class="text-[7px] sm:text-[9px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">Total</p>
                             <p id="total-count" class="text-xs sm:text-sm font-bold text-slate-800 dark:text-cinder-white">226</p>
                         </div>
-                        <div class="glass-card px-2 sm:px-3 py-1 rounded-2xl text-center border-l-2 border-green-500 shadow-sm min-w-[42px] sm:min-w-[50px]">
+                        <div class="glass-card px-2 sm:px-3 py-1 rounded-2xl text-center border-l-2 border-slate-500 shadow-sm min-w-[42px] sm:min-w-[50px]">
                             <p class="text-[7px] sm:text-[9px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">Tenho</p>
-                            <p id="obtained-count" class="text-xs sm:text-sm font-bold text-green-600 dark:text-green-400">0</p>
+                            <p id="obtained-count" class="text-xs sm:text-sm font-bold text-slate-600 dark:text-slate-400">0</p>
                         </div>
                         <div class="glass-card px-2 sm:px-3 py-1 rounded-2xl text-center border-l-2 border-cinder-orange dark:border-cinder-yellow shadow-sm min-w-[42px] sm:min-w-[50px]">
                             <p class="text-[7px] sm:text-[9px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-wider">Faltam</p>
@@ -437,60 +490,13 @@
         </div>
 
         <section id="view-dashboard" class="space-y-4">
-            <div class="glass-panel rounded-3xl p-5 sm:p-7 shadow-2xl">
-                <h2 class="text-base sm:text-lg font-black text-slate-800 dark:text-cinder-white mb-1 flex items-center gap-2">
-                    <span class="text-cinder-orange">📊</span> Resumo Geral da Coleção
-                </h2>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mb-5">Acompanhe a conclusão por Pokémon, Idioma, Expansão e Característica.</p>
-                
-                <div class="mb-5 glass-card p-4 sm:p-6 rounded-2xl border border-cinder-orange/20 shadow-inner">
-                    <div class="flex justify-between items-center text-sm font-bold mb-2.5">
-                        <span class="text-slate-800 dark:text-cinder-white">Master Set Completo</span>
-                        <span id="dashboard-total-pct" class="text-cinder-orange font-extrabold text-base">0%</span>
-                    </div>
-                    <div class="w-full bg-slate-200/60 dark:bg-cinder-dark/80 h-3 rounded-full overflow-hidden p-0.5 border border-cinder-orange/20">
-                        <div id="dashboard-total-bar" class="bg-gradient-to-r from-cinder-orange to-cinder-yellow h-full rounded-full transition-all duration-500 shadow-sm" style="width: 0%"></div>
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
-                    <div class="glass-card p-4 sm:p-5 rounded-2xl border border-cinder-orange/20 flex flex-col justify-between shadow-sm">
-                        <div>
-                            <div class="flex items-center gap-2 mb-3.5 border-b border-cinder-orange/10 pb-2.5">
-                                <span class="w-2.5 h-2.5 rounded-full bg-cinder-orange"></span>
-                                <h3 class="text-xs font-black text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Pokémon</h3>
-                            </div>
-                            <div id="stats-pokemon" class="pokemon-progress-grid"></div>
-                        </div>
-                    </div>
-
-                    <div class="glass-card p-4 sm:p-5 rounded-2xl border border-cinder-orange/20 flex flex-col justify-between shadow-sm">
-                        <div>
-                            <div class="flex items-center gap-2 mb-3.5 border-b border-cinder-orange/10 pb-2.5">
-                                <span class="w-2.5 h-2.5 rounded-full bg-cinder-yellow"></span>
-                                <h3 class="text-xs font-black text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Países / idiomas</h3>
-                            </div>
-                            <div id="stats-lang" class="language-progress-grid"></div>
-                        </div>
-                    </div>
-
-                    <div class="md:col-span-2 glass-card p-4 sm:p-5 rounded-2xl border border-cinder-orange/20 shadow-sm">
-                        <div class="flex items-center gap-2 mb-3.5 border-b border-cinder-orange/10 pb-2.5">
-                            <span class="w-2.5 h-2.5 rounded-full bg-cinder-orange"></span>
-                            <h3 class="text-xs font-black text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Expansão</h3>
-                        </div>
-                        <p class="expansion-intro">Cada carta conquistada revela mais cor. Idiomas e versões reunidos por família de expansão.</p><div id="stats-set" class="expansion-grid"></div>
-                    </div>
-
-                    <div class="md:col-span-2 glass-card p-4 sm:p-5 rounded-2xl border border-cinder-orange/20 shadow-sm">
-                        <div class="flex items-center gap-2 mb-3.5 border-b border-cinder-orange/10 pb-2.5">
-                            <span class="w-2.5 h-2.5 rounded-full bg-cinder-yellow"></span>
-                            <h3 class="text-xs font-black text-cinder-orange dark:text-cinder-yellow uppercase tracking-wider">Como chegaram à coleção</h3>
-                        </div>
-                        <p class="acquisition-hint">Passe o mouse ou toque numa fatia para ver as lojas, pessoas e coleções registradas em Captura.</p><div id="stats-acquisition"></div>
-                    </div>
-                </div>
-            </div>
+          <div class="dashboard-shell glass-panel">
+            <div class="dashboard-heading"><div><p class="section-kicker">Sua coleção, em evolução</p><h2>Cada carta conta.</h2></div><div class="collection-total"><span>Progresso total</span><strong id="dashboard-total-pct">0%</strong><div class="total-track"><div id="dashboard-total-bar" style="width:0%"></div></div></div></div>
+            <section class="evolution-stage" aria-label="Progresso por Pokémon"><div id="stats-pokemon" class="pokemon-progress-grid"></div></section>
+            <section class="country-section" aria-label="Países e idiomas"><div id="stats-lang" class="language-progress-grid"></div></section>
+            <section class="collection-section"><div class="section-heading"><span class="section-kicker">Explore a coleção</span><h3>Expansões</h3><p>Toque nas logos para comparar as cartas de cada idioma.</p></div><div id="stats-set"></div></section>
+            <section class="collection-section acquisition-section"><div class="section-heading"><span class="section-kicker">A história de cada captura</span><h3>Como chegaram até aqui</h3><p>Passe o mouse ou toque no gráfico para ver pessoas, lojas e coleções.</p></div><div id="stats-acquisition"></div></section>
+          </div>
         </section>
 
         <section id="view-grid" class="hidden">
@@ -569,7 +575,7 @@
                         </div>
                         <div class="flex flex-col gap-2.5">
                             <a href="https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Cinderace" target="_blank" class="bg-cinder-orange hover:bg-cinder-red text-white py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-md">Liga Pokémon</a>
-                            <a href="https://www.ebay.com/sch/i.html?_nkw=Pokemon+Cinderace+card" target="_blank" class="glass-card hover:bg-slate-200/80 dark:hover:bg-[#25364f]/80 text-slate-800 dark:text-cinder-white border border-cinder-orange/30 py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-sm">eBay</a>
+                            <a href="https://www.ebay.com/sch/i.html?_nkw=Pokemon+Cinderace+card" target="_blank" class="glass-card hover:bg-slate-200/80 dark:hover:bg-[#343434]/80 text-slate-800 dark:text-cinder-white border border-cinder-orange/30 py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-sm">eBay</a>
                         </div>
                     </div>
 
@@ -582,7 +588,7 @@
                         </div>
                         <div class="flex flex-col gap-2.5">
                             <a href="https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Raboot" target="_blank" class="bg-cinder-orange hover:bg-cinder-red text-white py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-md">Liga Pokémon</a>
-                            <a href="https://www.ebay.com/sch/i.html?_nkw=Pokemon+Raboot+card" target="_blank" class="glass-card hover:bg-slate-200/80 dark:hover:bg-[#25364f]/80 text-slate-800 dark:text-cinder-white border border-cinder-orange/30 py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-sm">eBay</a>
+                            <a href="https://www.ebay.com/sch/i.html?_nkw=Pokemon+Raboot+card" target="_blank" class="glass-card hover:bg-slate-200/80 dark:hover:bg-[#343434]/80 text-slate-800 dark:text-cinder-white border border-cinder-orange/30 py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-sm">eBay</a>
                         </div>
                     </div>
 
@@ -595,7 +601,7 @@
                         </div>
                         <div class="flex flex-col gap-2.5">
                             <a href="https://www.ligapokemon.com.br/?view=cards%2Fsearch&card=Scorbunny" target="_blank" class="bg-cinder-orange hover:bg-cinder-red text-white py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-md">Liga Pokémon</a>
-                            <a href="https://www.ebay.com/sch/i.html?_nkw=Pokemon+Scorbunny+card" target="_blank" class="glass-card hover:bg-slate-200/80 dark:hover:bg-[#25364f]/80 text-slate-800 dark:text-cinder-white border border-cinder-orange/30 py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-sm">eBay</a>
+                            <a href="https://www.ebay.com/sch/i.html?_nkw=Pokemon+Scorbunny+card" target="_blank" class="glass-card hover:bg-slate-200/80 dark:hover:bg-[#343434]/80 text-slate-800 dark:text-cinder-white border border-cinder-orange/30 py-2.5 px-3 rounded-2xl text-xs font-bold transition text-center shadow-sm">eBay</a>
                         </div>
                     </div>
                 </div>
@@ -659,13 +665,13 @@
             { id: "card-6", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "PT-BR", numero: "SWSH112", imagem: "SP_112_R_PT.png" },
             { id: "card-7", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "PT-BR", numero: "SWSH278", imagem: "SP_278_R_PT.png" },
             { id: "card-8", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "V Regular", lingua: "PT-BR", numero: "035/192", imagem: "RCL_035_R_PT.png" },
-            { id: "card-9", nome: "Cinderace V", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "V Regular", lingua: "PT-BR", numero: "018/073", imagem: "SHF_018_R_PT_H.png" },
+            { id: "card-9", nome: "Cinderace V", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "V Regular", lingua: "PT-BR", numero: "018/072", imagem: "SHF_018_R_PT_H.png" },
             { id: "card-10", nome: "Cinderace V", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "V Regular", lingua: "PT-BR", numero: "SWSH015", imagem: "SP_015_R_PT_H.png" },
             { id: "card-11", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "V Full Art", lingua: "PT-BR", numero: "178/192", imagem: "RCL_178_R_PT_H.png" },
             { id: "card-12", nome: "Cinderace V", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "V Regular", lingua: "PT-BR", numero: "043/264", imagem: "FST_043_R_PT.png" },
             { id: "card-13", nome: "Cinderace V", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "V Regular", lingua: "PT-BR", numero: "044/264", imagem: "FST_044_R_PT.png" },
             { id: "card-14", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "VMAX Regular", lingua: "PT-BR", numero: "036/192", imagem: "RCL_036_R_PT.png" },
-            { id: "card-15", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "VMAX Regular", lingua: "PT-BR", numero: "019/073", imagem: "SHF_019_R_PT_H.png" },
+            { id: "card-15", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "VMAX Regular", lingua: "PT-BR", numero: "019/072", imagem: "SHF_019_R_PT_H.png" },
             { id: "card-16", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "VMAX Regular", lingua: "PT-BR", numero: "194/192", imagem: "RCL_194_R_PT_H.png" },
             { id: "card-17", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "VMAX Regular", lingua: "PT-BR", numero: "045/264", imagem: "FST_045_R_PT.png" },
             { id: "card-18", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "ex Regular", lingua: "PT-BR", numero: "028/142", imagem: "SCR_028_R_PT_H.png" },
@@ -688,14 +694,14 @@
             { id: "card-33", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "EN", numero: "SWSH112", imagem: "SP_112_R_EN.png" },
             { id: "card-34", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "EN", numero: "SWSH278", imagem: "SP_278_R_EN.png" },
             { id: "card-35", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "V Regular", lingua: "EN", numero: "035/192", imagem: "RCL_035_R_EN.png" },
-            { id: "card-36", nome: "Cinderace V", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "V Regular", lingua: "EN", numero: "018/073", imagem: "SHF_018_R_EN_H.png" },
+            { id: "card-36", nome: "Cinderace V", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "V Regular", lingua: "EN", numero: "018/072", imagem: "SHF_018_R_EN_H.png" },
             { id: "card-37", nome: "Cinderace V", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "V Regular", lingua: "EN", numero: "SWSH015", imagem: "SP_015_R_EN_H.png" },
             { id: "card-38", nome: "Cinderace V", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "EN", numero: "SWSH015", imagem: "SP_015_R_EN_JUMBO_H.png" },
             { id: "card-39", nome: "Cinderace V", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "V Full Art", lingua: "EN", numero: "178/192", imagem: "RCL_178_R_EN_H.png" },
             { id: "card-40", nome: "Cinderace V", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "V Regular", lingua: "EN", numero: "043/264", imagem: "FST_043_R_EN.png" },
             { id: "card-41", nome: "Cinderace V", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "V Regular", lingua: "EN", numero: "044/264", imagem: "FST_044_R_EN.png" },
             { id: "card-42", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "VMAX Regular", lingua: "EN", numero: "036/192", imagem: "RCL_036_R_EN.png" },
-            { id: "card-43", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "VMAX Regular", lingua: "EN", numero: "019/073", imagem: "SHF_019_R_EN_H.png" },
+            { id: "card-43", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Destinos Brilhantes", variante: "VMAX Regular", lingua: "EN", numero: "019/072", imagem: "SHF_019_R_EN_H.png" },
             { id: "card-44", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Rivalidades Rebeldes", variante: "VMAX Regular", lingua: "EN", numero: "194/192", imagem: "RCL_194_R_EN_H.png" },
             { id: "card-45", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Punhos de Fusão", variante: "VMAX Regular", lingua: "EN", numero: "045/264", imagem: "FST_045_R_EN.png" },
             { id: "card-46", nome: "Cinderace ex", pokemon: "Cinderace", set: "Coroa Estelar", variante: "ex Regular", lingua: "EN", numero: "028/142", imagem: "SCR_028_R_EN_H.png" },
@@ -717,43 +723,43 @@
             { id: "card-62", nome: "Cinderace", pokemon: "Cinderace", set: "Espada e Escudo", variante: "Foil", lingua: "EN", numero: "034/202", imagem: "SSH_034_R_EN_COSMOS_H.png" },
 
             // JP & CN Cinderace (Atualizados com os seus apontamentos)
-            { id: "card-63", nome: "Cinderace", pokemon: "Cinderace", set: "Sword & Shield (JP)", variante: "Foil", lingua: "JP", numero: "009/060", imagem: "S1H_009_R_JP.png" },
+            { id: "card-63", nome: "Cinderace", pokemon: "Cinderace", set: "Shield (JP)", variante: "Foil", lingua: "JP", numero: "009/060", imagem: "S1H_009_R_JP.png" },
             { id: "card-64", nome: "Cinderace", pokemon: "Cinderace", set: "Shiny Star V (JP)", variante: "Foil", lingua: "JP", numero: "024/190", imagem: "S4A_024_R_JP_H.png" },
             { id: "card-65", nome: "Cinderace", pokemon: "Cinderace", set: "Shiny Star V (JP)", variante: "Foil", lingua: "JP", numero: "216/190", imagem: "S4A_216_R_JP_H.png" },
-            { id: "card-66", nome: "Cinderace", pokemon: "Cinderace", set: "Scarlet & Violet (JP)", variante: "Foil", lingua: "JP", numero: "008/078", imagem: "SAR_008_R_JP.png" },
+            { id: "card-66", nome: "Cinderace", pokemon: "Cinderace", set: "Starter Set V — Fire (JP)", variante: "Foil", lingua: "JP", numero: "008/023", imagem: "SAR_008_R_JP.png" },
             { id: "card-67", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "022/S-P", imagem: "SP_022_R_JP.png" },
-            { id: "card-68", nome: "Cinderace", pokemon: "Cinderace", set: "Chilling Reign (JP)", variante: "Foil", lingua: "JP", numero: "017/070", imagem: "S6H_017_R_JP.png" },
+            { id: "card-68", nome: "Cinderace", pokemon: "Cinderace", set: "Silver Lance (JP)", variante: "Foil", lingua: "JP", numero: "017/070", imagem: "S6H_017_R_JP.png" },
             { id: "card-69", nome: "Cinderace", pokemon: "Cinderace", set: "Start Deck 100 (JP)", variante: "Foil", lingua: "JP", numero: "072/414", imagem: "SI_072_R_JP.png" },
             { id: "card-70", nome: "Cinderace V", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "V Regular", lingua: "JP", numero: "016/070", imagem: "S1A_016_R_JP.png" },
-            { id: "card-71", nome: "Cinderace V", pokemon: "Cinderace", set: "Shining Fates (JP)", variante: "V Regular", lingua: "JP", numero: "010/050", imagem: "SH_010_R_JP.png" },
+            { id: "card-71", nome: "Cinderace V", pokemon: "Cinderace", set: "Family Pokémon Card Game (JP)", variante: "V Regular", lingua: "JP", numero: "010/053", imagem: "SH_010_R_JP.png" },
             { id: "card-72", nome: "Cinderace V", pokemon: "Cinderace", set: "Start Deck 100 (JP)", variante: "V Regular", lingua: "JP", numero: "073/414", imagem: "SI_073_R_JP.png" },
             { id: "card-73", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "VMAX Regular", lingua: "JP", numero: "017/070", imagem: "S1A_017_R_JP.png" },
             { id: "card-74", nome: "Cinderace ex", pokemon: "Cinderace", set: "Stellar Miracle (JP)", variante: "ex Regular", lingua: "JP", numero: "018/102", imagem: "SV7_018_R_JP.png" },
-            { id: "card-75", nome: "Cinderace", pokemon: "Cinderace", set: "Battle Partners (JP)", variante: "Foil", lingua: "JP", numero: "017/080", imagem: "M1L_017_R_JP.png" },
-            { id: "card-76", nome: "Cinderace ex", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "ex Regular", lingua: "CN", numero: "029/150", imagem: "CSV9C_029_CN.webp" },
-            { id: "card-77", nome: "Cinderace ex", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "ex Alt Art", lingua: "CN", numero: "218/150", imagem: "CSV9C_218_CN.webp" },
+            { id: "card-75", nome: "Cinderace", pokemon: "Cinderace", set: "Mega Brave (JP)", variante: "Foil", lingua: "JP", numero: "017/063", imagem: "M1L_017_R_JP.png" },
+            { id: "card-76", nome: "Cinderace ex", pokemon: "Cinderace", set: "Stellar Crystal (CN)", variante: "ex Regular", lingua: "CN", numero: "029/208", imagem: "CSV9C_029_CN.webp" },
+            { id: "card-77", nome: "Cinderace ex", pokemon: "Cinderace", set: "Stellar Crystal (CN)", variante: "ex Alt Art", lingua: "CN", numero: "218/150", imagem: "CSV9C_218_CN.webp" },
             { id: "card-78", nome: "Cinderace", pokemon: "Cinderace", set: "Start Deck 100 (CN)", variante: "Foil", lingua: "CN", numero: "072/414", imagem: "SD100_072_CN.webp" },
             { id: "card-79", nome: "Cinderace V", pokemon: "Cinderace", set: "Start Deck 100 (CN)", variante: "V Regular", lingua: "CN", numero: "073/414", imagem: "SD100_073_CN.webp" },
-            { id: "card-80", nome: "Cinderace V", pokemon: "Cinderace", set: "Family Pokémon (CN)", variante: "V Regular", lingua: "CN", numero: "010/050", imagem: "FAMILY_010_CN.webp" },
-            { id: "card-81", nome: "Cinderace", pokemon: "Cinderace", set: "Paradise Dragona (CN)", variante: "Foil", lingua: "CN", numero: "023/064", imagem: "PAO_023_CN.webp" },
-            { id: "card-82", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Foil", lingua: "CN", numero: "049/150", imagem: "DCF_049_CN.webp" },
-            { id: "card-83", nome: "Cinderace V", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "V Regular", lingua: "CN", numero: "050/150", imagem: "DCF_050_CN.webp" },
-            { id: "card-84", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "VMAX Regular", lingua: "CN", numero: "051/150", imagem: "DCF_051_CN.webp" },
-            { id: "card-85", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Foil", lingua: "CN", numero: "142/150", imagem: "DCF_142_CN.webp" },
-            { id: "card-86", nome: "Cinderace V", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "V Regular", lingua: "CN", numero: "165/150", imagem: "DCF_165_CN.webp" },
-            { id: "card-87", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "VMAX Regular", lingua: "CN", numero: "184/150", imagem: "DCF_184_CN.webp" },
+            { id: "card-80", nome: "Cinderace V", pokemon: "Cinderace", set: "Family Pokémon (CN)", variante: "V Regular", lingua: "CN", numero: "010/053", imagem: "FAMILY_010_CN.webp" },
+            { id: "card-81", nome: "Cinderace", pokemon: "Cinderace", set: "Primordial Arts — Overgrow (CN)", variante: "Foil", lingua: "CN", numero: "023/125", imagem: "PAO_023_CN.webp" },
+            { id: "card-82", nome: "Cinderace", pokemon: "Cinderace", set: "Dynamax Clash — Flame (CN)", variante: "Foil", lingua: "CN", numero: "049/136", imagem: "DCF_049_CN.webp" },
+            { id: "card-83", nome: "Cinderace V", pokemon: "Cinderace", set: "Dynamax Clash — Flame (CN)", variante: "V Regular", lingua: "CN", numero: "050/136", imagem: "DCF_050_CN.webp" },
+            { id: "card-84", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Dynamax Clash — Flame (CN)", variante: "VMAX Regular", lingua: "CN", numero: "051/136", imagem: "DCF_051_CN.webp" },
+            { id: "card-85", nome: "Cinderace", pokemon: "Cinderace", set: "Dynamax Clash — Flame (CN)", variante: "Foil", lingua: "CN", numero: "142/136", imagem: "DCF_142_CN.webp" },
+            { id: "card-86", nome: "Cinderace V", pokemon: "Cinderace", set: "Dynamax Clash — Flame (CN)", variante: "V Regular", lingua: "CN", numero: "165/136", imagem: "DCF_165_CN.webp" },
+            { id: "card-87", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Dynamax Clash — Flame (CN)", variante: "VMAX Regular", lingua: "CN", numero: "184/136", imagem: "DCF_184_CN.webp" },
             { id: "card-88", nome: "Cinderace", pokemon: "Cinderace", set: "Stellar Miracle (JP)", variante: "Poké Ball Holo", lingua: "JP", numero: "116/102", imagem: "SV7_116_R_JP_H.png" },
-            { id: "card-89", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Rivals (CN)", variante: "Poké Ball Holo", lingua: "CN", numero: "258/150", imagem: "CSV9C_258_CN_H.webp" },
+            { id: "card-89", nome: "Cinderace ex", pokemon: "Cinderace", set: "Stellar Crystal (CN)", variante: "Poké Ball Holo", lingua: "CN", numero: "258/208", imagem: "CSV9C_258_CN_H.webp" },
             { id: "card-90", nome: "Cinderace", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "Foil", lingua: "JP", numero: "072/070", imagem: "S1A_072_R_JP_H.png" },
             { id: "card-91", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "168/S-P", imagem: "SP_168_R_JP.png" },
-            { id: "card-92", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Foil", lingua: "JP", numero: "002/020", imagem: "SP2_002_R_JP_H.png" },
+            { id: "card-92", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "VMAX Special Set (JP)", variante: "Foil", lingua: "JP", numero: "002/004", imagem: "SP2_002_R_JP_H.png" },
             { id: "card-93", nome: "Cinderace", pokemon: "Cinderace", set: "VMAX Rising (JP)", variante: "Foil", lingua: "JP", numero: "080/070", imagem: "S1a_080_HR_JP_H.jpg" },
             { id: "card-94", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "169/S-P", imagem: "SP_169_R_JP.png" },
-            { id: "card-95", nome: "Cinderace", pokemon: "Cinderace", set: "Promo (JP)", variante: "Promo", lingua: "JP", numero: "139/SV-P", imagem: "MC_139_R_JP.png" },
-            { id: "card-96", nome: "Cinderace", pokemon: "Cinderace", set: "Paradise Volunteer (CN)", variante: "Foil", lingua: "CN", numero: "025/080", imagem: "PAV_025_CN_H.webp" },
-            { id: "card-97", nome: "Cinderace", pokemon: "Cinderace", set: "Paradise Volunteer (CN)", variante: "Foil", lingua: "CN", numero: "026/080", imagem: "PAV_026_CN_H.webp" },
-            { id: "card-98", nome: "Cinderace", pokemon: "Cinderace", set: "Paradise Volunteer (CN)", variante: "Foil", lingua: "CN", numero: "027/080", imagem: "PAV_027_CN_H.webp" },
-            { id: "card-99", nome: "Cinderace", pokemon: "Cinderace", set: "Destined Volunteer (CN)", variante: "Foil", lingua: "CN", numero: "039/080", imagem: "DCV_039_CN_H.webp" },
+            { id: "card-95", nome: "Cinderace ex", pokemon: "Cinderace", set: "Start Deck 100 Battle Collection (JP)", variante: "A conferir", lingua: "JP", numero: "139/742", imagem: "MC_139_R_JP.png" },
+            { id: "card-96", nome: "Cinderace", pokemon: "Cinderace", set: "Primordial Arts V Starter Deck (CS3dC)", variante: "Foil", lingua: "CN", numero: "025/170", imagem: "PAV_025_CN_H.webp" },
+            { id: "card-97", nome: "Cinderace V", pokemon: "Cinderace", set: "Primordial Arts V Starter Deck (CS3dC)", variante: "Foil", lingua: "CN", numero: "026/170", imagem: "PAV_026_CN_H.webp" },
+            { id: "card-98", nome: "Cinderace VMAX", pokemon: "Cinderace", set: "Primordial Arts V Starter Deck (CS3dC)", variante: "Foil", lingua: "CN", numero: "027/170", imagem: "PAV_027_CN_H.webp" },
+            { id: "card-99", nome: "Cinderace", pokemon: "Cinderace", set: "Dynamax Clash V Starter Deck (CS1dC)", variante: "Foil", lingua: "CN", numero: "039/207", imagem: "DCV_039_CN_H.webp" },
             { id: "card-100", nome: "Cinderace", pokemon: "Cinderace", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "CN", numero: "026/S-P", imagem: "SP_026_CN.webp" },
             
             // SCORBUNNY
@@ -799,34 +805,34 @@
             { id: "card-140", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Promo", variante: "Promo", lingua: "EN", numero: "MEP053", imagem: "MEP_053_R_EN.png" },
             { id: "card-141", nome: "Scorbunny", pokemon: "Scorbunny", set: "McDonald's 2021", variante: "Regular", lingua: "EN", numero: "16/25", imagem: "MCD21_16_EN.jpg" },
             { id: "card-142", nome: "Scorbunny", pokemon: "Scorbunny", set: "McDonald's 2021", variante: "Foil", lingua: "EN", numero: "16/25", imagem: "MCD21_16_EN_CONFETTI_H.jpg" },
-            { id: "card-143", nome: "Scorbunny", pokemon: "Scorbunny", set: "Futsal Promo", variante: "Promo", lingua: "EN", numero: "004", imagem: "FUTSAL_004_R_EN.png" },
+            { id: "card-143", nome: "Scorbunny", pokemon: "Scorbunny", set: "Futsal Promo", variante: "Promo", lingua: "EN", numero: "004/005", imagem: "FUTSAL_004_R_EN.png" },
             { id: "card-144", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Foil", lingua: "EN", numero: "SWSH002", imagem: "SP_002_R_EN_ALT.png" },
             { id: "card-145", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Foil", lingua: "EN", numero: "030/202", imagem: "SSH_030_R_EN_COSMOS_BLISTER_H.png" },
             { id: "card-146", nome: "Scorbunny", pokemon: "Scorbunny", set: "Espada e Escudo", variante: "Foil", lingua: "EN", numero: "031/202", imagem: "SSH_031_R_EN_H.png" },
-            { id: "card-147", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promo (JP)", variante: "Promo", lingua: "JP", numero: "137/SV-P", imagem: "MC_137_R_JP.png" },
-            { id: "card-148", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promo (JP)", variante: "Promo", lingua: "JP", numero: "745/SV-P", imagem: "MC_745_R_JP.png" },
-            { id: "card-149", nome: "Scorbunny", pokemon: "Scorbunny", set: "Battle Partners (JP)", variante: "Regular", lingua: "JP", numero: "015/080", imagem: "M1L_015_R_JP.png" },
+            { id: "card-147", nome: "Scorbunny", pokemon: "Scorbunny", set: "Start Deck 100 Battle Collection (JP)", variante: "A conferir", lingua: "JP", numero: "137/742", imagem: "MC_137_R_JP.png" },
+            { id: "card-148", nome: "Scorbunny", pokemon: "Scorbunny", set: "Start Deck 100 Battle Collection (JP)", variante: "A conferir", lingua: "JP", numero: "745/742", imagem: "MC_745_R_JP.png" },
+            { id: "card-149", nome: "Scorbunny", pokemon: "Scorbunny", set: "Mega Brave (JP)", variante: "Regular", lingua: "JP", numero: "015/063", imagem: "M1L_015_R_JP.png" },
             { id: "card-150", nome: "Scorbunny", pokemon: "Scorbunny", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "016/102", imagem: "SV7_016_R_JP.png" },
             { id: "card-151", nome: "Scorbunny", pokemon: "Scorbunny", set: "Start Deck 100 (JP)", variante: "Regular", lingua: "JP", numero: "070/414", imagem: "SI_070_R_JP.png" },
-            { id: "card-152", nome: "Scorbunny", pokemon: "Scorbunny", set: "Chilling Reign (JP)", variante: "Regular", lingua: "JP", numero: "015/070", imagem: "S6H_015_R_JP.png" },
+            { id: "card-152", nome: "Scorbunny", pokemon: "Scorbunny", set: "Silver Lance (JP)", variante: "Regular", lingua: "JP", numero: "015/070", imagem: "S6H_015_R_JP.png" },
             { id: "card-153", nome: "Scorbunny", pokemon: "Scorbunny", set: "Shiny Star V (JP)", variante: "Regular", lingua: "JP", numero: "022/190", imagem: "S4A_022_R_JP.png" },
             { id: "card-154", nome: "Scorbunny", pokemon: "Scorbunny", set: "Shiny Star V (JP)", variante: "Regular", lingua: "JP", numero: "214/190", imagem: "S4A_214_R_JP.png" },
-            { id: "card-155", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "016/S-P", imagem: "SD_016_R_JP.png" },
-            { id: "card-156", nome: "Scorbunny", pokemon: "Scorbunny", set: "Sword & Shield (JP)", variante: "Regular", lingua: "JP", numero: "007/060", imagem: "S1H_007_R_JP.png" },
-            { id: "card-157", nome: "Scorbunny", pokemon: "Scorbunny", set: "Scarlet & Violet (JP)", variante: "Regular", lingua: "JP", numero: "006/078", imagem: "SAR_006_R_JP.png" },
+            { id: "card-155", nome: "Scorbunny", pokemon: "Scorbunny", set: "V Starter Decks (JP)", variante: "A conferir", lingua: "JP", numero: "016/127", imagem: "SD_016_R_JP.png" },
+            { id: "card-156", nome: "Scorbunny", pokemon: "Scorbunny", set: "Shield (JP)", variante: "Regular", lingua: "JP", numero: "007/060", imagem: "S1H_007_R_JP.png" },
+            { id: "card-157", nome: "Scorbunny", pokemon: "Scorbunny", set: "Starter Set V — Fire (JP)", variante: "Regular", lingua: "JP", numero: "006/023", imagem: "SAR_006_R_JP.png" },
             { id: "card-158", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "006/S-P", imagem: "SP_006_R_JP.png" },
             { id: "card-159", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "034/S-P", imagem: "SP_034_R_JP.png" },
             { id: "card-160", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "130/S-P", imagem: "SP_130_R_JP.png" },
             { id: "card-161", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "JP", numero: "255/S-P", imagem: "SP_255_R_JP.png" },
             { id: "card-162", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Foil", lingua: "JP", numero: "123/M-P", imagem: "M-P_123_P_JP_H.jpg" },
-            { id: "card-163", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "027/150", imagem: "CSV9C_027_CN.webp" },
-            { id: "card-164", nome: "Scorbunny", pokemon: "Scorbunny", set: "30th Anniversary", variante: "Regular", lingua: "CN", numero: "023/100", imagem: "30THP_023_CN.webp" },
+            { id: "card-163", nome: "Scorbunny", pokemon: "Scorbunny", set: "Stellar Crystal (CN)", variante: "Regular", lingua: "CN", numero: "027/208", imagem: "CSV9C_027_CN.webp" },
+            { id: "card-164", nome: "Scorbunny", pokemon: "Scorbunny", set: "30th Anniversary", variante: "Regular", lingua: "CN", numero: "023/30th-P", imagem: "30THP_023_CN.webp" },
             { id: "card-165", nome: "Scorbunny", pokemon: "Scorbunny", set: "Start Deck 100 (CN)", variante: "Regular", lingua: "CN", numero: "070/414", imagem: "SD100_070_CN.webp" },
-            { id: "card-166", nome: "Scorbunny", pokemon: "Scorbunny", set: "Paradise Dragona (CN)", variante: "Regular", lingua: "CN", numero: "021/064", imagem: "PAO_021_CN.webp" },
-            { id: "card-167", nome: "Scorbunny", pokemon: "Scorbunny", set: "Paradise Volunteer (CN)", variante: "Foil", lingua: "CN", numero: "023/080", imagem: "PAV_023_CN_H.webp" },
-            { id: "card-168", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "047/150", imagem: "DCF_047_CN.webp" },
-            { id: "card-169", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "140/150", imagem: "DCF_140_CN.webp" },
-            { id: "card-170", nome: "Scorbunny", pokemon: "Scorbunny", set: "Destined Volunteer (CN)", variante: "Foil", lingua: "CN", numero: "037/080", imagem: "DCV_037_CN_H.webp" },
+            { id: "card-166", nome: "Scorbunny", pokemon: "Scorbunny", set: "Primordial Arts — Overgrow (CN)", variante: "Regular", lingua: "CN", numero: "021/125", imagem: "PAO_021_CN.webp" },
+            { id: "card-167", nome: "Scorbunny", pokemon: "Scorbunny", set: "Primordial Arts V Starter Deck (CS3dC)", variante: "Foil", lingua: "CN", numero: "023/170", imagem: "PAV_023_CN_H.webp" },
+            { id: "card-168", nome: "Scorbunny", pokemon: "Scorbunny", set: "Dynamax Clash — Flame (CN)", variante: "Regular", lingua: "CN", numero: "047/136", imagem: "DCF_047_CN.webp" },
+            { id: "card-169", nome: "Scorbunny", pokemon: "Scorbunny", set: "Dynamax Clash — Flame (CN)", variante: "Regular", lingua: "CN", numero: "140/136", imagem: "DCF_140_CN.webp" },
+            { id: "card-170", nome: "Scorbunny", pokemon: "Scorbunny", set: "Dynamax Clash V Starter Deck (CS1dC)", variante: "Foil", lingua: "CN", numero: "037/207", imagem: "DCV_037_CN_H.webp" },
             { id: "card-171", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "CN", numero: "013/S-P", imagem: "SP_013_CN.webp" },
             { id: "card-172", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "CN", numero: "053/S-P", imagem: "SP_053_CN.webp" },
             { id: "card-173", nome: "Scorbunny", pokemon: "Scorbunny", set: "Promos Estrela Negra SWSH", variante: "Promo", lingua: "CN", numero: "125/S-P", imagem: "SP_125_CN.webp" },
@@ -862,17 +868,17 @@
             { id: "card-201", nome: "Raboot", pokemon: "Raboot", set: "Heróis Ascendentes", variante: "Poké Ball Holo", lingua: "EN", numero: "037/217", imagem: "ASC_037_EN_FB_RH.jpg" },
             { id: "card-202", nome: "Raboot", pokemon: "Raboot", set: "Mega Evolução", variante: "Regular", lingua: "EN", numero: "027/132", imagem: "MEG_027_R_EN.png" },
             { id: "card-203", nome: "Raboot", pokemon: "Raboot", set: "Mega Evolução", variante: "Reverse Foil", lingua: "EN", numero: "027/132", imagem: "MEG_027_R_EN_RH.png" },
-            { id: "card-204", nome: "Raboot", pokemon: "Raboot", set: "Promo (JP)", variante: "Promo", lingua: "JP", numero: "138/SV-P", imagem: "MC_138_R_JP.png" },
-            { id: "card-205", nome: "Raboot", pokemon: "Raboot", set: "Battle Partners (JP)", variante: "Regular", lingua: "JP", numero: "016/080", imagem: "M1L_016_R_JP.png" },
+            { id: "card-204", nome: "Raboot", pokemon: "Raboot", set: "Start Deck 100 Battle Collection (JP)", variante: "A conferir", lingua: "JP", numero: "138/742", imagem: "MC_138_R_JP.png" },
+            { id: "card-205", nome: "Raboot", pokemon: "Raboot", set: "Mega Brave (JP)", variante: "Regular", lingua: "JP", numero: "016/063", imagem: "M1L_016_R_JP.png" },
             { id: "card-206", nome: "Raboot", pokemon: "Raboot", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "017/102", imagem: "SV7_017_R_JP.png" },
             { id: "card-207", nome: "Raboot", pokemon: "Raboot", set: "Stellar Miracle (JP)", variante: "Regular", lingua: "JP", numero: "106/102", imagem: "SV7_106_R_JP.png" },
             { id: "card-208", nome: "Raboot", pokemon: "Raboot", set: "Start Deck 100 (JP)", variante: "Regular", lingua: "JP", numero: "071/414", imagem: "SI_071_R_JP.png" },
-            { id: "card-209", nome: "Raboot", pokemon: "Raboot", set: "Chilling Reign (JP)", variante: "Regular", lingua: "JP", numero: "016/070", imagem: "S6H_016_R_JP.png" },
+            { id: "card-209", nome: "Raboot", pokemon: "Raboot", set: "Silver Lance (JP)", variante: "Regular", lingua: "JP", numero: "016/070", imagem: "S6H_016_R_JP.png" },
             { id: "card-210", nome: "Raboot", pokemon: "Raboot", set: "Shiny Star V (JP)", variante: "Regular", lingua: "JP", numero: "023/190", imagem: "S4A_023_R_JP.png" },
             { id: "card-211", nome: "Raboot", pokemon: "Raboot", set: "Shiny Star V (JP)", variante: "Regular", lingua: "JP", numero: "215/190", imagem: "S4A_215_R_JP.png" },
-            { id: "card-212", nome: "Raboot", pokemon: "Raboot", set: "Sword & Shield (JP)", variante: "Regular", lingua: "JP", numero: "008/060", imagem: "S1H_008_R_JP.png" },
-            { id: "card-213", nome: "Raboot", pokemon: "Raboot", set: "Scarlet & Violet (JP)", variante: "Regular", lingua: "JP", numero: "007/078", imagem: "SAR_007_R_JP.png" },
-            { id: "card-214", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "028/150", imagem: "CSV9C_028_CN.webp" },
+            { id: "card-212", nome: "Raboot", pokemon: "Raboot", set: "Shield (JP)", variante: "Regular", lingua: "JP", numero: "008/060", imagem: "S1H_008_R_JP.png" },
+            { id: "card-213", nome: "Raboot", pokemon: "Raboot", set: "Starter Set V — Fire (JP)", variante: "Regular", lingua: "JP", numero: "007/023", imagem: "SAR_007_R_JP.png" },
+            { id: "card-214", nome: "Raboot", pokemon: "Raboot", set: "Stellar Crystal (CN)", variante: "Regular", lingua: "CN", numero: "028/208", imagem: "CSV9C_028_CN.webp" },
             { id: "card-215", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Energy Holo", lingua: "CN", numero: "1901", imagem: "GP5_1901_CN.webp" },
             { id: "card-216", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Poké Ball Holo", lingua: "CN", numero: "1902", imagem: "GP5_1902_CN.webp" },
             { id: "card-217", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Glitter Foil", lingua: "CN", numero: "1903", imagem: "GP5_1903_CN.webp" },
@@ -881,10 +887,10 @@
             { id: "card-220", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Promo", lingua: "CN", numero: "1907", imagem: "GP5_1907_CN.webp" },
             { id: "card-221", nome: "Raboot", pokemon: "Raboot", set: "Simplified Chinese Promo", variante: "Promo", lingua: "CN", numero: "1904", imagem: "GP5_1904_CN.webp" },
             { id: "card-222", nome: "Raboot", pokemon: "Raboot", set: "Start Deck 100 (CN)", variante: "Regular", lingua: "CN", numero: "071/414", imagem: "SD100_071_CN.webp" },
-            { id: "card-223", nome: "Raboot", pokemon: "Raboot", set: "Paradise Dragona (CN)", variante: "Regular", lingua: "CN", numero: "022/064", imagem: "PAO_022_CN.webp" },
-            { id: "card-224", nome: "Raboot", pokemon: "Raboot", set: "Paradise Volunteer (CN)", variante: "Foil", lingua: "CN", numero: "024/080", imagem: "PAV_024_CN_H.webp" },
-            { id: "card-225", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "048/150", imagem: "DCF_048_CN.webp" },
-            { id: "card-226", nome: "Raboot", pokemon: "Raboot", set: "Destined Rivals (CN)", variante: "Regular", lingua: "CN", numero: "141/150", imagem: "DCF_141_CN.webp" }
+            { id: "card-223", nome: "Raboot", pokemon: "Raboot", set: "Primordial Arts — Overgrow (CN)", variante: "Regular", lingua: "CN", numero: "022/125", imagem: "PAO_022_CN.webp" },
+            { id: "card-224", nome: "Raboot", pokemon: "Raboot", set: "Primordial Arts V Starter Deck (CS3dC)", variante: "Foil", lingua: "CN", numero: "024/170", imagem: "PAV_024_CN_H.webp" },
+            { id: "card-225", nome: "Raboot", pokemon: "Raboot", set: "Dynamax Clash — Flame (CN)", variante: "Regular", lingua: "CN", numero: "048/136", imagem: "DCF_048_CN.webp" },
+            { id: "card-226", nome: "Raboot", pokemon: "Raboot", set: "Dynamax Clash — Flame (CN)", variante: "Regular", lingua: "CN", numero: "141/136", imagem: "DCF_141_CN.webp" }
         ];
         
         // Keep original ids and catalog values to preserve collection/capture history.
@@ -1842,18 +1848,18 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         function imageProgress(label, data, asset, direction) {
             const value = data.total ? Math.min(100, Math.max(0, data.obtained / data.total * 100)) : 0;
             const pct = value >= 100 ? 100 : Math.floor(value);
-            return `<article class="image-progress ${direction}" aria-label="${escapeLabel(label)}: ${data.obtained} de ${data.total} cartas, ${pct}%" style="--filled:${value}%">
+            return `<article class="image-progress ${direction}" data-pokemon="${escapeLabel(label)}" aria-label="${escapeLabel(label)}: ${data.obtained} de ${data.total} cartas, ${pct}%" style="--filled:${value}%">
                 <div class="progress-art"><img class="progress-muted" src="${encodeURI(asset)}" alt=""><img class="progress-filled" src="${encodeURI(asset)}" alt=""></div>
                 <h4>${escapeLabel(label)}</h4><strong>${pct}<span>%</span></strong>
                 <p>${data.obtained} <span>/ ${data.total} cartas</span></p>
             </article>`;
         }
         const acquisitionTypes = {
-            compra: {label:'Compra', color:'#f88b38'},
-            troca: {label:'Troca', color:'#38bdf8'},
-            doada: {label:'Doada', color:'#c084fc'},
-            booster: {label:'Booster', color:'#4ade80'},
-            desconhecida: {label:'Não informada', color:'#94a3b8'}
+            compra: {label:'Compra', color:'#c43b30'},
+            troca: {label:'Troca', color:'#f4d664'},
+            doada: {label:'Doada', color:'#d8d8d5'},
+            booster: {label:'Booster', color:'#898985'},
+            desconhecida: {label:'Não informada', color:'#4d4d4a'}
         };
         let acquisitionSummary = [];
         let selectedAcquisition = '';
@@ -1913,7 +1919,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 const label=escapeLabel(`${group.label}: ${group.count} ${group.count===1?'carta':'cartas'}`);
                 return `${shape} fill="${group.color}" class="acquisition-slice" role="button" tabindex="0" aria-label="${label}" aria-pressed="false" data-acquisition="${group.key}" onpointerenter="selectAcquisition('${group.key}')" onfocus="selectAcquisition('${group.key}')" onclick="selectAcquisition('${group.key}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();selectAcquisition('${group.key}')}" ><title>${label}</title></${acquisitionSummary.length===1?'circle':'path'}>`;
             }).join('');
-            host.innerHTML=`<div class="acquisition-layout"><div class="acquisition-overview"><svg class="acquisition-pie" viewBox="0 0 240 240" role="group" aria-label="Meios de aquisição das ${total} cartas obtidas">${slices}</svg><p class="acquisition-total"><strong>${total}</strong> cartas obtidas</p><div class="acquisition-legend">${acquisitionSummary.map(group=>`<button type="button" data-acquisition="${group.key}" aria-pressed="false" onpointerenter="selectAcquisition('${group.key}')" onfocus="selectAcquisition('${group.key}')" onclick="selectAcquisition('${group.key}')"><i style="background:${group.color}"></i><span>${escapeLabel(group.label)}</span><strong>${group.count}</strong></button>`).join('')}</div></div><div id="acquisition-detail" class="acquisition-detail" aria-live="polite"></div></div>`;
+            host.innerHTML=`<div class="acquisition-layout"><div class="acquisition-overview"><svg class="acquisition-pie" viewBox="0 0 240 240" role="group" aria-label="Meios de aquisição das ${total} cartas obtidas">${slices}<circle class="donut-center" cx="120" cy="120" r="78" pointer-events="none"/><text class="donut-count" x="120" y="119" text-anchor="middle" pointer-events="none">${total}</text><text class="donut-label" x="120" y="140" text-anchor="middle" pointer-events="none">CARTAS OBTIDAS</text></svg><div class="acquisition-legend">${acquisitionSummary.map(group=>`<button type="button" data-acquisition="${group.key}" aria-pressed="false" onpointerenter="selectAcquisition('${group.key}')" onfocus="selectAcquisition('${group.key}')" onclick="selectAcquisition('${group.key}')"><i style="background:${group.color}"></i><span>${escapeLabel(group.label)}</span><strong>${group.count}</strong></button>`).join('')}</div></div><div id="acquisition-detail" class="acquisition-detail" aria-live="polite"></div></div>`;
             window.selectAcquisition(acquisitionSummary.some(item=>item.key===selectedAcquisition)?selectedAcquisition:acquisitionSummary[0].key);
         }
 
@@ -1952,9 +1958,13 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             document.getElementById('dashboard-total-pct').innerText = `${totalPct}% (${totalObtained}/${totalCards})`;
             document.getElementById('dashboard-total-bar').style.width = `${totalPct}%`;
 
-            document.getElementById('stats-pokemon').innerHTML = ['Scorbunny','Raboot','Cinderace'].filter(name=>pokes[name]).map(name=>imageProgress(name,pokes[name],pokemonProgressAssets[name],'vertical')).join('');
+            document.getElementById('stats-pokemon').innerHTML = ['Scorbunny','Cinderace','Raboot'].filter(name=>pokes[name]).map(name=>imageProgress(name,pokes[name],pokemonProgressAssets[name],'vertical')).join('');
             document.getElementById('stats-lang').innerHTML = ['PT-BR','EN','JP','CN'].filter(code=>langs[code]).map(code=>imageProgress(languageProgressAssets[code].label,langs[code],languageProgressAssets[code].image,'horizontal')).join('');
-            document.getElementById('stats-set').innerHTML = Object.keys(expansionGroups).filter(key => sets[key]).map(key => expansionProgress(key, sets[key])).join('');
+            document.getElementById('stats-set').innerHTML = [
+                {label:'Expansões',kind:'sets',test:g=>g.logoOficial&&!g.brand},
+                {label:'Selos e eventos',kind:'stamps',test:g=>g.brand},
+                {label:'Decks, promos e outros',kind:'generic',test:g=>!g.logoOficial}
+            ].map(section=>{const keys=Object.keys(expansionGroups).filter(key=>sets[key]&&section.test(expansionGroups[key]));return keys.length?`<section class="expansion-section ${section.kind}"><h4 class="expansion-category">${section.label}</h4><div class="expansion-grid">${keys.map(key=>expansionProgress(key,sets[key])).join('')}</div></section>`:''}).join('');
             renderAcquisitionChart();
         }
 
