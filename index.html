@@ -427,6 +427,24 @@
         .market-matched-photo{float:left;width:100px;padding:5px!important;margin:0 16px 12px 0;background:transparent!important;border:0!important}.market-matched-photo img{width:100%;height:auto;aspect-ratio:63/88;object-fit:contain;border-radius:5%}.market-matched-photo span{display:block;font-size:9px;color:var(--subtle);margin-top:4px}.market-row::after{content:"";display:block;clear:both}@media(max-width:640px){.market-matched-photo{width:76px;margin-right:10px}.market-row-heading{align-items:flex-start}}
     
         img.market-language-flag,.market-picker-card img.market-language-flag{display:inline-block;width:24px;height:16px;min-width:24px;aspect-ratio:auto;object-fit:cover;border-radius:2px;vertical-align:middle;margin:0 5px 0 0;flex-shrink:0}
+    
+        /* Compact purchase review: card and metadata remain beside the editable details. */
+        .market-row{display:grid;grid-template-columns:96px minmax(0,1fr);gap:14px;padding:14px 0;align-items:start}
+        .market-row::after{display:none}.market-card-content{min-width:0}
+        .market-matched-photo{float:none;width:100%;margin:0;padding:0!important}
+        .market-photo-meta{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px;font-size:11px}
+        .market-photo-meta img{width:22px;height:16px;object-fit:contain}
+        .market-photo-placeholder{width:100%;aspect-ratio:63/88;border-style:dashed!important;color:var(--subtle)}
+        .market-fields{grid-template-columns:minmax(130px,2fr) minmax(60px,.65fr) minmax(90px,1fr) minmax(90px,1fr);gap:8px}
+        .market-fields label:first-child{grid-column:auto}.market-fields input{padding:7px!important;margin-top:3px}
+        .market-row .market-note{margin:6px 0;font-size:10px;line-height:1.45}
+        .market-row .market-version{margin:7px 0}.market-version>span{display:none}
+        .market-row .market-pick-trigger{padding:7px 9px;margin:0;font-size:11px;text-align:left;width:100%}
+        .market-row .market-badges{margin-top:6px}.market-row .market-badges span{padding:3px 6px}
+        .market-auto-duplicate{font-size:11px;color:#c98b20;margin:7px 0 0}.dark .market-auto-duplicate{color:#f4d664}
+        @media(max-width:700px){.market-fields{grid-template-columns:1fr 1fr}.market-fields label:first-child{grid-column:auto}}
+        @media(max-width:480px){.market-row{grid-template-columns:72px minmax(0,1fr);gap:9px}.market-row-heading{gap:5px;font-size:11px}.market-row-heading button{padding:5px;font-size:9px}.market-row-heading label{gap:4px}.market-fields{gap:6px}.market-fields label{font-size:9px}.market-fields input{font-size:11px!important}.market-photo-meta{gap:5px}}
+
     </style>
 </head>
 <body class="text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
@@ -2053,7 +2071,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             document.getElementById('market-mode-import').setAttribute('aria-pressed',String(marketMode==='import'));
             document.getElementById('market-confirm').hidden=marketMode!=='import'||!marketRows.length;
             document.getElementById('market-undo-remove').hidden=!marketRemoved;
-            const duplicates=marketDuplicates(marketRows);const counts={};let cost=0;
+            const duplicates=marketDuplicates(marketRows);const importPlan=planMarketImport(marketRows);const counts={};let cost=0;
             host.innerHTML=marketRows.map((row,index)=>{
                 const match=marketResolved(row);counts[match.state]=(counts[match.state]||0)+1;
                 if(row.include&&Number.isFinite(row.price))cost+=(row.price+(row.freight||0))*row.quantity;
@@ -2062,14 +2080,15 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 const option=c=>`<option value="${c.id}" ${row.chosen===c.id?'selected':''}>${escapeLabel(marketCardLabel(c))}</option>`;
                 const locked=match.id&&captureDataMap[match.id]?.locked;
                 const matchedCard=match.id?allCards.find(c=>c.id===match.id):null;
-                return `<article class="market-row ${row.include?'':'market-excluded'}">${matchedCard?`<button type="button" class="market-matched-photo" onclick="showZoomModal('${matchedCard.id}')" aria-label="Ampliar ${escapeLabel(matchedCard.nome+' '+matchedCard.numero)}"><img src="${encodeURI(matchedCard.imagem)}" alt="${escapeLabel(matchedCard.nome+' '+matchedCard.numero)}" loading="lazy"><span>Ampliar</span></button>`:''}<div class="market-row-heading"><label><input type="checkbox" ${row.include?'checked':''} onchange="marketEdit(${index},'include',this.checked)"> <strong>${escapeLabel(row.name)} ${escapeLabel(row.number)}</strong></label><button type="button" onclick="marketRemove(${index})" aria-label="Remover item ${index+1}">Remover</button></div>
+                const extraCount=importPlan.extras.filter(item=>item.row===row).length;
+                return `<article class="market-row ${row.include?'':'market-excluded'}"><div class="market-card-visual">${matchedCard?`<button type="button" class="market-matched-photo" onclick="showZoomModal('${matchedCard.id}')" aria-label="Ampliar ${escapeLabel(matchedCard.nome+' '+matchedCard.numero)}"><img src="${encodeURI(matchedCard.imagem)}" alt="${escapeLabel(matchedCard.nome+' '+matchedCard.numero)}" loading="lazy"><span>Ampliar</span></button>`:`<button type="button" class="market-photo-placeholder" onclick="marketOpenPicker(${index})">Identificar<br>carta</button>`}<div class="market-photo-meta">${marketLanguageFlag(matchedCard?.lingua||row.lang)}${row.condition?`<span title="Estado de conservação">${escapeLabel(row.condition)}</span>`:''}</div></div><div class="market-card-content"><div class="market-row-heading"><label><input type="checkbox" ${row.include?'checked':''} onchange="marketEdit(${index},'include',this.checked)"> <strong>${escapeLabel(row.name)} ${escapeLabel(row.number)}</strong></label><button type="button" onclick="marketRemove(${index})" aria-label="Remover item ${index+1}">Remover</button></div>
                 <div class="market-badges"><span>${escapeLabel(match.state)}</span>${duplicates.has(index)?`<span class="market-duplicate">${escapeLabel(duplicates.get(index))}</span>`:''}${locked?'<span>Captura bloqueada · não será alterada</span>':''}</div>
-                <p class="market-note">${marketLanguageFlag(matchedCard?.lingua||row.lang)}${row.condition?' · Estado: '+escapeLabel(row.condition):''}${row.order?' · Pedido #'+escapeLabel(row.order):''}${row.status?' · '+escapeLabel(row.status):''} ${escapeLabel(match.reason)}${row.quantityNeedsReview?' · Lista de estoque: quantidade iniciada em 1; ajuste se necessário.':''}</p>
+                <p class="market-note">${row.order?'Pedido #'+escapeLabel(row.order):''}${row.status?' · '+escapeLabel(row.status):''} ${escapeLabel(match.reason)}${row.quantityNeedsReview?' · Lista de estoque: quantidade iniciada em 1; ajuste se necessário.':''}</p>
                 <div class="market-version"><span>Carta no seu catálogo</span><button class="market-pick-trigger" type="button" onclick="marketOpenPicker(${index})">${match.id?'Trocar / conferir: '+escapeLabel(marketCardLabel(allCards.find(c=>c.id===match.id))):'Identificar por foto ou digitar número / nome'}</button></div>
                 <div class="market-fields"><label>Loja<input value="${escapeLabel(row.shop)}" onchange="marketEdit(${index},'shop',this.value)"></label><label>Quantidade<input type="number" min="1" step="1" value="${row.quantity}" onchange="marketEdit(${index},'quantity',this.value)"></label><label>Preço unitário (R$)<input inputmode="decimal" value="${Number.isFinite(row.price)?row.price.toFixed(2).replace('.',','):''}" placeholder="0,00" onchange="marketEdit(${index},'price',this.value)"></label><label>Frete por carta (R$)<input inputmode="decimal" value="${Number.isFinite(row.freight)?row.freight.toFixed(4).replace(/0+$/,'').replace(/\.$/,'').replace('.',','):''}" placeholder="Não informado" onchange="marketEdit(${index},'freight',this.value)"></label></div>
-                <p class="market-note">${row.shippingTotal!==null&&row.shippingTotal!==undefined?'Frete do pedido: '+marketCurrency(row.shippingTotal)+' ÷ '+row.shippingQuantity+' cartas. ':''}Custo por carta: ${Number.isFinite(row.price)?marketCurrency(row.price+(row.freight||0)):'Informe o preço'}${row.freight===null||row.freight===undefined?' · frete não informado':''}. O rateio inclui todas as cartas lidas do pedido, mesmo as não identificadas.</p>
-                ${marketMode==='import'&&match.id?`<label class="market-note"><input type="checkbox" ${row.extras?'checked':''} onchange="marketEdit(${index},'extras',this.checked)"> Registrar cópias extras em Captura → Duplicatas</label>`:''}
-                ${marketMode==='import'&&match.id&&obtainedMap[match.id]&&!locked?`<label class="market-note"><input type="checkbox" ${row.replace?'checked':''} onchange="marketEdit(${index},'replace',this.checked)"> Atualizar loja e valor já registrados para esta carta</label>`:''}</article>`;
+                <p class="market-note">${row.shippingTotal!==null&&row.shippingTotal!==undefined?'Frete do pedido: '+marketCurrency(row.shippingTotal)+' ÷ '+row.shippingQuantity+' cartas. ':''}Custo por carta: ${Number.isFinite(row.price)?marketCurrency(row.price+(row.freight||0)):'Informe o preço'}${row.freight===null||row.freight===undefined?' · frete não informado':''}.</p>
+                ${marketMode==='import'&&extraCount?`<p class="market-auto-duplicate" role="status">${extraCount===1?'1 duplicata identificada':extraCount+' duplicatas identificadas'} · ${extraCount===1?'será':'serão'} salva${extraCount===1?'':'s'} em Captura → Duplicatas.</p>`:''}
+                ${marketMode==='import'&&match.id&&obtainedMap[match.id]&&!locked?`<label class="market-note"><input type="checkbox" ${row.replace?'checked':''} onchange="marketEdit(${index},'replace',this.checked)"> Atualizar loja e valor já registrados para esta carta</label>`:''}</div></article>`;
             }).join('');
             document.getElementById('market-summary').textContent=marketRows.length?Object.entries(counts).map(([k,v])=>v+' '+k.toLowerCase()).join(' · ')+' | Seleção: '+marketCurrency(cost)+' (com frete informado)':'Cole uma lista ou adicione uma carta para começar.';
         }
@@ -2080,7 +2099,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 const quantity=Math.max(1,Math.floor(Number(row.quantity)||1));
                 const addPrimary=!seen.has(id)&&!captureDataMap[id]?.locked&&(!obtainedMap[id]||row.replace);
                 if(addPrimary){primary.push({id,row});seen.add(id);}
-                const extraCount=row.extras?quantity-(addPrimary?1:0):0;
+                const extraCount=quantity-(addPrimary?1:0);
                 for(let i=0;i<extraCount;i++)extras.push({id,row});
                 if(!addPrimary&&!extraCount)skipped++;
             }
@@ -2089,7 +2108,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         window.marketConfirm=function(){
             if(marketMode!=='import')return;
             const plan=planMarketImport(marketRows),message=document.getElementById('market-message');
-            if(!plan.primary.length&&!plan.extras.length){message.textContent='Nada alterado. Confira as versões, loja e preço. Para cartas já adquiridas, escolha registrar duplicatas ou atualizar a aquisição.';return;}
+            if(!plan.primary.length&&!plan.extras.length){message.textContent='Nada alterado. Confira as versões, loja e preço. Cartas já adquiridas serão registradas como duplicatas.';return;}
             if(!window.confirm(`Salvar ${plan.primary.length} aquisições na coleção principal e ${plan.extras.length} cópias extras em Duplicatas? ${plan.skipped} itens sem alteração.`))return;
             const oldOwned={...obtainedMap},oldCaptures=JSON.parse(JSON.stringify(captureDataMap)),oldExtras=JSON.parse(JSON.stringify(duplicateCaptures));
             const data=row=>({type:'compra',entity:row.shop.trim(),price:(row.price+(row.freight||0)).toFixed(2).replace('.',','),cardPrice:row.price,freightPerCard:row.freight??null,quantity:1,order:row.order,condition:row.condition||'',orderStatus:row.status});
