@@ -638,13 +638,12 @@
             <div class="glass-panel rounded-3xl p-5 sm:p-7 market-workspace">
               <p class="section-kicker">Planeje e registre suas compras</p><h2>Conferência de cartas</h2>
               <div class="market-modes"><button id="market-mode-check" type="button" aria-pressed="true" onclick="marketSetMode('check')">Conferir antes de comprar</button><button id="market-mode-import" type="button" aria-pressed="false" onclick="marketSetMode('import')">Importar compras</button></div>
-              <p class="market-note">Copie os itens da Liga e cole abaixo. Inclua loja, número, idioma, acabamento, quantidade e preços. Links de pedidos privados não importam os dados.</p>
-              <label class="market-version" for="market-paste">Texto do pedido ou lista de lojas</label><textarea id="market-paste" rows="6" placeholder="Cole aqui uma ou várias listas…"></textarea>
+              <div id="market-check-input"><p class="market-note">Copie as cartas do carrinho e cole aqui para ver o que comprar ou remover.</p><label class="market-version" for="market-paste-check">Conferir carrinho</label><textarea id="market-paste-check" rows="4" placeholder="Cole as cartas antes de comprar…" oninput="persistMarketDraft()"></textarea></div>
+              <div id="market-import-input" hidden><p class="market-note">Cole o pedido comprado, confira as cartas e confirme a importação.</p><label class="market-version" for="market-paste">Importar pedido</label><textarea id="market-paste" rows="4" placeholder="Cole seu pedido comprado…" oninput="persistMarketDraft()"></textarea></div>
               <div class="market-actions"><button type="button" onclick="marketAnalyze(false)">Analisar nova lista</button><button type="button" onclick="marketAnalyze(true)">Acrescentar à lista</button><button type="button" onclick="marketAdd()">+ Adicionar carta</button><button type="button" id="market-undo-remove" hidden onclick="marketUndoRemove()">Desfazer remoção</button></div>
-              <p class="market-note">Já tem: marcada na sua coleção. Comprar: versão identificada e ainda não marcada. Não identificada: número ausente do catálogo. Conferir versão: idioma, acabamento ou selo ambíguo.</p>
-              <p class="market-note">Repetições consideram a mesma versão. Sugestões de repetição comparam o preço da carta, sem frete, e não alteram pedidos nas lojas. O custo registrado em Captura inclui a parcela do frete. Remover aqui só remove da lista de conferência.</p>
+              <p class="market-note">Toque na foto para ampliar. Remover aqui não altera o carrinho da loja.</p>
               <p id="market-summary" class="market-summary" aria-live="polite">Cole uma lista ou adicione uma carta para começar.</p><p id="market-message" class="market-note" role="status"></p>
-              <div id="market-review"></div><button id="market-confirm" type="button" hidden onclick="marketConfirm()">Confirmar importação dos itens selecionados</button>
+              <div id="market-review"></div><button id="market-confirm" type="button" hidden onclick="marketConfirm()">Confirmar importação</button>
             </div>
 
             <div class="glass-panel rounded-3xl p-5 sm:p-7 shadow-2xl">
@@ -701,7 +700,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getFirestore, doc, setDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         window.toggleTheme = function() {
             const isDark = document.documentElement.classList.toggle('dark');
@@ -1405,12 +1404,28 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
 
         const uniqueSets = Array.from(new Set(allCards.map(c => c.set))).sort();
 
+        const COLLECTION_RESET_VERSION = 'fresh-collection-20261030-v1';
+        let collectionReady = false;
+        let collectionResetPending = false;
+        async function ensureFreshCollection() {
+            await runTransaction(db, async transaction => {
+                const snapshot = await transaction.get(docRef);
+                if (snapshot.exists() && snapshot.data().collectionResetVersion === COLLECTION_RESET_VERSION) return;
+                transaction.set(docRef, {
+                    obtainedMap: {}, captureDataMap: {}, duplicateCaptures: [],
+                    collectionResetVersion: COLLECTION_RESET_VERSION,
+                    updatedAt: new Date().toISOString()
+                });
+            });
+        }
         async function saveToCloud() {
+            if (!collectionReady) return;
             try {
                 await setDoc(docRef, {
                     obtainedMap,
                     captureDataMap,
                     duplicateCaptures,
+                    collectionResetVersion: COLLECTION_RESET_VERSION,
                     updatedAt: new Date().toISOString()
                 });
             } catch (e) {
@@ -1431,7 +1446,26 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             }
         }
 
-        onSnapshot(docRef, (docSnap) => {
+        onSnapshot(docRef, async (docSnap) => {
+            if (!docSnap.exists() || docSnap.data().collectionResetVersion !== COLLECTION_RESET_VERSION) {
+                collectionReady = false;
+                if (collectionResetPending) return;
+                collectionResetPending = true;
+                try { await ensureFreshCollection(); }
+                catch (error) {
+                    console.error('Não foi possível iniciar a coleção limpa:', error);
+                    document.getElementById('market-message').textContent = 'Conecte-se à internet e recarregue para concluir a limpeza inicial da coleção.';
+                } finally { collectionResetPending = false; }
+                return;
+            }
+            collectionReady = true;
+            if (localStorage.getItem('scorace_collection_reset_version') !== COLLECTION_RESET_VERSION) {
+                localStorage.removeItem('scorace_market_draft_v1');
+                marketRows = []; marketDrafts = {check:[],import:[]}; marketRemoved = null;
+                document.getElementById('market-paste').value = '';
+                document.getElementById('market-paste-check').value = '';
+                localStorage.setItem('scorace_collection_reset_version', COLLECTION_RESET_VERSION);
+            }
             if (docSnap.exists()) {
                 const cloudData = docSnap.data();
                 obtainedMap = cloudData.obtainedMap || {};
@@ -1448,6 +1482,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 saveToCloud();
             }
             
+            renderMarketReview();
             if (isInitialLoad) {
                 isInitialLoad = false;
                 switchTab('dashboard');
@@ -1946,6 +1981,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         // Shopping review only mutates the collection after an explicit confirmation.
         let marketRows = [];
         let marketMode = 'check';
+        let marketDrafts={check:[],import:[]};
         let marketRemoved = null;
         const marketMoney = value => Number(String(value ?? '').trim().replace(/R\$\s*/g,'').replace(/\s/g,'').replace(/\.(?=.*[,])/g,'').replace(',','.'));
         const marketCurrency = value => Number.isFinite(value) ? value.toLocaleString('pt-BR',{style:'currency',currency:'BRL'}) : 'Preço não informado';
@@ -2029,8 +2065,8 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 if(group.length<2&&group[0].row.quantity<2)continue;
                 const conditions=new Set(group.map(x=>x.row.condition||'Não informado'));
                 const priced=group.filter(x=>x.row.price!==null&&Number.isFinite(x.row.price));priced.sort((a,b)=>a.row.price-b.row.price||a.index-b.index);const best=priced[0];
-                for(const item of group){let note='Repetida na lista';if(item.row.quantity>1)note+=' · '+item.row.quantity+' unidades';if(conditions.size>1)note+=' · conservação diferente: '+[...conditions].join(' / ')+'; confira antes de remover';
-                else if(best&&group.length>1) note+=item.index===best.index?' · menor preço unitário (ou empate)':' · pode remover esta e manter '+(best.row.shop||'o item '+(best.index+1))+' por '+marketCurrency(best.row.price);notes.set(item.index,note);}
+                for(const item of group){let note='Conferir: carta repetida no carrinho';if(item.row.quantity>1)note+=' · '+item.row.quantity+' unidades';if(conditions.size>1)note+=' · conservação diferente: '+[...conditions].join(' / ')+'; confira antes de remover';
+                else if(best&&group.length>1) note=item.index===best.index?'Comprar · menor preço (ou empate)':item.row.price>best.row.price?'Remover · motivo: mais cara que a mesma carta em '+(best.row.shop||'outra loja')+' ('+marketCurrency(best.row.price)+', sem frete)':'Remover · motivo: repetida pelo mesmo preço em '+(best.row.shop||'outra loja');notes.set(item.index,note);}
             }return notes;
         }
         function marketLanguageFlag(code) {
@@ -2038,11 +2074,12 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             return locale?`<img class="market-language-flag" src="${locale.image}" alt="${escapeLabel(locale.label)}" title="${escapeLabel(locale.label)}" width="24" height="16">`:'<span>Idioma a conferir</span>';
         }
         function marketCardLabel(c) {return [c.nome,c.numero,c.lingua,c.acabamento,c.padrao,c.selo].filter(x=>x&&x!=='A conferir'&&x!=='Sem selo informado'&&x!=='Sem padrão foil').join(' · ');}
-        function persistMarketDraft(){try{localStorage.setItem('scorace_market_draft_v1',JSON.stringify({rows:marketRows,mode:marketMode}));}catch(e){/* Collection remains untouched if draft storage is full. */}}
-        window.marketSetMode=function(mode){marketMode=mode==='import'?'import':'check';persistMarketDraft();renderMarketReview();};
-        window.marketAnalyze=function(append=false){const input=document.getElementById('market-paste');const parsed=parseMarketText(input.value);const message=document.getElementById('market-message');if(!parsed.length){message.textContent='Nenhuma carta reconhecida. Cole os itens da página, com nome, número, idioma e preço; um link sozinho não contém os pedidos.';return;}marketRows=append?[...marketRows,...parsed]:parsed;marketRemoved=null;persistMarketDraft();renderMarketReview();message.textContent=parsed.length+' itens lidos. Revise as versões e os preços antes de importar.';};
+        function persistMarketDraft(){marketDrafts[marketMode]=marketRows;try{localStorage.setItem('scorace_market_draft_v1',JSON.stringify({rows:marketRows,mode:marketMode,drafts:marketDrafts,texts:{check:document.getElementById('market-paste-check').value,import:document.getElementById('market-paste').value}}));}catch(e){}}
+        window.persistMarketDraft=persistMarketDraft;
+        window.marketSetMode=function(mode){persistMarketDraft();marketMode=mode==='import'?'import':'check';marketRows=marketDrafts[marketMode];marketRemoved=null;document.getElementById('market-message').textContent='';persistMarketDraft();renderMarketReview();};
+        window.marketAnalyze=function(append=false){const input=document.getElementById(marketMode==='import'?'market-paste':'market-paste-check');const parsed=parseMarketText(input.value);const message=document.getElementById('market-message');if(!parsed.length){message.textContent='Nenhuma carta reconhecida. Cole os itens da página, com nome, número, idioma e preço; um link sozinho não contém os pedidos.';return;}marketRows=append?[...marketRows,...parsed]:parsed;marketRemoved=null;persistMarketDraft();renderMarketReview();message.textContent=parsed.length+(marketMode==='import'?' cartas lidas. Confira e confirme a importação.':' cartas conferidas. Veja as sugestões abaixo.');};
         window.marketAdd=function(){marketRows.push({name:'Carta adicionada manualmente',number:'',lang:'',detail:'',shop:'',order:'',status:'',quantity:1,price:null,chosen:'',include:true,replace:false,manual:true});persistMarketDraft();renderMarketReview();};
-        window.marketEdit=function(index,field,value){const row=marketRows[index];if(!row)return; if(field==='quantity')value=Math.max(1,parseInt(value)||1);if(field==='price'||field==='freight')value=value.trim()===''?null:marketMoney(value);if(!['shop','quantity','price','freight','include','replace','chosen','extras'].includes(field))return;row[field]=value;persistMarketDraft();renderMarketReview();};
+        window.marketEdit=function(index,field,value){const row=marketRows[index];if(!row)return; if(field==='quantity')value=Math.max(1,parseInt(value)||1);if(field==='price'||field==='freight')value=value.trim()===''?null:marketMoney(value);if(!['shop','quantity','price','freight','include','chosen'].includes(field))return;row[field]=value;persistMarketDraft();renderMarketReview();};
         window.marketRemove=function(index){marketRemoved={row:marketRows[index],index};marketRows.splice(index,1);persistMarketDraft();renderMarketReview();};
         window.marketUndoRemove=function(){if(marketRemoved){marketRows.splice(marketRemoved.index,0,marketRemoved.row);marketRemoved=null;persistMarketDraft();renderMarketReview();}};
         let marketPickerIndex=-1;
@@ -2067,6 +2104,8 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         window.marketChooseCard=function(id){if(!allCards.some(c=>c.id===id))return;window.marketEdit(marketPickerIndex,'chosen',id);document.getElementById('market-card-picker').close();};
         function renderMarketReview(){
             const host=document.getElementById('market-review');if(!host)return;
+            document.getElementById('market-check-input').hidden=marketMode!=='check';
+            document.getElementById('market-import-input').hidden=marketMode!=='import';
             document.getElementById('market-mode-check').setAttribute('aria-pressed',String(marketMode==='check'));
             document.getElementById('market-mode-import').setAttribute('aria-pressed',String(marketMode==='import'));
             document.getElementById('market-confirm').hidden=marketMode!=='import'||!marketRows.length;
@@ -2078,17 +2117,17 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 // A complete selector allows deliberate manual correction even outside parser candidates.
                 const candidates=match.candidates||[],others=allCards.filter(c=>!candidates.some(x=>x.id===c.id));
                 const option=c=>`<option value="${c.id}" ${row.chosen===c.id?'selected':''}>${escapeLabel(marketCardLabel(c))}</option>`;
-                const locked=match.id&&captureDataMap[match.id]?.locked;
+                const locked=match.id&&obtainedMap[match.id]&&captureDataMap[match.id]?.locked;
                 const matchedCard=match.id?allCards.find(c=>c.id===match.id):null;
                 const extraCount=importPlan.extras.filter(item=>item.row===row).length;
                 return `<article class="market-row ${row.include?'':'market-excluded'}"><div class="market-card-visual">${matchedCard?`<button type="button" class="market-matched-photo" onclick="showZoomModal('${matchedCard.id}')" aria-label="Ampliar ${escapeLabel(matchedCard.nome+' '+matchedCard.numero)}"><img src="${encodeURI(matchedCard.imagem)}" alt="${escapeLabel(matchedCard.nome+' '+matchedCard.numero)}" loading="lazy"><span>Ampliar</span></button>`:`<button type="button" class="market-photo-placeholder" onclick="marketOpenPicker(${index})">Identificar<br>carta</button>`}<div class="market-photo-meta">${marketLanguageFlag(matchedCard?.lingua||row.lang)}${row.condition?`<span title="Estado de conservação">${escapeLabel(row.condition)}</span>`:''}</div></div><div class="market-card-content"><div class="market-row-heading"><label><input type="checkbox" ${row.include?'checked':''} onchange="marketEdit(${index},'include',this.checked)"> <strong>${escapeLabel(row.name)} ${escapeLabel(row.number)}</strong></label><button type="button" onclick="marketRemove(${index})" aria-label="Remover item ${index+1}">Remover</button></div>
-                <div class="market-badges"><span>${escapeLabel(match.state)}</span>${duplicates.has(index)?`<span class="market-duplicate">${escapeLabel(duplicates.get(index))}</span>`:''}${locked?'<span>Captura bloqueada · não será alterada</span>':''}</div>
-                <p class="market-note">${row.order?'Pedido #'+escapeLabel(row.order):''}${row.status?' · '+escapeLabel(row.status):''} ${escapeLabel(match.reason)}${row.quantityNeedsReview?' · Lista de estoque: quantidade iniciada em 1; ajuste se necessário.':''}</p>
+                <div class="market-badges"><span>${escapeLabel(marketMode==='check'&&match.id&&obtainedMap[match.id]?'Remover · motivo: você já tem':match.state)}</span>${duplicates.has(index)&&!(marketMode==='check'&&obtainedMap[match.id])?`<span class="market-duplicate">${escapeLabel(duplicates.get(index))}</span>`:''}${locked?'<span>Captura bloqueada · não será alterada</span>':''}</div>
+                <p class="market-note">${row.order?'Pedido #'+escapeLabel(row.order):''}${row.status?' · '+escapeLabel(row.status):''} ${match.id?'':escapeLabel(match.reason)}${row.quantityNeedsReview?' · Lista de estoque: quantidade iniciada em 1; ajuste se necessário.':''}</p>
                 <div class="market-version"><span>Carta no seu catálogo</span><button class="market-pick-trigger" type="button" onclick="marketOpenPicker(${index})">${match.id?'Trocar / conferir: '+escapeLabel(marketCardLabel(allCards.find(c=>c.id===match.id))):'Identificar por foto ou digitar número / nome'}</button></div>
-                <div class="market-fields"><label>Loja<input value="${escapeLabel(row.shop)}" onchange="marketEdit(${index},'shop',this.value)"></label><label>Quantidade<input type="number" min="1" step="1" value="${row.quantity}" onchange="marketEdit(${index},'quantity',this.value)"></label><label>Preço unitário (R$)<input inputmode="decimal" value="${Number.isFinite(row.price)?row.price.toFixed(2).replace('.',','):''}" placeholder="0,00" onchange="marketEdit(${index},'price',this.value)"></label><label>Frete por carta (R$)<input inputmode="decimal" value="${Number.isFinite(row.freight)?row.freight.toFixed(4).replace(/0+$/,'').replace(/\.$/,'').replace('.',','):''}" placeholder="Não informado" onchange="marketEdit(${index},'freight',this.value)"></label></div>
-                <p class="market-note">${row.shippingTotal!==null&&row.shippingTotal!==undefined?'Frete do pedido: '+marketCurrency(row.shippingTotal)+' ÷ '+row.shippingQuantity+' cartas. ':''}Custo por carta: ${Number.isFinite(row.price)?marketCurrency(row.price+(row.freight||0)):'Informe o preço'}${row.freight===null||row.freight===undefined?' · frete não informado':''}.</p>
+                ${marketMode==='check'?`<p class="market-note"><strong>${escapeLabel(row.shop||'Loja não informada')}</strong> · ${marketCurrency(row.price)} · ${row.quantity} un.</p>`:''}<div class="market-fields" ${marketMode==='check'?'hidden':''}><label>Loja<input value="${escapeLabel(row.shop)}" onchange="marketEdit(${index},'shop',this.value)"></label><label>Quantidade<input type="number" min="1" step="1" value="${row.quantity}" onchange="marketEdit(${index},'quantity',this.value)"></label><label>Preço unitário (R$)<input inputmode="decimal" value="${Number.isFinite(row.price)?row.price.toFixed(2).replace('.',','):''}" placeholder="0,00" onchange="marketEdit(${index},'price',this.value)"></label><label>Frete por carta (R$)<input inputmode="decimal" value="${Number.isFinite(row.freight)?row.freight.toFixed(4).replace(/0+$/,'').replace(/\.$/,'').replace('.',','):''}" placeholder="Não informado" onchange="marketEdit(${index},'freight',this.value)"></label></div>
+                <p class="market-note" ${marketMode==='check'?'hidden':''}>${row.shippingTotal!==null&&row.shippingTotal!==undefined?'Frete do pedido: '+marketCurrency(row.shippingTotal)+' ÷ '+row.shippingQuantity+' cartas. ':''}Custo por carta: ${Number.isFinite(row.price)?marketCurrency(row.price+(row.freight||0)):'Informe o preço'}${row.freight===null||row.freight===undefined?' · frete não informado':''}.</p>
                 ${marketMode==='import'&&extraCount?`<p class="market-auto-duplicate" role="status">${extraCount===1?'1 duplicata identificada':extraCount+' duplicatas identificadas'} · ${extraCount===1?'será':'serão'} salva${extraCount===1?'':'s'} em Captura → Duplicatas.</p>`:''}
-                ${marketMode==='import'&&match.id&&obtainedMap[match.id]&&!locked?`<label class="market-note"><input type="checkbox" ${row.replace?'checked':''} onchange="marketEdit(${index},'replace',this.checked)"> Atualizar loja e valor já registrados para esta carta</label>`:''}</div></article>`;
+                </div></article>`;
             }).join('');
             document.getElementById('market-summary').textContent=marketRows.length?Object.entries(counts).map(([k,v])=>v+' '+k.toLowerCase()).join(' · ')+' | Seleção: '+marketCurrency(cost)+' (com frete informado)':'Cole uma lista ou adicione uma carta para começar.';
         }
@@ -2097,7 +2136,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             for(const row of rows){if(!row.include)continue;const id=marketResolved(row).id;
                 if(!id||!row.shop.trim()||!Number.isFinite(row.price)||row.price<0||(row.freight!=null&&(!Number.isFinite(row.freight)||row.freight<0))){skipped++;continue;}
                 const quantity=Math.max(1,Math.floor(Number(row.quantity)||1));
-                const addPrimary=!seen.has(id)&&!captureDataMap[id]?.locked&&(!obtainedMap[id]||row.replace);
+                const addPrimary=!seen.has(id)&&!obtainedMap[id];
                 if(addPrimary){primary.push({id,row});seen.add(id);}
                 const extraCount=quantity-(addPrimary?1:0);
                 for(let i=0;i<extraCount;i++)extras.push({id,row});
@@ -2107,19 +2146,22 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         }
         window.marketConfirm=function(){
             if(marketMode!=='import')return;
+            if(!collectionReady){document.getElementById('market-message').textContent='Aguarde a sincronização inicial da coleção.';return;}
             const plan=planMarketImport(marketRows),message=document.getElementById('market-message');
             if(!plan.primary.length&&!plan.extras.length){message.textContent='Nada alterado. Confira as versões, loja e preço. Cartas já adquiridas serão registradas como duplicatas.';return;}
             if(!window.confirm(`Salvar ${plan.primary.length} aquisições na coleção principal e ${plan.extras.length} cópias extras em Duplicatas? ${plan.skipped} itens sem alteração.`))return;
             const oldOwned={...obtainedMap},oldCaptures=JSON.parse(JSON.stringify(captureDataMap)),oldExtras=JSON.parse(JSON.stringify(duplicateCaptures));
             const data=row=>({type:'compra',entity:row.shop.trim(),price:(row.price+(row.freight||0)).toFixed(2).replace('.',','),cardPrice:row.price,freightPerCard:row.freight??null,quantity:1,order:row.order,condition:row.condition||'',orderStatus:row.status});
-            plan.primary.forEach(({id,row})=>{obtainedMap[id]=true;captureDataMap[id]={...captureDataMap[id],...data(row)};});
+            plan.primary.forEach(({id,row})=>{obtainedMap[id]=true;captureDataMap[id]={...data(row),locked:false};});
             plan.extras.forEach(({id,row})=>duplicateCaptures.push({id:duplicateId(),cardId:id,...data(row),locked:false}));
             try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(obtainedMap));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(captureDataMap));localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(duplicateCaptures));}
             catch(error){obtainedMap=oldOwned;captureDataMap=oldCaptures;duplicateCaptures=oldExtras;try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(oldOwned));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(oldCaptures));localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(oldExtras));}catch(e){}message.textContent='Não foi possível salvar. Importação não enviada à nuvem.';return;}
             [...plan.primary,...plan.extras].forEach(({row})=>{row.include=false;row.replace=false;row.extras=false;});
+            document.getElementById('market-paste').value='';
             saveToCloud();updateHeaderCounters();persistMarketDraft();renderMarketReview();message.textContent=plan.primary.length+' aquisições principais e '+plan.extras.length+' duplicatas salvas. Cópias extras estão em Captura → Filtros → Duplicatas.';
         };
-        try{const draft=JSON.parse(localStorage.getItem('scorace_market_draft_v1')||'null');if(draft&&Array.isArray(draft.rows)){marketRows=draft.rows;marketMode=draft.mode==='import'?'import':'check';}}catch(error){}
+        try{const draft=JSON.parse(localStorage.getItem('scorace_market_draft_v1')||'null');if(draft){marketMode=draft.mode==='import'?'import':'check';if(draft.drafts){marketDrafts={check:Array.isArray(draft.drafts.check)?draft.drafts.check:[],import:Array.isArray(draft.drafts.import)?draft.drafts.import:[]};}else if(Array.isArray(draft.rows)){marketDrafts[marketMode]=draft.rows;}marketRows=marketDrafts[marketMode];document.getElementById('market-paste-check').value=draft.texts?.check||'';document.getElementById('market-paste').value=draft.texts?.import||'';}}catch(error){}
+
 
         function updateHeaderCounters() {
             let totalObtainedCount = 0;
