@@ -2161,9 +2161,11 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             plan.extras.forEach(({id,row})=>duplicateCaptures.push({id:duplicateId(),cardId:id,...data(row),locked:false}));
             try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(obtainedMap));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(captureDataMap));localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(duplicateCaptures));}
             catch(error){obtainedMap=oldOwned;captureDataMap=oldCaptures;duplicateCaptures=oldExtras;try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(oldOwned));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(oldCaptures));localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(oldExtras));}catch(e){}message.textContent='Não foi possível salvar. Importação não enviada à nuvem.';return;}
-            [...plan.primary,...plan.extras].forEach(({row})=>{row.include=false;row.replace=false;row.extras=false;});
+            const importedRows=new Set([...plan.primary,...plan.extras].map(item=>item.row));
+            marketRows=marketRows.filter(row=>!importedRows.has(row)&&(!marketResolved(row).id||row.include));
+            marketRemoved=null;
             document.getElementById('market-paste').value='';
-            saveToCloud();updateHeaderCounters();persistMarketDraft();renderMarketReview();message.textContent=plan.primary.length+' aquisições principais e '+plan.extras.length+' duplicatas salvas. Cópias extras estão em Captura → Filtros → Duplicatas.';
+            saveToCloud();updateHeaderCounters();persistMarketDraft();renderMarketReview();message.textContent=plan.primary.length+' aquisições principais e '+plan.extras.length+' duplicatas salvas.'+(marketRows.length?' Restam '+marketRows.length+' cartas para identificar ou corrigir.':' Lista de importação limpa.');
         };
         try{const draft=JSON.parse(localStorage.getItem('scorace_market_draft_v1')||'null');if(draft){marketMode=draft.mode==='import'?'import':'check';if(draft.drafts){marketDrafts={check:Array.isArray(draft.drafts.check)?draft.drafts.check:[],import:Array.isArray(draft.drafts.import)?draft.drafts.import:[]};}else if(Array.isArray(draft.rows)){marketDrafts[marketMode]=draft.rows;}marketRows=marketDrafts[marketMode];document.getElementById('market-paste-check').value=draft.texts?.check||'';document.getElementById('market-paste').value=draft.texts?.import||'';}}catch(error){}
 
