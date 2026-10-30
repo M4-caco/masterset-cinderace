@@ -2039,17 +2039,21 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             let candidates=numbered.filter(c=>!row.lang||c.lingua===row.lang);
             const text=marketNorm(row.detail), mechanic=/vmax/.test(text)?'VMAX':/\bex\b/.test(text)?'ex':/cinderace\s*-?\s*v\b/.test(text)?'V':'';
             candidates=candidates.filter(c=>mechanic?c.mecanica===mechanic:!['V','VMAX','ex'].includes(c.mecanica));
-            const stamp=/play!|pokemon league|staff/i.test(text);
-            if(!stamp)candidates=candidates.filter(c=>!(/play!|pokemon league|staff/i.test(c.selo)));
-            else candidates=candidates.filter(c=>/staff/.test(text)?/staff/i.test(c.selo):/league/.test(text)?/league/i.test(c.selo):/play!/i.test(c.selo));
-            const uncertain=suffix||/pok[eé]?ball foil|poke ball foil/.test(text);
-            if(/reverse|energy holo|ball holo|glitter/.test(text)||uncertain) {
+            const stamp=/play!|pokemon league|staff|battle academy|academia de batalha/i.test(text);
+            if(!stamp)candidates=candidates.filter(c=>!(/play!|pokemon league|staff|battle academy/i.test(c.selo)));
+            else candidates=candidates.filter(c=>/battle academy|academia de batalha/.test(text)?/battle academy/i.test(c.selo):/staff/.test(text)?/staff/i.test(c.selo):/league/.test(text)?/league/i.test(c.selo):/play!/i.test(c.selo));
+            const ballFoil=/poke\s*ball\s*(foil|holo)/.test(text);
+            // Liga uses Pokeball Foil for the Friend Ball reverse in these specific 217-card entries.
+            const heroesReverse=['36/217','37/217'].includes(base)&&['PT-BR','EN'].includes(row.lang);
+            const uncertain=suffix;
+            if(/reverse|reverce|energy holo|ball holo|glitter|friend ball/.test(text)||ballFoil||uncertain) {
                 candidates=candidates.filter(c=>/reverse|foil/i.test(c.acabamento));
                 if(/master ball/.test(text))candidates=candidates.filter(c=>/master ball/i.test(c.padrao));
-                else if(/poke ball holo/.test(text))candidates=candidates.filter(c=>/pok[eé] ball/i.test(c.padrao));
+                else if(ballFoil)candidates=candidates.filter(c=>heroesReverse?/friend ball/i.test(c.padrao):/poke ?ball/i.test(marketNorm(c.padrao)));
+                else if(/friend ball/.test(text))candidates=candidates.filter(c=>/friend ball/i.test(c.padrao));
                 else if(/energy holo/.test(text))candidates=candidates.filter(c=>/energia/i.test(c.padrao));
                 else if(/glitter/.test(text))candidates=candidates.filter(c=>/glitter/i.test(c.padrao));
-                else candidates=candidates.filter(c=>/reverse/i.test(c.acabamento));
+                else candidates=candidates.filter(c=>/reverse/i.test(c.acabamento)&&(heroesReverse?/energia/i.test(c.padrao):true));
             } else if(/\bfoil\b|\bholo\b/.test(text)) candidates=candidates.filter(c=>/holo|foil/i.test(c.acabamento)&&!/reverse|não foil/i.test(c.acabamento));
             else candidates=candidates.filter(c=>c.acabamento==='Não foil');
             if(candidates.length===1&&row.lang&&!uncertain) {const id=candidates[0].id;return {state:obtainedMap[id]?'Já tem':'Comprar',id,candidates,reason:''};}
@@ -2090,7 +2094,8 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         window.marketOpenPicker=function(index){
             if(!marketRows[index])return;marketPickerIndex=index;
             document.getElementById('market-picker-query').value='';
-            document.getElementById('market-picker-lang').value='';
+            const detectedLanguage=marketRows[index].lang;
+            document.getElementById('market-picker-lang').value=['PT-BR','EN','JP','CN'].includes(detectedLanguage)?detectedLanguage:'';
             document.getElementById('market-picker-title').textContent='Identificar '+marketRows[index].name;
             window.marketSearchPicker();document.getElementById('market-card-picker').showModal();
             document.getElementById('market-picker-query').focus();
