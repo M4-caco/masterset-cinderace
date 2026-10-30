@@ -618,7 +618,7 @@
                         <p class="text-xs text-slate-500 dark:text-slate-400">Cadastre a origem das suas cartas obtidas. Ative o <strong>cadeado (🔒)</strong> para travá-las.</p>
                     </div>
 
-                    <details id="capture-filter-drawer" class="capture-filter-drawer">
+                    <div class="flex items-start gap-2"><button type="button" class="scan-launch" onclick="scannerOpen()" aria-label="Escanear carta pela câmera" title="Escanear carta" style="width:44px;height:44px;padding:10px">📷</button><details id="capture-filter-drawer" class="capture-filter-drawer">
                       <summary>Filtros <span id="capture-filter-count"></span><span aria-hidden="true">⌄</span></summary>
                       <div class="capture-filter-options">
                         <label>Status<select id="cap-filter-status" onchange="setCaptureFilter('status',this.value)"><option value="all">Todos</option><option value="locked">Trancadas 🔒</option><option value="unlocked">Abertas 🔓</option></select></label>
@@ -627,7 +627,7 @@
                         <label>Captura · pessoa / loja<select id="cap-filter-entity" onchange="setCaptureFilter('entity',this.value)"><option value="all">Todas</option></select></label>
                         <label>Exibir<select id="cap-filter-copies" onchange="setCaptureFilter('copies',this.value)"><option value="all">Coleção principal</option><option value="duplicates">Duplicatas</option></select></label><button id="capture-clear-filters" type="button" hidden onclick="clearCaptureFilters()">Limpar filtros</button>
                       </div>
-                    </details>
+                    </details></div>
                 </div>
 
                 <div id="capture-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5"></div>
@@ -698,7 +698,22 @@
 
     </main>
 
-    <script type="module">
+    
+<style>
+#live-scanner{background:#201e1c;color:#fff;border:1px solid #665044;border-radius:22px;padding:20px;width:min(960px,96vw);max-height:92vh;overflow:auto}#live-scanner::backdrop{background:#000b}#live-scanner button,#live-scanner input,#live-scanner select,.scan-launch{background:#332d29;color:white;border:1px solid #806044;border-radius:10px;padding:10px}#live-scanner button:disabled{opacity:.45}.scan-camera{position:relative;width:min(100%,360px);margin:12px auto;aspect-ratio:3/4;background:#111;overflow:hidden;border-radius:14px}.scan-camera video{width:100%;height:100%;object-fit:cover}.scan-guide{position:absolute;inset:8%;border:2px solid #ffb75c;border-radius:12px;pointer-events:none}#scan-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin-top:15px}#scan-results button{display:flex;gap:10px;text-align:left}#scan-results img{width:70px;object-fit:contain;align-self:start}#scan-results small{display:block}#scan-selection img{width:95px;float:left;margin:0 14px 14px 0}.scan-controls{display:flex;gap:8px;flex-wrap:wrap}.scan-controls input{min-width:0;flex:1}#scan-selection{margin:15px 0;display:flow-root}#scan-status{margin:12px 0;font-size:14px}
+</style>
+<dialog id="live-scanner" aria-labelledby="scan-title">
+<div class="scan-controls"><h2 id="scan-title" style="flex:1;font-weight:bold">Escanear carta</h2><button type="button" onclick="scannerClose()">Fechar</button></div>
+<p>Aponte uma carta inteira para dentro da moldura, com boa luz e sem reflexos. Confira a versão antes de adicionar.</p>
+<div class="scan-camera"><video id="scan-video" autoplay playsinline muted></video><div class="scan-guide"></div></div>
+<div class="scan-controls"><button type="button" id="scan-start" onclick="scannerStart()">Ligar câmera</button><button type="button" onclick="scannerStop()">Parar câmera</button></div>
+<p id="scan-status" role="status" aria-live="polite">Permita o acesso à câmera para começar.</p>
+<div class="scan-controls"><input id="scan-query" aria-label="Buscar carta por nome ou número" placeholder="Ou digite nome / número" oninput="scannerSearch()"><select id="scan-language" aria-label="Idioma" onchange="scannerSearch()"><option value="">Todos os idiomas</option><option value="PT-BR">🇧🇷 Português</option><option value="EN">🇺🇸 Inglês</option><option value="JP">🇯🇵 Japonês</option><option value="CN">🇨🇳 Chinês</option></select></div>
+<p style="font-size:12px;margin-top:8px">A leitura automática usa nome e numeração. Foil, reverse e selos exigem conferência. Só a imagem do catálogo será usada.</p>
+<div id="scan-selection" hidden></div><div id="scan-results"></div>
+</dialog>
+
+<script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
@@ -2077,6 +2092,68 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             const locale=languageProgressAssets[code];
             return locale?`<img class="market-language-flag" src="${locale.image}" alt="${escapeLabel(locale.label)}" title="${escapeLabel(locale.label)}" width="24" height="16">`:'<span>Idioma a conferir</span>';
         }
+        // Live OCR: frames stay in memory; only catalog IDs enter collection storage.
+        let scanSession=0,scanStream=null,scanWorker=null,scanTimer=null,scanChosen='',scanBusy=false,scanLibrary=null;
+        const scanEl=id=>document.getElementById(id);
+        function scanStatus(message){scanEl('scan-status').textContent=message;}
+        function scannerCandidates(text,locale='') {
+            const normalized=String(text).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
+            const species=(normalized.match(/scorbunny|raboot|cinderace/)||[])[0];
+            const numbers=[...normalized.matchAll(/\b(\d{1,3})\s*[/／]\s*(\d{1,3}|∞)/g)].map(m=>Number(m[1])+'/'+(m[2]==='∞'?'∞':Number(m[2])));
+            if(!species&&!numbers.length)return [];
+            return allCards.filter(c=>{
+                const num=String(c.numero).match(/(\d+)\s*[/／]\s*(\d+|∞)/);
+                return (!locale||c.lingua===locale)&&(!species||c.pokemon.toLowerCase()===species)&&(!numbers.length||num&&numbers.includes(Number(num[1])+'/'+(num[2]==='∞'?'∞':Number(num[2]))));
+            });
+        }
+        function scannerRender(cards){
+            scanEl('scan-results').innerHTML=cards.map(c=>`<button type="button" onclick="scannerChoose('${c.id}')"><img src="${encodeURI(c.imagem)}" alt="${escapeLabel(c.nome)}" loading="lazy"><span><strong>${escapeLabel(c.nome)}</strong><small>${escapeLabel(c.numero)} ${marketLanguageFlag(c.lingua)}</small><small>${escapeLabel(c.acabamento||c.variante)} · ${escapeLabel(c.padrao||'')}</small><small>${escapeLabel(c.selo||'')}</small><small>${obtainedMap[c.id]?'Já tem':'Ainda não tem'}</small></span></button>`).join('')||'<p>Nenhuma correspondência. Ajuste a posição ou digite o nome / número.</p>';
+        }
+        window.scannerSearch=function(){scannerStop();scanChosen='';scanEl('scan-selection').hidden=true;const q=scanEl('scan-query').value.trim(),lang=scanEl('scan-language').value;scannerRender(q?allCards.filter(c=>(!lang||c.lingua===lang)&&matchesCardSearch(c,q)):[]);};
+        window.scannerOpen=function(){scanChosen='';scanEl('scan-query').value='';scanEl('scan-selection').hidden=true;scanEl('scan-results').innerHTML='';scanEl('live-scanner').showModal();scannerStart();};
+        window.scannerStop=function(){scanSession++;clearTimeout(scanTimer);scanStream?.getTracks().forEach(t=>t.stop());scanStream=null;scanEl('scan-video').srcObject=null;const w=scanWorker;scanWorker=null;if(w)w.terminate().catch(()=>{});scanEl('scan-start').disabled=false;};
+        window.scannerClose=function(){scannerStop();scanEl('live-scanner').close();};
+        function loadScannerOCR(){if(window.Tesseract)return Promise.resolve();if(scanLibrary)return scanLibrary;scanLibrary=new Promise((resolve,reject)=>{const script=document.createElement('script');script.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';script.onload=resolve;script.onerror=()=>{scanLibrary=null;script.remove();reject(new Error('ocr'));};document.head.appendChild(script);});return scanLibrary;}
+        window.scannerStart=async function(){
+            scannerStop();const session=scanSession;scanChosen='';scanEl('scan-selection').hidden=true;scanEl('scan-start').disabled=true;
+            if(!window.isSecureContext||!navigator.mediaDevices?.getUserMedia){scanStatus('Abra o site em HTTPS para usar a câmera. A busca digitada continua disponível.');scanEl('scan-start').disabled=false;return;}
+            scanStatus('Abrindo câmera e preparando leitura… Na primeira vez, o leitor precisa de internet.');
+            try{
+                const stream=await navigator.mediaDevices.getUserMedia({audio:false,video:{facingMode:{ideal:'environment'},width:{ideal:1920},height:{ideal:1080}}});
+                if(session!==scanSession){stream.getTracks().forEach(t=>t.stop());return;}scanStream=stream;const video=scanEl('scan-video');video.srcObject=stream;await video.play();await loadScannerOCR();if(session!==scanSession)return;
+                const worker=await Tesseract.createWorker('eng+por');if(session!==scanSession){await worker.terminate();return;}scanWorker=worker;await worker.setParameters({tessedit_pageseg_mode:'11'});
+                const canvas=document.createElement('canvas');canvas.width=800;canvas.height=1067;
+                async function tick(){
+                    if(session!==scanSession)return;
+                    try{
+                        if(video.readyState<2){scanTimer=setTimeout(tick,500);return;}
+                        const ratio=3/4,w=video.videoWidth,h=video.videoHeight,cw=Math.min(w,h*ratio),ch=cw/ratio;
+                        canvas.getContext('2d').drawImage(video,(w-cw)/2+cw*.08,(h-ch)/2+ch*.08,cw*.84,ch*.84,0,0,800,1067);
+                        const result=await worker.recognize(canvas);canvas.getContext('2d').clearRect(0,0,800,1067);if(session!==scanSession)return;
+                        const text=result.data.text, candidates=scannerCandidates(text,scanEl('scan-language').value);
+                        if(candidates.length){scannerRender(candidates);scanStatus(candidates.length+' versões possíveis. Toque na correta para conferir idioma, acabamento e selo.');scannerStop();return;}
+                        scanStatus('Procurando nome e número… Mantenha a carta inteira, parada e sem reflexos.');scanTimer=setTimeout(tick,1000);
+                    }catch(error){if(session===scanSession){scannerStop();scanStatus('A leitura não pôde continuar. Tente ligar a câmera novamente ou use a busca digitada.');}}
+                }tick();
+            }catch(error){if(session!==scanSession)return;scannerStop();scanStatus(error.name==='NotAllowedError'?'Acesso à câmera não permitido. Autorize nas configurações do navegador ou use a busca digitada.':'Não foi possível iniciar o leitor. Confira a câmera e a conexão, ou use a busca digitada.');}
+        };
+        window.scannerChoose=function(id){const c=allCards.find(c=>c.id===id);if(!c)return;scannerStop();scanChosen=id;scanEl('scan-selection').hidden=false;scanEl('scan-selection').innerHTML=`<img src="${encodeURI(c.imagem)}" alt="${escapeLabel(c.nome)}"><strong>${escapeLabel(marketCardLabel(c))}</strong><p>${obtainedMap[id]?'Você já tem esta versão. A nova cópia será uma duplicata com dados próprios.':'Você ainda não tem esta versão.'}</p><div class="scan-controls"><input id="scan-shop" aria-label="Loja ou pessoa" placeholder="Loja / pessoa (opcional)"><input id="scan-price" aria-label="Valor pago" inputmode="decimal" placeholder="Valor R$ (opcional)"></div><button type="button" id="scan-save" onclick="scannerSave()">${obtainedMap[id]?'Confirmar duplicata':'Adicionar à coleção'}</button>`;scanEl('scan-results').innerHTML='';scanStatus('Confira a versão escolhida. Nada será adicionado sem confirmar.');};
+        window.scannerSave=function(){
+            if(scanBusy||!scanChosen)return;if(!collectionReady){scanStatus('Aguarde a sincronização inicial da coleção.');return;}
+            const id=scanChosen;if(!allCards.some(c=>c.id===id))return;
+            const raw=scanEl('scan-price').value.trim(),price=raw?marketMoney(raw):null;
+            if(raw&&(!Number.isFinite(price)||price<0)){scanStatus('Informe um valor válido ou deixe em branco.');return;}
+            scanBusy=true;const oldOwned={...obtainedMap},oldCaptures=JSON.parse(JSON.stringify(captureDataMap)),oldCopies=JSON.parse(JSON.stringify(duplicateCaptures));const extra=!!obtainedMap[id];
+            const data={type:'compra',entity:scanEl('scan-shop').value.trim(),price:price===null?'':price.toFixed(2).replace('.',','),locked:false};
+            if(extra)duplicateCaptures.push({id:duplicateId(),cardId:id,...data});else{obtainedMap[id]=true;captureDataMap[id]=data;}
+            try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(obtainedMap));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(captureDataMap));localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(duplicateCaptures));}
+            catch(e){obtainedMap=oldOwned;captureDataMap=oldCaptures;duplicateCaptures=oldCopies;try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(oldOwned));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(oldCaptures));localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(oldCopies));}catch(_){}scanBusy=false;scanStatus('Não foi possível salvar. Libere espaço e tente novamente.');return;}
+            scanChosen='';scanEl('scan-save').disabled=true;scanBusy=false;saveToCloud();updateHeaderCounters();updateCaptureFilterOptions();renderCaptureView();scanStatus(extra?'Duplicata registrada. Ligue a câmera para ler outra carta.':'Carta adicionada à coleção. Ligue a câmera para ler outra carta.');
+        };
+        scanEl('live-scanner').addEventListener('close',()=>scannerStop());
+        document.addEventListener('visibilitychange',()=>{if(document.hidden)scannerStop();});
+        window.addEventListener('pagehide',()=>scannerStop());
+
         function marketCardLabel(c) {return [c.nome,c.numero,c.lingua,c.acabamento,c.padrao,c.selo].filter(x=>x&&x!=='A conferir'&&x!=='Sem selo informado'&&x!=='Sem padrão foil').join(' · ');}
         function persistMarketDraft(){marketDrafts[marketMode]=marketRows;try{localStorage.setItem('scorace_market_draft_v1',JSON.stringify({rows:marketRows,mode:marketMode,drafts:marketDrafts,texts:{check:document.getElementById('market-paste-check').value,import:document.getElementById('market-paste').value}}));}catch(e){}}
         window.persistMarketDraft=persistMarketDraft;
