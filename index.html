@@ -421,6 +421,12 @@
         .capture-filter-drawer{position:relative;z-index:25}.capture-filter-drawer summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:9px;padding:10px 15px;border:1px solid var(--line);border-radius:12px;background:var(--surface);font-size:12px;font-weight:650}.capture-filter-drawer summary::-webkit-details-marker{display:none}.capture-filter-drawer summary:focus-visible{outline:2px solid #f4d664;outline-offset:3px}.capture-filter-options{position:absolute;right:0;top:calc(100% + 8px);width:300px;max-width:calc(100vw - 48px);max-height:65dvh;overflow:auto;display:grid;gap:13px;padding:18px;background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 45px #0005}.capture-filter-options label{display:grid;gap:6px;font-size:11px;font-weight:600}.capture-filter-options select{width:100%;min-width:0;padding:10px;border-radius:9px;border:1px solid var(--line);background:var(--surface);color:var(--ink);font-size:12px}.capture-filter-options button{font-size:11px;padding:8px;color:#c43b30;text-align:left}.capture-filter-options [hidden]{display:none!important}@media(max-width:640px){.capture-filter-drawer{align-self:flex-start}.capture-filter-options{left:0;right:auto;width:min(300px,calc(100vw - 64px))}}
     
         .market-pick-trigger{display:block;width:100%;text-align:left;margin-top:5px;line-height:1.5}#market-card-picker{width:min(1250px,calc(100vw - 20px));max-height:90dvh;padding:22px;border:1px solid var(--line);border-radius:20px;background:var(--surface);color:var(--ink)}#market-card-picker::backdrop{background:#000b;backdrop-filter:blur(6px)}.market-picker-header{display:flex;align-items:center;justify-content:space-between;gap:15px}.market-picker-header h2{font-size:20px;font-weight:700}.market-picker-header button{font-size:30px;padding:0 10px}.market-picker-search{display:flex;gap:10px;margin:16px 0}.market-picker-search input,.market-picker-search select{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);min-width:0}.market-picker-search input{flex:1}#market-picker-count{font-size:11px;margin-bottom:12px;color:var(--subtle)}#market-picker-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;max-height:64dvh;overflow:auto}.market-picker-card{display:flex;align-items:center;gap:9px;text-align:left;padding:9px;border:1px solid var(--line);border-radius:12px;min-width:0}.market-picker-card:hover,.market-picker-card:focus-visible{border-color:#f4d664;outline:1px solid #f4d664}.market-picker-card img{width:42%;aspect-ratio:63/88;object-fit:contain;border-radius:5%;flex-shrink:0}.market-picker-card span{min-width:0;overflow-wrap:anywhere}.market-picker-card strong,.market-picker-card b,.market-picker-card small{display:block;font-size:10px;line-height:1.5}.market-picker-card b{color:#c43b30;margin:4px 0}.dark .market-picker-card b{color:#f4d664}.market-picker-card small{font-size:9px;color:var(--subtle)}@media(max-width:850px){#market-picker-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:480px){#market-card-picker{padding:13px}.market-picker-header h2{font-size:16px}.market-picker-search{flex-wrap:wrap}.market-picker-search input{width:100%;flex-basis:100%}.market-picker-card{gap:5px;padding:5px}.market-picker-card strong,.market-picker-card b{font-size:9px}.market-picker-card small{font-size:8px}}
+    
+        .duplicate-tools{grid-column:1/-1}.duplicate-tools h3{font-size:20px;font-weight:700}.duplicate-tools p,.duplicate-card p{font-size:11px;color:var(--subtle);margin:7px 0}.duplicate-tools>div{display:flex;gap:8px;margin:14px 0}.duplicate-tools select{min-width:0;flex:1}.duplicate-tools select,.duplicate-card input,.duplicate-card select{background:var(--surface);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:9px;font-size:11px;max-width:100%}.duplicate-tools button,.duplicate-actions button{background:#80808015;border:1px solid var(--line);padding:8px 12px;border-radius:8px;font-size:11px}.duplicate-card{display:flex;align-items:flex-start;gap:14px;padding:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface)}.duplicate-card>img{width:70px;object-fit:contain;border-radius:5%}.duplicate-card>div{flex:1;min-width:0}.duplicate-card h4{font-size:12px;font-weight:650}.duplicate-card label{display:grid;gap:4px;font-size:10px;margin-top:9px}.duplicate-actions{display:flex;gap:8px;margin-top:12px}.duplicate-card :disabled{opacity:.5}.duplicate-tools>div{flex-wrap:wrap}
+    
+        .market-matched-photo{float:left;width:100px;padding:5px!important;margin:0 16px 12px 0;background:transparent!important;border:0!important}.market-matched-photo img{width:100%;height:auto;aspect-ratio:63/88;object-fit:contain;border-radius:5%}.market-matched-photo span{display:block;font-size:9px;color:var(--subtle);margin-top:4px}.market-row::after{content:"";display:block;clear:both}@media(max-width:640px){.market-matched-photo{width:76px;margin-right:10px}.market-row-heading{align-items:flex-start}}
+    
+        img.market-language-flag,.market-picker-card img.market-language-flag{display:inline-block;width:24px;height:16px;min-width:24px;aspect-ratio:auto;object-fit:cover;border-radius:2px;vertical-align:middle;margin:0 5px 0 0;flex-shrink:0}
     </style>
 </head>
 <body class="text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
@@ -601,7 +607,7 @@
                         <label>Pokémon<select id="cap-filter-poke" onchange="setCaptureFilter('poke',this.value)"><option value="all">Todos</option><option>Scorbunny</option><option>Raboot</option><option>Cinderace</option></select></label>
                         <label>Idioma<select id="cap-filter-lang" onchange="setCaptureFilter('lang',this.value)"><option value="all">Todos</option><option value="PT-BR">Português</option><option value="EN">Inglês</option><option value="JP">Japonês</option><option value="CN">Chinês</option></select></label>
                         <label>Captura · pessoa / loja<select id="cap-filter-entity" onchange="setCaptureFilter('entity',this.value)"><option value="all">Todas</option></select></label>
-                        <button id="capture-clear-filters" type="button" hidden onclick="clearCaptureFilters()">Limpar filtros</button>
+                        <label>Exibir<select id="cap-filter-copies" onchange="setCaptureFilter('copies',this.value)"><option value="all">Coleção principal</option><option value="duplicates">Duplicatas</option></select></label><button id="capture-clear-filters" type="button" hidden onclick="clearCaptureFilters()">Limpar filtros</button>
                       </div>
                     </details>
                 </div>
@@ -709,6 +715,7 @@
 
         let obtainedMap = {};
         let captureDataMap = {};
+        let duplicateCaptures = [];
         let currentLayout = localStorage.getItem('pokedex_layout_v2') || 'medio';
         let isInitialLoad = true;
         let currentZoomIndex = 0;
@@ -717,7 +724,8 @@
             status: 'all',
             poke: 'all',
             lang: 'all',
-            entity: 'all'
+            entity: 'all',
+            copies: 'all'
         };
 
         // MATRIZ COMPLETA DE CARTAS COM AS CORREÇÕES DOS SEUS PRINTS
@@ -1384,6 +1392,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 await setDoc(docRef, {
                     obtainedMap,
                     captureDataMap,
+                    duplicateCaptures,
                     updatedAt: new Date().toISOString()
                 });
             } catch (e) {
@@ -1409,12 +1418,15 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 const cloudData = docSnap.data();
                 obtainedMap = cloudData.obtainedMap || {};
                 captureDataMap = cloudData.captureDataMap || {};
+                duplicateCaptures = Array.isArray(cloudData.duplicateCaptures) ? cloudData.duplicateCaptures : [];
+                localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(duplicateCaptures));
                 
                 localStorage.setItem('pokedex_obtained_v2', JSON.stringify(obtainedMap));
                 localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
             } else {
                 obtainedMap = JSON.parse(localStorage.getItem('pokedex_obtained_v2') || '{}');
                 captureDataMap = JSON.parse(localStorage.getItem('pokedex_capture_data_v1') || '{}');
+                duplicateCaptures = JSON.parse(localStorage.getItem('scorace_duplicate_captures_v1') || '[]');
                 saveToCloud();
             }
             
@@ -1471,7 +1483,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         const captureEntityKey = name => String(name || '').trim().replace(/\s+/g,' ').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLocaleLowerCase('pt-BR');
         function captureEntityOptions() {
             const names = new Map();
-            Object.values(captureDataMap).forEach(data=>{
+            (captureFilterState.copies==='duplicates'?duplicateCaptures:Object.values(captureDataMap)).forEach(data=>{
                 if(data.type==='booster')return;
                 const label=String(data.entity || '').trim().replace(/\s+/g,' '), key=captureEntityKey(label);
                 if(key && !names.has(key)) names.set(key,label);
@@ -1484,7 +1496,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             const names=captureEntityOptions();
             if(captureFilterState.entity!=='all'&&!names.some(([key])=>key===captureFilterState.entity))captureFilterState.entity='all';
             select.innerHTML='<option value="all">Todas as pessoas e lojas</option>'+names.map(([key,label])=>`<option value="${escapeLabel(key)}">${escapeLabel(label)}</option>`).join('');
-            ['status','poke','lang','entity'].forEach(key=>{const element=document.getElementById('cap-filter-'+key);if(element)element.value=captureFilterState[key];});
+            ['status','poke','lang','entity','copies'].forEach(key=>{const element=document.getElementById('cap-filter-'+key);if(element)element.value=captureFilterState[key];});
             const count=Object.values(captureFilterState).filter(value=>value!=='all').length;
             document.getElementById('capture-filter-count').textContent=count?'('+count+')':'';
             document.getElementById('capture-clear-filters').hidden=!count;
@@ -2003,12 +2015,16 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 else if(best&&group.length>1) note+=item.index===best.index?' · menor preço unitário (ou empate)':' · pode remover esta e manter '+(best.row.shop||'o item '+(best.index+1))+' por '+marketCurrency(best.row.price);notes.set(item.index,note);}
             }return notes;
         }
+        function marketLanguageFlag(code) {
+            const locale=languageProgressAssets[code];
+            return locale?`<img class="market-language-flag" src="${locale.image}" alt="${escapeLabel(locale.label)}" title="${escapeLabel(locale.label)}" width="24" height="16">`:'<span>Idioma a conferir</span>';
+        }
         function marketCardLabel(c) {return [c.nome,c.numero,c.lingua,c.acabamento,c.padrao,c.selo].filter(x=>x&&x!=='A conferir'&&x!=='Sem selo informado'&&x!=='Sem padrão foil').join(' · ');}
         function persistMarketDraft(){try{localStorage.setItem('scorace_market_draft_v1',JSON.stringify({rows:marketRows,mode:marketMode}));}catch(e){/* Collection remains untouched if draft storage is full. */}}
         window.marketSetMode=function(mode){marketMode=mode==='import'?'import':'check';persistMarketDraft();renderMarketReview();};
         window.marketAnalyze=function(append=false){const input=document.getElementById('market-paste');const parsed=parseMarketText(input.value);const message=document.getElementById('market-message');if(!parsed.length){message.textContent='Nenhuma carta reconhecida. Cole os itens da página, com nome, número, idioma e preço; um link sozinho não contém os pedidos.';return;}marketRows=append?[...marketRows,...parsed]:parsed;marketRemoved=null;persistMarketDraft();renderMarketReview();message.textContent=parsed.length+' itens lidos. Revise as versões e os preços antes de importar.';};
         window.marketAdd=function(){marketRows.push({name:'Carta adicionada manualmente',number:'',lang:'',detail:'',shop:'',order:'',status:'',quantity:1,price:null,chosen:'',include:true,replace:false,manual:true});persistMarketDraft();renderMarketReview();};
-        window.marketEdit=function(index,field,value){const row=marketRows[index];if(!row)return; if(field==='quantity')value=Math.max(1,parseInt(value)||1);if(field==='price'||field==='freight')value=value.trim()===''?null:marketMoney(value);if(!['shop','quantity','price','freight','include','replace','chosen'].includes(field))return;row[field]=value;persistMarketDraft();renderMarketReview();};
+        window.marketEdit=function(index,field,value){const row=marketRows[index];if(!row)return; if(field==='quantity')value=Math.max(1,parseInt(value)||1);if(field==='price'||field==='freight')value=value.trim()===''?null:marketMoney(value);if(!['shop','quantity','price','freight','include','replace','chosen','extras'].includes(field))return;row[field]=value;persistMarketDraft();renderMarketReview();};
         window.marketRemove=function(index){marketRemoved={row:marketRows[index],index};marketRows.splice(index,1);persistMarketDraft();renderMarketReview();};
         window.marketUndoRemove=function(){if(marketRemoved){marketRows.splice(marketRemoved.index,0,marketRemoved.row);marketRemoved=null;persistMarketDraft();renderMarketReview();}};
         let marketPickerIndex=-1;
@@ -2028,7 +2044,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             const row=marketRows[marketPickerIndex];if(!row)return;
             const cards=marketPickerCards(row,document.getElementById('market-picker-query').value,document.getElementById('market-picker-lang').value);
             document.getElementById('market-picker-count').textContent=cards.length+' versões · toque na carta correta';
-            document.getElementById('market-picker-grid').innerHTML=cards.map(card=>`<button type="button" class="market-picker-card" onclick="marketChooseCard('${card.id}')"><img src="${encodeURI(card.imagem)}" loading="lazy" alt="${escapeLabel(card.nome)}"><span><strong>${escapeLabel(card.nome)}</strong><b>${escapeLabel(card.numero)} · ${escapeLabel(card.lingua)}</b><small>${escapeLabel(card.acabamento)}<br>${escapeLabel(card.padrao)}<br>${escapeLabel(card.selo)}</small><small>${obtainedMap[card.id]?'Já tem':'Ainda não tem'}</small></span></button>`).join('')||'<p>Nenhuma versão encontrada. Tente outro número ou remova o filtro de idioma.</p>';
+            document.getElementById('market-picker-grid').innerHTML=cards.map(card=>`<button type="button" class="market-picker-card" onclick="marketChooseCard('${card.id}')"><img src="${encodeURI(card.imagem)}" loading="lazy" alt="${escapeLabel(card.nome)}"><span><strong>${escapeLabel(card.nome)}</strong><b>${escapeLabel(card.numero)}</b>${marketLanguageFlag(card.lingua)}<small>${escapeLabel(card.acabamento)}<br>${escapeLabel(card.padrao)}<br>${escapeLabel(card.selo)}</small><small>${obtainedMap[card.id]?'Já tem':'Ainda não tem'}</small></span></button>`).join('')||'<p>Nenhuma versão encontrada. Tente outro número ou remova o filtro de idioma.</p>';
         };
         window.marketChooseCard=function(id){if(!allCards.some(c=>c.id===id))return;window.marketEdit(marketPickerIndex,'chosen',id);document.getElementById('market-card-picker').close();};
         function renderMarketReview(){
@@ -2045,31 +2061,44 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 const candidates=match.candidates||[],others=allCards.filter(c=>!candidates.some(x=>x.id===c.id));
                 const option=c=>`<option value="${c.id}" ${row.chosen===c.id?'selected':''}>${escapeLabel(marketCardLabel(c))}</option>`;
                 const locked=match.id&&captureDataMap[match.id]?.locked;
-                return `<article class="market-row ${row.include?'':'market-excluded'}"><div class="market-row-heading"><label><input type="checkbox" ${row.include?'checked':''} onchange="marketEdit(${index},'include',this.checked)"> <strong>${escapeLabel(row.name)} ${escapeLabel(row.number)}</strong></label><button type="button" onclick="marketRemove(${index})" aria-label="Remover item ${index+1}">Remover</button></div>
+                const matchedCard=match.id?allCards.find(c=>c.id===match.id):null;
+                return `<article class="market-row ${row.include?'':'market-excluded'}">${matchedCard?`<button type="button" class="market-matched-photo" onclick="showZoomModal('${matchedCard.id}')" aria-label="Ampliar ${escapeLabel(matchedCard.nome+' '+matchedCard.numero)}"><img src="${encodeURI(matchedCard.imagem)}" alt="${escapeLabel(matchedCard.nome+' '+matchedCard.numero)}" loading="lazy"><span>Ampliar</span></button>`:''}<div class="market-row-heading"><label><input type="checkbox" ${row.include?'checked':''} onchange="marketEdit(${index},'include',this.checked)"> <strong>${escapeLabel(row.name)} ${escapeLabel(row.number)}</strong></label><button type="button" onclick="marketRemove(${index})" aria-label="Remover item ${index+1}">Remover</button></div>
                 <div class="market-badges"><span>${escapeLabel(match.state)}</span>${duplicates.has(index)?`<span class="market-duplicate">${escapeLabel(duplicates.get(index))}</span>`:''}${locked?'<span>Captura bloqueada · não será alterada</span>':''}</div>
-                <p class="market-note">${escapeLabel(row.lang||'Idioma a conferir')}${row.condition?' · Estado: '+escapeLabel(row.condition):''}${row.order?' · Pedido #'+escapeLabel(row.order):''}${row.status?' · '+escapeLabel(row.status):''} ${escapeLabel(match.reason)}${row.quantityNeedsReview?' · Lista de estoque: quantidade iniciada em 1; ajuste se necessário.':''}</p>
+                <p class="market-note">${marketLanguageFlag(matchedCard?.lingua||row.lang)}${row.condition?' · Estado: '+escapeLabel(row.condition):''}${row.order?' · Pedido #'+escapeLabel(row.order):''}${row.status?' · '+escapeLabel(row.status):''} ${escapeLabel(match.reason)}${row.quantityNeedsReview?' · Lista de estoque: quantidade iniciada em 1; ajuste se necessário.':''}</p>
                 <div class="market-version"><span>Carta no seu catálogo</span><button class="market-pick-trigger" type="button" onclick="marketOpenPicker(${index})">${match.id?'Trocar / conferir: '+escapeLabel(marketCardLabel(allCards.find(c=>c.id===match.id))):'Identificar por foto ou digitar número / nome'}</button></div>
                 <div class="market-fields"><label>Loja<input value="${escapeLabel(row.shop)}" onchange="marketEdit(${index},'shop',this.value)"></label><label>Quantidade<input type="number" min="1" step="1" value="${row.quantity}" onchange="marketEdit(${index},'quantity',this.value)"></label><label>Preço unitário (R$)<input inputmode="decimal" value="${Number.isFinite(row.price)?row.price.toFixed(2).replace('.',','):''}" placeholder="0,00" onchange="marketEdit(${index},'price',this.value)"></label><label>Frete por carta (R$)<input inputmode="decimal" value="${Number.isFinite(row.freight)?row.freight.toFixed(4).replace(/0+$/,'').replace(/\.$/,'').replace('.',','):''}" placeholder="Não informado" onchange="marketEdit(${index},'freight',this.value)"></label></div>
                 <p class="market-note">${row.shippingTotal!==null&&row.shippingTotal!==undefined?'Frete do pedido: '+marketCurrency(row.shippingTotal)+' ÷ '+row.shippingQuantity+' cartas. ':''}Custo por carta: ${Number.isFinite(row.price)?marketCurrency(row.price+(row.freight||0)):'Informe o preço'}${row.freight===null||row.freight===undefined?' · frete não informado':''}. O rateio inclui todas as cartas lidas do pedido, mesmo as não identificadas.</p>
+                ${marketMode==='import'&&match.id?`<label class="market-note"><input type="checkbox" ${row.extras?'checked':''} onchange="marketEdit(${index},'extras',this.checked)"> Registrar cópias extras em Captura → Duplicatas</label>`:''}
                 ${marketMode==='import'&&match.id&&obtainedMap[match.id]&&!locked?`<label class="market-note"><input type="checkbox" ${row.replace?'checked':''} onchange="marketEdit(${index},'replace',this.checked)"> Atualizar loja e valor já registrados para esta carta</label>`:''}</article>`;
             }).join('');
             document.getElementById('market-summary').textContent=marketRows.length?Object.entries(counts).map(([k,v])=>v+' '+k.toLowerCase()).join(' · ')+' | Seleção: '+marketCurrency(cost)+' (com frete informado)':'Cole uma lista ou adicione uma carta para começar.';
         }
+        function planMarketImport(rows){
+            const seen=new Set(),primary=[],extras=[];let skipped=0;
+            for(const row of rows){if(!row.include)continue;const id=marketResolved(row).id;
+                if(!id||!row.shop.trim()||!Number.isFinite(row.price)||row.price<0||(row.freight!=null&&(!Number.isFinite(row.freight)||row.freight<0))){skipped++;continue;}
+                const quantity=Math.max(1,Math.floor(Number(row.quantity)||1));
+                const addPrimary=!seen.has(id)&&!captureDataMap[id]?.locked&&(!obtainedMap[id]||row.replace);
+                if(addPrimary){primary.push({id,row});seen.add(id);}
+                const extraCount=row.extras?quantity-(addPrimary?1:0):0;
+                for(let i=0;i<extraCount;i++)extras.push({id,row});
+                if(!addPrimary&&!extraCount)skipped++;
+            }
+            return {primary,extras,skipped};
+        }
         window.marketConfirm=function(){
             if(marketMode!=='import')return;
-            const seen=new Set(),updates=[];let skipped=0;
-            for(const row of marketRows){if(!row.include)continue;const match=marketResolved(row),id=match.id;
-                if(!id||seen.has(id)||captureDataMap[id]?.locked||(obtainedMap[id]&&!row.replace)||!row.shop.trim()||row.price===null||!Number.isFinite(row.price)||row.price<0||(row.freight!==null&&row.freight!==undefined&&(!Number.isFinite(row.freight)||row.freight<0))){skipped++;continue;}
-                seen.add(id);updates.push({id,row});
-            }
-            const message=document.getElementById('market-message');
-            if(!updates.length){message.textContent='Nada foi alterado. Confirme as versões, preencha loja e preço e selecione itens novos ou autorize atualizar os já adquiridos.';return;}
-            if(!window.confirm(`Confirmar ${updates.length} cartas como Tenho e salvar loja e custo unitário com frete em Captura? ${skipped} itens ficarão sem alteração. A quantidade não cria novos registros no master set.`))return;
-            const beforeOwned={...obtainedMap},beforeCaptures=JSON.parse(JSON.stringify(captureDataMap));
-            updates.forEach(({id,row})=>{obtainedMap[id]=true;captureDataMap[id]={...captureDataMap[id],type:'compra',entity:row.shop.trim(),price:(row.price+(row.freight||0)).toFixed(2).replace('.',','),cardPrice:row.price,freightPerCard:row.freight??null,quantity:row.quantity,order:row.order,orderStatus:row.status,condition:row.condition||''};row.replace=false;});
-            try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(obtainedMap));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(captureDataMap));}
-            catch(error){obtainedMap=beforeOwned;captureDataMap=beforeCaptures;try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(beforeOwned));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(beforeCaptures));}catch(e){}message.textContent='Não foi possível salvar no navegador. Nenhuma importação foi enviada à nuvem.';return;}
-            saveToCloud();updateHeaderCounters();persistMarketDraft();renderMarketReview();message.textContent=updates.length+' cartas atualizadas em Tenho e Captura. '+skipped+' itens sem alteração. Você pode editar as aquisições na aba Captura e desmarcar cartas na aba Coleção.';
+            const plan=planMarketImport(marketRows),message=document.getElementById('market-message');
+            if(!plan.primary.length&&!plan.extras.length){message.textContent='Nada alterado. Confira as versões, loja e preço. Para cartas já adquiridas, escolha registrar duplicatas ou atualizar a aquisição.';return;}
+            if(!window.confirm(`Salvar ${plan.primary.length} aquisições na coleção principal e ${plan.extras.length} cópias extras em Duplicatas? ${plan.skipped} itens sem alteração.`))return;
+            const oldOwned={...obtainedMap},oldCaptures=JSON.parse(JSON.stringify(captureDataMap)),oldExtras=JSON.parse(JSON.stringify(duplicateCaptures));
+            const data=row=>({type:'compra',entity:row.shop.trim(),price:(row.price+(row.freight||0)).toFixed(2).replace('.',','),cardPrice:row.price,freightPerCard:row.freight??null,quantity:1,order:row.order,condition:row.condition||'',orderStatus:row.status});
+            plan.primary.forEach(({id,row})=>{obtainedMap[id]=true;captureDataMap[id]={...captureDataMap[id],...data(row)};});
+            plan.extras.forEach(({id,row})=>duplicateCaptures.push({id:duplicateId(),cardId:id,...data(row),locked:false}));
+            try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(obtainedMap));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(captureDataMap));localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(duplicateCaptures));}
+            catch(error){obtainedMap=oldOwned;captureDataMap=oldCaptures;duplicateCaptures=oldExtras;try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(oldOwned));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(oldCaptures));localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(oldExtras));}catch(e){}message.textContent='Não foi possível salvar. Importação não enviada à nuvem.';return;}
+            [...plan.primary,...plan.extras].forEach(({row})=>{row.include=false;row.replace=false;row.extras=false;});
+            saveToCloud();updateHeaderCounters();persistMarketDraft();renderMarketReview();message.textContent=plan.primary.length+' aquisições principais e '+plan.extras.length+' duplicatas salvas. Cópias extras estão em Captura → Filtros → Duplicatas.';
         };
         try{const draft=JSON.parse(localStorage.getItem('scorace_market_draft_v1')||'null');if(draft&&Array.isArray(draft.rows)){marketRows=draft.rows;marketMode=draft.mode==='import'?'import':'check';}}catch(error){}
 
@@ -2329,6 +2358,8 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         }
 
         window.saveCaptureData = function(cardId, key, value) {
+            if(duplicateCaptures.some(copy=>copy.id===cardId)){window.editDuplicateCapture(cardId,key,value);return;}
+            if(captureDataMap[cardId]?.locked)return;
             if(!captureDataMap[cardId]) captureDataMap[cardId] = {};
             captureDataMap[cardId][key] = value;
             if(key==='entity'||key==='type')updateCaptureFilterOptions();
@@ -2338,6 +2369,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         };
 
         window.toggleLock = function(cardId) {
+            if(duplicateCaptures.some(copy=>copy.id===cardId)){window.lockDuplicateCapture(cardId);return;}
             if(!captureDataMap[cardId]) captureDataMap[cardId] = {};
             captureDataMap[cardId].locked = !captureDataMap[cardId].locked;
             localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
@@ -2346,7 +2378,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         };
 
         function updateCaptureFieldsUI(cardId) {
-            const data = captureDataMap[cardId] || {};
+            const data = duplicateCaptures.find(copy=>copy.id===cardId) || captureDataMap[cardId] || {};
             const typeSelect = document.getElementById(`cap-type-${cardId}`);
             const selectedType = typeSelect ? typeSelect.value : '';
 
@@ -2385,10 +2417,120 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             updateCaptureFieldsUI(cardId);
         };
 
+        function saveDuplicateCaptures() {
+            localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(duplicateCaptures));
+            saveToCloud();updateCaptureFilterOptions();
+        }
+        function duplicateId(){return 'dup-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);}
+        window.addDuplicateCapture=function(){
+            const cardId=document.getElementById('duplicate-add-card').value;
+            if(!allCards.some(c=>c.id===cardId))return;
+            duplicateCaptures.push({id:duplicateId(),cardId,type:'compra',entity:'',price:'',locked:false});
+            saveDuplicateCaptures();renderDuplicateCaptures();
+        };
+        window.editDuplicateCapture=function(id,key,value){
+            const copy=duplicateCaptures.find(c=>c.id===id);if(!copy||copy.locked||!['entity','price','type','booster'].includes(key))return;
+            copy[key]=value;saveDuplicateCaptures();
+        };
+        window.lockDuplicateCapture=function(id){const copy=duplicateCaptures.find(c=>c.id===id);if(!copy)return;copy.locked=!copy.locked;saveDuplicateCaptures();renderDuplicateCaptures();};
+        window.removeDuplicateCapture=function(id){const copy=duplicateCaptures.find(c=>c.id===id);if(!copy||copy.locked)return;if(!window.confirm('Remover somente esta cópia extra? A carta da coleção principal será mantida.'))return;duplicateCaptures=duplicateCaptures.filter(c=>c.id!==id);saveDuplicateCaptures();renderDuplicateCaptures();};
+        function renderDuplicateCaptures(){
+            const host=document.getElementById('capture-grid');
+            const visible=duplicateCaptures.filter(copy=>{
+                const card=allCards.find(c=>c.id===copy.cardId);if(!card)return false;
+                return (captureFilterState.poke==='all'||card.pokemon===captureFilterState.poke)&&(captureFilterState.lang==='all'||card.lingua===captureFilterState.lang)&&(captureFilterState.entity==='all'||copy.type!=='booster'&&captureEntityKey(copy.entity)===captureFilterState.entity)&&(captureFilterState.status==='all'||(captureFilterState.status==='locked'?copy.locked:!copy.locked));
+            });
+            host.innerHTML=`<div class="duplicate-tools"><h3>Duplicatas</h3><p>Cópias extras com aquisições independentes. Não entram no progresso nem nos gráficos.</p><div><select id="duplicate-add-card" aria-label="Carta para adicionar cópia extra">${allCards.map(c=>`<option value="${c.id}">${escapeLabel(marketCardLabel(c))}</option>`).join('')}</select><button type="button" onclick="addDuplicateCapture()">+ Adicionar cópia</button></div><p>${visible.length} cópias neste filtro.</p></div>`;
+            visible.forEach(copy=>{
+                const card=allCards.find(c=>c.id===copy.cardId);
+                host.appendChild(createCaptureCard(card,copy,copy.id,true));
+                updateCaptureFieldsUI(copy.id);
+            });
+        }
+
+        function createCaptureCard(card,data,entryId=card.id,isDuplicate=false) {
+
+
+                const currentType = data.type || '';
+                const currentBooster = data.booster || card.set;
+                const currentEntity = escapeLabel(data.entity || '');
+                const currentPrice = escapeLabel(data.price || '');
+                const isLocked = !!data.locked;
+
+                const cardBox = document.createElement('div');
+                cardBox.className = "glass-card border border-cinder-orange/20 rounded-3xl p-4 sm:p-5 flex gap-3.5 sm:gap-4 items-start shadow-xl relative backdrop-blur-md";
+
+                const boosterOptionsHtml = uniqueSets.map(s => 
+                    `<option value="${s}" ${s === currentBooster ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">${s}</option>`
+                ).join('');
+
+                cardBox.innerHTML = `
+                    <div class="shrink-0 flex flex-col items-center gap-1.5 w-16 sm:w-20">
+                        <div class="w-full h-22 sm:h-28 glass-card rounded-2xl overflow-hidden border border-cinder-orange/25 flex items-center justify-center p-1 relative shadow-sm">
+                            <img src="${card.imagem}" class="pokemon-card-image max-h-full max-w-full object-contain drop-shadow" alt="${card.nome} — imagem não disponível" onerror="this.onerror=null; this.removeAttribute('src')">
+                        </div>
+                        <div class="flex items-center gap-1 w-full justify-center">
+                            <span class="px-1 py-0.5 rounded-md text-[8px] font-black uppercase glass-card text-cinder-orange dark:text-cinder-yellow border border-cinder-orange/30">${card.lingua}</span>
+                            <span title="${escapeLabel(classificationDetail(card))}">${variantTags(card)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="flex-1 space-y-2.5 min-w-0">
+                        <div class="flex justify-between items-start gap-2">
+                            <div class="truncate">
+                                <p class="text-xs font-bold text-slate-800 dark:text-cinder-white truncate mt-0.5">${card.nome} <span class="text-[10px] font-normal text-slate-400">#${card.numero}</span></p>
+                                <p class="text-[10px] text-cinder-orange font-semibold truncate">${escapeLabel(card.expansao)}</p>
+                            </div>
+                            <button onclick="toggleLock('${entryId}')" title="${isLocked ? 'Cadeado Ativo' : 'Cadeado Inativo'}" class="p-1.5 rounded-xl border transition shrink-0 cursor-pointer ${isLocked ? 'bg-cinder-red/25 text-cinder-red dark:text-cinder-yellow border-cinder-orange/60 shadow-sm' : 'glass-card text-slate-400 border-cinder-orange/15 hover:text-slate-700 dark:hover:text-cinder-white'}">
+                                ${isLocked ? '🔒' : '🔓'}
+                            </button>
+                        </div>
+
+                        <div>
+                            <label class="block text-[9px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase mb-1 tracking-wider">Origem da Carta:</label>
+                            <select id="cap-type-${entryId}" onchange="handleCaptureTypeChange('${entryId}', this.value)" class="w-full glass-card border border-cinder-orange/30 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange cursor-pointer shadow-sm">
+                                <option value="" ${currentType === '' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">-- Selecione a origem --</option>
+                                <option value="booster" ${currentType === 'booster' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">Booster</option>
+                                <option value="troca" ${currentType === 'troca' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">Troca</option>
+                                <option value="doada" ${currentType === 'doada' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">Doada</option>
+                                <option value="compra" ${currentType === 'compra' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">Compra</option>
+                            </select>
+                        </div>
+
+                        <div id="cap-booster-div-${entryId}" class="hidden">
+                            <label class="block text-[9px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase mb-1 tracking-wider">Qual Booster / Coleção?</label>
+                            <select onchange="saveCaptureData('${entryId}', 'booster', this.value)" class="w-full glass-card border border-cinder-orange/30 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange cursor-pointer shadow-sm">
+                                ${boosterOptionsHtml}
+                            </select>
+                        </div>
+
+                        <div id="cap-text-div-${entryId}" class="hidden">
+                            <label id="cap-text-label-${entryId}" class="block text-[9px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase mb-1 tracking-wider">Pessoa / Loja:</label>
+                            <input type="text" value="${currentEntity}" oninput="saveCaptureData('${entryId}', 'entity', this.value)" placeholder="Digite o nome..." class="w-full glass-card border border-cinder-orange/30 rounded-xl px-3 py-1.5 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange shadow-sm">
+                        </div>
+
+                        <div id="cap-price-div-${entryId}" class="hidden">
+                            <label class="block text-[9px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase mb-1 tracking-wider">Preço Pago (R$):</label>
+                            <input type="text" value="${currentPrice}" oninput="saveCaptureData('${entryId}', 'price', this.value)" placeholder="Ex: 25,00" class="w-full glass-card border border-cinder-orange/30 rounded-xl px-3 py-1.5 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange shadow-sm">
+                        </div>
+                    </div>
+                `;
+
+
+            if(isLocked)cardBox.querySelectorAll('input,select').forEach(field=>field.disabled=true);
+            if(isDuplicate){
+                const remove=document.createElement('button');remove.type='button';remove.textContent='Remover cópia';
+                remove.className='text-xs text-cinder-orange mt-2';remove.disabled=isLocked;
+                remove.onclick=()=>window.removeDuplicateCapture(entryId);
+                cardBox.lastElementChild.appendChild(remove);
+            }
+            return cardBox;
+        }
         function renderCaptureView() {
             updateCaptureFilterOptions();
             updateHeaderCounters();
             const captureGrid = document.getElementById('capture-grid');
+            if(captureFilterState.copies==='duplicates'){renderDuplicateCaptures();return;}
             captureGrid.innerHTML = '';
 
             const ownedCards = allCards.filter(card => {
@@ -2417,72 +2559,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             }
 
             ownedCards.forEach(card => {
-                const data = captureDataMap[card.id] || {};
-                const currentType = data.type || '';
-                const currentBooster = data.booster || card.set;
-                const currentEntity = data.entity || '';
-                const currentPrice = data.price || '';
-                const isLocked = !!data.locked;
-
-                const cardBox = document.createElement('div');
-                cardBox.className = "glass-card border border-cinder-orange/20 rounded-3xl p-4 sm:p-5 flex gap-3.5 sm:gap-4 items-start shadow-xl relative backdrop-blur-md";
-
-                const boosterOptionsHtml = uniqueSets.map(s => 
-                    `<option value="${s}" ${s === currentBooster ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">${s}</option>`
-                ).join('');
-
-                cardBox.innerHTML = `
-                    <div class="shrink-0 flex flex-col items-center gap-1.5 w-16 sm:w-20">
-                        <div class="w-full h-22 sm:h-28 glass-card rounded-2xl overflow-hidden border border-cinder-orange/25 flex items-center justify-center p-1 relative shadow-sm">
-                            <img src="${card.imagem}" class="pokemon-card-image max-h-full max-w-full object-contain drop-shadow" alt="${card.nome} — imagem não disponível" onerror="this.onerror=null; this.removeAttribute('src')">
-                        </div>
-                        <div class="flex items-center gap-1 w-full justify-center">
-                            <span class="px-1 py-0.5 rounded-md text-[8px] font-black uppercase glass-card text-cinder-orange dark:text-cinder-yellow border border-cinder-orange/30">${card.lingua}</span>
-                            <span title="${escapeLabel(classificationDetail(card))}">${variantTags(card)}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="flex-1 space-y-2.5 min-w-0">
-                        <div class="flex justify-between items-start gap-2">
-                            <div class="truncate">
-                                <p class="text-xs font-bold text-slate-800 dark:text-cinder-white truncate mt-0.5">${card.nome} <span class="text-[10px] font-normal text-slate-400">#${card.numero}</span></p>
-                                <p class="text-[10px] text-cinder-orange font-semibold truncate">${escapeLabel(card.expansao)}</p>
-                            </div>
-                            <button onclick="toggleLock('${card.id}')" title="${isLocked ? 'Cadeado Ativo' : 'Cadeado Inativo'}" class="p-1.5 rounded-xl border transition shrink-0 cursor-pointer ${isLocked ? 'bg-cinder-red/25 text-cinder-red dark:text-cinder-yellow border-cinder-orange/60 shadow-sm' : 'glass-card text-slate-400 border-cinder-orange/15 hover:text-slate-700 dark:hover:text-cinder-white'}">
-                                ${isLocked ? '🔒' : '🔓'}
-                            </button>
-                        </div>
-
-                        <div>
-                            <label class="block text-[9px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase mb-1 tracking-wider">Origem da Carta:</label>
-                            <select id="cap-type-${card.id}" onchange="handleCaptureTypeChange('${card.id}', this.value)" class="w-full glass-card border border-cinder-orange/30 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange cursor-pointer shadow-sm">
-                                <option value="" ${currentType === '' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">-- Selecione a origem --</option>
-                                <option value="booster" ${currentType === 'booster' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">Booster</option>
-                                <option value="troca" ${currentType === 'troca' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">Troca</option>
-                                <option value="doada" ${currentType === 'doada' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">Doada</option>
-                                <option value="compra" ${currentType === 'compra' ? 'selected' : ''} class="bg-white dark:bg-cinder-dark">Compra</option>
-                            </select>
-                        </div>
-
-                        <div id="cap-booster-div-${card.id}" class="hidden">
-                            <label class="block text-[9px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase mb-1 tracking-wider">Qual Booster / Coleção?</label>
-                            <select onchange="saveCaptureData('${card.id}', 'booster', this.value)" class="w-full glass-card border border-cinder-orange/30 rounded-xl px-2.5 py-1.5 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange cursor-pointer shadow-sm">
-                                ${boosterOptionsHtml}
-                            </select>
-                        </div>
-
-                        <div id="cap-text-div-${card.id}" class="hidden">
-                            <label id="cap-text-label-${card.id}" class="block text-[9px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase mb-1 tracking-wider">Pessoa / Loja:</label>
-                            <input type="text" value="${currentEntity}" oninput="saveCaptureData('${card.id}', 'entity', this.value)" placeholder="Digite o nome..." class="w-full glass-card border border-cinder-orange/30 rounded-xl px-3 py-1.5 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange shadow-sm">
-                        </div>
-
-                        <div id="cap-price-div-${card.id}" class="hidden">
-                            <label class="block text-[9px] font-bold text-cinder-orange dark:text-cinder-yellow uppercase mb-1 tracking-wider">Preço Pago (R$):</label>
-                            <input type="text" value="${currentPrice}" oninput="saveCaptureData('${card.id}', 'price', this.value)" placeholder="Ex: 25,00" class="w-full glass-card border border-cinder-orange/30 rounded-xl px-3 py-1.5 text-xs text-slate-800 dark:text-cinder-white outline-none focus:border-cinder-orange shadow-sm">
-                        </div>
-                    </div>
-                `;
-
+                const cardBox=createCaptureCard(card,captureDataMap[card.id]||{});
                 captureGrid.appendChild(cardBox);
                 updateCaptureFieldsUI(card.id);
             });
