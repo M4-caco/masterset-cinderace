@@ -1,0 +1,16 @@
+PBR surface sources — CC0 1.0
+
+Wood Table 001 — Dimitrios Savva / Rico Cilliers, Poly Haven
+https://polyhaven.com/a/wood_table_001
+
+Marble 01 — Rob Tuytel, Poly Haven
+https://polyhaven.com/a/marble_01
+
+License: https://polyhaven.com/license
+Local files are resized/compressed color, OpenGL normal and roughness maps.
+The black and neutral marble color variants are derived from Marble 01.
+Laminate uses a procedural fine surface grain.
+
+Tabletop update: Oak Veneer 01, Jenelle van Heerden, Poly Haven (CC0): https://polyhaven.com/a/oak_veneer_01
+Countertop slabs: Marble006 and Marble012, ambientCG (CC0): https://ambientcg.com/view?id=Marble006 and https://ambientcg.com/view?id=Marble012
+https://docs.ambientcg.com/license/
