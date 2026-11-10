@@ -9,7 +9,8 @@ self.addEventListener("fetch",event=>{
  if(url.origin!==self.location.origin)return;
  event.respondWith((async()=>{
   const cache=await caches.open(CARD_CACHE);
-  const cached=await cache.match(req,{ignoreVary:true});
+  const bypass=req.cache==="reload"||req.cache==="no-store"||req.cache==="no-cache";
+  const cached=bypass?null:await cache.match(req,{ignoreVary:true});
   if(cached)return cached;
   try{
    const response=await fetch(req);
