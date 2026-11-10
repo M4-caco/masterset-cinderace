@@ -1,0 +1,17 @@
+#scCardLoader{position:fixed;inset:0;z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 50% 45%,#321d16f3,#08080ef8 75%);backdrop-filter:blur(14px);color:#fbf1e4;font:14px/1.4 system-ui,Arial,sans-serif;box-sizing:border-box}
+#scCardLoader[hidden]{display:none!important}
+#scCardLoader .sc-loader-card{width:min(455px,100%);padding:35px 32px;background:#15151beb;border:1px solid #ca855d88;border-radius:24px;box-shadow:0 28px 90px #000b;box-sizing:border-box}
+#scCardLoader .sc-loader-logo{color:#ffb65e;letter-spacing:.22em;font-size:12px;font-weight:900;margin:0 0 16px}
+#scCardLoader h2{font-size:23px;font-weight:800;line-height:1.2;letter-spacing:-.4px;margin:0 0 12px}
+#scCardLoader p{font-size:13px;color:#b0adb6;line-height:1.5;margin:0;min-height:19px}
+#scCardLoader .sc-loader-numbers{display:flex;align-items:center;justify-content:space-between;font-variant-numeric:tabular-nums;margin:22px 0 9px}
+#scCardLoader #scLoaderCount{font-size:28px;font-weight:750}
+#scCardLoader #scLoaderPercent{color:#f3b66b;font-size:14px;font-weight:750}
+#scCardLoader .sc-loader-progress{height:9px;background:#31313b;border-radius:99px;overflow:hidden}
+#scCardLoader .sc-loader-progress i{display:block;width:0;height:100%;background:linear-gradient(90deg,#ad4124,#ff9b41,#ffda8d);border-radius:inherit;transition:width .2s ease}
+#scCardLoader #scLoaderMeta{font-size:11px;color:#c7b9b0;margin-top:10px}
+#scCardLoader .sc-loader-actions{display:flex;flex-wrap:wrap;gap:8px;justify-content:flex-end;margin-top:24px}
+#scCardLoader .sc-loader-actions button{padding:10px 14px;font:700 12px system-ui,Arial,sans-serif;border-radius:10px;cursor:pointer}
+#scLoaderSkip{background:#5f2922;color:#fff1de;border:1px solid #ab6f43}
+#scLoaderRetry{background:#24252d;color:#f4d6a3;border:1px solid #6c5a55}
+@media(max-width:580px){#scCardLoader .sc-loader-card{padding:26px 20px;border-radius:18px}#scCardLoader h2{font-size:21px}#scCardLoader #scLoaderCount{font-size:24px}}

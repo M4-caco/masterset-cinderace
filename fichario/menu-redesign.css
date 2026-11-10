@@ -1,0 +1,58 @@
+/* Scorace: integrated full-height menu and 3D viewport. */
+html,body{overscroll-behavior:none}
+body.sc-menu-new[data-screen=binder]{height:100dvh!important;overflow:hidden!important}
+body.sc-menu-new[data-screen=binder] #binderWorkspace,
+body.sc-menu-new[data-screen=binder] .binder-stage,
+body.sc-menu-new[data-screen=binder] .scene-wrap,
+body.sc-menu-new[data-screen=binder] #viewport{height:100dvh!important;max-height:100dvh!important;overflow:hidden!important}
+body.sc-menu-new .collection-panel{top:12px!important;left:12px!important;right:auto!important;width:min(282px,calc(100vw - 24px))!important;max-height:calc(100dvh - 24px)!important;overflow:hidden!important;display:flex!important;flex-direction:column;background:#15151bdc!important;border-color:#c17b4855!important}
+body.sc-menu-new .collection-panel .dock-header{flex:none;min-height:42px!important;padding:9px 13px!important}
+body.sc-menu-new .collection-panel .dock-content{padding:10px 11px!important;overflow-y:auto!important;overflow-x:hidden!important;scrollbar-width:thin;scrollbar-color:#735d50 transparent;min-height:0}
+body.sc-menu-new .sc-menu-section{padding-bottom:10px;margin:0 0 11px;border-bottom:1px solid #ffffff19;min-width:0}
+body.sc-menu-new .sc-menu-section:last-child{border:0;margin:0}
+body.sc-menu-new .sc-menu-section h3{font:700 10px/1.4 system-ui,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#dba577;margin:0 0 8px}
+body.sc-menu-new .binder-heading{display:flex!important;gap:6px!important;margin:0 0 8px!important;align-items:center;min-height:30px}
+body.sc-menu-new .binder-heading h1{font-size:12px!important;white-space:normal!important;flex:1}
+body.sc-menu-new .binder-actions{display:none!important}
+body.sc-menu-new .book-toolbar{position:static!important;display:flex!important;flex-wrap:wrap!important;justify-content:space-between;align-items:center;gap:7px;margin:0!important;padding:0!important}
+body.sc-menu-new .book-toolbar #toggleBook{flex:1 0 100%;margin:0!important;min-height:35px}
+body.sc-menu-new .book-toolbar .pagination{display:flex!important;order:2;flex:1!important;align-items:center;justify-content:space-between;gap:4px}
+body.sc-menu-new .book-toolbar .pagination span{flex:1;text-align:center;font-size:10px}
+body.sc-menu-new .camera-bar{display:block!important;position:static!important;margin:0!important;padding:0!important}
+body.sc-menu-new .view-buttons{display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px!important}
+body.sc-menu-new .view-buttons button{min-height:33px!important;padding:6px 3px!important;font-size:10px!important}
+body.sc-menu-new #trayToggle{display:none!important}
+body.sc-menu-new .sc-menu-section .scene-top{display:flex!important;position:static!important;inset:auto!important;transform:none!important;justify-content:flex-start!important;margin:8px 0 0!important;padding:0!important;font-size:9px!important;z-index:0!important}
+body.sc-menu-new .scene-top #viewReset{margin-left:auto!important}
+body.sc-menu-new .sc-modes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;margin:0 0 8px}
+body.sc-menu-new .sc-modes button{min-width:0;min-height:35px;padding:6px 3px;font:600 9px/1.2 system-ui,sans-serif;color:#c2c4ce;background:#22232b;border:1px solid #5d5351;border-radius:8px;cursor:pointer}
+body.sc-menu-new .sc-modes button[aria-pressed=true]{color:#f5d786!important;background:#a44d2b40!important;border-color:#dfad62!important}
+body.sc-menu-new #binderOrganization{position:relative!important;top:auto!important;right:auto!important;bottom:auto!important;left:auto!important;width:100%!important;max-width:none!important;margin:0!important;z-index:1!important}
+body.sc-menu-new #binderOrganization summary{width:100%!important;min-height:36px!important;box-shadow:none!important;justify-content:space-between!important;padding:8px 10px!important;border:1px solid #735843!important;background:#24232a!important;font-size:11px!important}
+body.sc-menu-new #binderOrganization .binder-organization-menu{position:static!important;width:100%!important;max-width:none!important;box-shadow:none!important;margin-top:5px;background:#191a20!important}
+body.sc-menu-new .sc-menu-section .zoom-control{position:static!important;transform:none!important;margin:0!important;display:flex!important;justify-content:space-between!important;width:100%!important}
+body.sc-menu-new .sc-menu-section .zoom-control span{flex:1;text-align:center}
+body.sc-menu-new .sc-menu-section .render-quality{position:static!important;display:flex!important;gap:5px;flex-wrap:wrap;margin:0!important;padding:0!important}
+body.sc-menu-new .sc-menu-section .render-quality button{flex:1;min-width:0;padding:7px 4px!important;font-size:10px;min-height:34px}
+body.sc-menu-new .sc-menu-section #renderStatus{position:static!important;inset:auto!important;transform:none!important;font-size:10px;margin:5px 0 0;max-width:100%}
+body.sc-menu-new .sc-menu-section #uiVisibility{display:block!important;position:static!important;inset:auto!important;transform:none!important;width:100%!important;margin:0!important;min-height:34px}
+body.sc-menu-new.scorace-embedded #temporaryTray,body.sc-menu-new.scorace-embedded .cards-panel{display:none!important}
+body.sc-menu-new .scene-bottom{display:none!important}
+body.sc-menu-new .sc-editor-fab{display:flex!important;position:fixed!important;z-index:75!important;top:15px!important;right:15px!important;left:auto!important;width:42px!important;min-width:42px!important;height:42px!important;align-items:center;justify-content:flex-start;flex-direction:row-reverse;gap:10px;overflow:hidden;white-space:nowrap;cursor:pointer;padding:10px!important;border:1px solid #c88953!important;border-radius:12px!important;background:#1d2028ed!important;transition:width .2s}
+body.sc-menu-new .sc-editor-fab svg{width:20px;min-width:20px;height:20px}
+body.sc-menu-new .sc-editor-fab span{opacity:0;transform:translateX(8px);transition:opacity .2s,transform .2s;font:600 12px system-ui,sans-serif}
+body.sc-menu-new .sc-editor-fab:hover,body.sc-menu-new .sc-editor-fab:focus-visible{width:170px!important}
+body.sc-menu-new .sc-editor-fab:hover span,body.sc-menu-new .sc-editor-fab:focus-visible span{opacity:1;transform:translateX(0)}
+body.sc-menu-new #scShowMenus{display:none!important}
+body.sc-menu-new.menus-hidden #scShowMenus{display:block!important;position:fixed!important;left:14px;top:14px;z-index:90;background:#20212ae9;border:1px solid #bd8549;border-radius:10px;color:#f8dc9e;padding:10px 13px;cursor:pointer}
+body.sc-menu-new.menus-hidden .sc-editor-fab,body.sc-menu-new.editing .sc-editor-fab{display:none!important}
+body.sc-menu-new #swatches,body.sc-menu-new #pageColors,body.sc-menu-new #surfaceColors{display:none!important}
+body.sc-menu-new .editor-dialog .hex-row,body.sc-menu-new .editor-dialog .color-custom{display:grid!important;grid-template-columns:38px minmax(0,1fr);gap:9px;align-items:center}
+body.sc-menu-new .editor-dialog .hex-row .color-chip{display:block;width:38px!important;min-width:38px!important;height:38px!important;overflow:hidden!important;border-radius:50%!important;border:1px solid #7c8494!important;padding:2px!important;background:none!important}
+body.sc-menu-new .editor-dialog input[type=color]{border-radius:50%!important;width:38px!important;height:38px!important;padding:2px!important;transform:none!important;cursor:pointer}
+body.sc-menu-new .editor-dialog .hex-row input[type=color]{width:100%!important;height:100%!important;border:none!important;padding:0!important}
+body.sc-menu-new .editor-dialog input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+body.sc-menu-new .editor-dialog input[type=color]::-webkit-color-swatch{border:0;border-radius:50%}
+body.sc-menu-new .editor-dialog .field input:not([type=color]){min-width:0}
+body.sc-menu-new .editor-dialog #colorName{display:none!important}
+@media(max-width:740px){body.sc-menu-new .collection-panel{top:8px!important;left:8px!important;width:min(250px,calc(100vw - 16px))!important;max-height:calc(100dvh - 16px)!important}body.sc-menu-new .sc-editor-fab{top:9px!important;right:9px!important;width:39px!important;height:39px!important}body.sc-menu-new .sc-editor-fab:hover{width:148px!important}}
