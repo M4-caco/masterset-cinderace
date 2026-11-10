@@ -1,6 +1,6 @@
 (()=>{
 'use strict';
-const frame=document.getElementById('scorace-binder-frame');if(!frame)return;let mode='all',ready=false;try{const saved=localStorage.getItem('scorace_binder_mode_v1');if(['all','colored'].includes(saved))mode=saved}catch{}
+const brandLogo=document.querySelector('img.brand-logo');if(brandLogo){brandLogo.addEventListener('error',function(){if(this.getAttribute('src')!=='scorace.png')this.src='scorace.png'},{once:true});brandLogo.src='scorace-logo-nova.webp';brandLogo.style.width='180px';brandLogo.style.height='60px';brandLogo.style.maxWidth='min(36vw,180px)';}const frame=document.getElementById('scorace-binder-frame');if(!frame)return;let mode='all',ready=false;try{const saved=localStorage.getItem('scorace_binder_mode_v1');if(['all','colored'].includes(saved))mode=saved}catch{}
 document.querySelectorAll('[data-collection-mode="owned"]').forEach(el=>el.remove());
 function controls(){document.querySelectorAll('[data-collection-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.collectionMode===mode)))}
 window.refreshScoraceBinder=function(){controls();if(!ready||!window.scoraceBinderSnapshot)return;const snapshot=window.scoraceBinderSnapshot();frame.contentWindow.postMessage({...snapshot,type:'scorace:collection',mode,theme:document.documentElement.classList.contains('dark')?'dark':'light'},location.origin)};
