@@ -1,6 +1,7 @@
 (()=>{
 'use strict';
-const frame=document.getElementById('scorace-binder-frame');if(!frame)return;let mode='all',ready=false;try{const saved=localStorage.getItem('scorace_binder_mode_v1');if(['all','owned','colored'].includes(saved))mode=saved}catch{}
+const frame=document.getElementById('scorace-binder-frame');if(!frame)return;let mode='all',ready=false;try{const saved=localStorage.getItem('scorace_binder_mode_v1');if(['all','colored'].includes(saved))mode=saved}catch{}
+document.querySelectorAll('[data-collection-mode="owned"]').forEach(el=>el.remove());
 function controls(){document.querySelectorAll('[data-collection-mode]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.collectionMode===mode)))}
 window.refreshScoraceBinder=function(){controls();if(!ready||!window.scoraceBinderSnapshot)return;const snapshot=window.scoraceBinderSnapshot();frame.contentWindow.postMessage({...snapshot,type:'scorace:collection',mode,theme:document.documentElement.classList.contains('dark')?'dark':'light'},location.origin)};
 window.openScoraceBinder=function(){if(!frame.getAttribute('src'))frame.src=frame.dataset.src;window.refreshScoraceBinder()};
