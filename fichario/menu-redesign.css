@@ -56,3 +56,39 @@ body.sc-menu-new .editor-dialog input[type=color]::-webkit-color-swatch{border:0
 body.sc-menu-new .editor-dialog .field input:not([type=color]){min-width:0}
 body.sc-menu-new .editor-dialog #colorName{display:none!important}
 @media(max-width:740px){body.sc-menu-new .collection-panel{top:8px!important;left:8px!important;width:min(250px,calc(100vw - 16px))!important;max-height:calc(100dvh - 16px)!important}body.sc-menu-new .sc-editor-fab{top:9px!important;right:9px!important;width:39px!important;height:39px!important}body.sc-menu-new .sc-editor-fab:hover{width:148px!important}}
+
+
+/* Edição: o menu normal deve sair da tela, deixando somente os
+   controles de câmera do editor e o painel de propriedades. */
+body.sc-menu-new.editing #collectionPanel,
+body.sc-menu-new.editing .dock-panel.collection-panel,
+body.sc-menu-new.editing #temporaryTray,
+body.sc-menu-new.editing .cards-panel,
+body.sc-menu-new.editing #binderOrganization,
+body.sc-menu-new.editing #scShowMenus,
+body.sc-menu-new.editing #editMode {
+  display:none!important;
+}
+body.sc-menu-new.editing #editorSceneControls:not([hidden]){
+  display:grid!important;
+  position:fixed!important;
+  top:14px!important;
+  left:14px!important;
+  right:auto!important;
+  bottom:auto!important;
+  z-index:115!important;
+  max-height:calc(100dvh - 28px)!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain;
+}
+body.sc-menu-new.editing #editorDialog{
+  max-height:calc(100dvh - 28px)!important;
+}
+@media(max-width:740px){
+  body.sc-menu-new.editing #editorSceneControls:not([hidden]){
+    top:8px!important;
+    left:8px!important;
+    max-width:min(210px,calc(100vw - 24px))!important;
+    max-height:calc(100dvh - 16px)!important;
+  }
+}
