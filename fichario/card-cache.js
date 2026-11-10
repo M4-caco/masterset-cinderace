@@ -20,7 +20,7 @@ function render(){
  overlay.querySelector("#scLoaderBar").style.width=pct+"%";
  overlay.querySelector(".sc-loader-progress").setAttribute("aria-valuenow",String(pct));
  overlay.querySelector("#scLoaderMeta").textContent=state.cached+" no cache · "+state.loaded+" disponíveis"+(state.errors.length?" · "+state.errors.length+" com falha":"");
- overlay.querySelector("#scLoaderMessage").textContent=state.busy?"Carregando as cartas. Nas próximas visitas, o navegador poderá reutilizá-las.":state.errors.length?"Algumas imagens falharam. Tente novamente ou entre no fichário.":"Imagens baixadas e decodificadas. A cena 3D prepara texturas de cada página conforme necessário.";
+ overlay.querySelector("#scLoaderMessage").textContent=state.busy?"Carregando as cartas. Nas próximas visitas, o navegador poderá reutilizá-las.":state.errors.length?"Algumas imagens falharam. Tente novamente ou entre no fichário.":"Arquivos recebidos. As texturas 3D são preparadas conforme as cartas aparecem.";
  overlay.querySelector("#scLoaderRetry").hidden=state.busy||!state.errors.length;
  overlay.querySelector("#scLoaderSkip").textContent=state.busy?"Entrar enquanto carrega":"Entrar no fichário"
 }
@@ -34,26 +34,17 @@ async function fetchTimed(url,ms){
  try{return await fetch(url,{mode:"cors",credentials:"same-origin",cache:"force-cache",signal:c.signal})}
  finally{clearTimeout(t)}
 }
-async function checkImageDecode(url){
- const image=new Image();image.decoding="async";image.src=url;
- let timer;
- try{
-  await Promise.race([image.decode(),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error("Decodificação excedeu 12 segundos")),12000)})]);
-  if(!image.naturalWidth||!image.naturalHeight)throw new Error("Arquivo não pôde ser decodificado");
- }finally{clearTimeout(timer);image.src=""}
-}
 async function loadOne(url,cache){
  if(/^(data:|blob:)/.test(url))return{ok:true,cached:false};
  if(new URL(url).origin!==location.origin){
   return await new Promise(resolve=>{const img=new Image;let done=false;const finish=ok=>{if(done)return;done=true;clearTimeout(timer);img.onload=img.onerror=null;resolve({ok,cached:false})},timer=setTimeout(()=>finish(false),11000);img.onload=()=>finish(true);img.onerror=()=>finish(false);img.src=url})
  }
- if(cache)try{if(await cache.match(url,{ignoreVary:true})){await checkImageDecode(url);return{ok:true,cached:true}}}catch(e){console.warn("[Scorace] Cache inválido ou erro de decodificação",url,e)}
+ if(cache)try{if(await cache.match(url,{ignoreVary:true}))return{ok:true,cached:true}}catch{}
  let last;
  for(let attempt=0;attempt<2;attempt++)try{
   const response=await fetchTimed(url,attempt?14000:11000);
   if(!response.ok||!response.headers.get("content-type")?.startsWith("image/"))throw Error("HTTP "+response.status+" ou não é imagem");
-  if(cache)try{await cache.put(url,response.clone())}catch(e){console.warn("[Scorace] Cache não disponível:",e)}
-  await checkImageDecode(url);
+  if(cache)try{await cache.put(url,response.clone());return{ok:true,cached:false}}catch(e){console.warn("[Scorace] Sem espaço para cache:",e)}
   return{ok:true,cached:false}
  }catch(e){last=e}
  console.warn("[Scorace] Não foi possível obter a carta",url,last);return{ok:false,cached:false,error:String(last)}
