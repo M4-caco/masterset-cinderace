@@ -33,3 +33,19 @@ body[data-screen=binder]{overflow:hidden}body[data-screen=binder] .app-header{po
 .editor-scene-body{display:grid;gap:9px}.controls-collapsed .editor-scene-body{display:none}.editor-scene-controls.controls-collapsed{width:132px}#editorControlsToggle{display:flex;justify-content:space-between;align-items:center;padding:0 10px;background:none;border-color:transparent}.controls-collapsed #editorControlsToggle span{transform:rotate(90deg)}
 
 .color-custom{display:grid;grid-template-columns:42px 1fr;gap:8px;align-items:center}.color-custom input[type=color]{width:42px;height:40px;padding:4px;border:1px solid #64708466;border-radius:8px;background:#20242c}.color-custom input:not([type=color]){min-width:0;width:100%}@media(min-width:741px){.editing:has(#editorSceneControls:not(.controls-collapsed)) #scaleWrap{left:-55px}}
+
+/* Organização da coleção: ações rápidas sem alterar a seleção de cartas possuídas. */
+.binder-organization{position:relative;z-index:65;flex:none;font-family:Arial,sans-serif}
+.binder-organization summary{list-style:none;display:flex;align-items:center;justify-content:center;cursor:pointer;border:1px solid #494b55;border-radius:10px;background:#24272f;color:#eee;padding:10px 12px;min-height:38px;font-size:11px;font-weight:700;white-space:nowrap}
+.binder-organization summary::-webkit-details-marker{display:none}
+.binder-organization[open] summary,.binder-organization summary:hover{border-color:var(--accent);color:var(--accent)}
+.binder-organization-menu{position:absolute;right:0;top:calc(100% + 6px);z-index:75;display:grid;width:min(250px,75vw);padding:6px;gap:4px;background:#202229;border:1px solid #545963;border-radius:12px;box-shadow:0 12px 30px #0009}
+.binder-organization-menu button{display:block!important;border:0!important;text-align:left!important;border-radius:9px!important;padding:10px!important;min-height:50px!important;width:100%;color:#f4f4f4;background:transparent!important;font-size:12px;font-weight:700;cursor:pointer}
+.binder-organization-menu button:hover,.binder-organization-menu button:focus-visible{background:#ffffff14!important;outline:2px solid #e6b53e55}
+.binder-organization-menu small{display:block;margin-top:4px;color:#a4a8b4;font-size:10px;font-weight:400;white-space:normal}
+.scorace-embedded .binder-organization summary{background:#202020;border-color:#bf302650;color:#f4d664}
+.scorace-embedded .binder-organization-menu{background:#181818;border-color:#bf302650}
+.scorace-embedded[data-master-theme=light] .binder-organization-menu{background:#fff;color:#282828;box-shadow:0 12px 30px #0003}
+.scorace-embedded[data-master-theme=light] .binder-organization-menu button{color:#2b2b2b!important}
+.scorace-embedded[data-master-theme=light] .binder-organization-menu small{color:#666}
+@media(max-width:740px){.binder-organization summary{padding:8px;font-size:10px;min-height:35px}.binder-organization-menu{right:0}}
