@@ -1,0 +1,74 @@
+/* Scorace collection: lightweight two-dimensional card organizer next to 3D binder. */
+body.scorace-embedded #scOrganizer{
+ position:fixed;right:12px;top:70px;bottom:12px;
+ z-index:69;width:290px;max-width:calc(100vw - 24px);
+ display:flex;flex-direction:column;box-sizing:border-box;
+ border:1px solid #875c3f9c;border-radius:16px;
+ color:#f6eee8;background:#171a21ed;backdrop-filter:blur(14px);
+ box-shadow:0 10px 32px #0007;font:12px/1.4 system-ui,Arial,sans-serif;
+ overflow:hidden;transition:width .2s ease;
+}
+body.scorace-embedded #scOrganizer .sc-org-head{
+ flex:0 0 auto;display:flex;justify-content:space-between;align-items:center;gap:9px;
+ padding:12px 13px;border-bottom:1px solid #ffffff1b;
+}
+body.scorace-embedded #scOrganizer .sc-org-head strong{display:block;font-size:13px;font-weight:750;line-height:1.2}
+body.scorace-embedded #scOrganizer .sc-org-head small{display:block;color:#b9abb0;font-size:10px;margin-top:3px}
+body.scorace-embedded #scOrganizer .sc-org-head button{font-size:18px;line-height:1;width:32px;height:32px;flex:none;background:#31303a;color:#f3d6af;border:1px solid #6b5548;border-radius:9px;cursor:pointer}
+body.scorace-embedded #scOrganizer .sc-org-body{flex:1;min-height:0;display:flex;flex-direction:column;padding:10px 11px 12px;gap:9px}
+body.scorace-embedded #scOrganizer .sc-org-family{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+body.scorace-embedded #scOrganizer .sc-org-family:has([data-family=other]){grid-template-columns:repeat(2,minmax(0,1fr))}
+body.scorace-embedded #scOrganizer .sc-org-family button,
+body.scorace-embedded #scOrganizer .sc-org-status button{
+ min-width:0;min-height:34px;cursor:pointer;border:1px solid #574e50;
+ border-radius:9px;background:#242630;color:#d0cace;
+ font:700 10px/1.2 system-ui,sans-serif;padding:6px 4px;
+}
+body.scorace-embedded #scOrganizer .sc-org-family button small{display:block;color:#b9a6ac;margin-top:4px;font-size:9px}
+body.scorace-embedded #scOrganizer .sc-org-family button[aria-pressed=true],
+body.scorace-embedded #scOrganizer .sc-org-status button[aria-pressed=true]{color:#ffd891;background:#6d33283e;border-color:#db985c}
+body.scorace-embedded #scOrganizer .sc-org-status{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px}
+body.scorace-embedded #scOrganizer #scOrgSearch{width:100%;box-sizing:border-box;min-height:35px;padding:8px 10px;background:#10141c;border:1px solid #68606a;color:#f4eee8;border-radius:9px;font:12px system-ui,sans-serif}
+body.scorace-embedded #scOrganizer #scOrgSearch:focus-visible{outline:2px solid #edab6d}
+body.scorace-embedded #scOrganizer #scOrgHint{font-size:10px;color:#baadb5;line-height:1.5;margin:0}
+body.scorace-embedded #scOrganizer .sc-org-grid{
+ display:grid;grid-template-columns:repeat(3,minmax(0,1fr));align-content:start;
+ flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+ scrollbar-width:thin;scrollbar-color:#68606a transparent;gap:8px;padding:3px
+}
+body.scorace-embedded #scOrganizer .sc-org-card{
+ display:flex;flex-direction:column;min-width:0;gap:5px;padding:5px;
+ border:1px solid #494956;border-radius:10px;background:#222630;
+ color:#efecf0;cursor:grab;text-align:center;transition:border-color .15s,transform .15s;
+}
+body.scorace-embedded #scOrganizer .sc-org-card:hover{border-color:#dca46b;transform:translateY(-2px)}
+body.scorace-embedded #scOrganizer .sc-org-card.selected{border-color:#f4bf79;box-shadow:0 0 0 2px #edac4966}
+body.scorace-embedded #scOrganizer .sc-org-card img{display:block;width:100%;height:auto;aspect-ratio:63/88;object-fit:contain;border-radius:5px;background:#0e1015}
+body.scorace-embedded #scOrganizer .sc-org-name{font:600 10px/1.35 system-ui,sans-serif;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:27px}
+body.scorace-embedded #scOrganizer .sc-org-image-error{width:100%;min-height:70px;display:flex;align-items:center;justify-content:center;color:#e9a898;font-size:10px}
+body.scorace-embedded #scOrganizer .sc-org-empty{grid-column:1/-1;margin:0;color:#b8b5be;padding:24px 8px;text-align:center;font-size:12px}
+body.scorace-embedded #scOrganizer .sc-org-pages{display:flex;align-items:center;justify-content:center;gap:10px;font-variant-numeric:tabular-nums;flex:none}
+body.scorace-embedded #scOrganizer .sc-org-pages[hidden]{display:none}
+body.scorace-embedded #scOrganizer .sc-org-pages button{width:37px;height:34px;background:#272b34;border:1px solid #665960;border-radius:9px;color:#f9d394;font-size:23px;cursor:pointer}
+body.scorace-embedded #scOrganizer button:disabled{opacity:.35;cursor:default}
+body.scorace-embedded #scOrganizer .sc-org-cancel{min-height:35px;background:#693a2d;color:#f8e2ce;border:1px solid #ba8658;border-radius:8px;font-weight:700;cursor:pointer}
+body.scorace-embedded #scOrganizer .sc-org-cancel[hidden]{display:none}
+body.scorace-embedded #scOrganizer.collapsed{width:47px;height:48px;bottom:auto}
+body.scorace-embedded #scOrganizer.collapsed .sc-org-body,
+body.scorace-embedded #scOrganizer.collapsed .sc-org-head>div{display:none}
+body.scorace-embedded #scOrganizer.collapsed .sc-org-head{padding:7px;justify-content:center}
+body.scorace-embedded #scOrganizer.collapsed .sc-org-head button{width:32px;height:32px}
+body.scorace-embedded.editing #scOrganizer,
+body.scorace-embedded.menus-hidden #scOrganizer,
+body[data-screen=home] #scOrganizer{display:none!important}
+body.scorace-embedded #scOrganizer button:focus-visible{outline:2px solid #ffc476;outline-offset:2px}
+body.scorace-embedded .binder-canvas.sc-org-drop-target{outline:2px solid #e0af68}
+@media(max-width:940px){
+ body.scorace-embedded #scOrganizer{width:255px;right:9px;top:61px;bottom:9px}
+ body.scorace-embedded #scOrganizer .sc-org-grid{gap:5px}
+}
+@media(max-width:740px){
+ body.scorace-embedded #scOrganizer{width:min(295px,calc(100vw - 18px));right:9px;top:57px;bottom:9px;z-index:90}
+ body.scorace-embedded #scOrganizer .sc-org-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ body.scorace-embedded #scOrganizer.collapsed{width:44px;height:45px}
+}
