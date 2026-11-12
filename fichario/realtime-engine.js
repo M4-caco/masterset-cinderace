@@ -92,7 +92,7 @@ import{a as h,b as R}from"./chunks/chunk-ESUZZES5.js";import{A as W,G as K,H as 
 
 			#endif
 
-		}`};var F=class extends h{constructor(){super(),this.uniforms=b.clone(T.uniforms),this.material=new te({name:T.name,uniforms:this.uniforms,vertexShader:T.vertexShader,fragmentShader:T.fragmentShader}),this._fsQuad=new R(this.material),this._outputColorSpace=null,this._toneMapping=null}render(e,t,a){this.uniforms.tDiffuse.value=a.texture,this.uniforms.toneMappingExposure.value=e.toneMappingExposure,(this._outputColorSpace!==e.outputColorSpace||this._toneMapping!==e.toneMapping)&&(this._outputColorSpace=e.outputColorSpace,this._toneMapping=e.toneMapping,this.material.defines={},Z.getTransfer(this._outputColorSpace)===J&&(this.material.defines.SRGB_TRANSFER=""),this._toneMapping===O?this.material.defines.LINEAR_TONE_MAPPING="":this._toneMapping===I?this.material.defines.REINHARD_TONE_MAPPING="":this._toneMapping===H?this.material.defines.CINEON_TONE_MAPPING="":this._toneMapping===Q?this.material.defines.ACES_FILMIC_TONE_MAPPING="":this._toneMapping===X?this.material.defines.AGX_TONE_MAPPING="":this._toneMapping===V?this.material.defines.NEUTRAL_TONE_MAPPING="":this._toneMapping===k&&(this.material.defines.CUSTOM_TONE_MAPPING=""),this.material.needsUpdate=!0),this.renderToScreen===!0?(e.setRenderTarget(null),this._fsQuad.render(e)):(e.setRenderTarget(t),this.clear&&e.clear(e.autoClearColor,e.autoClearDepth,e.autoClearStencil),this._fsQuad.render(e))}dispose(){this.material.dispose(),this._fsQuad.dispose()}};var ne={name:"FXAAShader",uniforms:{tDiffuse:{value:null},resolution:{value:new m(1/1024,1/512)}},vertexShader:`
+		}`};var F=class extends h{constructor(){super(),this.uniforms=b.clone(T.uniforms),this.material=new te({name:T.name,uniforms:this.uniforms,vertexShader:T.vertexShader,fragmentShader:T.fragmentShader}),this._fsQuad=new R(this.material),this._outputColorSpace=null,this._toneMapping=null}render(e,t,a){this.uniforms.tDiffuse.value=a.texture,this.uniforms.toneMappingExposure.value=e.toneMappingExposure,(this._outputColorSpace!==e.outputColorSpace||this._toneMapping!==e.toneMapping)&&(this._outputColorSpace=e.outputColorSpace,this._toneMapping=e.toneMapping,this.material.defines={},Z.getTransfer(this._outputColorSpace)===J&&(this.material.defines.SRGB_TRANSFER=""),this._toneMapping===O?this.material.defines.LINEAR_TONE_MAPPING="":this._toneMapping===I?this.material.defines.REINHARD_TONE_MAPPING="":this._toneMapping===H?this.material.defines.CINEON_TONE_MAPPING="":this._toneMapping===Q?this.material.defines.ACES_FILMIC_TONE_MAPPING="":this._toneMapping===X?this.material.defines.AGX_TONE_MAPPING="":this._toneMapping===V?this.material.defines.NEUTRAL_TONE_MAPPING="":this._toneMapping===k&&(this.material.defines.CUSTOM_TONE_MAPPING=""),this.material.needsUpdate=!0),this.renderToScreen===!0?(e.setRenderTarget(null),this._fsQuad.render(e)):(e.setRenderTarget(t),this.clear&&e.clear(e.autoClearColor,e.autoClearDepth,e.autoClearStencil),this._fsQuad.render(e))}dispose(){this.material.dispose(),this._fsQuad.dispose()}};var ne={name:"FXAAShader",uniforms:{tDiffuse:{value:null},resolution:{value:new m(1/1024,1/512)},detailStrength:{value:0}},vertexShader:`
 
 		varying vec2 vUv;
 
@@ -105,6 +105,7 @@ import{a as h,b as R}from"./chunks/chunk-ESUZZES5.js";import{A as W,G as K,H as 
 
 		uniform sampler2D tDiffuse;
 		uniform vec2 resolution;
+		uniform float detailStrength;
 		varying vec2 vUv;
 
 		#define EDGE_STEP_COUNT 6
@@ -321,12 +322,24 @@ import{a as h,b as R}from"./chunks/chunk-ESUZZES5.js";import{A as W,G as K,H as 
 
 		}
 
+		vec4 RestoreDetail( vec4 color, LuminanceData l, float blend ) {
+
+			// Reuse the FXAA neighborhood to recover texture detail at reduced resolution.
+			float average = 0.25 * ( l.n + l.s + l.e + l.w );
+			float limit = min( 0.045, 0.25 * l.contrast );
+			float edgeProtection = 1.0 - smoothstep( 0.20, 0.55, l.contrast );
+			float correction = clamp( l.m - average, -limit, limit );
+			color.rgb = clamp( color.rgb + correction * detailStrength * edgeProtection * ( 1.0 - blend ), 0.0, 1.0 );
+			return color;
+
+		}
+
 		vec4 ApplyFXAA( sampler2D  tex2D, vec2 texSize, vec2 uv ) {
 
 			LuminanceData luminance = SampleLuminanceNeighborhood( tex2D, texSize, uv );
 			if ( ShouldSkipPixel( luminance ) ) {
 
-				return Sample( tex2D, uv );
+				return RestoreDetail( Sample( tex2D, uv ), luminance, 0.0 );
 
 			}
 
@@ -345,7 +358,7 @@ import{a as h,b as R}from"./chunks/chunk-ESUZZES5.js";import{A as W,G as K,H as 
 
 			}
 
-			return Sample( tex2D, uv );
+			return RestoreDetail( Sample( tex2D, uv ), luminance, finalBlend );
 
 		}
 
@@ -353,4 +366,38 @@ import{a as h,b as R}from"./chunks/chunk-ESUZZES5.js";import{A as W,G as K,H as 
 
 			gl_FragColor = ApplyFXAA( tDiffuse, resolution.xy, vUv );
 
-		}`};function oe(n=512,e=256){let t=new Float32Array(n*e*4),a=[[-.85,.68,.42,.38,8,[1,.95,.88]],[.92,.4,.55,.5,2.6,[.83,.9,1]],[2.5,.35,.18,.65,7,[.88,.94,1]],[-2.7,.15,.4,.65,2,[1,.94,.86]]];for(let s=0;s<e;s++)for(let i=0;i<n;i++){let o=(i/n-.5)*Math.PI*2,f=(.5-s/e)*Math.PI,r=.035+Math.max(0,Math.sin(f))*.05,c=(s*n+i)*4;t[c]=r,t[c+1]=r,t[c+2]=r*1.08,t[c+3]=1;for(let[p,w,C,x,_,M]of a){let E=Math.abs(Math.atan2(Math.sin(o-p),Math.cos(o-p)))/C,g=Math.abs(f-w)/x,S=Math.max(E,g),d=1-Math.min(1,Math.max(0,(S-.82)/.18)),N=d*d*(3-2*d);for(let l=0;l<3;l++)t[c+l]+=N*_*M[l]}}return{data:t,width:n,height:e}}function fe(n){let e=n.getContext(),t=e.getExtension("EXT_disjoint_timer_query_webgl2"),a=[],s=null,i=null;return{begin(){!t||a.length>=4||(s=e.createQuery(),e.beginQuery(t.TIME_ELAPSED_EXT,s))},end(){s&&(e.endQuery(t.TIME_ELAPSED_EXT),a.push(s),s=null)},poll(){if(!t)return null;let o=e.getParameter(t.GPU_DISJOINT_EXT);for(;a.length&&e.getQueryParameter(a[0],e.QUERY_RESULT_AVAILABLE);){let f=a.shift(),r=e.getQueryParameter(f,e.QUERY_RESULT);e.deleteQuery(f),o||(i=r/1e6)}return o&&(i=null),i},dispose(){for(let o of a)e.deleteQuery(o)}}}function Oe(n,e,t){let a={environment:e.environment,intensity:e.environmentIntensity,rotation:e.environmentRotation.clone(),shadowType:n.shadowMap.type,shadowAuto:n.shadowMap.autoUpdate},s=oe(),i=new ee(s.data,s.width,s.height,Y,K);i.mapping=j,i.minFilter=i.magFilter=q,i.needsUpdate=!0;let o=new ae(n),f=o.fromEquirectangular(i);o.dispose(),i.dispose(),e.environment=f.texture,e.environmentIntensity=.42;let r=new m;n.getDrawingBufferSize(r);let c=new P(r.x,r.y,{type:n.extensions.has("EXT_color_buffer_float")?L:W,depthBuffer:!0}),p=new y(n,c),w=new z(e,t),C=new F,x=new v(ne);p.setPixelRatio(1),p.addPass(w),p.addPass(C),p.addPass(x),n.shadowMap.type=G,n.shadowMap.autoUpdate=!1,n.shadowMap.needsUpdate=!0;let _=[];e.traverse(l=>{l.isLight&&l.castShadow&&_.push({light:l,size:l.shadow.mapSize.x})});let M=2048,E=!1,g=0,S=0,d=fe(n);function N(l){if(l!==M){M=l;for(let{light:u}of _)u.shadow.mapSize.set(l,l),u.shadow.map?.dispose(),u.shadow.map=null,u.shadow.mapPass?.dispose(),u.shadow.mapPass=null;n.shadowMap.needsUpdate=!0}}return{render({dirty:l=!1,moving:u=!1,floating:le=!1,scale:re=1}={}){if(!E){n.getDrawingBufferSize(r),(r.x!==g||r.y!==S)&&(g=r.x,S=r.y,p.setSize(g,S),x.uniforms.resolution.value.set(1/g,1/S)),N(re<.78?1024:2048),(l||u)&&(n.shadowMap.needsUpdate=!0),le?e.environmentRotation.setFromQuaternion(t.quaternion):e.environmentRotation.copy(a.rotation),d.begin();try{p.render()}finally{d.end()}}},get gpuMs(){return d.poll()},dispose(){if(!E){E=!0,d.dispose(),p.dispose(),w.dispose(),C.dispose(),x.dispose(),f.dispose(),e.environment=a.environment,e.environmentIntensity=a.intensity,e.environmentRotation.copy(a.rotation),n.shadowMap.type=a.shadowType,n.shadowMap.autoUpdate=a.shadowAuto;for(let{light:l,size:u}of _)l.shadow.mapSize.x!==u&&(l.shadow.mapSize.set(u,u),l.shadow.map?.dispose(),l.shadow.map=null);n.shadowMap.needsUpdate=!0}}}}export{Oe as createRealtimeEngine};
+		}`};function createStudioEnvironment(width = 512, height = 256) {
+  const data = new Float32Array(width * height * 4);
+  // Linear HDR output of the studio softboxes, prefiltered once by Three.js.
+  const softboxes = [
+    { azimuth: -.85, elevation: .68, spreadX: .42, spreadY: .38, power: 8, tint: [1, .95, .88] },
+    { azimuth: .92, elevation: .40, spreadX: .55, spreadY: .50, power: 2.6, tint: [.83, .90, 1] },
+    { azimuth: 2.5, elevation: .35, spreadX: .18, spreadY: .65, power: 7, tint: [.88, .94, 1] },
+    { azimuth: -2.7, elevation: .15, spreadX: .40, spreadY: .65, power: 2, tint: [1, .94, .86] }
+  ];
+  for (let y = 0; y < height; y++) {
+    const elevation = (.5 - y / height) * Math.PI;
+    const sky = Math.max(0, Math.sin(elevation));
+    for (let x = 0; x < width; x++) {
+      const azimuth = (x / width - .5) * Math.PI * 2;
+      const offset = (y * width + x) * 4;
+      data[offset] = .035 + sky * .045;
+      data[offset + 1] = .035 + sky * .050;
+      data[offset + 2] = .038 + sky * .063;
+      data[offset + 3] = 1;
+      for (const box of softboxes) {
+        const angle = azimuth - box.azimuth;
+        const dx = Math.atan2(Math.sin(angle), Math.cos(angle)) / box.spreadX;
+        const dy = (elevation - box.elevation) / box.spreadY;
+        const distance = Math.max(Math.abs(dx), Math.abs(dy));
+        const edge = Math.min(1, Math.max(0, (1.12 - distance) / .40));
+        const falloff = edge * edge * (3 - 2 * edge);
+        for (let channel = 0; channel < 3; channel++) {
+          data[offset + channel] += falloff * box.power * box.tint[channel];
+        }
+      }
+    }
+  }
+  return {data, width, height};
+}
+function fe(n){let e=n.getContext(),t=e.getExtension("EXT_disjoint_timer_query_webgl2"),a=[],s=null,i=null;return{begin(){!t||a.length>=4||(s=e.createQuery(),e.beginQuery(t.TIME_ELAPSED_EXT,s))},end(){s&&(e.endQuery(t.TIME_ELAPSED_EXT),a.push(s),s=null)},poll(){if(!t)return null;let o=e.getParameter(t.GPU_DISJOINT_EXT);for(;a.length&&e.getQueryParameter(a[0],e.QUERY_RESULT_AVAILABLE);){let f=a.shift(),r=e.getQueryParameter(f,e.QUERY_RESULT);e.deleteQuery(f),o||(i=r/1e6)}return o&&(i=null),i},dispose(){for(let o of a)e.deleteQuery(o)}}}function Oe(n,e,t){let a={environment:e.environment,intensity:e.environmentIntensity,rotation:e.environmentRotation.clone(),shadowType:n.shadowMap.type,shadowAuto:n.shadowMap.autoUpdate},s=createStudioEnvironment(),i=new ee(s.data,s.width,s.height,Y,K);i.mapping=j,i.minFilter=i.magFilter=q,i.needsUpdate=!0;let o=new ae(n),f=o.fromEquirectangular(i);o.dispose(),i.dispose(),e.environment=f.texture,e.environmentIntensity=.42;let r=new m;n.getDrawingBufferSize(r);let c=new P(r.x,r.y,{type:n.extensions.has("EXT_color_buffer_float")?L:W,depthBuffer:!0}),p=new y(n,c),w=new z(e,t),C=new F,x=new v(ne);p.setPixelRatio(1),p.addPass(w),p.addPass(C),p.addPass(x),n.shadowMap.type=G,n.shadowMap.autoUpdate=!1,n.shadowMap.needsUpdate=!0;let _=[];e.traverse(l=>{l.isLight&&l.castShadow&&_.push({light:l,size:l.shadow.mapSize.x})});let M=2048,E=!1,g=0,S=0,d=fe(n);function N(l){if(l!==M){M=l;for(let{light:u}of _)u.shadow.mapSize.set(l,l),u.shadow.map?.dispose(),u.shadow.map=null,u.shadow.mapPass?.dispose(),u.shadow.mapPass=null;n.shadowMap.needsUpdate=!0}}return{render({dirty:l=!1,moving:u=!1,floating:le=!1,scale:re=1}={}){if(!E){n.getDrawingBufferSize(r),(r.x!==g||r.y!==S)&&(g=r.x,S=r.y,p.setSize(g,S),x.uniforms.resolution.value.set(1/g,1/S)),x.uniforms.detailStrength.value=Math.max(0,Math.min(.65,(1-re)*1.8)),N(re<.78?1024:2048),(l||u)&&(n.shadowMap.needsUpdate=!0),le?e.environmentRotation.setFromQuaternion(t.quaternion):e.environmentRotation.copy(a.rotation),d.begin();try{p.render()}finally{d.end()}}},get gpuMs(){return d.poll()},dispose(){if(!E){E=!0,d.dispose(),p.dispose(),w.dispose(),C.dispose(),x.dispose(),f.dispose(),e.environment=a.environment,e.environmentIntensity=a.intensity,e.environmentRotation.copy(a.rotation),n.shadowMap.type=a.shadowType,n.shadowMap.autoUpdate=a.shadowAuto;for(let{light:l,size:u}of _)l.shadow.mapSize.x!==u&&(l.shadow.mapSize.set(u,u),l.shadow.map?.dispose(),l.shadow.map=null);n.shadowMap.needsUpdate=!0}}}}export{Oe as createRealtimeEngine};

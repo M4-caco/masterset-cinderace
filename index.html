@@ -467,11 +467,12 @@
 #item-detail .it-term{margin-top:10px;line-height:1.5}
 #item-detail #item-copy-status:empty{display:none}
 @media(max-width:640px){#item-detail{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:17px}#item-detail .it-detail-grid{grid-template-columns:minmax(0,1fr);gap:12px}#item-detail .it-detail-image{width:100%;height:220px;max-height:30dvh;aspect-ratio:auto}#item-detail .it-detail-image img{max-height:30dvh}}
-</style><link rel="stylesheet" href="scorace-binder.css">
+</style><link rel="stylesheet" href="scorace-binder.css?v=2">
 </head>
 <body class="text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
 
     <div id="zoom-modal" onclick="handleModalClick(event)" class="fixed inset-0 z-[9999] bg-black/85 backdrop-blur-xl flex items-center justify-center hidden opacity-0 pointer-events-none p-4">
+        <button type="button" id="zoom-close-mobile" aria-label="Fechar ampliação" onclick="event.stopPropagation(); hideZoomModal()">×</button>
         <button id="zoom-prev-btn" onclick="event.stopPropagation(); prevZoomCard()" class="hidden sm:flex absolute left-4 sm:left-8 lg:left-16 top-1/2 -translate-y-1/2 z-40 bg-white/90 dark:bg-cinder-dark/90 hover:bg-cinder-orange disabled:opacity-20 text-cinder-orange dark:text-cinder-yellow hover:text-white p-3 sm:p-4 rounded-full border border-cinder-orange/40 shadow-2xl transition active:scale-95 items-center justify-center cursor-pointer select-none">
             ‹
         </button>
@@ -733,7 +734,35 @@
   <details class="it-research"><summary>Sobre o catálogo e a pesquisa</summary><p id="items-coverage"></p><p>Um produto com dois ou três Pokémon conta uma vez no total e uma vez para cada personagem que aparece nele. Edições regionais com embalagens diferentes podem ter registros próprios; tamanhos de roupa não são contados como novos desenhos.</p><p>Só entram produtos com Scorbunny, Raboot ou Cinderace visível na arte, no acessório ou em uma carta / figura exposta na embalagem. Ter uma promo escondida ou aleatória no conteúdo não basta. A ficha de cada item indica onde o Pokémon aparece; os contadores seguem essa aparição visível.</p><p>As fotos são de produtos reais, com preferência por perspectivas que mostram o volume da embalagem. PNGs mantêm a transparência original. Fotos sem transparência são apresentadas sobre uma base clara, sem apagar bordas ou áreas brancas do produto. Confira o nome, o código e a fonte antes de comprar: buscas no eBay, Google ou AliExpress também podem retornar réplicas. O botão AliExpress abre uma pesquisa; não representa um anúncio avaliado ou autenticado.</p><p>Referências: <a href="https://www.pokemon.com/us/pokemon-tcg/product-gallery" target="_blank" rel="noopener noreferrer">Galeria oficial Pokémon TCG</a> · <a href="https://copag.com.br/pokemon/blog" target="_blank" rel="noopener noreferrer">Lançamentos Copag</a> · <a href="https://www.pokemon-card.com/products/" target="_blank" rel="noopener noreferrer">Produtos oficiais do Japão</a></p></details>
 </section>
 
-    <section id="view-binder" class="hidden"><div class="scorace-binder-toolbar"><h2>Fichário</h2><div class="scorace-binder-modes" role="group" aria-label="Cartas disponíveis"><button type="button" data-collection-mode="all">Todas as cartas</button><button type="button" data-collection-mode="owned">Só as que tenho</button><button type="button" data-collection-mode="colored">Tenho em cores</button></div></div><div class="scorace-binder-stage"><iframe id="scorace-binder-frame" title="Fichário 3D do master set" data-src="fichario/index.html?collection=scorace" allow="fullscreen" loading="lazy"></iframe></div></section>
+    <section id="view-binder" class="hidden">
+        <div id="scorace-binder-mobile" hidden>
+            <div class="scorace-binder-toolbar">
+                <h2>Fichário</h2>
+                <button type="button" data-binder-view="3d">Abrir em 3D</button>
+            </div>
+            <div class="scorace-binder-modes" role="group" aria-label="Cartas disponíveis">
+                <button type="button" data-collection-mode="all" aria-pressed="true">Todas as cartas</button>
+                <button type="button" data-collection-mode="owned" aria-pressed="false">Só as que tenho</button>
+                <button type="button" data-collection-mode="colored" aria-pressed="false">Tenho em cores</button>
+            </div>
+            <nav class="scorace-binder-pagination" aria-label="Páginas do fichário">
+                <button type="button" id="binder-mobile-prev" aria-label="Página anterior" disabled>‹</button>
+                <p id="binder-mobile-page" aria-live="polite"></p>
+                <button type="button" id="binder-mobile-next" aria-label="Próxima página" disabled>›</button>
+            </nav>
+            <div class="scorace-binder-sleeves">
+                <div id="binder-mobile-grid" class="scorace-binder-grid" hidden></div>
+                <p id="binder-mobile-status" class="scorace-binder-status" role="status">Carregando as cartas…</p>
+                <button type="button" id="binder-mobile-retry" hidden>Tentar novamente</button>
+            </div>
+        </div>
+        <div class="scorace-binder-return" hidden>
+            <button type="button" data-binder-view="light">Voltar ao fichário leve</button>
+        </div>
+        <div class="scorace-binder-stage">
+            <iframe id="scorace-binder-frame" title="Fichário 3D do master set" data-src="fichario/index.html?collection=scorace" allow="fullscreen" loading="lazy"></iframe>
+        </div>
+    </section>
     </main>
 
     
@@ -2862,6 +2891,6 @@ window.renderItems=render;
 
 })();
 
-</script><script src="scorace-binder.js" defer></script>
+</script><script src="scorace-binder.js?v=2" defer></script>
 </body>
 </html>
