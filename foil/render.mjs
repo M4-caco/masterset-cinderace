@@ -1,6 +1,8 @@
 const clamp = (x, min=0, max=1) => Math.max(min,Math.min(max,x));
 const attackPanel = {top:464, bottom:784};
 const footerTop = 825;
+// Bounds of the Pokémon League stamp in the 356 × 501 reference scan.
+const leagueStamp = {x:283/356, y:178/501, width:59/356, height:64/501, radius:4/356};
 const motifLayout = {
   fogo: {artBottom:366, ruleTop:630, ruleBottom:654},
   pokebola: {artBottom:741, ruleTop:1265, ruleBottom:1306},
@@ -459,7 +461,14 @@ export function paintFoil(scene, pose, mix=.78, lamp=.64) {
   return output;
 }
 
-function fieldMask(w,h,layout,stage,surface) {
+function leagueStampPath(ctx) {
+  const {width:w,height:h}=ctx.canvas;
+  const {x,y,width,height,radius}=leagueStamp;
+  ctx.beginPath();
+  ctx.roundRect(x*w,y*h,width*w,height*h,radius*w);
+}
+
+function fieldMask(w,h,layout,stage,hasLeagueStamp,surface) {
   const ctx=surface(w,h);
   ctx.scale(w/660,h/920);
   ctx.fillStyle='#fff';
@@ -480,6 +489,11 @@ function fieldMask(w,h,layout,stage,surface) {
   ctx.arc(604,55,25,0,Math.PI*2);
   ctx.fill();
   ctx.fillRect(36,858,78,31);
+  if(hasLeagueStamp){
+    ctx.resetTransform();
+    leagueStampPath(ctx);
+    ctx.fill();
+  }
   return ctx.getImageData(0,0,w,h).data;
 }
 
@@ -525,10 +539,17 @@ function mosaicMap(source,w,h,surface) {
 }
 
 function copyPrintDetails(ctx,print,layout,effect) {
-  // Retain only the printed set identifiers or logo from the foil scan.
-  const patches=layout==='gem' ? [[.047,.937,.271,.037]] : [[.797,.421,.153,.131]];
-  if(layout==='gem'&&effect==='faixas')patches.push([.659,.318,.311,.152]);
   const {width:w,height:h}=ctx.canvas;
+  if(layout!=='gem'){
+    ctx.save();
+    leagueStampPath(ctx);
+    ctx.clip();
+    ctx.drawImage(print,0,0,w,h);
+    ctx.restore();
+    return;
+  }
+  const patches=[[.047,.937,.271,.037]];
+  if(effect==='faixas')patches.push([.659,.318,.311,.152]);
   const sw=print.naturalWidth??print.width, sh=print.naturalHeight??print.height;
   for(const [x,y,width,height] of patches){
     ctx.drawImage(print,x*sw,y*sh,width*sw,height*sh,x*w,y*h,width*w,height*h);
@@ -548,7 +569,7 @@ export function prepareFoil(base,config,stencil,print,w,createCanvas,Path2DClass
   const {effect,layout,stage}=config;
   if(print)copyPrintDetails(ctx,print,layout,effect);
   const input=ctx.getImageData(0,0,w,h);
-  const field=fieldMask(w,h,layout,stage,surface), all=field;
+  const field=fieldMask(w,h,layout,stage,Boolean(print)&&layout!=='gem',surface), all=field;
   const protection=new Float32Array(w*h), noise=new Float32Array(w*h);
   const random=seededRandom(2019);
   for(let j=0;j<protection.length;j++){

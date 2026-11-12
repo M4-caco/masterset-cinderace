@@ -18,6 +18,7 @@ const finishes = {
   'fogo-central': 'Símbolos de Energia',
   friend: 'Friend Ball'
 };
+const revisedPreviews = new Set(['colunas', 'fogo-central', 'fogo', 'friend']);
 
 export function prepareReverseCatalog(cards) {
   const byId = new Map(cards.map(card => [card.id, card]));
@@ -73,7 +74,9 @@ export function prepareReverseCatalog(cards) {
 }
 
 export function cardImage(card) {
-  return card.foil ? 'foil/v1/' + card.id + '.webp' : card.imagem;
+  if (!card.foil) return card.imagem;
+  const version = revisedPreviews.has(card.foil.effect) ? '?v=2' : '';
+  return 'foil/v1/' + card.id + '.webp' + version;
 }
 
 export const reverseBaseIds = new Map(additions.map(([id, base]) => [String(id), String(base)]));
