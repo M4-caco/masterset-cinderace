@@ -10,9 +10,8 @@ body.scorace-iframe-fit { overflow: hidden !important; }
   height: calc(100dvh - 175px);
   min-height: 530px;
   overflow: hidden;
-  border: 1px solid #bf30264d;
   border-radius: 22px;
-  background: #fafafa;
+  background: transparent;
 }
 .scorace-binder-stage iframe {
   display: block;
@@ -20,7 +19,6 @@ body.scorace-iframe-fit { overflow: hidden !important; }
   height: 100%;
   border: 0;
 }
-.dark .scorace-binder-stage { background: #101010; }
 
 #scorace-binder-mobile {
   width: min(100%, 550px);
