@@ -1,184 +1,217 @@
-(()=>{
+(() => {
 "use strict";
-const THUMBS="scorace-3d-thumbnails-v2";
-const ORIGINALS="scorace-card-images-v1";
-const memory=new Map();
-const state={key:"",ready:false,loading:false,items:[],errors:[],done:0,total:0,phase:"idle",sceneToken:0,generation:0,scope:null,sceneCheck:null,sceneError:null,sceneCount:null};
-let overlay=null;
-function mount(){
- if(overlay)return;
- overlay=document.createElement("section");
- overlay.id="scCardLoader";overlay.setAttribute("role","status");overlay.setAttribute("aria-live","polite");
- overlay.innerHTML='<div class="sc-loader-card"><div class="sc-loader-logo">✦ SCORACE</div><h2>Preparando as cartas</h2><p id="scLoaderMessage"></p><div class="sc-loader-numbers"><strong id="scLoaderCount">0 / 0</strong><span id="scLoaderPercent">0%</span></div><div class="sc-loader-progress" role="progressbar" aria-label="Cartas necessárias para abrir" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="scLoaderBar"></i></div><p id="scLoaderMeta"></p><div id="scLoaderFailures" hidden></div><div class="sc-loader-actions"><button type="button" id="scLoaderRetry" hidden>Tentar novamente</button></div></div>';
- overlay.querySelector("#scLoaderRetry").onclick=retry;
- const errors=overlay.querySelector("#scLoaderFailures");
- errors.style.cssText="margin-top:14px;max-height:142px;overflow-y:auto;color:#f3c7b3;font:11px/1.5 system-ui;overflow-wrap:anywhere";
- document.body.append(overlay);
-}
-function draw(){
- if(!overlay)return;
- const scene=state.phase==="scene";
- const done=scene?(state.sceneCount?.done??0):Math.max(0,state.done-state.errors.length);
- const total=scene?(state.sceneCount?.total??0):state.total;
- const pct=total?Math.round(done/total*100):0;
- overlay.querySelector("#scLoaderCount").textContent=done+" / "+total;
- overlay.querySelector("#scLoaderPercent").textContent=pct+"%";
- overlay.querySelector("#scLoaderBar").style.width=pct+"%";
- overlay.querySelector(".sc-loader-progress").setAttribute("aria-valuenow",String(pct));
- overlay.querySelector("#scLoaderMessage").textContent=state.loading?"Preparando as imagens prioritárias. As demais carregarão quando forem exibidas.":scene?"Aguardando as texturas das cartas aparecerem na cena 3D.":state.sceneError?"Não foi possível preparar algumas texturas.":"";
- overlay.querySelector("#scLoaderMeta").textContent=scene?"Preparação do 3D":"Miniaturas otimizadas guardadas no navegador";
- const issues=state.sceneError?[{name:"Texturas 3D",error:state.sceneError}]:state.errors;
- const list=overlay.querySelector("#scLoaderFailures");
- list.hidden=!issues.length;
- list.replaceChildren();
- issues.slice(0,12).forEach(issue=>{const line=document.createElement("p");line.textContent=issue.name+": "+issue.error;list.append(line)});
- const retry=overlay.querySelector("#scLoaderRetry");
- retry.hidden=state.loading||state.phase==="scene"&&!state.sceneError||!issues.length;
-}
-function show(){mount();overlay.hidden=false;draw()}
-function names(cards){
- const chosen=new Map();
- const put=c=>{if(typeof c?.image!=="string"||!c.image.trim())return;try{const u=new URL(c.image,document.baseURI);if(!chosen.has(u.href))chosen.set(u.href,{url:u.href,name:String(c.name||"Carta").slice(0,100)})}catch{}};
- cards.slice(0,5).forEach(put);
- return [...chosen.values()]
-}
-function digest(cards,mode){return mode+"|"+names(mode==="owned"?cards.filter(c=>c.owned):cards).map(x=>x.url).join("|")}
-function thumbnail(url){return memory.get(url)||null}
-function withTimeout(url,ms=12000){
- const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),ms);
- return fetch(url,{cache:"force-cache",credentials:"same-origin",signal:controller.signal}).finally(()=>clearTimeout(timer))
-}
-async function toThumbnail(blob){
- if(!blob.size)throw Error("Imagem vazia");
- let bitmap;
- try{
-  bitmap=await createImageBitmap(blob);
-  if(!bitmap.width||!bitmap.height)throw Error("Dimensões inválidas");
-  const scale=Math.min(1,640/Math.max(bitmap.width,bitmap.height));
-  const canvas=document.createElement("canvas");
-  canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
-  const ctx=canvas.getContext("2d",{alpha:false});
-  if(!ctx)throw Error("Canvas 2D indisponível");
-  ctx.drawImage(bitmap,0,0,canvas.width,canvas.height);
-  const resized=await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",.82));
-  if(!resized?.size)throw Error("Não foi possível gerar miniatura");
-  return resized
- }finally{bitmap?.close()}
-}
-async function getImage(item){
- const {url}=item;
- if(memory.has(url))return;
- let cache=null,origCache=null;
- if("caches" in window)try{cache=await caches.open(THUMBS);origCache=await caches.open(ORIGINALS)}catch{}
- if(cache)try{
-  const stored=await cache.match(url,{ignoreVary:true});
-  if(stored?.ok){const blob=await stored.blob();if(blob.size>0){const bmp=await createImageBitmap(blob);if(!bmp.width||!bmp.height)throw Error("Miniatura inválida");bmp.close();memory.set(url,URL.createObjectURL(blob));return}}
- }catch(e){console.warn("[Scorace] Miniatura inválida",item.name,e);await cache.delete(url).catch(()=>{})}
- let error;
- for(let attempt=0;attempt<2;attempt++)try{
-  let response;
-  if(attempt===0&&origCache)response=await origCache.match(url,{ignoreVary:true});
-  if(!response?.ok)response=await withTimeout(url,attempt?16000:12000);
-  if(!response?.ok)throw Error("HTTP "+response?.status);
-  const blob=await response.blob();
-  let thumb=await toThumbnail(blob);
-  if(cache)try{await cache.put(url,new Response(thumb,{headers:{"Content-Type":"image/webp"}}))}catch(e){console.warn("[Scorace] Cache sem espaço",e)}
-  memory.set(url,URL.createObjectURL(thumb));
-  return
- }catch(e){error=e;console.warn("[Scorace] Falha de miniatura",item.url,e)}
- throw error||Error("Imagem inacessível")
-}
-async function start(cards,mode="all",force=false){
- const filtered=mode==="owned"?cards.filter(x=>x.owned):cards;
- const list=names(filtered),key=digest(cards,mode);
- if(!force&&state.key===key&&(state.ready||state.loading||state.errors.length))return;
- state.generation++;
- const current=state.generation;
- state.key=key;state.items=list;state.total=list.length;state.done=0;state.errors=[];state.ready=false;state.loading=true;state.phase="thumbs";state.sceneError=null;state.sceneToken++;
- show();
- if(!list.length){state.loading=false;state.ready=true;draw();window.dispatchEvent(new CustomEvent("scorace:cards-ready",{detail:{count:0}}));return}
- let index=0;
- async function worker(){
-  while(current===state.generation&&index<list.length){
-   const item=list[index++];
-   try{await getImage(item)}catch(e){state.errors.push({name:item.name,error:e?.message||String(e)})}
-   if(current!==state.generation)return;
-   state.done++;draw()
-  }
- }
- await Promise.all(Array.from({length:Math.min(4,list.length)},worker));
- if(current!==state.generation)return;
- state.loading=false;state.ready=!state.errors.length;
- draw();
- if(state.ready)window.dispatchEvent(new CustomEvent("scorace:cards-ready",{detail:{count:list.length}}));
-}
-function isReady(cards,mode){return state.ready&&state.key===digest(cards,mode)}
-function retry(){
- if(state.loading)return;
- if(state.sceneError){
-  state.sceneError=null;
-  window.dispatchEvent(new Event("scorace:cards-retry"));
-  if(state.sceneCheck)waitSceneReady(state.sceneCheck);
-  return
- }
- if(state.scope)start(state.scope.cards,state.scope.mode,true);
-}
-function ensure(cards,mode="all"){if(!Array.isArray(cards)){return}state.scope={cards,mode};start(cards,mode)}
-function waitSceneReady(check){
- if(!state.ready)return;
- const token=++state.sceneToken;
- state.sceneCheck=check;state.sceneError=null;state.sceneCount=null;state.phase="scene";
- show();
- const t=performance.now();
- let previous="";
- function tick(){
-  if(token!==state.sceneToken||!state.ready)return;
-  let result;
-  try{result=check?.()}catch(e){state.sceneError=String(e)}
-  if(result&&Number.isInteger(result.total)){
-   state.sceneCount={done:result.done||0,total:result.total};
-   if(result.failed?.length)state.sceneError="Falha nas imagens: "+result.failed.slice(0,5).map(x=>String(x).split("/").pop()).join(", ");
-   if(result.ready&&!state.sceneError){
-    state.phase="complete";state.sceneCheck=null;state.sceneCount=result;draw();
-    requestAnimationFrame(()=>requestAnimationFrame(()=>{if(token===state.sceneToken&&state.ready)overlay.hidden=true}));
-    return
+
+const assets = new URL("assets/card-textures-v1/", document.currentScript.src);
+const previews = new Map();
+const sheets = new Map();
+const requests = new Map();
+const queue = [];
+const concurrency = 4;
+let running = 0;
+let manifest;
+let overlay;
+let pending;
+let generation = 0;
+
+function loadImage(url) {
+ return new Promise((resolve, reject) => {
+  const image = new Image();
+  if (new URL(url, document.baseURI).origin !== location.origin) image.crossOrigin = "anonymous";
+  const timer = setTimeout(() => finish(new Error("Tempo de resposta esgotado")), 10000);
+  function finish(error) {
+   clearTimeout(timer);
+   image.onload = image.onerror = null;
+   if (error) {
+    image.removeAttribute("src");
+    reject(error);
+   } else {
+    resolve(image);
    }
-   const signature=state.sceneCount.done+"/"+state.sceneCount.total;
-   if(signature!==previous)previous=signature;
   }
-  if(performance.now()-t>16000&&!state.sceneError){state.sceneError="Texturas ainda não prontas. Você pode tentar novamente."}
-  if(state.sceneError){draw();return}
-  draw();setTimeout(tick,160)
- }
- requestAnimationFrame(tick)
+  image.onload = () => finish();
+  image.onerror = () => finish(new Error("Arquivo indisponível ou inválido"));
+  image.src = url;
+ });
 }
 
-async function capture(url,image){
- if(memory.has(url)||!image?.naturalWidth||!image?.naturalHeight)return;
- let cache=null;
- try{
-  const scale=Math.min(1,640/Math.max(image.naturalWidth,image.naturalHeight));
-  const canvas=document.createElement("canvas");
-  canvas.width=Math.max(1,Math.round(image.naturalWidth*scale));canvas.height=Math.max(1,Math.round(image.naturalHeight*scale));
-  const ctx=canvas.getContext("2d",{alpha:false});ctx.drawImage(image,0,0,canvas.width,canvas.height);
-  const blob=await new Promise(resolve=>canvas.toBlob(resolve,"image/webp",.82));
-  if(!blob?.size)return;
-  if("caches" in window){cache=await caches.open(THUMBS);await cache.put(url,new Response(blob,{headers:{"Content-Type":"image/webp"}}))}
-  if(!memory.has(url))memory.set(url,URL.createObjectURL(blob))
- }catch(e){console.warn("[Scorace] Não foi possível otimizar imagem 3D",url,e)}
-}
-function warm(cards,page,pockets){
- const visible=cards.filter(c=>c.slot!==null&&Math.abs(Math.floor(c.slot/pockets)-page*2)<=2);
- let n=0;
- async function queue(){
-  for(const card of visible){if(n++>=4)break;try{await getImage({url:new URL(card.image,document.baseURI).href,name:card.name})}catch{}}
+function loadSheet(number) {
+ if (!sheets.has(number)) {
+  const url = new URL(String(number).padStart(2, "0") + ".webp", assets);
+  const promise = loadImage(url.href).catch(error => {
+   sheets.delete(number);
+   throw error;
+  });
+  sheets.set(number, promise);
+  if (sheets.size > 4) sheets.delete(sheets.keys().next().value);
  }
- queue()
+ return sheets.get(number);
 }
-window.addEventListener("pagehide",()=>{for(const u of memory.values())URL.revokeObjectURL(u);memory.clear()});
-window.ScoraceCardCache={start:ensure,ensure,isReady,thumbnail,capture,waitSceneReady,warm,retry,stats:()=>({ready:state.ready,loading:state.loading,done:state.done,total:state.total,errors:state.errors})};
-if(new URLSearchParams(location.search).get("collection")==="scorace"){
- const open=()=>{mount();show()};
- if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",open,{once:true});else open()
+
+async function makePreview(url) {
+ const source = new URL(url, document.baseURI);
+ if (source.origin === location.origin && !source.search) {
+  try {
+   manifest ??= fetch(new URL("index.json", assets), {signal: AbortSignal.timeout(6000)})
+    .then(response => {
+     if (!response.ok) throw Error("Índice de miniaturas indisponível");
+     return response.json();
+    }).catch(() => {
+     manifest = undefined;
+     return {};
+    });
+   const entry = (await manifest)[source.pathname];
+   if (Array.isArray(entry)) {
+    const [number, x, y, width, height] = entry;
+    const sheet = await loadSheet(number);
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    canvas.getContext("2d", {alpha:false}).drawImage(sheet, x, y, width, height, 0, 0, width, height);
+    const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/webp", .9));
+    if (blob?.size) return URL.createObjectURL(blob);
+   }
+  } catch (error) {
+   console.warn("[Scorace] Usando a imagem original", source.pathname, error);
+  }
+ }
+ await loadImage(url);
+ return url;
+}
+
+function pump() {
+ while (running < concurrency && queue.length) {
+  const task = queue.shift();
+  running++;
+  task.started = true;
+  makePreview(task.url).then(preview => {
+   previews.set(task.url, preview);
+   task.resolve(preview);
+  }, task.reject).finally(() => {
+   requests.delete(task.url);
+   running--;
+   pump();
+  });
+ }
+}
+
+function load(source, priority = false) {
+ const url = new URL(source, document.baseURI).href;
+ if (previews.has(url)) return Promise.resolve(previews.get(url));
+ let task = requests.get(url);
+ if (task) {
+  if (priority && !task.started) {
+   queue.splice(queue.indexOf(task), 1);
+   queue.unshift(task);
+  }
+  return task.promise;
+ }
+ task = {url, started:false};
+ task.promise = new Promise((resolve, reject) => Object.assign(task, {resolve, reject}));
+ requests.set(url, task);
+ if (priority) queue.unshift(task);
+ else queue.push(task);
+ pump();
+ return task.promise;
+}
+
+function thumbnail(source) {
+ return previews.get(new URL(source, document.baseURI).href);
+}
+
+function mount() {
+ if (overlay) return;
+ overlay = document.createElement("section");
+ overlay.id = "scCardLoader";
+ overlay.setAttribute("role", "status");
+ overlay.setAttribute("aria-live", "polite");
+ overlay.innerHTML = '<div class="sc-loader-card"><div class="sc-loader-logo">✦ SCORACE</div><h2>Preparando as cartas</h2><p id="scLoaderMessage"></p><div class="sc-loader-numbers"><strong id="scLoaderCount"></strong><span id="scLoaderPercent"></span></div><div class="sc-loader-progress" role="progressbar" aria-label="Imagens preparadas" aria-valuemin="0" aria-valuemax="100"><i id="scLoaderBar"></i></div><div id="scLoaderFailures" hidden></div><div class="sc-loader-actions"><button type="button" id="scLoaderRetry" hidden>Tentar novamente</button></div></div>';
+ overlay.querySelector("#scLoaderRetry").onclick = () => {
+  if (!pending) return;
+  pending.reset?.();
+  prepare(pending.items, pending.ready, pending.check, pending.reset);
+ };
+ document.body.append(overlay);
+}
+
+function draw(done, total, message, errors = []) {
+ mount();
+ overlay.hidden = false;
+ const pct = total ? Math.round(done / total * 100) : 0;
+ overlay.querySelector("#scLoaderCount").textContent = done + " / " + total;
+ overlay.querySelector("#scLoaderPercent").textContent = pct + "%";
+ overlay.querySelector("#scLoaderBar").style.width = pct + "%";
+ overlay.querySelector(".sc-loader-progress").setAttribute("aria-valuenow", String(pct));
+ overlay.querySelector("#scLoaderMessage").textContent = message;
+ const failures = overlay.querySelector("#scLoaderFailures");
+ failures.hidden = !errors.length;
+ failures.textContent = errors.slice(0, 4).join(" · ");
+ overlay.querySelector("#scLoaderRetry").hidden = !errors.length;
+}
+
+function prepare(items, ready, check, reset) {
+ const token = ++generation;
+ const targets = new Map(items.filter(item => item.image).map(item => [item.image, item.name]));
+ const total = targets.size;
+ let done = [...targets.keys()].filter(thumbnail).length;
+ pending = {items, ready, check, reset};
+
+ function finish() {
+  if (token !== generation) return;
+  pending = null;
+  if (overlay) overlay.hidden = true;
+  ready?.();
+ }
+
+ if (done === total && !check) {
+  finish();
+  return;
+ }
+ const errors = [];
+ const report = () => draw(done, total, errors.length ? "Algumas imagens não puderam ser carregadas." : "Carregando as cartas desta página.");
+ report();
+
+ Promise.all([...targets].map(async ([image, name]) => {
+  if (thumbnail(image)) return;
+  try {
+   await load(image, true);
+   done++;
+  } catch {
+   errors.push(name);
+  }
+  if (token === generation) report();
+ })).then(() => {
+  if (token !== generation) return;
+  if (errors.length) {
+   draw(done, total, "Algumas imagens não puderam ser carregadas.", errors);
+   return;
+  }
+  if (!check) {
+   finish();
+   return;
+  }
+  const deadline = performance.now() + 8000;
+  function waitForTextures() {
+   if (token !== generation) return;
+   const status = check();
+   if (!status || status.ready) {
+    finish();
+    return;
+   }
+   if (status.failed?.length || performance.now() >= deadline) {
+    draw(status.done, status.total, "Não foi possível preparar as texturas 3D.", status.failed?.length ? status.failed : ["A cena 3D demorou para responder."]);
+    return;
+   }
+   draw(status.done, status.total, "Aplicando as imagens no fichário 3D.");
+   setTimeout(waitForTextures, 100);
+  }
+  requestAnimationFrame(waitForTextures);
+ });
+}
+
+window.ScoraceCardCache = {load, thumbnail, prepare, busy: () => pending !== undefined && pending !== null};
+if (new URLSearchParams(location.search).get("collection") === "scorace" && window.parent !== window) {
+ document.addEventListener("DOMContentLoaded", () => {
+  if (!overlay) draw(0, 0, "Conectando ao catálogo do Scorace.");
+ }, {once:true});
 }
 })();

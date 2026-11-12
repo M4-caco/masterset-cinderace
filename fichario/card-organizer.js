@@ -47,9 +47,11 @@ function draw(){
   if(state.selected===card.id)button.classList.add("selected");
   button.title=card.name+" · Clique para selecionar";
   const img=document.createElement("img");img.alt=card.name;img.loading="lazy";img.decoding="async";img.draggable=false;
-  img.src=window.ScoraceCardCache?.thumbnail?.(card.image)||card.image;
-  img.onload=()=>{if(img.naturalWidth)window.ScoraceCardCache?.capture?.(card.image,img)};
-  img.onerror=()=>{img.onerror=null;img.style.display="none";const error=document.createElement("span");error.className="sc-org-image-error";error.textContent="Imagem indisponível";button.prepend(error)};
+  const showError=()=>{img.onerror=null;img.style.display="none";const error=document.createElement("span");error.className="sc-org-image-error";error.textContent="Imagem indisponível";button.prepend(error)};
+  img.onerror=showError;
+  const cache=window.ScoraceCardCache;
+  if(cache)cache.load(card.image).then(url=>{if(img.isConnected)img.src=url},()=>{if(img.isConnected)showError()});
+  else img.src=card.image;
   button.append(img);
   const label=document.createElement("span");label.textContent=card.name;label.className="sc-org-name";button.append(label);
   button.onclick=e=>{if(button.dataset.wasDragging){button.dataset.wasDragging="";return}select(card,e)};
@@ -68,7 +70,7 @@ function draw(){
 }
 function render(cards,mode){
  initUI();state.cards=cards||[];state.mode=mode||"all";
- const next=state.mode+"|"+state.cards.map(c=>c.id+":"+(c.slot===null?"_":c.slot)+":"+(c.owned?"1":"0")).join(";");
+ const next=state.mode+"|"+state.cards.map(c=>c.id+":"+c.image+":"+(c.slot===null?"_":c.slot)+":"+(c.owned?"1":"0")).join(";");
  if(next===renderKey)return;
  renderKey=next;
  if(state.selected&&!state.cards.some(c=>c.id===state.selected&&c.slot===null))state.selected=null;

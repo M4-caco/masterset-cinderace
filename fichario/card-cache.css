@@ -15,3 +15,6 @@
 #scLoaderSkip{background:#5f2922;color:#fff1de;border:1px solid #ab6f43}
 #scLoaderRetry{background:#24252d;color:#f4d6a3;border:1px solid #6c5a55}
 @media(max-width:580px){#scCardLoader .sc-loader-card{padding:26px 20px;border-radius:18px}#scCardLoader h2{font-size:21px}#scCardLoader #scLoaderCount{font-size:24px}}
+
+#scLoaderFailures{max-height:142px;overflow:auto;overflow-wrap:anywhere;color:#f3c7b3;margin-top:14px}
+.scorace-embedded .scene-wrap:not(.webgl-ready)>.binder-canvas{display:none}
