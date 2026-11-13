@@ -128,7 +128,7 @@ function mount() {
  overlay.querySelector("#scLoaderRetry").onclick = () => {
   if (!pending) return;
   pending.reset?.();
-  prepare(pending.items, pending.ready, pending.check, pending.reset);
+  prepare(pending.items, pending.ready, pending.check, pending.reset, pending.options);
  };
  overlay.querySelector("#scLoaderCancel").onclick = () => window.dispatchEvent(new Event("scorace:cancel-page-jump"));
  document.body.append(overlay);
@@ -149,12 +149,21 @@ function draw(done, total, message, errors = []) {
  overlay.querySelector("#scLoaderRetry").hidden = !errors.length;
 }
 
-function prepare(items, ready, check, reset) {
+function prepare(items, ready, check, reset, options = {}) {
+ const {inline = false} = options;
  const token = ++generation;
  const targets = new Map(items.filter(item => item.image).map(item => [item.image, item.name]));
  const total = targets.size;
  let done = [...targets.keys()].filter(thumbnail).length;
- pending = {items, ready, check, reset};
+ const preparation = pending = {items, ready, check, reset, options};
+ mount();
+ overlay.classList.toggle("inline", inline);
+ overlay.classList.remove("inline-textures");
+ overlay.hidden = true;
+ const visibleAt = performance.now() + (inline ? 250 : 0);
+ function showProgress(done, total, message, errors = []) {
+  if (errors.length || performance.now() >= visibleAt) draw(done, total, message, errors);
+ }
 
  function finish() {
   if (token !== generation) return;
@@ -168,8 +177,9 @@ function prepare(items, ready, check, reset) {
   return;
  }
  const errors = [];
- const report = () => draw(done, total, errors.length ? "Algumas imagens não puderam ser carregadas." : "Carregando as cartas desta página.");
+ const report = () => showProgress(done, total, errors.length ? "Algumas imagens não puderam ser carregadas." : "Carregando as cartas desta página.");
  report();
+ if(inline)setTimeout(()=>{if(token===generation&&pending===preparation&&!overlay.classList.contains("inline-textures"))report()},250);
 
  Promise.all([...targets].map(async ([image, name]) => {
   if (thumbnail(image)) return;
@@ -190,6 +200,7 @@ function prepare(items, ready, check, reset) {
    finish();
    return;
   }
+  overlay.classList.add("inline-textures");
   const deadline = performance.now() + 8000;
   function waitForTextures() {
    if (token !== generation) return;
@@ -199,10 +210,10 @@ function prepare(items, ready, check, reset) {
     return;
    }
    if (status.failed?.length || performance.now() >= deadline) {
-    draw(status.done, status.total, "Não foi possível preparar as texturas 3D.", status.failed?.length ? status.failed : ["A cena 3D demorou para responder."]);
+    showProgress(status.done, status.total, "Não foi possível preparar as texturas 3D.", status.failed?.length ? status.failed : ["A cena 3D demorou para responder."]);
     return;
    }
-   draw(status.done, status.total, "Aplicando as imagens no fichário 3D.");
+   showProgress(status.done, status.total, "Aplicando as imagens no fichário 3D.");
    setTimeout(waitForTextures, 100);
   }
   requestAnimationFrame(waitForTextures);

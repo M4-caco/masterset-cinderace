@@ -18,3 +18,13 @@
 
 #scLoaderFailures{max-height:142px;overflow:auto;overflow-wrap:anywhere;color:#f3c7b3;margin-top:14px}
 .scorace-embedded .scene-wrap:not(.webgl-ready)>.binder-canvas{display:none}
+#scCardLoader.inline {
+ inset:auto auto 68px 50%;transform:translateX(-50%);width:min(330px,calc(100vw - 24px));
+ padding:0;background:none;backdrop-filter:none;pointer-events:none;
+}
+#scCardLoader.inline .sc-loader-card {
+ width:100%;padding:8px 12px;border-radius:10px;background:#25262ded;box-shadow:0 4px 18px #0005;
+}
+#scCardLoader.inline :is(.sc-loader-logo,h2,.sc-loader-numbers,.sc-loader-progress) { display:none; }
+#scCardLoader.inline .sc-loader-actions { margin:0; }
+#scCardLoader.inline .sc-loader-actions button { pointer-events:auto;margin-top:6px;padding:4px 8px; }

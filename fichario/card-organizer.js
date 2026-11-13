@@ -22,6 +22,7 @@ function initUI(){
   toggle.querySelector(".sc-pill-icon").textContent=collapsed?"+":"−";
   toggle.setAttribute("aria-label",collapsed?"Abrir cartas avulsas":"Recolher cartas avulsas");
   toggle.setAttribute("aria-expanded",String(!collapsed));
+  window.dispatchEvent(new Event("scorace:organizer-resize"));
  };
  root.querySelectorAll("[data-org-status]").forEach(btn=>btn.onclick=()=>{state.status=btn.dataset.orgStatus;state.page=0;draw()});
  root.querySelector("#scOrgSearch").oninput=event=>{state.search=event.target.value;state.page=0;draw()};
@@ -97,5 +98,5 @@ function init(options){
   canvas.addEventListener("drop",e=>{if(!state.selected)return;e.preventDefault();const ok=api?.drop?.({clientX:e.clientX,clientY:e.clientY});if(ok){state.selected=null;renderKey="";draw()}});
  }
 }
-window.ScoraceCardOrganizer={init,render,dropped,close:()=>{if(root&&!root.classList.contains("collapsed"))root.querySelector("#scOrgToggle").click()},state:()=>({...state,cards:undefined})};
+window.ScoraceCardOrganizer={init,render,dropped,close:()=>{if(root&&!root.classList.contains("collapsed"))document.getElementById("scOrgToggle")?.click()},state:()=>({...state,cards:undefined})};
 })();

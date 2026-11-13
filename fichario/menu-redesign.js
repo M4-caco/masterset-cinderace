@@ -37,7 +37,18 @@ function setupScoraceMenu() {
   }
 
   const binder = section('Fichário', 'scMenuBinder');
-  binder.append(document.querySelector('.binder-heading'), document.querySelector('.book-toolbar'));
+  binder.append(document.querySelector('.binder-heading'));
+  const bookToolbar = document.querySelector('.book-toolbar');
+  const pagination = bookToolbar.querySelector('.pagination');
+  pagination.classList.add('sc-bottom-pagination');
+  pagination.setAttribute('role', 'group');
+  pagination.setAttribute('aria-label', 'Páginas do fichário');
+  workspace.append(pagination);
+  const cameraBook = document.createElement('div');
+  cameraBook.className = 'sc-camera-book';
+  cameraBook.append(get('toggleBook'), get('quickZip'));
+  get('cameraDialog').append(cameraBook);
+  bookToolbar.hidden = true;
   const editor = get('editMode');
   pill(editor, 'Editar fichário', editor.querySelector('svg'));
   editor.setAttribute('aria-controls', 'editorDialog');
@@ -48,6 +59,8 @@ function setupScoraceMenu() {
   toolbar.className = 'sc-tool-bar';
   toolbar.append(editor);
   workspace.append(toolbar);
+  const organizer = get('scOrganizer');
+  if (organizer) toolbar.append(organizer.querySelector('#scOrgToggle'));
 
   for (const [id, label, dialogId] of [
     ['remove', 'Remoção', 'removeDialog'],
@@ -61,7 +74,7 @@ function setupScoraceMenu() {
     trigger.setAttribute('aria-expanded', 'false');
     trigger.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[id]}</svg>`;
     pill(trigger, label, trigger.querySelector('svg'));
-    toolbar.append(trigger);
+    toolbar.insertBefore(trigger, get('scOrgToggle'));
     const dialog = get(dialogId);
     trigger.onclick = () => {
       if (document.body.classList.contains('sc-exporting')) return;
@@ -73,6 +86,9 @@ function setupScoraceMenu() {
     dialog.querySelector('[data-close-tool]').onclick = () => dialog.close();
     dialog.addEventListener('close', () => trigger.setAttribute('aria-expanded', 'false'));
   }
+  get('scOrgToggle')?.addEventListener('click', () => {
+    for (const dialog of document.querySelectorAll('.sc-tool-dialog[open]')) dialog.close();
+  });
   editor.addEventListener('click', () => {
     for (const dialog of document.querySelectorAll('.sc-tool-dialog[open]')) dialog.close();
   });
@@ -99,15 +115,6 @@ function setupScoraceMenu() {
   }
   collection.append(modes);
 
-  const screen = section('Interface', 'scMenuScreen');
-  const visibility = get('uiVisibility');
-  screen.append(visibility);
-  const show = document.createElement('button');
-  show.id = 'scShowMenus';
-  show.type = 'button';
-  show.textContent = '☰ Mostrar controles';
-  show.onclick = () => visibility.click();
-  workspace.append(show);
   window.addEventListener('message', event => {
     if (event.origin !== location.origin || event.source !== window.parent || event.data?.type !== 'scorace:collection') return;
     for (const button of modes.children) button.setAttribute('aria-pressed', String(button.dataset.mode === event.data.mode));
