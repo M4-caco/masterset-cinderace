@@ -242,7 +242,7 @@ body.sc-exporting .sc-tool-bar .sc-expand-pill { pointer-events:none; }
 body:not(.sc-page-jumping) #scLoaderCancel { display:none; }
 #scLoaderCancel { background:#2a272b;color:#ffe1c7;border:1px solid #8c674e; }
 body.sc-menu-new .sc-page-jump input:focus-visible { outline:2px solid #ffc48a;outline-offset:2px; }
-body.scorace-embedded.editing #viewport:not(.webgl-ready) .slot img { visibility:hidden; }
+body.editing:not(.editor-cards-visible) #viewport:not(.webgl-ready) .slot img { visibility:hidden; }
 
 /* Keep the arrows and the page field together at the bottom of the scene. */
 body.sc-menu-new .sc-bottom-pagination {
@@ -311,9 +311,50 @@ body.scorace-embedded #viewport:not(.webgl-ready) #book.manual-cover #frontCover
   transform:translateZ(calc(var(--pile-depth) + 5px)) rotateY(var(--manual-cover-angle));
   transition:none;
 }
-body.scorace-embedded.editing #viewport:not(.webgl-ready) .turn-leaf img { visibility:hidden; }
+body.editing:not(.editor-cards-visible) #viewport:not(.webgl-ready) .turn-leaf img { visibility:hidden; }
 .turn-leaf.animate .leaf-strip,
 .turn-leaf.animate .leaf-clip::after {
   animation-duration: var(--leaf-duration, 1.1s);
   animation-delay: var(--leaf-delay, 0s);
 }
+.editor-dialog .editor-card-visibility {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin:0 0 12px;
+}
+.editor-card-visibility input { accent-color:#f49b5c; }
+.page-layout-editor { margin-bottom:22px; }
+.page-layout-editor h3 { font-size:15px; margin:0 0 6px; }
+.page-layout-editor p { margin:0 0 10px; font-size:12px; line-height:1.45; }
+.editor-spread-picker {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:5px;
+  margin-bottom:10px;
+}
+.editor-spread-picker button { min-height:34px; }
+.editor-page-number {
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:12px;
+}
+.editor-dialog .editor-page-number label { margin:0; }
+.editor-dialog .editor-page-number input { width:5.2em; padding:6px 8px; }
+.page-layout-editor .page-type-option {
+  grid-template-rows:auto 1fr;
+  gap:5px;
+  padding:6px 3px;
+  color:#f4eee9;
+  font:600 10px/1.2 system-ui,sans-serif;
+  text-align:center;
+}
+.page-layout-editor .page-type-option svg { width:36px; height:47px; }
+.page-layout-editor button[aria-pressed=true] { border-color:#f49b5c; background:#603b2d; color:#ffe0be; }
+.page-layout-editor button[aria-pressed=true] svg { color:#ffd3aa; }
+.page-layout-editor #pageLayoutStatus { margin:8px 0 0; }
+.page-layout-editor #pageLayoutStatus:empty { display:none; }
+body.editing .editor-page-selectable,
+body.editing .editor-page-selectable .slot { cursor:pointer; }
+body.editing .editor-page-selected { outline:2px solid #f49b5c; outline-offset:2px; }
