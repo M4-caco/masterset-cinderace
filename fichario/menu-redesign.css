@@ -358,3 +358,5 @@ body.editing:not(.editor-cards-visible) #viewport:not(.webgl-ready) .turn-leaf i
 body.editing .editor-page-selectable,
 body.editing .editor-page-selectable .slot { cursor:pointer; }
 body.editing .editor-page-selected { outline:2px solid #f49b5c; outline-offset:2px; }
+body.scorace-embedded #cardDialog.sc-imported-card #cardName { pointer-events:auto; }
+body.scorace-embedded #cardDialog.sc-imported-card .card-back-field { display:flex; }

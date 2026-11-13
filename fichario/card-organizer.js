@@ -3,8 +3,8 @@
 let root=null,api=null,renderKey="";
 const state={cards:[],family:"cinderace",status:"all",search:"",page:0,selected:null};
 const pageSize=12;
-const familyList=[["scorbunny","Scorbunny"],["raboot","Raboot"],["cinderace","Cinderace"],["other","Outras"]];
-function family(c){const n=(c.name||"").toLowerCase();return /scorbunny|ヒバニー|炎兔儿|炎兔兒/.test(n)?"scorbunny":/raboot|ラビフット|腾蹴小将|騰蹴小將/.test(n)?"raboot":/cinderace|エースバーン|闪焰王牌|閃焰王牌/.test(n)?"cinderace":"other"}
+const familyList=[["scorbunny","Scorbunny"],["raboot","Raboot"],["cinderace","Cinderace"],["other","Outras"],["imported","Importadas"]];
+function family(c){if(!c.catalog)return "imported";const n=(c.name||"").toLowerCase();return /scorbunny|ヒバニー|炎兔儿|炎兔兒/.test(n)?"scorbunny":/raboot|ラビフット|腾蹴小将|騰蹴小將/.test(n)?"raboot":/cinderace|エースバーン|闪焰王牌|閃焰王牌/.test(n)?"cinderace":"other"}
 function available(){const q=state.search.trim().toLocaleLowerCase("pt-BR");return state.cards.filter(c=>c.slot===null&&family(c)===state.family&&(state.status==="all"||(state.status==="owned")===!!c.owned)&&(!q||(String(c.name)+" "+c.id).toLocaleLowerCase("pt-BR").includes(q)))}
 function initUI(){
  if(root)return;
@@ -16,6 +16,12 @@ function initUI(){
  toggle.innerHTML='<span class="sc-pill-label"><span>Cartas avulsas</span></span><span class="sc-pill-icon" aria-hidden="true">−</span>';
  const panel=root.querySelector(".sc-org-body");
  panel.id="scOrgBody";
+ const upload=document.createElement("button");
+ upload.type="button";
+ upload.className="sc-org-upload";
+ upload.textContent="+ Adicionar imagem";
+ upload.onclick=()=>api?.upload?.();
+ panel.prepend(upload);
  toggle.setAttribute("aria-controls",root.id);
  toggle.onclick=()=>setOpen(root.classList.contains("collapsed"));
  root.querySelectorAll("[data-org-status]").forEach(btn=>btn.onclick=()=>{state.status=btn.dataset.orgStatus;state.page=0;draw()});
@@ -46,7 +52,7 @@ function draw(){
  if(!root)return;
  const outside=state.cards.filter(c=>c.slot===null);
  root.querySelector("#scOrgTotal").textContent=outside.length+" fora do fichário";
- const familyBtns=familyList.filter(pair=>pair[0]!=="other"||outside.some(c=>family(c)==="other")).map(pair=>{
+ const familyBtns=familyList.filter(([key])=>!["other","imported"].includes(key)||outside.some(c=>family(c)===key)).map(pair=>{
   const btn=document.createElement("button");btn.type="button";btn.dataset.family=pair[0];btn.setAttribute("aria-pressed",String(state.family===pair[0]));btn.textContent=pair[1];
   const num=document.createElement("small");num.textContent=String(outside.filter(c=>family(c)===pair[0]).length);btn.append(num);
   btn.onclick=()=>{state.family=pair[0];state.page=0;draw()};return btn
@@ -68,7 +74,7 @@ function draw(){
   else img.src=card.image;
   button.append(img);
   const label=document.createElement("span");label.textContent=card.name;label.className="sc-org-name";button.append(label);
-  button.onclick=e=>{if(button.dataset.wasDragging){button.dataset.wasDragging="";return}select(card,e)};
+  button.onclick=e=>{if(button.dataset.wasDragging){button.dataset.wasDragging="";return}if(card.catalog)select(card,e);else api?.edit?.(card.id)};
   button.addEventListener("dragstart",e=>{button.dataset.wasDragging="1";e.dataTransfer?.setData("text/plain",card.id);if(e.dataTransfer)e.dataTransfer.effectAllowed="move";select(card,e,true);button.classList.add("selected")});
   button.addEventListener("dragend",()=>{button.dataset.wasDragging="";if(api?.carrying?.()){api.cancel();state.selected=null;draw()}});
   fragment.append(button)
@@ -84,7 +90,7 @@ function draw(){
 }
 function render(cards){
  initUI();state.cards=cards;
- const next=state.cards.map(c=>c.id+":"+c.image+":"+(c.slot===null?"_":c.slot)+":"+(c.owned?"1":"0")).join(";");
+ const next=JSON.stringify(state.cards.map(c=>[c.id,c.name,c.catalog?c.image:null,c.slot,c.owned]));
  if(next===renderKey)return;
  renderKey=next;
  if(state.selected&&!state.cards.some(c=>c.id===state.selected&&c.slot===null))state.selected=null;
@@ -92,6 +98,11 @@ function render(cards){
  draw()
 }
 function dropped(){state.selected=null;renderKey="";draw()}
+function showImports(){
+ state.family="imported";state.status="all";state.search="";state.page=0;
+ root.querySelector("#scOrgSearch").value="";
+ draw();
+}
 function init(options){
  api=options;initUI();
  const canvas=document.querySelector(".binder-canvas");
@@ -101,5 +112,5 @@ function init(options){
   canvas.addEventListener("drop",e=>{if(!state.selected)return;e.preventDefault();const ok=api?.drop?.({clientX:e.clientX,clientY:e.clientY});if(ok){state.selected=null;renderKey="";draw()}});
  }
 }
-window.ScoraceCardOrganizer={init,render,dropped,close:()=>setOpen(false),state:()=>({...state,cards:undefined})};
+window.ScoraceCardOrganizer={init,render,dropped,showImports,close:()=>setOpen(false),state:()=>({...state,cards:undefined})};
 })();
