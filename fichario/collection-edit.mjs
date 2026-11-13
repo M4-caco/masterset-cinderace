@@ -1,5 +1,6 @@
 export function setupCollectionEdit(actions) {
   const byId = id => document.getElementById(id);
+  const dialog = byId('removeDialog');
   const quick = byId('quickRemoveCards');
   const stop = byId('stopQuickRemove');
   const species = byId('removePokemonSpecies');
@@ -25,7 +26,10 @@ export function setupCollectionEdit(actions) {
 
   quick.onclick = () => {
     setQuickRemove(!active);
-    if (active) stop.focus({ preventScroll: true });
+    if (active) {
+      dialog.close();
+      stop.focus({ preventScroll: true });
+    }
   };
   stop.onclick = () => setQuickRemove(false);
   species.onchange = updateCount;

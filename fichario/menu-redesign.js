@@ -1,42 +1,117 @@
-function setupScoraceMenu(){
-const panel=document.querySelector('#collectionPanel .dock-content'),workspace=document.getElementById('binderWorkspace');
-if(!panel||!workspace||panel.dataset.newMenu)return;
-panel.dataset.newMenu='true';document.body.classList.add('sc-menu-new');
-const section=(name,id)=>{const s=document.createElement('section');s.className='sc-menu-section';s.id=id;const h=document.createElement('h3');h.textContent=name;s.append(h);panel.append(s);return s};
-const binder=section('Fichário','scMenuBinder'),heading=document.querySelector('.binder-heading');
-if(heading)binder.append(heading);
-const editor=document.getElementById('editMode');
-if(editor){
-  const label = document.createElement('span');
-  label.className = 'sc-pill-label';
-  label.textContent = 'Editar fichário';
-  const icon = document.createElement('span');
-  icon.className = 'sc-pill-icon';
-  icon.append(editor.querySelector('svg'));
-  editor.replaceChildren(label, icon);
-  editor.classList.add('sc-editor-fab', 'sc-expand-pill');
+const icons = {
+  remove: '<path d="m7 20-4-4a2 2 0 0 1 0-3l9-9a2 2 0 0 1 3 0l5 5a2 2 0 0 1 0 3l-8 8H7Z"/><path d="m7 9 8 8m-3 3h9"/>',
+  camera: '<path d="M3 7h4l2-3h6l2 3h4v12H3z"/><circle cx="12" cy="13" r="3"/>',
+  save: '<path d="M12 3v12m-4-4 4 4 4-4M4 16v5h16v-5"/>'
+};
+
+function pill(button, label, icon) {
+  const text = document.createElement('span');
+  text.className = 'sc-pill-label';
+  text.textContent = label;
+  const circle = document.createElement('span');
+  circle.className = 'sc-pill-icon';
+  circle.append(icon);
+  button.replaceChildren(text, circle);
+  button.classList.add('sc-expand-pill');
+  button.setAttribute('aria-label', label);
+}
+
+function setupScoraceMenu() {
+  if (!document.body.classList.contains('scorace-embedded')) return;
+  const get = id => document.getElementById(id);
+  const panel = document.querySelector('#collectionPanel .dock-content');
+  const workspace = get('binderWorkspace');
+  if (!panel || !workspace || panel.dataset.newMenu) return;
+  panel.dataset.newMenu = 'true';
+  document.body.classList.add('sc-menu-new');
+
+  function section(name, id) {
+    const group = document.createElement('section');
+    const title = document.createElement('h3');
+    group.className = 'sc-menu-section';
+    group.id = id;
+    title.textContent = name;
+    group.append(title);
+    panel.append(group);
+    return group;
+  }
+
+  const binder = section('Fichário', 'scMenuBinder');
+  binder.append(document.querySelector('.binder-heading'), document.querySelector('.book-toolbar'));
+  const editor = get('editMode');
+  pill(editor, 'Editar fichário', editor.querySelector('svg'));
   editor.setAttribute('aria-controls', 'editorDialog');
   editor.setAttribute('aria-expanded', 'false');
-  workspace.append(editor);
+  editor.classList.add('sc-editor-fab');
+
+  const toolbar = document.createElement('div');
+  toolbar.className = 'sc-tool-bar';
+  toolbar.append(editor);
+  workspace.append(toolbar);
+
+  for (const [id, label, dialogId] of [
+    ['remove', 'Remoção', 'removeDialog'],
+    ['camera', 'Câmera', 'cameraDialog'],
+    ['save', 'Salvar', 'saveImageDialog']
+  ]) {
+    const trigger = document.createElement('button');
+    trigger.id = id + 'BinderTool';
+    trigger.type = 'button';
+    trigger.setAttribute('aria-controls', dialogId);
+    trigger.setAttribute('aria-expanded', 'false');
+    trigger.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[id]}</svg>`;
+    pill(trigger, label, trigger.querySelector('svg'));
+    toolbar.append(trigger);
+    const dialog = get(dialogId);
+    trigger.onclick = () => {
+      if (document.body.classList.contains('sc-exporting')) return;
+      if (dialog.open) { dialog.close(); return; }
+      for (const other of document.querySelectorAll('.sc-tool-dialog[open]')) other.close();
+      dialog.show();
+      trigger.setAttribute('aria-expanded', 'true');
+    };
+    dialog.querySelector('[data-close-tool]').onclick = () => dialog.close();
+    dialog.addEventListener('close', () => trigger.setAttribute('aria-expanded', 'false'));
+  }
+  editor.addEventListener('click', () => {
+    for (const dialog of document.querySelectorAll('.sc-tool-dialog[open]')) dialog.close();
+  });
+
+  get('cameraViews').append(document.querySelector('.camera-bar'), document.querySelector('.scene-top'));
+  get('cameraZoom').append(document.querySelector('.zoom-control'));
+  for (const id of ['emptyBinder', 'resetBinder']) get('collectionOrganizationActions').append(get(id));
+  get('binderOrganization').hidden = true;
+  document.querySelector('#collectionPanel .dock-quick')?.remove();
+  get('trayToggle').hidden = true;
+
+  const collection = section('Coleção', 'scMenuCollection');
+  const modes = document.createElement('div');
+  modes.className = 'sc-modes';
+  modes.id = 'scModes';
+  for (const [mode, label] of [['all', 'Todas'], ['owned', 'Só tenho'], ['colored', 'Tenho coloridas']]) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.dataset.mode = mode;
+    button.textContent = label;
+    button.setAttribute('aria-pressed', String(mode === 'all'));
+    button.onclick = () => window.parent.postMessage({type:'scorace:set-mode', mode}, location.origin);
+    modes.append(button);
+  }
+  collection.append(modes);
+
+  const screen = section('Interface', 'scMenuScreen');
+  const visibility = get('uiVisibility');
+  screen.append(visibility);
+  const show = document.createElement('button');
+  show.id = 'scShowMenus';
+  show.type = 'button';
+  show.textContent = '☰ Mostrar controles';
+  show.onclick = () => visibility.click();
+  workspace.append(show);
+  window.addEventListener('message', event => {
+    if (event.origin !== location.origin || event.source !== window.parent || event.data?.type !== 'scorace:collection') return;
+    for (const button of modes.children) button.setAttribute('aria-pressed', String(button.dataset.mode === event.data.mode));
+  });
 }
-const toolbar=document.querySelector('.book-toolbar');if(toolbar)binder.append(toolbar);
-const view=section('Visualização','scMenuView');
-for(const selector of ['.camera-bar','.scene-top']){const item=document.querySelector(selector);if(item)view.append(item)}
-const collection=section('Coleção','scMenuCollection');
-const modes=document.createElement('div');modes.className='sc-modes';modes.id='scModes';
-for(const [mode,label] of [['all','Todas'],['owned','Só tenho'],['colored','Tenho coloridas']]){
-const button=document.createElement('button');button.type='button';button.dataset.mode=mode;button.textContent=label;
-button.onclick=()=>{for(const b of modes.children)b.setAttribute('aria-pressed',String(b.dataset.mode===mode));window.parent.postMessage({type:'scorace:set-mode',mode},location.origin)};
-modes.append(button)}collection.append(modes);
-const organize=document.getElementById('binderOrganization');if(organize){organize.open=false;collection.append(organize)}
-const zoom=section('Zoom','scMenuZoom'),zc=document.querySelector('.zoom-control');if(zc)zoom.append(zc);
-const quality=section('Desempenho','scMenuQuality');for(const selector of ['.render-quality','#renderStatus']){const el=document.querySelector(selector);if(el)quality.append(el)}
-const screen=section('Interface','scMenuScreen'),visibility=document.getElementById('uiVisibility');
-if(visibility)screen.append(visibility);
-const show=document.createElement('button');show.id='scShowMenus';show.type='button';show.textContent='☰ Mostrar controles';show.onclick=()=>visibility?.click();workspace.append(show);
-document.querySelector('#collectionPanel .dock-quick')?.remove();
-document.getElementById('trayToggle')?.setAttribute('hidden','');
-window.addEventListener('message',e=>{if(e.origin!==location.origin||e.source!==window.parent||e.data?.type!=='scorace:collection')return;for(const b of modes.children)b.setAttribute('aria-pressed',String(b.dataset.mode===e.data.mode))});
-for(const b of modes.children)b.setAttribute('aria-pressed',String(b.dataset.mode==='all'));
-}
-if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setupScoraceMenu,{once:true});else setupScoraceMenu();
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupScoraceMenu, {once:true});
+else setupScoraceMenu();

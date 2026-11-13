@@ -124,12 +124,13 @@ function mount() {
  overlay.id = "scCardLoader";
  overlay.setAttribute("role", "status");
  overlay.setAttribute("aria-live", "polite");
- overlay.innerHTML = '<div class="sc-loader-card"><div class="sc-loader-logo">✦ SCORACE</div><h2>Preparando as cartas</h2><p id="scLoaderMessage"></p><div class="sc-loader-numbers"><strong id="scLoaderCount"></strong><span id="scLoaderPercent"></span></div><div class="sc-loader-progress" role="progressbar" aria-label="Imagens preparadas" aria-valuemin="0" aria-valuemax="100"><i id="scLoaderBar"></i></div><div id="scLoaderFailures" hidden></div><div class="sc-loader-actions"><button type="button" id="scLoaderRetry" hidden>Tentar novamente</button></div></div>';
+ overlay.innerHTML = '<div class="sc-loader-card"><div class="sc-loader-logo">✦ SCORACE</div><h2>Preparando as cartas</h2><p id="scLoaderMessage"></p><div class="sc-loader-numbers"><strong id="scLoaderCount"></strong><span id="scLoaderPercent"></span></div><div class="sc-loader-progress" role="progressbar" aria-label="Imagens preparadas" aria-valuemin="0" aria-valuemax="100"><i id="scLoaderBar"></i></div><div id="scLoaderFailures" hidden></div><div class="sc-loader-actions"><button type="button" id="scLoaderRetry" hidden>Tentar novamente</button><button type="button" id="scLoaderCancel">Parar de folhear</button></div></div>';
  overlay.querySelector("#scLoaderRetry").onclick = () => {
   if (!pending) return;
   pending.reset?.();
   prepare(pending.items, pending.ready, pending.check, pending.reset);
  };
+ overlay.querySelector("#scLoaderCancel").onclick = () => window.dispatchEvent(new Event("scorace:cancel-page-jump"));
  document.body.append(overlay);
 }
 
@@ -208,7 +209,13 @@ function prepare(items, ready, check, reset) {
  });
 }
 
-window.ScoraceCardCache = {load, thumbnail, prepare, busy: () => pending !== undefined && pending !== null};
+function cancel() {
+ generation++;
+ pending = null;
+ if (overlay) overlay.hidden = true;
+}
+
+window.ScoraceCardCache = {load, thumbnail, prepare, cancel, busy: () => pending !== undefined && pending !== null};
 if (new URLSearchParams(location.search).get("collection") === "scorace" && window.parent !== window) {
  document.addEventListener("DOMContentLoaded", () => {
   if (!overlay) draw(0, 0, "Conectando ao catálogo do Scorace.");
