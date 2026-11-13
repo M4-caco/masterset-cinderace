@@ -23,7 +23,7 @@ function initUI(){
  root.querySelector("#scOrgPrev").onclick=()=>{state.page=Math.max(0,state.page-1);draw()};
  root.querySelector("#scOrgNext").onclick=()=>{state.page++;draw()};
  root.querySelector("#scOrgCancel").onclick=()=>{api?.cancel?.();state.selected=null;draw()};
- if(window.matchMedia("(max-width:740px)").matches)toggle.click();
+ setOpen(false);
 }
 function setOpen(open){
  const toggle=document.getElementById("scOrgToggle");

@@ -19,7 +19,7 @@
   const mobile = document.getElementById('scorace-binder-mobile');
   const stage = frame.parentElement;
   const back = binder.querySelector('.scorace-binder-return');
-  const modes = [...mobile.querySelectorAll('[data-collection-mode]')];
+  const modes = new Set(['all', 'colored']);
   const grid = document.getElementById('binder-mobile-grid');
   const status = document.getElementById('binder-mobile-status');
   const retry = document.getElementById('binder-mobile-retry');
@@ -39,7 +39,12 @@
 
   try {
     const saved = localStorage.getItem(storageKey);
-    if (modes.some(button => button.dataset.collectionMode === saved)) mode = saved;
+    if (saved === 'owned') {
+      mode = 'colored';
+      localStorage.setItem(storageKey, mode);
+    } else if (modes.has(saved)) {
+      mode = saved;
+    }
   } catch {}
 
   function fitBinderViewport() {
@@ -59,13 +64,12 @@
   }
 
   async function renderMobilePage(cards) {
-    const filtered = mode === 'owned' ? cards.filter(card => card.owned) : cards;
-    pageCount = Math.ceil(filtered.length / cardsPerPage);
+    pageCount = Math.ceil(cards.length / cardsPerPage);
     page = Math.max(0, Math.min(page, pageCount - 1));
     prev.disabled = page === 0;
     next.disabled = page >= pageCount - 1;
     pageLabel.textContent = pageCount ? 'Página ' + (page + 1) + ' de ' + pageCount : '';
-    const shown = filtered.slice(page * cardsPerPage, (page + 1) * cardsPerPage);
+    const shown = cards.slice(page * cardsPerPage, (page + 1) * cardsPerPage);
     const key = JSON.stringify([mode, page, shown]);
     if (key === renderKey) return;
     renderKey = key;
@@ -73,7 +77,7 @@
     grid.hidden = true;
     if (!shown.length) {
       grid.replaceChildren();
-      statusMessage('Nenhuma carta marcada como Tenho.');
+      statusMessage('Nenhuma carta na coleção.');
       return;
     }
 
@@ -117,9 +121,6 @@
   }
 
   window.refreshScoraceBinder = function() {
-    for (const button of modes) {
-      button.setAttribute('aria-pressed', String(button.dataset.collectionMode === mode));
-    }
     const isMobileView = !mobile.hidden && !binder.classList.contains('hidden');
     if ((!frameReady && !isMobileView) || !window.scoraceBinderSnapshot) return;
     const snapshot = window.scoraceBinderSnapshot();
@@ -149,7 +150,7 @@
   window.openScoraceBinder = updateBinderView;
 
   function setMode(value) {
-    if (!modes.some(button => button.dataset.collectionMode === value) || mode === value) return;
+    if (!modes.has(value) || mode === value) return;
     mode = value;
     page = 0;
     try { localStorage.setItem(storageKey, mode); } catch {}
@@ -164,9 +165,6 @@
     return true;
   }
 
-  for (const button of modes) {
-    button.addEventListener('click', () => setMode(button.dataset.collectionMode));
-  }
   prev.addEventListener('click', () => turnPage(-1));
   next.addEventListener('click', () => turnPage(1));
   retry.addEventListener('click', () => {

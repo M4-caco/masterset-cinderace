@@ -37,25 +37,13 @@ body.scorace-iframe-fit #view-binder .scorace-binder-stage {
 }
 .scorace-binder-toolbar { margin-bottom: 10px; }
 .scorace-binder-toolbar h2 { font-size: 23px; font-weight: 800; }
-.scorace-binder-modes {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 4px;
-  padding: 4px;
-  border: 1px solid var(--line, #bf302640);
-  border-radius: 14px;
-  background: var(--surface, #fafafa);
-}
-.scorace-binder-modes button, .scorace-binder-pagination button,
+.scorace-binder-pagination button,
 #view-binder [data-binder-view], #binder-mobile-retry {
   min-height: 44px;
   border-radius: 10px;
   font-size: 12px;
   font-weight: 700;
 }
-.scorace-binder-modes button { padding: 4px; }
-.scorace-binder-modes button[aria-pressed="true"] { background: #bf302622; color: #a52218; }
-.dark .scorace-binder-modes button[aria-pressed="true"] { background: #bf30264d; color: #ffe070; }
 .scorace-binder-pagination { margin: 8px 0; }
 .scorace-binder-pagination p { font-size: 13px; font-weight: 700; }
 .scorace-binder-pagination button, #view-binder [data-binder-view] {

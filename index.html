@@ -467,7 +467,7 @@
 #item-detail .it-term{margin-top:10px;line-height:1.5}
 #item-detail #item-copy-status:empty{display:none}
 @media(max-width:640px){#item-detail{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:17px}#item-detail .it-detail-grid{grid-template-columns:minmax(0,1fr);gap:12px}#item-detail .it-detail-image{width:100%;height:220px;max-height:30dvh;aspect-ratio:auto}#item-detail .it-detail-image img{max-height:30dvh}}
-</style><link rel="stylesheet" href="scorace-binder.css?v=4">
+</style><link rel="stylesheet" href="scorace-binder.css?v=5">
 </head>
 <body class="text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
 
@@ -740,11 +740,6 @@
                 <h2>Fichário</h2>
                 <button type="button" data-binder-view="3d">Abrir em 3D</button>
             </div>
-            <div class="scorace-binder-modes" role="group" aria-label="Cartas disponíveis">
-                <button type="button" data-collection-mode="all" aria-pressed="true">Todas as cartas</button>
-                <button type="button" data-collection-mode="owned" aria-pressed="false">Só as que tenho</button>
-                <button type="button" data-collection-mode="colored" aria-pressed="false">Tenho em cores</button>
-            </div>
             <nav class="scorace-binder-pagination" aria-label="Páginas do fichário">
                 <button type="button" id="binder-mobile-prev" aria-label="Página anterior" disabled>‹</button>
                 <p id="binder-mobile-page" aria-live="polite"></p>
@@ -760,7 +755,7 @@
             <button type="button" data-binder-view="light">Voltar ao fichário leve</button>
         </div>
         <div class="scorace-binder-stage">
-            <iframe id="scorace-binder-frame" title="Fichário 3D do master set" data-src="fichario/index.html?collection=scorace&amp;v=binder-toolbar-2" allow="fullscreen" loading="lazy"></iframe>
+            <iframe id="scorace-binder-frame" title="Fichário 3D do master set" data-src="fichario/index.html?collection=scorace&amp;v=binder-visibility" allow="fullscreen" loading="lazy"></iframe>
         </div>
     </section>
     </main>
@@ -2892,6 +2887,6 @@ window.renderItems=render;
 
 })();
 
-</script><script src="scorace-binder.js?v=3" defer></script>
+</script><script src="scorace-binder.js?v=4" defer></script>
 </body>
 </html>

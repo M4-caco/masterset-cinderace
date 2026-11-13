@@ -21,25 +21,10 @@ function pill(button, label, icon) {
 function setupScoraceMenu() {
   if (!document.body.classList.contains('scorace-embedded')) return;
   const get = id => document.getElementById(id);
-  const panel = document.querySelector('#collectionPanel .dock-content');
   const workspace = get('binderWorkspace');
-  if (!panel || !workspace || panel.dataset.newMenu) return;
-  panel.dataset.newMenu = 'true';
+  if (!workspace || document.body.classList.contains('sc-menu-new')) return;
   document.body.classList.add('sc-menu-new');
 
-  function section(name, id) {
-    const group = document.createElement('section');
-    const title = document.createElement('h3');
-    group.className = 'sc-menu-section';
-    group.id = id;
-    title.textContent = name;
-    group.append(title);
-    panel.append(group);
-    return group;
-  }
-
-  const binder = section('Fichário', 'scMenuBinder');
-  binder.append(document.querySelector('.binder-heading'));
   const bookToolbar = document.querySelector('.book-toolbar');
   const pagination = bookToolbar.querySelector('.pagination');
   pagination.classList.add('sc-bottom-pagination');
@@ -110,27 +95,16 @@ function setupScoraceMenu() {
   get('cameraZoom').append(document.querySelector('.zoom-control'));
   for (const id of ['emptyBinder', 'resetBinder']) get('collectionOrganizationActions').append(get(id));
   get('binderOrganization').hidden = true;
-  document.querySelector('#collectionPanel .dock-quick')?.remove();
   get('trayToggle').hidden = true;
 
-  const collection = section('Coleção', 'scMenuCollection');
-  const modes = document.createElement('div');
-  modes.className = 'sc-modes';
-  modes.id = 'scModes';
-  for (const [mode, label] of [['all', 'Todas'], ['owned', 'Só tenho'], ['colored', 'Tenho coloridas']]) {
-    const button = document.createElement('button');
-    button.type = 'button';
-    button.dataset.mode = mode;
-    button.textContent = label;
-    button.setAttribute('aria-pressed', String(mode === 'all'));
-    button.onclick = () => window.parent.postMessage({type:'scorace:set-mode', mode}, location.origin);
-    modes.append(button);
+  const modes = get('cameraDialog').querySelectorAll('[data-mode]');
+  for (const button of modes) {
+    button.onclick = () => window.parent.postMessage({type:'scorace:set-mode', mode:button.dataset.mode}, location.origin);
   }
-  collection.append(modes);
 
   window.addEventListener('message', event => {
     if (event.origin !== location.origin || event.source !== window.parent || event.data?.type !== 'scorace:collection') return;
-    for (const button of modes.children) button.setAttribute('aria-pressed', String(button.dataset.mode === event.data.mode));
+    for (const button of modes) button.setAttribute('aria-pressed', String(button.dataset.mode === event.data.mode));
   });
 }
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setupScoraceMenu, {once:true});
