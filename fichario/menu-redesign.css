@@ -303,6 +303,43 @@ body.sc-menu-new.sc-quick-remove .sc-tool-bar { top: 12px; }
 @media (max-width: 740px) {
   body.sc-menu-new.scorace-embedded.editing #editorDialog { right: 8px; bottom: 62px; max-height: 40dvh!important; }
 }
+@media (max-width: 740px), (pointer: coarse) and (max-width: 1024px) {
+  body.sc-menu-new.scorace-embedded .sc-tool-bar {
+    top: 8px;
+    right: max(10px, env(safe-area-inset-right));
+    grid-auto-flow: column;
+    gap: 5px;
+  }
+  body.sc-menu-new.scorace-embedded .sc-tool-bar .sc-pill-label {
+    max-width: 0 !important;
+    opacity: 0 !important;
+  }
+  body.sc-menu-new.scorace-embedded .sc-tool-bar .sc-pill-icon {
+    background: #ffe591;
+    color: #4b2c22;
+  }
+  body.sc-menu-new.scorace-embedded .sc-tool-bar [aria-expanded=true] .sc-pill-icon {
+    background: #f49b5c;
+    color: #17130f;
+  }
+  body.sc-menu-new.scorace-embedded .sc-tool-dialog {
+    inset: 60px max(8px, env(safe-area-inset-right)) auto auto;
+    width: min(340px, calc(100vw - 16px));
+    max-height: calc(100dvh - 128px);
+  }
+  body.sc-menu-new.scorace-embedded #scOrganizer:not(.collapsed) {
+    top: 60px;
+    right: max(8px, env(safe-area-inset-right));
+    bottom: 68px;
+  }
+  body.sc-menu-new.scorace-embedded #stopQuickRemove { top: 60px; }
+  body.sc-menu-new.scorace-embedded.editing #editorSceneControls:not([hidden]) {
+    top: 60px !important;
+  }
+  body.sc-menu-new.scorace-embedded .sc-bottom-pagination {
+    bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+}
 body.sc-menu-new .sc-cover-control { margin: 14px 0 0; }
 body.sc-menu-new .sc-cover-control label { display:flex;justify-content:space-between;gap:10px; }
 body.sc-menu-new .sc-cover-control output { color:#ffd0a4;font-variant-numeric:tabular-nums; }

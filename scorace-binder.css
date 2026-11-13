@@ -100,7 +100,18 @@ body.scorace-iframe-fit #view-binder .scorace-binder-stage {
 }
 #view-binder button:focus-visible { outline: 2px solid #df7951; outline-offset: 2px; }
 .scorace-binder-return { margin-bottom: 6px; }
-.scorace-binder-return:not([hidden]) + .scorace-binder-stage { min-height: 0; height: auto; }
+body.scorace-mobile-binder #view-binder {
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+}
+body.scorace-mobile-binder .scorace-binder-return { padding: 0 8px; }
+body.scorace-mobile-binder .scorace-binder-return button {
+  min-height: 36px;
+  color: #fff4e9;
+  background: #26272ceb;
+  border-color: #ac785b;
+}
+body.scorace-mobile-binder .scorace-binder-stage { border-radius: 0; }
 #zoom-close-mobile { display: none; }
 @media (max-width: 740px) {
   #view-binder { width: calc(100vw - 16px); margin-left: calc(50% - 50vw + 8px); }

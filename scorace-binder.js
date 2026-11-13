@@ -35,7 +35,7 @@
   let renderKey = '';
   let renderGeneration = 0;
   let frameReady = false;
-  let mobile3D = false;
+  let preferLightBinder = false;
 
   try {
     const saved = localStorage.getItem(storageKey);
@@ -50,6 +50,7 @@
   function fitBinderViewport() {
     const visible = !binder.classList.contains('hidden') && !stage.hidden && frame.offsetWidth > 0;
     document.body.classList.toggle('scorace-iframe-fit', visible);
+    document.body.classList.toggle('scorace-mobile-binder', visible && smallScreen.matches);
     if (!visible) return;
     const viewport = window.visualViewport;
     const bottom = viewport ? viewport.offsetTop + viewport.height : innerHeight;
@@ -133,7 +134,7 @@
   };
 
   function updateBinderView() {
-    const light = smallScreen.matches && !mobile3D;
+    const light = smallScreen.matches && preferLightBinder;
     mobile.hidden = !light;
     stage.hidden = light;
     back.hidden = !smallScreen.matches || light;
@@ -147,7 +148,10 @@
     requestAnimationFrame(fitBinderViewport);
   }
 
-  window.openScoraceBinder = updateBinderView;
+  window.openScoraceBinder = () => {
+    if (smallScreen.matches) window.scrollTo({top: 0, behavior: 'instant'});
+    updateBinderView();
+  };
 
   function setMode(value) {
     if (!modes.has(value) || mode === value) return;
@@ -192,12 +196,12 @@
   });
 
   mobile.querySelector('[data-binder-view="3d"]').addEventListener('click', () => {
-    mobile3D = true;
+    preferLightBinder = false;
     updateBinderView();
     back.querySelector('button').focus();
   });
   back.querySelector('button').addEventListener('click', () => {
-    mobile3D = false;
+    preferLightBinder = true;
     updateBinderView();
     mobile.querySelector('[data-binder-view="3d"]').focus();
   });
@@ -210,15 +214,8 @@
     }
     if (event.data?.type === 'scorace:set-mode') setMode(event.data.mode);
   });
-  smallScreen.addEventListener('change', () => {
-    mobile3D = false;
-    updateBinderView();
-  });
+  smallScreen.addEventListener('change', updateBinderView);
   new MutationObserver(() => {
-    if (binder.classList.contains('hidden') && mobile3D) {
-      mobile3D = false;
-      updateBinderView();
-    }
     fitBinderViewport();
   }).observe(binder,{attributes:true,attributeFilter:['class']});
   new MutationObserver(window.refreshScoraceBinder)
