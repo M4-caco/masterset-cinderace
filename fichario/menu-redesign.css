@@ -35,7 +35,7 @@ body.sc-menu-new .sc-menu-section .zoom-control span{flex:1;text-align:center}
 body.sc-menu-new .sc-menu-section .render-quality{position:static!important;display:flex!important;gap:5px;flex-wrap:wrap;margin:0!important;padding:0!important}
 body.sc-menu-new .sc-menu-section .render-quality button{flex:1;min-width:0;padding:7px 4px!important;font-size:10px;min-height:34px}
 body.sc-menu-new .sc-menu-section #renderStatus{position:static!important;inset:auto!important;transform:none!important;font-size:10px;margin:5px 0 0;max-width:100%}
-body.sc-menu-new .sc-menu-section #uiVisibility{display:block!important;position:static!important;inset:auto!important;transform:none!important;width:100%!important;margin:0!important;min-height:34px}
+body.sc-menu-new #uiVisibility { display:none!important; }
 body.sc-menu-new.scorace-embedded #temporaryTray,body.sc-menu-new.scorace-embedded .cards-panel{display:none!important}
 body.sc-menu-new .scene-bottom{display:none!important}
 /* Both top-right controls share the pill silhouette and right-hand icon. */
@@ -195,6 +195,7 @@ body.sc-menu-new .sc-tool-bar .sc-expand-pill[aria-expanded=true] {
   border-color: #f49b5c;
   color: #17130f;
 }
+body.sc-menu-new .sc-tool-bar .sc-expand-pill[aria-expanded=true] .sc-pill-label { transition:none; }
 body.sc-menu-new .sc-tool-bar .sc-expand-pill[aria-expanded=true] .sc-pill-icon {
   background: transparent;
   color: inherit;
