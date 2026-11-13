@@ -72,3 +72,18 @@ body.scorace-embedded .binder-canvas.sc-org-drop-target{outline:2px solid #e0af6
  body.scorace-embedded #scOrganizer .sc-org-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
  body.scorace-embedded #scOrganizer.collapsed{width:44px;height:45px}
 }
+
+body.scorace-embedded.sc-menu-new #scOrganizer.collapsed {
+ top:64px; right:12px; width:max-content; height:auto; max-width:unset;
+ border:0; border-radius:0; overflow:visible; background:none; box-shadow:none; backdrop-filter:none;
+}
+body.scorace-embedded.sc-menu-new #scOrganizer.collapsed .sc-org-head {
+ padding:0; border:0; justify-content:flex-end;
+}
+body.scorace-embedded.sc-menu-new #scOrganizer #scOrgToggle {
+ width:var(--pill-size); height:var(--pill-size); padding:3px;
+ border:1px solid #d58b50; border-radius:999px; background:#25272d;
+}
+@media (max-width:740px) {
+ body.scorace-embedded.sc-menu-new #scOrganizer.collapsed { top:60px; right:8px; }
+}

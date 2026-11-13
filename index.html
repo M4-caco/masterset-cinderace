@@ -760,7 +760,7 @@
             <button type="button" data-binder-view="light">Voltar ao fichário leve</button>
         </div>
         <div class="scorace-binder-stage">
-            <iframe id="scorace-binder-frame" title="Fichário 3D do master set" data-src="fichario/index.html?collection=scorace&amp;v=wall" allow="fullscreen" loading="lazy"></iframe>
+            <iframe id="scorace-binder-frame" title="Fichário 3D do master set" data-src="fichario/index.html?collection=scorace&amp;v=editor-arts" allow="fullscreen" loading="lazy"></iframe>
         </div>
     </section>
     </main>
@@ -1496,9 +1496,10 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
 
         const uniqueSets = Array.from(new Set(allCards.map(c => c.set))).sort();
 
+        const binderArtOrder = new Map(collectionRows(allCards).flat().map((card, index) => [card.id, index]));
         const binderFoils = Object.fromEntries(allCards.filter(card => card.foil).map(card => [card.id, card.foil]));
         window.scoraceBinderSnapshot=()=>({
-            cards:allCards.map(card=>({id:card.id,name:[card.nome,card.numero,card.lingua].filter(Boolean).join(' · '),image:new URL(cardImage(card),location.href).href,language:card.lingua,owned:!!obtainedMap[card.id]})),
+            cards:allCards.map(card=>({id:card.id,name:[card.nome,card.numero,card.lingua].filter(Boolean).join(' · '),image:new URL(cardImage(card),location.href).href,language:card.lingua,pokemon:card.pokemon,artOrder:binderArtOrder.get(card.id),owned:!!obtainedMap[card.id]})),
             reverseFoils:binderFoils
         });
         const COLLECTION_RESET_VERSION = 'fresh-collection-20261030-v1';

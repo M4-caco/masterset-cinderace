@@ -6,7 +6,19 @@ const section=(name,id)=>{const s=document.createElement('section');s.className=
 const binder=section('Fichário','scMenuBinder'),heading=document.querySelector('.binder-heading');
 if(heading)binder.append(heading);
 const editor=document.getElementById('editMode');
-if(editor){const span=document.createElement('span');span.textContent='Editar fichário';editor.append(span);editor.classList.add('sc-editor-fab');workspace.append(editor)}
+if(editor){
+  const label = document.createElement('span');
+  label.className = 'sc-pill-label';
+  label.textContent = 'Editar fichário';
+  const icon = document.createElement('span');
+  icon.className = 'sc-pill-icon';
+  icon.append(editor.querySelector('svg'));
+  editor.replaceChildren(label, icon);
+  editor.classList.add('sc-editor-fab', 'sc-expand-pill');
+  editor.setAttribute('aria-controls', 'editorDialog');
+  editor.setAttribute('aria-expanded', 'false');
+  workspace.append(editor);
+}
 const toolbar=document.querySelector('.book-toolbar');if(toolbar)binder.append(toolbar);
 const view=section('Visualização','scMenuView');
 for(const selector of ['.camera-bar','.scene-top']){const item=document.querySelector(selector);if(item)view.append(item)}

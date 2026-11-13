@@ -12,7 +12,17 @@ function initUI(){
  root.innerHTML='<div class="sc-org-head"><div><strong>Cartas avulsas</strong><small id="scOrgTotal"></small></div><button id="scOrgToggle" type="button" aria-label="Recolher organizador" aria-expanded="true">−</button></div><div class="sc-org-body"><div class="sc-org-family" id="scOrgFamily" role="group" aria-label="Famílias"></div><div class="sc-org-status" role="group" aria-label="Posse"><button data-org-status="all" type="button">Todas</button><button data-org-status="owned" type="button">Tenho</button><button data-org-status="missing" type="button">Não tenho</button></div><input id="scOrgSearch" type="search" placeholder="Buscar carta ou número" aria-label="Buscar carta ou número"><p id="scOrgHint">Clique na carta e depois no bolso do fichário, ou arraste a carta até ele.</p><div id="scOrgGrid" class="sc-org-grid"></div><div id="scOrgPages" class="sc-org-pages"><button id="scOrgPrev" type="button">‹</button><span id="scOrgPosition"></span><button id="scOrgNext" type="button">›</button></div><button type="button" class="sc-org-cancel" id="scOrgCancel" hidden>Cancelar seleção</button></div>';
  document.querySelector("#binderWorkspace")?.append(root);
  const toggle=root.querySelector("#scOrgToggle");
- toggle.onclick=()=>{const collapsed=root.classList.toggle("collapsed");toggle.textContent=collapsed?"+":"−";toggle.setAttribute("aria-expanded",String(!collapsed))};
+ toggle.classList.add("sc-expand-pill");
+ toggle.innerHTML='<span class="sc-pill-label">Cartas avulsas</span><span class="sc-pill-icon" aria-hidden="true">−</span>';
+ const panel=root.querySelector(".sc-org-body");
+ panel.id="scOrgBody";
+ toggle.setAttribute("aria-controls",panel.id);
+ toggle.onclick=()=>{
+  const collapsed=root.classList.toggle("collapsed");
+  toggle.querySelector(".sc-pill-icon").textContent=collapsed?"+":"−";
+  toggle.setAttribute("aria-label",collapsed?"Abrir cartas avulsas":"Recolher cartas avulsas");
+  toggle.setAttribute("aria-expanded",String(!collapsed));
+ };
  root.querySelectorAll("[data-org-status]").forEach(btn=>btn.onclick=()=>{state.status=btn.dataset.orgStatus;state.page=0;draw()});
  root.querySelector("#scOrgSearch").oninput=event=>{state.search=event.target.value;state.page=0;draw()};
  root.querySelector("#scOrgPrev").onclick=()=>{state.page=Math.max(0,state.page-1);draw()};
@@ -87,5 +97,5 @@ function init(options){
   canvas.addEventListener("drop",e=>{if(!state.selected)return;e.preventDefault();const ok=api?.drop?.({clientX:e.clientX,clientY:e.clientY});if(ok){state.selected=null;renderKey="";draw()}});
  }
 }
-window.ScoraceCardOrganizer={init,render,dropped,close:()=>root?.classList.add("collapsed"),state:()=>({...state,cards:undefined})};
+window.ScoraceCardOrganizer={init,render,dropped,close:()=>{if(root&&!root.classList.contains("collapsed"))root.querySelector("#scOrgToggle").click()},state:()=>({...state,cards:undefined})};
 })();
