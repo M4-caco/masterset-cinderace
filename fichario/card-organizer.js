@@ -1,7 +1,7 @@
 (()=>{
 "use strict";
 let root=null,api=null,renderKey="";
-const state={cards:[],family:"cinderace",status:"all",search:"",page:0,selected:null,mode:"all"};
+const state={cards:[],family:"cinderace",status:"all",search:"",page:0,selected:null};
 const pageSize=12;
 const familyList=[["scorbunny","Scorbunny"],["raboot","Raboot"],["cinderace","Cinderace"],["other","Outras"]];
 function family(c){const n=(c.name||"").toLowerCase();return /scorbunny|ヒバニー|炎兔儿|炎兔兒/.test(n)?"scorbunny":/raboot|ラビフット|腾蹴小将|騰蹴小將/.test(n)?"raboot":/cinderace|エースバーン|闪焰王牌|閃焰王牌/.test(n)?"cinderace":"other"}
@@ -82,9 +82,9 @@ function draw(){
  root.querySelector("#scOrgCancel").hidden=!state.selected;
  root.querySelector("#scOrgHint").textContent=state.selected?"Selecione um bolso no fichário 3D para colocar a carta.":"Clique na carta e depois no bolso do fichário, ou arraste a carta até ele."
 }
-function render(cards,mode){
- initUI();state.cards=cards||[];state.mode=mode||"all";
- const next=state.mode+"|"+state.cards.map(c=>c.id+":"+c.image+":"+(c.slot===null?"_":c.slot)+":"+(c.owned?"1":"0")).join(";");
+function render(cards){
+ initUI();state.cards=cards;
+ const next=state.cards.map(c=>c.id+":"+c.image+":"+(c.slot===null?"_":c.slot)+":"+(c.owned?"1":"0")).join(";");
  if(next===renderKey)return;
  renderKey=next;
  if(state.selected&&!state.cards.some(c=>c.id===state.selected&&c.slot===null))state.selected=null;
