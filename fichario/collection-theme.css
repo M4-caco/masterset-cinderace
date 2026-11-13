@@ -15,6 +15,9 @@
 .scorace-embedded .binder-canvas {
   filter: drop-shadow(5px 12px 11px rgb(0 0 0 / 62%));
 }
+.scorace-embedded .webgl-simplified .binder-canvas {
+  filter: drop-shadow(2px 5px 3px rgb(0 0 0 / 48%));
+}
 .scorace-embedded [data-tab="studio"],
 .scorace-embedded #panel-studio,
 .scorace-embedded .editor-view-buttons,
