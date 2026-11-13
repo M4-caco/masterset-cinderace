@@ -46,9 +46,10 @@
     const visible = !binder.classList.contains('hidden') && !stage.hidden && frame.offsetWidth > 0;
     document.body.classList.toggle('scorace-iframe-fit', visible);
     if (!visible) return;
-    const height = Math.max(280, Math.floor(innerHeight - frame.getBoundingClientRect().top - 2)) + 'px';
-    frame.style.setProperty('height', height, 'important');
-    frame.style.setProperty('max-height', height, 'important');
+    const viewport = window.visualViewport;
+    const bottom = viewport ? viewport.offsetTop + viewport.height : innerHeight;
+    const height = Math.max(0, Math.floor(bottom - stage.getBoundingClientRect().top - 8));
+    stage.style.setProperty('--binder-stage-height', `${height}px`);
   }
 
   function statusMessage(message, failed = false) {
@@ -226,5 +227,7 @@
     .observe(document.documentElement,{attributes:true,attributeFilter:['class']});
   new ResizeObserver(fitBinderViewport).observe(document.querySelector('header'));
   window.addEventListener('resize', fitBinderViewport);
+  window.visualViewport?.addEventListener('resize', fitBinderViewport);
+  window.visualViewport?.addEventListener('scroll', fitBinderViewport);
   updateBinderView();
 })();

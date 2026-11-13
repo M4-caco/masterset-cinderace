@@ -13,6 +13,10 @@ body.scorace-iframe-fit { overflow: hidden !important; }
   border-radius: 22px;
   background: transparent;
 }
+body.scorace-iframe-fit #view-binder .scorace-binder-stage {
+  height: var(--binder-stage-height, calc(100dvh - 175px));
+  min-height: 0;
+}
 .scorace-binder-stage iframe {
   display: block;
   width: 100%;

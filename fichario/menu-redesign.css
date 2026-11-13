@@ -41,13 +41,11 @@ body.sc-menu-new .scene-bottom{display:none!important}
 /* Both top-right controls share the pill silhouette and right-hand icon. */
 body.sc-menu-new .sc-expand-pill {
   --pill-size: 44px;
-  --pill-width: 170px;
   display: flex;
   align-items: center;
   justify-content: flex-end;
   flex: none;
-  gap: 8px;
-  width: var(--pill-size);
+  width: max-content;
   min-width: var(--pill-size);
   height: var(--pill-size);
   padding: 3px;
@@ -58,7 +56,7 @@ body.sc-menu-new .sc-expand-pill {
   background: #25272d;
   white-space: nowrap;
   cursor: pointer;
-  transition: width .2s ease, border-color .2s ease;
+  transition: background-color .15s ease, border-color .15s ease;
 }
 body.sc-menu-new .sc-expand-pill:focus-visible,
 body.sc-menu-new .sc-card-tools :is(button,select):focus-visible,
@@ -79,22 +77,16 @@ body.sc-menu-new .sc-expand-pill .sc-pill-icon {
   line-height: 1;
 }
 body.sc-menu-new .sc-expand-pill .sc-pill-label {
+  max-width: 0;
+  overflow: hidden;
   opacity: 0;
-  padding-left: 10px;
   font: 700 12px/1 system-ui, sans-serif;
-  transition: opacity .15s ease;
+  transition: max-width .18s ease, opacity .15s ease;
 }
-body.sc-menu-new .sc-editor-fab {
-  position: fixed;
-  z-index: 92;
-  top: 12px;
-  right: 12px;
-  left: auto;
-}
-body.sc-menu-new .sc-editor-fab svg { width: 17px; height: 17px; }
-body.sc-menu-new .sc-expand-pill:focus-visible .sc-pill-label { opacity: 1; }
-@media (hover: hover) {
-  body.sc-menu-new .sc-expand-pill:hover .sc-pill-label { opacity: 1; }
+body.sc-menu-new .sc-pill-label > span {
+  display: block;
+  width: max-content;
+  padding-inline: 10px 8px;
 }
 body.sc-menu-new #stopQuickRemove {
   position: fixed;
@@ -118,6 +110,7 @@ body.sc-menu-new.scorace-embedded #editorDialog {
   color: #f4eee9;
   background: #24262c;
   border-color: #a5643d;
+  right: 64px;
   width: clamp(360px, 32vw, 460px);
 }
 body.sc-menu-new.scorace-embedded #editorDialog .tabs button { color: #d7c6bc; }
@@ -132,7 +125,6 @@ body.sc-menu-new .page-type-option[data-page-type=full] { font: 600 10px/1.25 sy
 body.sc-menu-new .page-type-grid.compact-page-types {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-body.sc-menu-new.menus-hidden .sc-editor-fab,body.sc-menu-new.editing .sc-editor-fab{display:none!important}
 body.sc-menu-new #swatches,body.sc-menu-new #pageColors,body.sc-menu-new #surfaceColors{display:none!important}
 body.sc-menu-new .editor-dialog .hex-row,body.sc-menu-new .editor-dialog .color-custom{display:grid!important;grid-template-columns:38px minmax(0,1fr);gap:9px;align-items:center}
 body.sc-menu-new .editor-dialog .hex-row .color-chip{display:block;width:38px!important;min-width:38px!important;height:38px!important;overflow:hidden!important;border-radius:50%!important;border:1px solid #7c8494!important;padding:2px!important;background:none!important}
@@ -144,7 +136,7 @@ body.sc-menu-new .editor-dialog .field input:not([type=color]){min-width:0}
 body.sc-menu-new .editor-dialog #colorName{display:none!important}
 @media (max-width: 740px) {
   body.sc-menu-new .collection-panel { top: 8px!important; left: 8px!important; width: min(250px, calc(100vw - 16px))!important; max-height: calc(100dvh - 16px)!important; }
-  body.sc-menu-new .sc-editor-fab, body.sc-menu-new #stopQuickRemove { top: 8px; right: 8px; }
+  body.sc-menu-new #stopQuickRemove { top: 8px; right: 8px; }
   body.sc-menu-new.scorace-embedded.editing #editorDialog { width: calc(100% - 16px); max-height: 48dvh!important; }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -159,8 +151,7 @@ body.sc-menu-new.editing #collectionPanel,
 body.sc-menu-new.editing .dock-panel.collection-panel,
 body.sc-menu-new.editing #temporaryTray,
 body.sc-menu-new.editing .cards-panel,
-body.sc-menu-new.editing #binderOrganization,
-body.sc-menu-new.editing #editMode {
+body.sc-menu-new.editing #binderOrganization {
   display:none!important;
 }
 body.sc-menu-new.editing #editorSceneControls:not([hidden]){
@@ -199,16 +190,30 @@ body.sc-menu-new .sc-tool-bar {
 }
 body.sc-menu-new .sc-tool-bar .sc-expand-pill { pointer-events: auto; position: static; }
 body.sc-menu-new .sc-tool-bar svg { width: 17px; height: 17px; }
-body.sc-menu-new .sc-tool-bar .sc-expand-pill:is(:focus-visible,[aria-expanded=true]) { width: var(--pill-width); }
-body.sc-menu-new .sc-tool-bar .sc-expand-pill[aria-expanded=true] .sc-pill-label { opacity: 1; }
-@media (hover:hover) {
-  body.sc-menu-new .sc-tool-bar .sc-expand-pill:hover { width: var(--pill-width); }
+body.sc-menu-new .sc-tool-bar .sc-expand-pill[aria-expanded=true] {
+  background: #f49b5c;
+  border-color: #f49b5c;
+  color: #17130f;
 }
-body.sc-menu-new:is(.editing,.menus-hidden) .sc-tool-bar { display:none; }
+body.sc-menu-new .sc-tool-bar .sc-expand-pill[aria-expanded=true] .sc-pill-icon {
+  background: transparent;
+  color: inherit;
+}
+body.sc-menu-new .sc-tool-bar .sc-expand-pill[aria-expanded=false]:focus-visible .sc-pill-label {
+  max-width: 20ch;
+  opacity: 1;
+}
+@media (hover:hover) and (min-width:741px) and (min-height:531px) {
+  body.sc-menu-new .sc-tool-bar .sc-expand-pill[aria-expanded=false]:hover .sc-pill-label {
+    max-width: 20ch;
+    opacity: 1;
+  }
+}
+body.sc-menu-new.menus-hidden .sc-tool-bar { display:none; }
 body.sc-menu-new .sc-tool-dialog {
   position:fixed;
-  inset:12px 192px auto auto;
-  width:min(340px,calc(100vw - 215px));
+  inset:12px 64px auto auto;
+  width:min(340px,calc(100vw - 76px));
   max-height:calc(100dvh - 24px);
   margin:0;
   padding:16px;
@@ -295,9 +300,8 @@ body.sc-menu-new #pageLabel { position: absolute; width: 1px; height: 1px; overf
 body.sc-menu-new #editorSceneControls .editor-pagination { display: none; }
 body.sc-menu-new .sc-camera-book { display: grid; gap: 6px; margin-top: 12px; }
 body.sc-menu-new .sc-camera-book button { min-height: 36px; }
-body.sc-menu-new.scorace-embedded #scOrganizer { top: 272px; bottom: 68px; }
+body.sc-menu-new.scorace-embedded #scOrganizer { top: 12px; right: 64px; bottom: 68px; }
 body.sc-menu-new.scorace-embedded #scOrganizer.collapsed { display: none; }
-body.sc-menu-new #scOrgToggle[aria-expanded=true] .sc-pill-label { opacity: 1; }
 body.sc-menu-new #stopQuickRemove { right: auto; left: 50%; transform: translateX(-50%); }
 body.sc-menu-new.sc-quick-remove .sc-tool-bar { top: 12px; }
 @media (max-width: 740px), (max-height: 530px) {
@@ -308,14 +312,13 @@ body.sc-menu-new.sc-quick-remove .sc-tool-bar { top: 12px; }
     grid-auto-flow: column;
     gap: 5px;
   }
-  body.sc-menu-new .sc-tool-bar .sc-expand-pill:is(:hover,:focus-visible,[aria-expanded=true]) { width: var(--pill-size); }
-  body.sc-menu-new .sc-tool-bar .sc-pill-label { opacity: 0!important; }
+  body.sc-menu-new .sc-tool-bar .sc-expand-pill[aria-expanded=false]:focus-visible .sc-pill-label { max-width: 0; opacity: 0; }
   body.sc-menu-new .sc-tool-dialog { inset: 60px 8px auto auto; width: min(340px, calc(100vw - 16px)); max-height: calc(100dvh - 128px); }
   body.sc-menu-new.scorace-embedded #scOrganizer:not(.collapsed) { top: 60px; right: 8px; bottom: 68px; }
   body.sc-menu-new #stopQuickRemove { top: 60px; }
 }
 @media (max-width: 740px) {
-  body.sc-menu-new.scorace-embedded.editing #editorDialog { bottom: 62px; max-height: 40dvh!important; }
+  body.sc-menu-new.scorace-embedded.editing #editorDialog { right: 8px; bottom: 62px; max-height: 40dvh!important; }
 }
 body.sc-menu-new .sc-cover-control { margin: 14px 0 0; }
 body.sc-menu-new .sc-cover-control label { display:flex;justify-content:space-between;gap:10px; }

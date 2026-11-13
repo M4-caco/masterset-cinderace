@@ -13,23 +13,26 @@ function initUI(){
  document.querySelector("#binderWorkspace")?.append(root);
  const toggle=root.querySelector("#scOrgToggle");
  toggle.classList.add("sc-expand-pill");
- toggle.innerHTML='<span class="sc-pill-label">Cartas avulsas</span><span class="sc-pill-icon" aria-hidden="true">−</span>';
+ toggle.innerHTML='<span class="sc-pill-label"><span>Cartas avulsas</span></span><span class="sc-pill-icon" aria-hidden="true">−</span>';
  const panel=root.querySelector(".sc-org-body");
  panel.id="scOrgBody";
- toggle.setAttribute("aria-controls",panel.id);
- toggle.onclick=()=>{
-  const collapsed=root.classList.toggle("collapsed");
-  toggle.querySelector(".sc-pill-icon").textContent=collapsed?"+":"−";
-  toggle.setAttribute("aria-label",collapsed?"Abrir cartas avulsas":"Recolher cartas avulsas");
-  toggle.setAttribute("aria-expanded",String(!collapsed));
-  window.dispatchEvent(new Event("scorace:organizer-resize"));
- };
+ toggle.setAttribute("aria-controls",root.id);
+ toggle.onclick=()=>setOpen(root.classList.contains("collapsed"));
  root.querySelectorAll("[data-org-status]").forEach(btn=>btn.onclick=()=>{state.status=btn.dataset.orgStatus;state.page=0;draw()});
  root.querySelector("#scOrgSearch").oninput=event=>{state.search=event.target.value;state.page=0;draw()};
  root.querySelector("#scOrgPrev").onclick=()=>{state.page=Math.max(0,state.page-1);draw()};
  root.querySelector("#scOrgNext").onclick=()=>{state.page++;draw()};
  root.querySelector("#scOrgCancel").onclick=()=>{api?.cancel?.();state.selected=null;draw()};
  if(window.matchMedia("(max-width:740px)").matches)toggle.click();
+}
+function setOpen(open){
+ const toggle=document.getElementById("scOrgToggle");
+ if(!root||!toggle||root.classList.contains("collapsed")===!open)return;
+ root.classList.toggle("collapsed",!open);
+ toggle.querySelector(".sc-pill-icon").textContent=open?"−":"+";
+ toggle.setAttribute("aria-label",open?"Recolher cartas avulsas":"Abrir cartas avulsas");
+ toggle.setAttribute("aria-expanded",String(open));
+ window.dispatchEvent(new Event("scorace:organizer-resize"));
 }
 function select(card,event,skipDraw=false){
  if(!card||card.slot!==null)return;
@@ -98,5 +101,5 @@ function init(options){
   canvas.addEventListener("drop",e=>{if(!state.selected)return;e.preventDefault();const ok=api?.drop?.({clientX:e.clientX,clientY:e.clientY});if(ok){state.selected=null;renderKey="";draw()}});
  }
 }
-window.ScoraceCardOrganizer={init,render,dropped,close:()=>{if(root&&!root.classList.contains("collapsed"))document.getElementById("scOrgToggle")?.click()},state:()=>({...state,cards:undefined})};
+window.ScoraceCardOrganizer={init,render,dropped,close:()=>setOpen(false),state:()=>({...state,cards:undefined})};
 })();

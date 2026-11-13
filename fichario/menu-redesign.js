@@ -7,7 +7,9 @@ const icons = {
 function pill(button, label, icon) {
   const text = document.createElement('span');
   text.className = 'sc-pill-label';
-  text.textContent = label;
+  const caption = document.createElement('span');
+  caption.textContent = label;
+  text.append(caption);
   const circle = document.createElement('span');
   circle.className = 'sc-pill-icon';
   circle.append(icon);
@@ -60,7 +62,17 @@ function setupScoraceMenu() {
   toolbar.append(editor);
   workspace.append(toolbar);
   const organizer = get('scOrganizer');
-  if (organizer) toolbar.append(organizer.querySelector('#scOrgToggle'));
+  const organizerToggle = organizer?.querySelector('#scOrgToggle');
+  if (organizerToggle) toolbar.append(organizerToggle);
+
+  function closeOtherMenus(current) {
+    for (const dialog of document.querySelectorAll('.sc-tool-dialog[open]')) {
+      if (dialog !== current) dialog.close();
+    }
+    const editorDialog = get('editorDialog');
+    if (current !== editorDialog && editorDialog.open) get('collectionMode').click();
+    if (current !== organizer) window.ScoraceCardOrganizer?.close();
+  }
 
   for (const [id, label, dialogId] of [
     ['remove', 'Remoção', 'removeDialog'],
@@ -74,23 +86,24 @@ function setupScoraceMenu() {
     trigger.setAttribute('aria-expanded', 'false');
     trigger.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icons[id]}</svg>`;
     pill(trigger, label, trigger.querySelector('svg'));
-    toolbar.insertBefore(trigger, get('scOrgToggle'));
+    toolbar.insertBefore(trigger, organizerToggle ?? null);
     const dialog = get(dialogId);
     trigger.onclick = () => {
       if (document.body.classList.contains('sc-exporting')) return;
       if (dialog.open) { dialog.close(); return; }
-      for (const other of document.querySelectorAll('.sc-tool-dialog[open]')) other.close();
+      closeOtherMenus(dialog);
       dialog.show();
       trigger.setAttribute('aria-expanded', 'true');
     };
     dialog.querySelector('[data-close-tool]').onclick = () => dialog.close();
-    dialog.addEventListener('close', () => trigger.setAttribute('aria-expanded', 'false'));
+    dialog.addEventListener('close', () => trigger.setAttribute('aria-expanded', String(dialog.open)));
   }
-  get('scOrgToggle')?.addEventListener('click', () => {
-    for (const dialog of document.querySelectorAll('.sc-tool-dialog[open]')) dialog.close();
+  organizerToggle?.addEventListener('click', () => {
+    if (organizerToggle.getAttribute('aria-expanded') === 'true') closeOtherMenus(organizer);
   });
   editor.addEventListener('click', () => {
-    for (const dialog of document.querySelectorAll('.sc-tool-dialog[open]')) dialog.close();
+    const dialog = get('editorDialog');
+    if (dialog.open) closeOtherMenus(dialog);
   });
 
   get('cameraViews').append(document.querySelector('.camera-bar'), document.querySelector('.scene-top'));
