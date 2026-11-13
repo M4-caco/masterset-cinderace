@@ -360,3 +360,31 @@ body.editing .editor-page-selectable .slot { cursor:pointer; }
 body.editing .editor-page-selected { outline:2px solid #f49b5c; outline-offset:2px; }
 body.scorace-embedded #cardDialog.sc-imported-card #cardName { pointer-events:auto; }
 body.scorace-embedded #cardDialog.sc-imported-card .card-back-field { display:flex; }
+#cardCropDialog {
+  box-sizing:border-box;
+  width:min(510px,calc(100vw - 24px));
+  max-width:none;
+  max-height:calc(100dvh - 24px);
+  padding:16px;
+  color:#f4eee9;
+  background:#24262c;
+  border:1px solid #a5643d;
+}
+#cardCropDialog::backdrop { background:#0b0b0dcc; }
+#cardCropDialog h2 { margin:0 0 6px; font-size:17px; }
+#cardCropDialog p { margin:0 0 10px; font-size:12px; }
+#cardCropDialog canvas {
+  display:block;
+  width:min(100%,calc((100dvh - 190px) * 460 / 410));
+  min-width:min(100%,170px);
+  height:auto;
+  margin:0 auto 12px;
+  background:#15161b;
+  border-radius:8px;
+  touch-action:none;
+  cursor:move;
+}
+#cardCropDialog label { display:flex; justify-content:space-between; margin:0 0 4px; }
+#cardCropDialog input { padding:0; accent-color:#f49b5c; }
+.card-crop-actions { display:flex; flex-wrap:wrap; justify-content:flex-end; gap:8px; margin-top:12px; }
+.card-crop-actions button { min-height:36px; }

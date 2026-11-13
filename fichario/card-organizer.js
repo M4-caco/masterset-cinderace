@@ -90,7 +90,7 @@ function draw(){
 }
 function render(cards){
  initUI();state.cards=cards;
- const next=JSON.stringify(state.cards.map(c=>[c.id,c.name,c.catalog?c.image:null,c.slot,c.owned]));
+ const next=JSON.stringify(state.cards.map(c=>[c.id,c.name,c.catalog?c.image:c.crop,c.slot,c.owned]));
  if(next===renderKey)return;
  renderKey=next;
  if(state.selected&&!state.cards.some(c=>c.id===state.selected&&c.slot===null))state.selected=null;
