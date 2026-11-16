@@ -5,7 +5,7 @@ import {
 import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=2';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=5';
 import { iconControl, mountVolume } from './showcase-controls.js?v=3';
-import { BattleEffects } from './battle-effects.js?v=5';
+import { BattleEffects } from './battle-effects.js?v=6';
 import { mountPokedex } from './pokedex.js?v=5';
 
 const FORMS = { normal: 'Normal', dynamax: 'Dynamax', gigamax: 'Gigamax' };
@@ -16,13 +16,18 @@ const SPECIES = [
 ];
 const FRAME_HEIGHT = 2.4;
 const FLOOR = 0.84;
-const DYNAMAX_FLOOR = 0.875;
-const DYNAMAX_SCALE = 1.3;
-const GIGAMAX_DISPLAY_HEIGHT = 1.95;
-const GIGAMAX_CAMERA_FRAME = 2.65;
+const DYNAMAX_SCALE = 1.55;
+const GIGAMAX_SCALE = 1.7;
 const CAROUSEL_DURATION = 440;
-// Silhouette radius around Scorbunny's waist, sampled through the tackle clip.
-const TACKLE_RADIUS = [0.3, 0.354, 0.356, 0.357, 0.357, 0.354, 0.362, 0.506, 0.52, 0.52, 0.431, 0.412, 0.411, 0.376, 0.303, 0.303, 0.301];
+const MODEL_MARGIN = 0.045;
+
+// Local bounds sampled from the exported idle loops. The Gigamax bounds include the fireball.
+const IDLE_BOUNDS = {
+    scorbunny: [[-0.185, -0.016, -0.066], [0.199, 0.631, 0.178]],
+    raboot: [[-0.309, -0.011, -0.148], [0.31, 0.88, 0.176]],
+    cinderace: [[-0.379, -0.011, -0.325], [0.398, 1.736, 0.367]],
+    'cinderace-gigamax': [[-0.987, -0.016, -1.352], [1.041, 2.829, 1.017]],
+};
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const MOVES = {
     physical: 'Ataque físico',
@@ -59,6 +64,7 @@ class PokemonViewer {
         this.revision = 0;
         this.frameRequest = 0;
         this.attack = null;
+        this.bounds = new Box3();
         this.model = null;
         this.inView = false;
         this.previewReady = '';
@@ -192,14 +198,21 @@ class PokemonViewer {
             }));
             const mixer = new AnimationMixer(root);
             const clips = new Map(gltf.animations.map(clip => [clip.name, clip]));
+            // The exported body shares vertices and skinning across its material groups.
+            const parts = meshes.filter((mesh, index) => !meshes.slice(0, index).some(other =>
+                other.parent === mesh.parent && other.skeleton === mesh.skeleton &&
+                other.geometry.attributes.position === mesh.geometry.attributes.position &&
+                other.geometry.attributes.skinWeight === mesh.geometry.attributes.skinWeight &&
+                other.geometry.attributes.skinIndex === mesh.geometry.attributes.skinIndex));
+            const idleBounds = new Box3(...IDLE_BOUNDS[id].map(point => new Vector3(...point)));
             const model = {
-                id, root, mixer, clips, materialPairs, body, props, visibilityController,
+                id, root, mixer, clips, materialPairs, body, props, visibilityController, parts, idleBounds,
                 idle: clips.get('Repouso da Pokédex') ?? clips.get('Repouso de batalha') ?? clips.get('Repouso'),
             };
             this.setRest(model);
             const bounds = new Box3();
-            const parts = id === 'cinderace-gigamax' ? [...body, ...props.filter(part => part.visible)] : body;
-            for (const part of parts) bounds.expandByObject(part, true);
+            const restParts = id === 'cinderace-gigamax' ? [...body, ...props.filter(part => part.visible)] : body;
+            for (const part of restParts) bounds.expandByObject(part, true);
             if (bounds.isEmpty()) throw new Error(`Malha 3D vazia: ${id}`);
             model.center = bounds.getCenter(new Vector3());
             model.size = bounds.getSize(new Vector3());
@@ -240,7 +253,8 @@ class PokemonViewer {
     async select(form, retry = false) {
         if (this.loading && form === this.form && !retry) return;
         if (this.model && form === this.form && !retry) return;
-        const changingForms = this.model && !retry;
+        const changingForms = this.model && !retry && this.form !== form;
+        const previousHeight = this.displayHeight;
         if ((this.form === 'gigamax') !== (form === 'gigamax')) this.angle = this.species.angle;
         this.form = form;
         this.stage.dataset.form = form;
@@ -269,7 +283,6 @@ class PokemonViewer {
             ]);
             if (revision !== this.revision) return;
             this.model = model;
-            this.tackleAnchor = this.species.id === 'scorbunny' ? model.root.getObjectByName('Waist_4') : null;
             this.turntable.clear();
             this.placement = new Group();
             this.placement.add(model.root);
@@ -281,7 +294,7 @@ class PokemonViewer {
             this.stage.toggleAttribute('data-max-cloud', Boolean(this.cloud && form !== 'normal'));
             this.setRest(model);
             this.restStart = performance.now();
-            this.updatePlacement(true);
+            this.updatePlacement(true, changingForms ? previousHeight : undefined);
             this.configureMax(pattern);
             this.pokedexMove = form === 'gigamax' ? MOVES.roar : MOVES.special;
             this.renderControls();
@@ -307,20 +320,23 @@ class PokemonViewer {
         }
     }
 
-    updatePlacement(immediate = false) {
-        if (!this.model || !this.placement) return;
+    normalHeight() {
         const side = this.card.parentElement.hasAttribute('data-focus') && !this.focused;
         const height = this.focused ? Math.max(this.species.height, 1.62) : this.species.height;
-        const baseHeight = this.form === 'gigamax' ? GIGAMAX_DISPLAY_HEIGHT :
-            height * (this.form === 'dynamax' ? DYNAMAX_SCALE : 1);
-        const target = baseHeight * (side ? 0.73 : 1);
-        if (immediate || reducedMotion.matches || this.displayHeight === undefined) {
+        return height * (side ? 0.73 : 1);
+    }
+
+    updatePlacement(immediate = false, previousHeight) {
+        if (!this.model || !this.placement) return;
+        const scale = this.form === 'gigamax' ? GIGAMAX_SCALE : this.form === 'dynamax' ? DYNAMAX_SCALE : 1;
+        const target = this.normalHeight() * scale;
+        const from = previousHeight ?? this.displayHeight;
+        if ((immediate && previousHeight === undefined) || reducedMotion.matches || from === undefined || from === target) {
             this.placementTransition = null;
             this.setDisplayHeight(target);
-        } else if (target !== this.displayHeight) {
-            this.placementTransition = { from: this.displayHeight, to: target, start: performance.now() };
         } else {
-            this.placementTransition = null;
+            this.setDisplayHeight(from);
+            this.placementTransition = { from, to: target, start: performance.now() };
         }
         this.invalidate();
     }
@@ -339,7 +355,10 @@ class PokemonViewer {
         const progress = Math.min(1, Math.max(0, (now - transition.start) / CAROUSEL_DURATION));
         const eased = progress * progress * (3 - 2 * progress);
         this.setDisplayHeight(transition.from + (transition.to - transition.from) * eased);
-        if (progress === 1) this.placementTransition = null;
+        if (progress === 1) {
+            this.placementTransition = null;
+            this.syncPreview();
+        }
     }
 
     setFocus(focused, order) {
@@ -389,7 +408,7 @@ class PokemonViewer {
     renderControls() {
         const fire = 'fire';
         const entries = this.form === 'gigamax'
-            ? [['Bola de Chamas G-Max', fire, MOVES.special, 'gmax']]
+            ? [['Bola de Chamas G-Max', fire, MOVES.special]]
             : this.form === 'dynamax'
                 ? [['Chama Max', fire, MOVES.special, 'max']]
                 : this.species.gigamax
@@ -430,7 +449,7 @@ class PokemonViewer {
             const src = new URL(`./previews/${this.species.id}-${this.form}-${color}.webp`, import.meta.url).href;
             if (this.webp.src !== src) this.webp.src = src;
         }
-        const active = show && !this.attack && !this.loading && !this.rotated &&
+        const active = show && !this.attack && !this.loading && !this.rotated && !this.placementTransition &&
             this.previewReady && this.previewReady === this.webp.src;
         this.stage.toggleAttribute('data-webp', Boolean(active));
         this.webp.hidden = !active;
@@ -507,38 +526,23 @@ class PokemonViewer {
         if (ambient || this.attack || this.placementTransition) this.invalidate();
 
         const { renderer, camera } = this;
-        const floor = this.form === 'dynamax' ? DYNAMAX_FLOOR : FLOOR;
-        const baseFrame = this.form === 'gigamax' ? GIGAMAX_CAMERA_FRAME : FRAME_HEIGHT;
-        const fittedMaxFrame = clouds ? (this.displayHeight + 0.35) / floor : baseFrame;
-        const size = this.model.size;
-        const aspect = width / height;
-        const shapeRatio = this.form === 'gigamax' ? 1.04 : Math.max(size.x, size.z) / size.y * 1.26;
-        const fittedWideFrame = this.displayHeight * shapeRatio / aspect;
-        const attackRadius = this.tackleRadius();
-        const frameHeight = Math.max(baseFrame, fittedMaxFrame, fittedWideFrame, attackRadius * 2.18 / aspect);
-        const resized = width !== this.width || height !== this.height;
-        if (resized) {
+        if (width !== this.width || height !== this.height) {
             renderer.setSize(width, height, false);
             this.width = width;
             this.height = height;
         }
-        const framingChanged = frameHeight !== this.frameHeight;
-        if (resized || framingChanged) {
+        const frame = this.fitFrame(width / height);
+        const { frameHeight, floor, centerX } = frame;
+        if (frameHeight !== this.frameHeight || floor !== this.effectsFloor || centerX !== this.effectsCenterX ||
+            width !== this.effectsWidth || height !== this.effectsPixels || this.displayHeight !== this.effectsHeight) {
             this.frameHeight = frameHeight;
-            const halfHeight = frameHeight / 2;
-            camera.left = -halfHeight * width / height;
-            camera.right = -camera.left;
-            camera.top = halfHeight;
-            camera.bottom = -halfHeight;
-            camera.updateProjectionMatrix();
-        }
-        if (resized || framingChanged || this.displayHeight !== this.effectsHeight || floor !== this.effectsFloor) {
-            this.effectsHeight = this.displayHeight;
             this.effectsFloor = floor;
-            this.positionEffects(width, height, frameHeight, floor);
+            this.effectsCenterX = centerX;
+            this.effectsWidth = width;
+            this.effectsPixels = height;
+            this.effectsHeight = this.displayHeight;
+            this.positionEffects(width, height, frameHeight, floor, centerX);
         }
-        this.turntable.rotation.y = this.angle;
-        this.frameAttack(camera, frameHeight, floor, attackRadius);
         this.turntable.visible = this.webp.hidden;
         if (this.cloud) {
             this.cloud.visible = Boolean(clouds);
@@ -552,40 +556,48 @@ class PokemonViewer {
         if (this.attack?.effect) {
             this.battleEffects.draw(this.attack.effect, this.attack.action.time / this.attack.duration,
                 width, height, this.displayHeight * height / frameHeight, height * floor, this.angle,
-                reducedMotion.matches);
+                reducedMotion.matches, width * centerX);
         }
     }
 
-    tackleRadius() {
-        if (!this.tackleAnchor || this.attack?.name !== MOVES.physical) return 0;
-        const last = TACKLE_RADIUS.length - 1;
-        const progress = Math.min(1, this.attack.action.time / this.attack.duration) * last;
-        const i = Math.floor(progress);
-        const current = TACKLE_RADIUS[i];
-        const next = TACKLE_RADIUS[Math.min(last, i + 1)];
-        return this.displayHeight * (current + (next - current) * (progress - i));
-    }
-
-    frameAttack(camera, frameHeight, floor, radius) {
-        camera.position.x = 0;
-        camera.position.y = frameHeight * (floor - 0.5);
-        if (!radius) {
-            if (this.followingTackle) this.stage.style.removeProperty('--pokemon-shadow-center');
-            this.followingTackle = false;
-            return;
+    fitFrame(aspect) {
+        const { bounds, camera, model, turntable, placement } = this;
+        turntable.rotation.y = this.angle;
+        turntable.updateMatrixWorld(true);
+        if (this.attack) {
+            bounds.makeEmpty();
+            for (const part of model.parts) {
+                if (part.visible) bounds.expandByObject(part, true);
+            }
+        } else {
+            bounds.copy(model.idleBounds).applyMatrix4(placement.matrixWorld);
         }
-        this.followingTackle = true;
-        this.attackCenter ??= new Vector3();
-        const waist = this.tackleAnchor.getWorldPosition(this.attackCenter);
-        const travel = Math.max(0, Math.min(camera.right * 0.42, camera.right - radius - 0.025));
-        const screenX = travel > 0 ? travel * Math.tanh(waist.x / travel) : 0;
-        camera.position.x = waist.x - screenX;
-        const headroom = waist.y + this.displayHeight * 0.76 + 0.06;
-        camera.position.y += Math.max(0, headroom - frameHeight * floor);
-        this.stage.style.setProperty('--pokemon-shadow-center', `${50 + screenX * 50 / camera.right}%`);
+
+        // Keep the same reference frame across forms so it doesn't cancel out the size increase.
+        const largest = this.normalHeight() * (this.species.gigamax ? GIGAMAX_SCALE : DYNAMAX_SCALE);
+        const baseFrame = Math.max(FRAME_HEIGHT, (largest + 0.38) / FLOOR);
+        const fitWidth = (bounds.max.x - bounds.min.x + MODEL_MARGIN * 2) / aspect;
+        const fitHeight = bounds.max.y - bounds.min.y + MODEL_MARGIN * 2;
+        const frameHeight = Math.max(baseFrame, fitWidth, fitHeight);
+        const halfHeight = frameHeight / 2;
+        const halfWidth = halfHeight * aspect;
+        const x = Math.max(bounds.max.x - halfWidth + MODEL_MARGIN,
+            Math.min(0, bounds.min.x + halfWidth - MODEL_MARGIN));
+        const y = Math.max(bounds.max.y - halfHeight + MODEL_MARGIN,
+            Math.min(frameHeight * (FLOOR - 0.5), bounds.min.y + halfHeight - MODEL_MARGIN));
+        if (halfWidth !== camera.right || halfHeight !== camera.top) {
+            camera.left = -halfWidth;
+            camera.right = halfWidth;
+            camera.top = halfHeight;
+            camera.bottom = -halfHeight;
+            camera.updateProjectionMatrix();
+        }
+        camera.position.x = x;
+        camera.position.y = y;
+        return { frameHeight, floor: 0.5 + y / frameHeight, centerX: 0.5 - x / (2 * halfWidth) };
     }
 
-    positionEffects(width, height, frameHeight, floor) {
+    positionEffects(width, height, frameHeight, floor, centerX) {
         const pixelsPerUnit = height / frameHeight;
         const tall = this.displayHeight * pixelsPerUnit;
         const baseline = height * floor;
@@ -597,9 +609,10 @@ class PokemonViewer {
             'aura-y': Math.max(0, baseline - tall - 14),
             'flash-y': baseline - tall * 0.52,
             'flash-width': limit(tall * 1.55, 85, 0.96),
-            'webp-size': tall * 1.27,
+            'webp-size': Math.min(tall * 1.27, width, baseline / 0.945),
             'webp-bottom': height - baseline - tall * 0.055,
         };
+        this.stage.style.setProperty('--pokemon-shadow-center', `${centerX * 100}%`);
         for (const [name, size] of Object.entries(effects)) {
             this.stage.style.setProperty(`--pokemon-${name}`, `${size}px`);
         }
@@ -617,7 +630,9 @@ export function mountShowcase(section) {
     const grid = section.querySelector('.pokemon-grid');
     const inspector = section.querySelector('.pokemon-inspector');
     const template = section.querySelector('template');
-    const updatePokedex = mountPokedex(section.querySelector('.pokemon-dex'), SPECIES, selectPokemon);
+    const dex = section.querySelector('.pokemon-dex');
+    const updatePokedex = mountPokedex(dex, SPECIES, selectPokemon);
+    const dexHeader = dex.querySelector('.pokemon-dex-header');
     const enlarge = section.querySelector('[data-enlarge]');
     const webp = section.querySelector('[data-webp]');
     let selected = -1;
@@ -652,6 +667,7 @@ export function mountShowcase(section) {
             card.setFocus(position === index, order);
         }
         updatePokedex(index === -1 ? null : cards[index]);
+        fitOpening();
         if (smooth) {
             const positions = cards.map(({ card }) => card.getBoundingClientRect());
             for (const [position, { card }] of cards.entries()) {
@@ -703,11 +719,30 @@ export function mountShowcase(section) {
             card.invalidate();
         }
     });
+    function fitOpening() {
+        if (section.classList.contains('hidden')) return;
+        const gridRect = grid.getBoundingClientRect();
+        const stageHeight = cards[0].stage.offsetHeight;
+        const bottom = selected === -1 ? gridRect.bottom : dexHeader.getBoundingClientRect().bottom;
+        const surroundingHeight = bottom + window.scrollY - stageHeight;
+        const availableHeight = window.innerHeight - surroundingHeight - 12;
+        section.style.setProperty('--pokemon-opening-stage', `${Math.floor(availableHeight)}px`);
+    }
+
+    const openingObserver = new ResizeObserver(fitOpening);
+    for (const element of [document.querySelector('header'), section.querySelector('.pokemon-header'),
+        inspector, dexHeader]) openingObserver.observe(element);
+    window.addEventListener('resize', fitOpening);
+
     mountVolume(section, cards);
     for (const card of cards) card.select('normal');
+    fitOpening();
 
     return {
-        show: () => cards.forEach(card => card.invalidate()),
+        show: () => {
+            fitOpening();
+            cards.forEach(card => card.invalidate());
+        },
         hide: () => cards.forEach(card => card.suspend()),
     };
 }

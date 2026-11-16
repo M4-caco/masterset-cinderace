@@ -3,8 +3,11 @@ const status = section.querySelector('.pokemon-message');
 const retry = section.querySelector('.pokemon-retry');
 let viewer;
 let loading;
+let active = false;
 
 function show() {
+    if (!active) window.scrollTo(0, 0);
+    active = true;
     if (viewer) {
         viewer.show();
         return;
@@ -13,7 +16,7 @@ function show() {
     status.hidden = false;
     status.textContent = 'Preparando visualizador 3D…';
     retry.hidden = true;
-    loading = import('./showcase.js?v=5').then(({ mountShowcase }) => {
+    loading = import('./showcase.js?v=6').then(({ mountShowcase }) => {
         viewer = mountShowcase(section);
         status.hidden = true;
     }).catch(error => {
@@ -24,6 +27,9 @@ function show() {
 }
 
 section.addEventListener('pokemon:show', show);
-section.addEventListener('pokemon:hide', () => viewer?.hide());
+section.addEventListener('pokemon:hide', () => {
+    active = false;
+    viewer?.hide();
+});
 retry.addEventListener('click', show);
 if (!section.classList.contains('hidden')) show();

@@ -12,4 +12,4 @@ O brilho Max combina a textura original `maxCaustics` com os parâmetros de cor 
 
 Os nomes dos golpes selecionados seguem os nomes em português do Pokémon GO. Os botões reproduzem os clipes corporais disponíveis para ataques físicos, especiais e Max do visualizador.
 
-Os efeitos de fogo dos botões foram desenhados para a página e sincronizados com os clipes de ataque disponíveis.
+Os efeitos de fogo em Canvas dos golpes das formas Normal e Dynamax foram desenhados para a página. A Bola de Chamas G-Max usa a animação e a malha da bola de fogo do pacote `pm815.floaf_assets_all`.

@@ -99,7 +99,7 @@ export class BattleEffects {
         this.canvas.hidden = true;
     }
 
-    draw(kind, progress, width, height, modelHeight, floor, angle, calm) {
+    draw(kind, progress, width, height, modelHeight, floor, angle, calm, centerX) {
         const ctx = this.ctx;
         if (!ctx) return;
         const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
@@ -116,7 +116,7 @@ export class BattleEffects {
         const t = clamp(progress);
         const power = ramp(0.045, 0.28, t) * (1 - ramp(0.74, 1, t));
         if (!power) return;
-        const cx = width / 2;
+        const cx = centerX;
         const extent = Math.min(Math.max(26, modelHeight), width * 0.84);
         const direction = Math.sin(angle);
         const facing = Math.abs(direction) < 0.18 ? 0.37 : direction;
@@ -144,13 +144,12 @@ export class BattleEffects {
             return;
         }
 
-        const giant = kind === 'gmax';
         const flight = ramp(0.37, 0.72, t);
         const burst = ramp(0.65, 0.8, t) * (1 - ramp(0.82, 1, t));
         const x = cx + facing * extent * lerp(0.1, 0.56, flight);
-        const y = floor - modelHeight * lerp(giant ? 0.34 : 0.28, 0.18, flight) -
+        const y = floor - modelHeight * lerp(0.28, 0.18, flight) -
             Math.sin(flight * Math.PI) * extent * 0.17;
-        const size = extent * (giant ? 0.29 : 0.19) * lerp(0.56, 1.13, ramp(0.14, 0.62, t));
+        const size = extent * 0.19 * lerp(0.56, 1.13, ramp(0.14, 0.62, t));
         const main = power * (1 - ramp(0.7, 0.87, t));
         for (let i = 3; i >= 1; i--) {
             glow(ctx, x - facing * size * i * flight * 0.72, y - size * i * 0.12,
@@ -164,6 +163,6 @@ export class BattleEffects {
                 size * 0.42, theta - 0.7, main * 0.84, i + t * 20);
         }
         glow(ctx, x, y, size * lerp(1.15, 2.05, burst), size * lerp(0.7, 1.35, burst), burst * 0.83, true);
-        sparks(ctx, x, y, size * (giant ? 2.6 : 2.3), t * 1.5, Math.max(main * 0.8, burst), particleCount);
+        sparks(ctx, x, y, size * 2.3, t * 1.5, Math.max(main * 0.8, burst), particleCount);
     }
 }
