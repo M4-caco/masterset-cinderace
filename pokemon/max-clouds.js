@@ -32,14 +32,19 @@ export function loadMaxClouds(loader) {
     return pending;
 }
 
-export function positionMaxClouds(cloud, modelHeight, frameHeight, time) {
-    const spread = Math.min(0.43, Math.max(0.15, modelHeight * 0.26));
-    const ceiling = frameHeight * 0.84;
-    cloud.position.y = Math.min(ceiling - spread * 0.46, modelHeight + 0.11 + spread * 0.22);
-    cloud.position.z = -0.15;
+export function positionMaxClouds(cloud, modelHeight, frameHeight, heading, time, floor) {
+    const spread = Math.min(0.46, Math.max(0.22, modelHeight * 0.24));
+    const ceiling = frameHeight * floor;
+    cloud.position.set(0, Math.min(ceiling - spread * 0.63, modelHeight + spread * 0.38 + 0.09), -0.04);
     cloud.scale.setScalar(spread);
-    cloud.rotation.set(-0.13, Math.sin(time * 0.42) * 0.36, Math.sin(time * 0.58) * 0.06);
+    cloud.rotation.set(-0.27, 0, 0);
+
+    const radius = 1.08;
+    const phase = time * 0.82 - heading;
+    const separation = 2 * Math.PI / cloud.children.length;
     for (const [index, cluster] of cloud.children.entries()) {
-        cluster.rotation.set(time * (index % 2 ? -0.63 : 0.48), time * 0.7 + index, time * 0.26);
+        const angle = phase + index * separation;
+        cluster.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
+        cluster.rotation.set(-0.14, -angle + Math.PI * 0.5, Math.sin(time * 0.75 + index) * 0.16);
     }
 }

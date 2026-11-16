@@ -87,16 +87,20 @@
 }
 
 .pokemon-viewer {
+    position: relative;
     display: flex;
     flex-direction: column;
     min-width: 0;
 }
 
+.pokemon-viewer[data-selected] { z-index: 1; }
+
 .pokemon-stage {
     position: relative;
     isolation: isolate;
     overflow: hidden;
-    height: clamp(16rem, 31vw, 26rem);
+    height: clamp(18rem, 35.5vw, 30rem);
+    transition: opacity 360ms ease;
 }
 
 .pokemon-max-effects,
@@ -337,6 +341,7 @@
     font-weight: 760;
     line-height: 1.15;
     text-align: center;
+    transition: color 230ms ease;
 }
 
 .pokemon-name:hover { color: var(--pk-accent); }
@@ -350,13 +355,17 @@
     opacity: 0.74;
 }
 
-.pokemon-viewer[data-selected] .pokemon-stage::before {
+.pokemon-viewer .pokemon-stage::before {
     content: '';
     position: absolute;
     inset: 9% 0 0;
     pointer-events: none;
     background: radial-gradient(ellipse at 50% 62%, #ffae5240, transparent 63%);
+    opacity: 0;
+    transition: opacity 410ms ease;
 }
+
+.pokemon-viewer[data-selected] .pokemon-stage::before { opacity: 1; }
 
 .pokemon-inspector {
     margin: 0.7rem auto 1.2rem;
@@ -455,7 +464,7 @@
 }
 
 .pokemon-grid[data-display=large] .pokemon-stage {
-    height: clamp(22rem, 44vw, 33rem);
+    height: clamp(23rem, 45vw, 35rem);
 }
 
 @media (min-width: 981px) {
@@ -468,10 +477,10 @@
 @media (max-width: 680px) {
     .pokemon-grid { gap: 0.25rem; }
 
-    .pokemon-stage { height: clamp(9.5rem, 48vw, 16rem); }
+    .pokemon-stage { height: clamp(11rem, 52vw, 18rem); }
 
     .pokemon-grid[data-display=large] .pokemon-stage {
-        height: clamp(11rem, 53vw, 18rem);
+        height: clamp(12rem, 57vw, 20rem);
     }
 
     .pokemon-name { font-size: clamp(0.7rem, 3.2vw, 1rem); }
@@ -486,5 +495,11 @@
     .pokemon-badge-shiny::after,
     .pokemon-max-glow::after {
         animation: none;
+    }
+
+    .pokemon-stage,
+    .pokemon-name,
+    .pokemon-viewer .pokemon-stage::before {
+        transition: none;
     }
 }
