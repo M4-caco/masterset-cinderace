@@ -468,8 +468,8 @@
 #item-detail #item-copy-status:empty{display:none}
 @media(max-width:640px){#item-detail{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:17px}#item-detail .it-detail-grid{grid-template-columns:minmax(0,1fr);gap:12px}#item-detail .it-detail-image{width:100%;height:220px;max-height:30dvh;aspect-ratio:auto}#item-detail .it-detail-image img{max-height:30dvh}}
 </style><link rel="stylesheet" href="scorace-binder.css?v=6">
-    <link rel="stylesheet" href="pokemon/showcase.css">
-    <script type="module" src="pokemon/entry.js"></script>
+    <link rel="stylesheet" href="pokemon/showcase.css?v=2">
+    <script type="module" src="pokemon/entry.js?v=2"></script>
 </head>
 <body class="text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
 
@@ -766,23 +766,36 @@
         <div class="pokemon-header">
             <div>
                 <h2 id="pokemon-title">Pokémon</h2>
-                <p>Arraste para girar. Toque no Pokémon para atacar.</p>
+                <p>Arraste para girar. Toque no Pokémon para ver a reação da Pokédex.</p>
             </div>
-            <div class="pokemon-colors" role="group" aria-label="Cores dos Pokémon">
-                <button type="button" data-color="gray" aria-pressed="true">Em cinza</button>
-                <button type="button" data-color="color" aria-pressed="false">100% colorido</button>
-                <button type="button" data-color="shiny" aria-pressed="false">Shiny</button>
+            <div class="pokemon-options">
+                <div class="pokemon-colors" role="group" aria-label="Cores dos Pokémon">
+                    <button type="button" data-color="color" aria-pressed="true">100% colorido</button>
+                    <button type="button" data-color="shiny" aria-pressed="false">Shiny</button>
+                </div>
+                <div class="pokemon-display">
+                    <button type="button" data-webp aria-pressed="false" aria-controls="pokemon-lineup">WebP</button>
+                    <button type="button" data-enlarge aria-pressed="false" aria-controls="pokemon-lineup">Ampliar trio</button>
+                </div>
             </div>
         </div>
         <p class="pokemon-message" role="status" hidden></p>
         <button type="button" class="pokemon-retry" hidden>Tentar novamente</button>
-        <div class="pokemon-grid"></div>
+        <div id="pokemon-lineup" class="pokemon-grid"></div>
         <template id="pokemon-card-template">
             <article class="pokemon-viewer">
                 <div class="pokemon-stage">
-                    <div class="pokemon-aura" aria-hidden="true"></div>
+                    <div class="pokemon-max-effects" aria-hidden="true">
+                        <div class="pokemon-clouds"></div>
+                        <div class="pokemon-max-glow"></div>
+                    </div>
                     <div class="pokemon-shadow" aria-hidden="true"></div>
+                    <img class="pokemon-webp" alt="" hidden>
                     <button type="button" class="pokemon-target" disabled></button>
+                    <div class="pokemon-transition" aria-hidden="true"></div>
+                    <div class="pokemon-shiny-sparkles" aria-hidden="true">
+                        <span>✦</span><span>✦</span><span>✦</span><span>✦</span><span>✦</span>
+                    </div>
                     <div class="pokemon-loading">
                         <img width="88" height="88" alt="">
                         <span role="status">Carregando modelo 3D…</span>
