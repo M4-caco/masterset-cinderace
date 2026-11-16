@@ -2,7 +2,7 @@
 
 As malhas, os esqueletos, as texturas normal e Shiny, os clipes e os ícones vieram dos [pacotes Unity do Pokémon GO](https://github.com/ChicoEevee/Pokemon-GO-AssetBundles/tree/main/Pokemon). Os pacotes são `pm813_assets_all`, `pm814_assets_all`, `pm815_assets_all` e `pm815.floaf_assets_all` (Cinderace Gigamax).
 
-Os modelos foram convertidos para glTF com buffers externos. A iluminação, a composição das texturas dos olhos e da bola de fogo, e a apresentação da aura foram adaptadas para o navegador. As nuvens Max são uma malha glTF procedural com animação em 3D. O brilho no entorno usa uma textura do pacote `bread_shared_assets_fx_max_glow`. O modo Dynamax usa a malha e o clipe especial de cada Pokémon da forma normal. O Gigamax usa o modelo, o ataque e o rugido do seu próprio pacote.
+Os modelos foram convertidos para glTF com buffers externos. A iluminação, a composição das texturas dos olhos e da bola de fogo e a apresentação da aura foram adaptadas para o navegador. As nuvens Max usam a malha `max_cloud_combined`, os atributos de fase dos vértices e a textura `max_cloud_vertex_anim` dos pacotes originais. O shader web reproduz as fórmulas do `MaxCloudShader` e usa os parâmetros de cor do material `fx_max_cloud`. O modo Dynamax usa a malha e o clipe especial de cada Pokémon da forma normal. O Gigamax usa o modelo, o ataque e o rugido do seu próprio pacote.
 
 O arquivo `vendor/three-gltf.js` é um bundle do Three.js 0.180.0 e do seu GLTFLoader. A licença está em `vendor/three-LICENSE.txt`.
 
@@ -11,3 +11,5 @@ A animação de repouso usa `ba10_waitA01`. Os movimentos de toque foram identif
 O brilho Max combina a textura original `maxCaustics` com os parâmetros de cor do material `BreadMode`. Os WebP de visualização foram renderizados diretamente dos modelos 3D e mantêm transparência, repouso, cores normais e Shiny.
 
 Os nomes dos golpes selecionados seguem os nomes em português do Pokémon GO. Os botões reproduzem os clipes corporais disponíveis para ataques físicos, especiais e Max do visualizador.
+
+Os efeitos de fogo dos botões foram desenhados para a página e sincronizados com os clipes de ataque disponíveis.

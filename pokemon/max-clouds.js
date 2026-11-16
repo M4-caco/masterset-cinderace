@@ -1,50 +1,82 @@
-const url = new URL('./visuals/max-clouds.gltf', import.meta.url).href;
-let pending;
+import { TextureLoader } from './vendor/three-gltf.js';
 
-export function loadMaxClouds(loader) {
-    if (!pending) {
-        pending = loader.loadAsync(url).then(({ scene }) => {
-            const materials = new Set();
-            scene.traverse(object => {
-                if (object.isMesh) materials.add(object.material);
-            });
-            for (const material of materials) {
-                material.onBeforeCompile = shader => {
-                    shader.fragmentShader = shader.fragmentShader.replace(
-                        '#include <emissivemap_fragment>',
-                        `#include <emissivemap_fragment>
-                        float face = clamp(dot(normalize(normal), normalize(vViewPosition)), 0.0, 1.0);
-                        float edge = pow(1.0 - face, 2.0);
-                        float ripple = 0.5 + 0.5 * sin(normal.x * 9.0 + normal.y * 7.0 + normal.z * 5.0);
-                        totalEmissiveRadiance += vec3(0.68, 0.004, 0.062) * (0.08 + edge * (0.73 + ripple * 0.26));
-                        `,
-                    );
-                };
-                material.customProgramCacheKey = () => 'scorace-max-clouds';
-            }
-            return scene;
-        }).catch(error => {
-            pending = null;
-            console.warn('Scorace · Nuvens Max', error);
-            return null;
-        });
-    }
-    return pending;
+const modelUrl = new URL('./visuals/max-clouds.gltf?v=5', import.meta.url).href;
+const textureUrl = new URL('./visuals/max-cloud-animation.png', import.meta.url).href;
+let source;
+
+const linear = c => c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
+const edgeColor = [0.945098, 0.043137, 0.261183].map(linear).join(', ');
+const coreColor = [0.273585, 0.070977, 0.070977].map(linear).join(', ');
+
+function makeClouds(scene, texture) {
+    const cloud = scene.clone(true);
+    const uniforms = { cloudTime: { value: 0 }, cloudHeading: { value: 0 }, cloudMotion: { value: texture } };
+    cloud.userData.motion = uniforms;
+    cloud.traverse(mesh => {
+        if (!mesh.isMesh) return;
+        mesh.frustumCulled = false;
+        mesh.material = mesh.material.clone();
+        mesh.material.customProgramCacheKey = () => 'scorace-original-max-cloud-v1';
+        mesh.material.onBeforeCompile = shader => {
+            Object.assign(shader.uniforms, uniforms);
+            shader.vertexShader = shader.vertexShader.replace('#include <common>', `#include <common>
+                attribute vec4 _cloud_data;
+                uniform float cloudTime;
+                uniform float cloudHeading;
+                uniform sampler2D cloudMotion;
+                varying vec3 cloudNormal;
+                varying float cloudTop;`).replace('#include <begin_vertex>', `
+                // RGB stores travel, vertical bob and scale over one 6.5-second cycle.
+                float moving = step(0.001, _cloud_data.r);
+                float phase = fract(cloudTime / 6.5 + _cloud_data.r) * moving;
+                vec3 motion = texture2D(cloudMotion, vec2(phase, 0.5)).rgb;
+                float scale = 1.25 * _cloud_data.a * mix(1.0, motion.b, moving);
+                vec3 local = position * vec3(-scale, scale, scale);
+                local.x -= 0.45 * motion.r * moving;
+                local.y += 0.09 * (motion.g - 0.5) * moving;
+                local.z += 0.4 - 0.4 * motion.r * phase;
+
+                float angle = cloudTime * 0.130899694 + _cloud_data.g * 6.283185307 - cloudHeading;
+                float s = sin(angle);
+                float c = cos(angle);
+                vec3 transformed = vec3(-c * local.x - s * local.z, local.y, -s * local.x + c * local.z);
+                vec3 turnedNormal = vec3(c * normal.x - s * normal.z, normal.y, s * normal.x + c * normal.z);
+                cloudNormal = normalMatrix * turnedNormal;
+                cloudTop = turnedNormal.y;`);
+            shader.fragmentShader = shader.fragmentShader.replace('#include <common>', `#include <common>
+                varying vec3 cloudNormal;
+                varying float cloudTop;`).replace('#include <opaque_fragment>', `
+                float rim = 1.0 - max(0.0, normalize(cloudNormal).z);
+                float gradient = pow(clamp(cloudTop, 0.0, 1.0), 0.01);
+                vec3 bottomColor = vec3(1.0, 0.0, 0.0);
+                vec3 topColor = vec3(1.0, 0.0, ${linear(0.017315865)});
+                outgoingLight = clamp(vec3(${coreColor}) * mix(bottomColor, topColor, gradient)
+                    + rim * vec3(${edgeColor}), 0.0, 1.0);
+                diffuseColor.a = 1.0;
+                #include <opaque_fragment>`);
+        };
+    });
+    return cloud;
 }
 
-export function positionMaxClouds(cloud, modelHeight, frameHeight, heading, time, floor) {
-    const spread = Math.min(0.46, Math.max(0.22, modelHeight * 0.24));
-    const ceiling = frameHeight * floor;
-    cloud.position.set(0, Math.min(ceiling - spread * 0.63, modelHeight + spread * 0.38 + 0.09), -0.04);
-    cloud.scale.setScalar(spread);
-    cloud.rotation.set(-0.27, 0, 0);
-
-    const radius = 1.08;
-    const phase = time * 0.82 - heading;
-    const separation = 2 * Math.PI / cloud.children.length;
-    for (const [index, cluster] of cloud.children.entries()) {
-        const angle = phase + index * separation;
-        cluster.position.set(Math.cos(angle) * radius, 0, Math.sin(angle) * radius);
-        cluster.rotation.set(-0.14, -angle + Math.PI * 0.5, Math.sin(time * 0.75 + index) * 0.16);
+export function loadMaxClouds(loader) {
+    if (!source) {
+        source = Promise.all([loader.loadAsync(modelUrl), new TextureLoader().loadAsync(textureUrl)])
+            .catch(error => {
+                source = null;
+                console.warn('Scorace · Nuvens Max', error);
+                return null;
+            });
     }
+    return source.then(assets => assets ? makeClouds(assets[0].scene, assets[1]) : null);
+}
+
+export function positionMaxClouds(cloud, modelHeight, frameHeight, heading, time, floor, mountScale, halfWidth) {
+    const scale = Math.min(mountScale, halfWidth / 0.52);
+    const ceiling = frameHeight * floor;
+    cloud.position.set(0, Math.min(ceiling - scale * 0.19, modelHeight + scale * 0.12), -0.03);
+    cloud.scale.setScalar(scale);
+    cloud.rotation.set(-0.19, 0, 0);
+    cloud.userData.motion.cloudTime.value = time;
+    cloud.userData.motion.cloudHeading.value = heading;
 }
