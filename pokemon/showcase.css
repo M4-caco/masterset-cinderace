@@ -1,0 +1,319 @@
+@media (min-width: 768px) and (max-width: 980px) {
+    header nav:has(#nav-pokemon) button {
+        padding-inline: clamp(0.3rem, (100vw - 750px) / 26, 0.875rem);
+    }
+}
+
+@media (max-width: 767px) {
+    header .brand-heading {
+        min-width: 0;
+        flex-shrink: 1;
+    }
+
+    header .brand-heading button,
+    header .brand-logo {
+        max-width: 100% !important;
+    }
+
+    header .brand-logo {
+        height: auto !important;
+        width: min(28vw, 138px) !important;
+    }
+
+    header :is(div:has(> #total-count), div:has(> #obtained-count), div:has(> #missing-count)) {
+        min-width: 35px;
+        padding-inline: 0.25rem;
+    }
+}
+
+#view-pokemon {
+    --pk-text: #261c16;
+    --pk-muted: #695447;
+    --pk-panel: #fff7ec;
+    --pk-edge: #bf302638;
+    --pk-accent: #a6251c;
+    --pk-on-accent: #fff6e9;
+    --pk-control: #ffffff99;
+    --pk-stage: radial-gradient(ellipse at 52% 56%, #ffebca 5%, #f5d9c0 50%, #e8c4af 100%);
+    color: var(--pk-text);
+}
+
+.dark #view-pokemon {
+    --pk-text: #fff2e6;
+    --pk-muted: #dac1b0;
+    --pk-panel: #241a19;
+    --pk-edge: #ff916a36;
+    --pk-accent: #ffd487;
+    --pk-on-accent: #301602;
+    --pk-control: #301e1c;
+    --pk-stage: radial-gradient(ellipse at 51% 58%, #4c2926 5%, #2e1a1b 51%, #1b1518 100%);
+}
+
+#view-pokemon [hidden] {
+    display: none !important;
+}
+
+.pokemon-header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.9rem 1.5rem;
+    padding: 0.25rem 0 1.2rem;
+}
+
+.pokemon-header h2 {
+    font-size: clamp(2rem, 4.5vw, 3.5rem);
+    line-height: 1.1;
+    font-weight: 850;
+    letter-spacing: -0.045em;
+}
+
+.pokemon-header p {
+    margin-top: 0.35rem;
+    color: var(--pk-muted);
+    font-size: 0.92rem;
+}
+
+.pokemon-colors,
+.pokemon-forms,
+.pokemon-moves {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.pokemon-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(0.65rem, 2vw, 1.25rem);
+}
+
+.pokemon-viewer {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--pk-edge);
+    border-radius: 1.4rem;
+    background: var(--pk-panel);
+    box-shadow: 0 12px 32px #200a0929;
+}
+
+.pokemon-stage {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    height: clamp(17rem, 29vw, 25rem);
+    background: var(--pk-stage);
+}
+
+.pokemon-stage[data-form=dynamax],
+.pokemon-stage[data-form=gigamax] {
+    background: radial-gradient(ellipse at 54% 62%, #823444 0%, #422039 52%, #211b37 100%);
+}
+
+.pokemon-aura {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 220ms ease;
+}
+
+.pokemon-stage:is([data-form=dynamax], [data-form=gigamax])[data-ready] .pokemon-aura {
+    opacity: 1;
+}
+
+.pokemon-aura::before,
+.pokemon-aura::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+}
+
+.pokemon-aura::before {
+    inset: 5% 13% 70%;
+    background: url("visuals/max-clouds.png") center 20% / min(76%, 14rem) auto no-repeat;
+    filter: drop-shadow(0 0 12px #eb3e835e);
+}
+
+.pokemon-aura::after {
+    inset: 45% 7% 0;
+    background: radial-gradient(ellipse at 50% 65%, #fff2ba 0%, #e44186 29%, #963ae5 62%, transparent 75%);
+    mask: url("visuals/max-glow.webp") center / 100% 100% no-repeat;
+    mask-mode: luminance;
+    opacity: 0.8;
+}
+
+.pokemon-stage[data-form=gigamax] .pokemon-aura::after {
+    background: radial-gradient(ellipse at 50% 65%, #fff1a8 0%, #ff8b3c 28%, #e04184 67%, transparent 76%);
+}
+
+.pokemon-stage[data-attacking] .pokemon-aura::before {
+    animation: pokemon-aura-pulse 620ms ease-out;
+}
+
+@keyframes pokemon-aura-pulse {
+    45% { transform: scale(1.14); opacity: 1; }
+}
+
+.pokemon-shadow {
+    display: none;
+    position: absolute;
+    left: 19%;
+    right: 19%;
+    bottom: 13%;
+    height: 13%;
+    background: radial-gradient(ellipse, #1c0c16a8, transparent 71%);
+}
+
+.pokemon-stage[data-ready] .pokemon-shadow {
+    display: block;
+}
+
+.pokemon-stage canvas,
+.pokemon-target {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.pokemon-stage canvas {
+    pointer-events: none;
+}
+
+#view-pokemon[data-color=gray] .pokemon-stage canvas {
+    filter: grayscale(1);
+}
+
+.pokemon-target {
+    z-index: 1;
+    touch-action: pan-y;
+    cursor: grab;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.pokemon-target[data-dragging] {
+    cursor: grabbing;
+}
+
+.pokemon-target:disabled {
+    pointer-events: none;
+}
+
+.pokemon-target:focus-visible {
+    outline: 2px solid var(--pk-accent);
+    outline-offset: -5px;
+}
+
+.pokemon-loading {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    align-content: center;
+    justify-items: center;
+    padding: 1rem;
+    gap: 0.65rem;
+    color: var(--pk-muted);
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+.pokemon-loading img {
+    object-fit: contain;
+}
+
+.pokemon-stage[data-form=dynamax] .pokemon-loading,
+.pokemon-stage[data-form=gigamax] .pokemon-loading {
+    color: #fff1e9;
+}
+
+.pokemon-controls {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: start;
+    gap: 0.7rem;
+    border-top: 1px solid var(--pk-edge);
+    padding: 0.95rem clamp(0.7rem, 1.5vw, 1.15rem) 1.15rem;
+}
+
+.pokemon-controls h3 {
+    font-size: clamp(1.22rem, 2.2vw, 1.65rem);
+    line-height: 1.2;
+    font-weight: 820;
+    letter-spacing: -0.025em;
+}
+
+.pokemon-controls button,
+.pokemon-colors button,
+.pokemon-retry {
+    border: 1px solid var(--pk-edge);
+    border-radius: 0.65rem;
+    padding: 0.42rem 0.65rem;
+    background: var(--pk-control);
+    color: var(--pk-text);
+    font-weight: 700;
+    font-size: 0.79rem;
+    line-height: 1.35;
+}
+
+.pokemon-controls button:hover:not(:disabled),
+.pokemon-colors button:hover,
+.pokemon-retry:hover {
+    border-color: var(--pk-accent);
+}
+
+.pokemon-controls button[aria-pressed=true],
+.pokemon-colors button[aria-pressed=true] {
+    color: var(--pk-on-accent);
+    background: var(--pk-accent);
+}
+
+.pokemon-moves button {
+    color: var(--pk-accent);
+}
+
+.pokemon-controls button:disabled {
+    opacity: 0.46;
+}
+
+.pokemon-controls button:focus-visible,
+.pokemon-colors button:focus-visible,
+.pokemon-retry:focus-visible {
+    outline: 2px solid var(--pk-accent);
+    outline-offset: 2px;
+}
+
+.pokemon-message {
+    margin: 0 0 0.6rem;
+}
+
+@media (max-width: 680px) {
+    .pokemon-grid {
+        grid-template-columns: minmax(0, 1fr);
+        max-width: 32rem;
+        margin-inline: auto;
+    }
+
+    .pokemon-stage {
+        height: clamp(15rem, 68vw, 20rem);
+    }
+
+    .pokemon-controls button,
+    .pokemon-colors button {
+        min-height: 2.5rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .pokemon-aura {
+        transition: none;
+    }
+
+    .pokemon-stage[data-attacking] .pokemon-aura::before {
+        animation: none;
+    }
+}
