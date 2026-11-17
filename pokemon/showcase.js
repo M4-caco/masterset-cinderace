@@ -7,15 +7,16 @@ import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=5';
 import { iconControl, mountVolume } from './showcase-controls.js?v=11';
 import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=11';
 import { mountPokedex } from './pokedex.js?v=11';
+import { prepareFace, updateFace } from './face-animation.js?v=12';
 
 const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
 const SPECIES = [
-    { id: 'scorbunny', name: 'Scorbunny', height: 0.67, angle: 0.07, cloudScale: 0.4 },
-    { id: 'cinderace', name: 'Cinderace', height: 1.49, angle: -0.12, cloudScale: 0.8, gigamax: true },
-    { id: 'raboot', name: 'Raboot', height: 0.95, angle: -0.08, cloudScale: 0.5 },
+    { id: 'scorbunny', name: 'Scorbunny', height: 0.84, focusHeight: 1.59, angle: 0.07, cloudScale: 0.4 },
+    { id: 'cinderace', name: 'Cinderace', height: 1.76, focusHeight: 2.12, angle: -0.12, cloudScale: 0.8, gigamax: true },
+    { id: 'raboot', name: 'Raboot', height: 0.99, focusHeight: 1.73, angle: -0.08, cloudScale: 0.5 },
 ];
-const FRAME_HEIGHT = 2.4;
-const FLOOR = 0.84;
+const FRAME_HEIGHT = 2.52;
+const FLOOR = 0.89;
 const DYNAMAX_SCALE = 1.25;
 const GIGAMAX_SCALE = 1.04;
 const CAROUSEL_DURATION = 440;
@@ -91,6 +92,7 @@ class PokemonViewer {
         this.frameRequest = 0;
         this.attack = null;
         this.bounds = new Box3();
+        this.attackBounds = new Box3();
         this.shadowCenter = null;
         this.model = null;
         this.inView = false;
@@ -203,10 +205,12 @@ class PokemonViewer {
             const meshes = [];
             const body = [];
             const props = [];
+            const eyes = [];
             let visibilityController;
             let waist;
             root.traverse(object => {
                 if (object.name.startsWith('_jnt_Visibility_')) visibilityController = object;
+                if (/^_jnt_(?:L|R)?Eye_\d+$/i.test(object.name)) eyes.push(object);
                 if (/^Waist_\d+$/.test(object.name)) waist = object;
                 if (!object.isMesh) return;
                 object.frustumCulled = false;
@@ -222,8 +226,15 @@ class PokemonViewer {
             const mixer = new AnimationMixer(root);
             const clips = new Map(gltf.animations.map(clip => [clip.name, clip]));
             const idleBounds = new Box3(...IDLE_BOUNDS[id].map(point => new Vector3(...point)));
+            const face = await prepareFace(id, materialPairs, eyes).catch(error => {
+                console.warn(`Scorace · Expressões de ${id}`, error);
+                return null;
+            });
+            const boundsMeshes = meshes.filter((mesh, index) => !meshes.slice(0, index).some(other =>
+                other.parent === mesh.parent && other.skeleton === mesh.skeleton &&
+                other.geometry.attributes.position === mesh.geometry.attributes.position));
             const model = {
-                id, root, mixer, clips, materialPairs, body, props, visibilityController, idleBounds,
+                id, root, mixer, clips, materialPairs, body, props, visibilityController, idleBounds, boundsMeshes, face,
                 tackle: tacklePath(waist, clips.get(MOVES.physical)),
                 idle: clips.get('Repouso da Pokédex') ?? clips.get('Repouso de batalha') ?? clips.get('Repouso'),
             };
@@ -350,9 +361,10 @@ class PokemonViewer {
     }
 
     normalHeight() {
-        const { height } = this.species;
-        if (!this.focused) return height;
-        return mobile.matches ? 1.62 : Math.max(1.62, height * 1.20);
+        const { height, focusHeight } = this.species;
+        if (mobile.matches) return height * 1.07;
+        if (this.focused) return focusHeight;
+        return this.card.parentElement.hasAttribute('data-focus') ? height * 0.84 : height;
     }
 
     updatePlacement(immediate = false, previousHeight) {
@@ -484,7 +496,6 @@ class PokemonViewer {
         delete this.stage.dataset.attacking;
         this.stage.removeAttribute('data-attack-away');
         this.stage.style.removeProperty('--pokemon-shadow-depth');
-        this.setBattleLane(false);
         this.turntable.position.set(0, 0, 0);
         this.turntable.scale.setScalar(1);
         this.setRest(this.model, this.restTime(performance.now()));
@@ -509,13 +520,13 @@ class PokemonViewer {
         });
     }
 
-    setBattleLane(active, width = 0, offset = 0) {
-        if (active) {
+    setSurface(width, offset) {
+        if (width !== this.surfaceWidth || offset !== this.surfaceOffset) {
             this.stage.style.setProperty('--pokemon-lane-width', `${width}px`);
             this.stage.style.setProperty('--pokemon-lane-left', `${-offset}px`);
+            this.surfaceWidth = width;
+            this.surfaceOffset = offset;
         }
-        this.stage.toggleAttribute('data-battle-lane', active);
-        this.card.toggleAttribute('data-battle-lane', active);
     }
 
     render(now) {
@@ -545,29 +556,33 @@ class PokemonViewer {
             rest.time = this.restTime(now);
             this.model.mixer.update(0);
         }
+        updateFace(this.model.face, (now - this.restStart) / 1000, this.attack);
         if (ambient || this.attack || this.placementTransition) this.invalidate();
 
         const { renderer, camera } = this;
-        const frame = this.fitFrame(width / height);
-        const { frameHeight, floor, centerX, halfWidth } = frame;
+        const stage = this.stage.getBoundingClientRect();
+        const lane = this.card.parentElement.parentElement.getBoundingClientRect();
+        const fullLeft = Math.min(lane.left, stage.left);
+        const fullRight = Math.max(lane.right, stage.right);
+        const center = stage.left + stage.width / 2;
+        const { frameHeight, floor } = this.fitFrame(height, center - fullLeft, fullRight - center);
         const pixelToWorld = frameHeight / height;
-        let surfaceWidth = width;
-        let offset = 0;
-        const battle = this.attack && this.stage.dataset.attacking === 'battle';
-        if (battle) {
-            const lane = this.card.parentElement.getBoundingClientRect();
-            const stage = this.stage.getBoundingClientRect();
-            const left = Math.min(lane.left, stage.left);
-            surfaceWidth = Math.ceil(Math.max(lane.right, stage.right) - left);
-            offset = stage.left - left;
-            this.setBattleLane(true, surfaceWidth, offset);
-        }
+        const extra = this.form === 'normal' ? 0 : this.displayHeight * 0.18;
+        const left = this.attack ? fullLeft : Math.max(fullLeft, Math.min(stage.left,
+            center + (this.bounds.min.x - extra) / pixelToWorld - 8));
+        const right = this.attack ? fullRight : Math.min(fullRight, Math.max(stage.right,
+            center + (this.bounds.max.x + extra) / pixelToWorld + 8));
+        const surfaceWidth = Math.ceil(right - left);
+        const offset = stage.left - left;
+        this.setSurface(surfaceWidth, offset);
+        this.card.toggleAttribute('data-battle-lane', Boolean(this.attack));
         if (surfaceWidth !== this.width || height !== this.height) {
             renderer.setSize(surfaceWidth, height, false);
             this.width = surfaceWidth;
             this.height = height;
         }
-        const cameraLeft = -halfWidth - offset * pixelToWorld;
+        const origin = center - left;
+        const cameraLeft = -origin * pixelToWorld;
         const cameraRight = cameraLeft + surfaceWidth * pixelToWorld;
         const cameraTop = frameHeight / 2;
         if (cameraLeft !== camera.left || cameraRight !== camera.right || cameraTop !== camera.top) {
@@ -577,22 +592,23 @@ class PokemonViewer {
             camera.bottom = -cameraTop;
             camera.updateProjectionMatrix();
         }
-        if (frameHeight !== this.frameHeight || floor !== this.effectsFloor || centerX !== this.effectsCenterX ||
+        if (frameHeight !== this.frameHeight || floor !== this.effectsFloor ||
             width !== this.effectsWidth || height !== this.effectsPixels || this.displayHeight !== this.effectsHeight) {
             this.frameHeight = frameHeight;
             this.effectsFloor = floor;
-            this.effectsCenterX = centerX;
             this.effectsWidth = width;
             this.effectsPixels = height;
             this.effectsHeight = this.displayHeight;
             this.positionEffects(width, height, frameHeight, floor);
         }
-        const origin = offset + width * centerX;
         const tall = this.displayHeight / pixelToWorld;
         const dash = this.attack?.effect === 'tackle' && this.model.tackle
             ? this.moveTackle(surfaceWidth, origin, tall, pixelToWorld, height * floor, height) : null;
-        if (dash) this.stage.style.setProperty('--pokemon-shadow-depth', `${dash.floorOffset}px`);
-        const shadowCenter = 100 * (width * centerX + (dash?.pixels ?? 0)) / width;
+        const adjustment = this.attack ? this.keepAttackInView(pixelToWorld) : null;
+        const dx = (dash?.pixels ?? 0) + (adjustment?.x ?? 0);
+        const dy = (dash?.floorOffset ?? 0) + (adjustment?.y ?? 0);
+        if (this.attack) this.stage.style.setProperty('--pokemon-shadow-depth', `${dy}px`);
+        const shadowCenter = 50 + 100 * dx / width;
         if (shadowCenter !== this.shadowCenter) {
             this.stage.style.setProperty('--pokemon-shadow-center', `${shadowCenter}%`);
             this.shadowCenter = shadowCenter;
@@ -607,16 +623,17 @@ class PokemonViewer {
             if (this.cloud.visible) {
                 const mountScale = this.form === 'gigamax' ? 1.9 : this.species.cloudScale;
                 positionMaxClouds(this.cloud, this.displayHeight, frameHeight, this.angle,
-                    ambient ? now / 1000 : 0, floor, mountScale * this.placement.scale.x, halfWidth);
+                    ambient ? now / 1000 : 0, floor, mountScale * this.placement.scale.x,
+                    Math.min(-cameraLeft, cameraRight));
             }
         }
         renderer.render(this.scene, camera);
         if (this.attack?.effect) {
             this.battleEffects.draw(this.attack.effect, {
                 time: this.attack.time, duration: this.attack.clipDuration,
-                width: surfaceWidth, height, modelHeight: tall * (dash?.scale ?? 1),
-                floor: height * floor + (dash?.floorOffset ?? 0),
-                angle: this.angle, x: origin + (dash?.pixels ?? 0),
+                width: surfaceWidth, height, modelHeight: tall * this.turntable.scale.x,
+                floor: height * floor + dy,
+                angle: this.angle, x: origin + dx,
                 hit: dash?.hit, hitX: dash?.hitX,
             });
         }
@@ -646,30 +663,55 @@ class PokemonViewer {
         return { pixels, scale, floorOffset, hit, hitX: origin + stride };
     }
 
-    fitFrame(aspect) {
+    fitFrame(height, leftPixels, rightPixels) {
         const { bounds, camera, model, turntable, placement } = this;
         turntable.position.set(0, 0, 0);
         turntable.scale.setScalar(1);
         turntable.rotation.y = this.angle;
         turntable.updateMatrixWorld(true);
-        // Frame the resting silhouette so the battle animation doesn't move the camera.
+        // Use the whole viewing area for the silhouette, including the space beyond the card slot.
         bounds.copy(model.idleBounds).applyMatrix4(placement.matrixWorld);
 
-        const frameReference = this.form === 'normal' && !mobile.matches ? this.species.height : this.normalHeight();
-        const largest = frameReference * DYNAMAX_SCALE;
-        const baseFrame = Math.max(FRAME_HEIGHT, (largest + 0.38) / FLOOR);
-        const fitWidth = (bounds.max.x - bounds.min.x + MODEL_MARGIN * 2) / aspect;
+        const baseFrame = this.form === 'normal' ? FRAME_HEIGHT : Math.max(FRAME_HEIGHT, (bounds.max.y + 0.25) / 0.93);
+        const fitWidth = height * Math.max(
+            (MODEL_MARGIN - bounds.min.x) / Math.max(1, leftPixels),
+            (bounds.max.x + MODEL_MARGIN) / Math.max(1, rightPixels),
+        );
         const fitHeight = bounds.max.y - bounds.min.y + MODEL_MARGIN * 2;
         const frameHeight = Math.max(baseFrame, fitWidth, fitHeight);
         const halfHeight = frameHeight / 2;
-        const halfWidth = halfHeight * aspect;
-        const x = Math.max(bounds.max.x - halfWidth + MODEL_MARGIN,
-            Math.min(0, bounds.min.x + halfWidth - MODEL_MARGIN));
         const y = Math.max(bounds.max.y - halfHeight + MODEL_MARGIN,
             Math.min(frameHeight * (FLOOR - 0.5), bounds.min.y + halfHeight - MODEL_MARGIN));
-        camera.position.x = x;
         camera.position.y = y;
-        return { frameHeight, halfWidth, floor: 0.5 + y / frameHeight, centerX: 0.5 - x / (2 * halfWidth) };
+        return { frameHeight, floor: 0.5 + y / frameHeight };
+    }
+
+    keepAttackInView(pixelToWorld) {
+        const { attackBounds: bounds, camera, model, turntable } = this;
+        turntable.updateMatrixWorld(true);
+        bounds.makeEmpty();
+        for (const mesh of model.boundsMeshes) {
+            if (mesh.visible) bounds.expandByObject(mesh, true);
+        }
+        if (bounds.isEmpty()) return { x: 0, y: 0 };
+
+        // Leave the camera still. Only move the model if the animated silhouette reaches an edge.
+        const margin = Math.max(MODEL_MARGIN, pixelToWorld * 7);
+        const minX = camera.left + margin;
+        const maxX = camera.right - margin;
+        const minY = camera.bottom + camera.position.y + margin;
+        const maxY = camera.top + camera.position.y - margin;
+        const scale = Math.min(1, (maxX - minX) / (bounds.max.x - bounds.min.x),
+            (maxY - minY) / (bounds.max.y - bounds.min.y));
+        const { position } = turntable;
+        const dx = Math.max(minX - (position.x + (bounds.min.x - position.x) * scale),
+            Math.min(0, maxX - (position.x + (bounds.max.x - position.x) * scale)));
+        const dy = Math.max(minY - (position.y + (bounds.min.y - position.y) * scale),
+            Math.min(0, maxY - (position.y + (bounds.max.y - position.y) * scale)));
+        turntable.scale.multiplyScalar(scale);
+        position.x += dx;
+        position.y += dy;
+        return { x: dx / pixelToWorld, y: -dy / pixelToWorld };
     }
 
     positionEffects(width, height, frameHeight, floor) {

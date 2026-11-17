@@ -14,6 +14,8 @@ A transição web segue a sequência observada na tela de atributos do jogo e us
 
 Os nomes dos golpes selecionados seguem os nomes em português do Pokémon GO. Os botões reproduzem os clipes corporais disponíveis para ataques físicos, especiais e Max do visualizador.
 
+As expressões usam quadros das texturas de face originais, nas cores normal e Shiny. Raboot e Cinderace usam novamente a composição do contorno e da íris com a disposição espelhada do jogo. Os controladores de olhos dos clipes selecionam o quadro durante o ataque. A piscada de repouso é cadenciada pelo visualizador.
+
 Investida, Chama Furacão, Ataque de Chamas e Bola Incendiária usam texturas do pacote Android `attackfx_assets_all`. As fases são adaptadas dos prefabs `tackle_fast_hit`, `fire_spin_fast_emit`, `flame_charge` e `pyroball`. O visualizador usa as texturas e os tempos dos prefabs em uma composição web. A Investida percorre a largura do palco com a trajetória horizontal do clipe, escalada para o espaço disponível.
 
 O catálogo Android registra `max_flare` e `gmax_fireball` em `breadattackfx_assets_all` e a transformação em `breadbattlefx_assets_all`. A Chama Max usa uma adaptação web com texturas de fogo de `attackfx_assets_all`. A Bola de Chamas G-Max usa a animação e a malha da bola de fogo do pacote `pm815.floaf_assets_all`.
