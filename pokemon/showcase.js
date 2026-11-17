@@ -321,6 +321,9 @@ class PokemonViewer {
         const maxTransformation = animateForm && form !== 'normal';
         const flash = this.stage.querySelector('.pokemon-transition');
         flash.classList.remove('is-playing');
+        // Allow the glow to replay even when switching forms repeatedly while
+        // their 3D assets are cached and load in the very same browser frame.
+        void flash.offsetWidth;
         flash.classList.toggle('is-max', maxTransformation);
         this.maxBurstStart = null;
         const previousHeight = this.displayHeight;
