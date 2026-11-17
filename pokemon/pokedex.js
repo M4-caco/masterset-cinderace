@@ -44,23 +44,22 @@ export function mountPokedex(panel) {
                 <button type="button" data-game="sword" aria-pressed="false">Sword &amp; Shield</button>
             </div>
         </header>
-        <div class="pokemon-dex-pages" role="group" aria-label="Seções da ficha">
-            <button type="button" data-dex-page="profile" aria-controls="pokemon-dex-profile" aria-pressed="true">Perfil</button>
-            <button type="button" data-dex-page="stats" aria-controls="pokemon-dex-stats" aria-pressed="false">Atributos</button>
-            <button type="button" data-dex-page="battle" aria-controls="pokemon-dex-battle" aria-pressed="false">Batalha</button>
-        </div>
         <div class="pokemon-dex-content">
-            <div id="pokemon-dex-profile" data-dex-content="profile">
-                <p class="pokemon-dex-description"></p><dl class="pokemon-dex-facts"></dl>
-            </div>
-            <div id="pokemon-dex-stats" data-dex-content="stats" hidden>
+            <section>
+                <h3>Perfil</h3>
+                <p class="pokemon-dex-description"></p>
+                <dl class="pokemon-dex-facts"></dl>
+            </section>
+            <section>
+                <h3>Atributos</h3>
                 <dl class="pokemon-dex-stats" aria-label="Atributos base"></dl>
                 <dl class="pokemon-dex-total"></dl>
-            </div>
-            <div id="pokemon-dex-battle" data-dex-content="battle" hidden>
+            </section>
+            <section>
+                <h3>Batalha</h3>
                 <dl class="pokemon-dex-battle" aria-label="Ataques"></dl>
                 <dl class="pokemon-dex-matchups" aria-label="Fraquezas e resistências"></dl>
-            </div>
+            </section>
         </div>
         <p class="pokemon-dex-source"><a target="_blank" rel="noopener noreferrer"></a></p>`;
     const indexLine = panel.querySelector('.pokemon-dex-index');
@@ -70,8 +69,6 @@ export function mountPokedex(panel) {
     const stats = panel.querySelector('.pokemon-dex-stats');
     const battle = panel.querySelector('.pokemon-dex-battle');
     const total = panel.querySelector('.pokemon-dex-total');
-    const pageButtons = panel.querySelectorAll('[data-dex-page]');
-    const pages = panel.querySelectorAll('[data-dex-content]');
     const source = panel.querySelector('.pokemon-dex-source a');
     const switches = [...panel.querySelectorAll('[data-game]')];
     let current;
@@ -135,12 +132,8 @@ export function mountPokedex(panel) {
         render();
     });
 
-    for (const button of pageButtons) button.addEventListener('click', () => {
-        for (const tab of pageButtons) tab.setAttribute('aria-pressed', String(tab === button));
-        for (const page of pages) page.hidden = page.dataset.dexContent !== button.dataset.dexPage;
-    });
-
     return viewer => {
+        if (current?.species !== viewer?.species) panel.scrollTop = 0;
         current = viewer;
         render();
     };

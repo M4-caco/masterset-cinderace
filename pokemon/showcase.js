@@ -6,15 +6,15 @@ import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=8';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=10';
 import { iconControl, mountVolume } from './showcase-controls.js?v=11';
 import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=12';
-import { mountPokedex } from './pokedex.js?v=11';
+import { mountPokedex } from './pokedex.js?v=12';
 import { prepareFace, updateFace } from './face-animation.js?v=12';
 
 const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
 const SPECIES = [
-    { id: 'scorbunny', name: 'Scorbunny', height: 0.84, focusHeight: 1.59, angle: -0.44, cloudScale: 0.4 },
+    { id: 'scorbunny', name: 'Scorbunny', height: 0.84, focusHeight: 1.59, normalScale: 0.92, angle: -0.44, cloudScale: 0.4 },
     { id: 'cinderace', name: 'Cinderace', height: 1.76, focusHeight: 2.34,
         maxFocusHeight: 2.92, angle: -0.45, cloudScale: 0.8, gigamax: true },
-    { id: 'raboot', name: 'Raboot', height: 0.99, focusHeight: 1.73, angle: -0.50, cloudScale: 0.5 },
+    { id: 'raboot', name: 'Raboot', height: 0.99, focusHeight: 1.73, normalScale: 0.92, angle: -0.50, cloudScale: 0.5 },
 ];
 const FRAME_HEIGHT = 2.52;
 // A consistent low ground line keeps models from growing downward when focused.
@@ -410,7 +410,7 @@ class PokemonViewer {
         }
     }
 
-    normalHeight() {
+    baseDisplayHeight() {
         const { height, focusHeight } = this.species;
         // Mobile shows only one Pokémon at a time. Give it the same full-size
         // focus treatment as desktop instead of the tiny side-card height.
@@ -420,14 +420,14 @@ class PokemonViewer {
     }
 
     targetDisplayHeight() {
-        const base = this.normalHeight();
-        if (this.form !== 'normal' && this.species.maxFocusHeight) {
+        const base = this.baseDisplayHeight();
+        if (this.form === 'normal') return base * (this.species.normalScale ?? 1);
+        if (this.species.maxFocusHeight) {
             // Apply the same multiplier to both Max forms, even on the side
             // slots. Keep Scorbunny and Raboot on their existing scales.
             return base * this.species.maxFocusHeight / this.species.focusHeight;
         }
-        const scale = this.form === 'gigamax' ? GIGAMAX_SCALE
-            : this.form === 'dynamax' ? DYNAMAX_SCALE : 1;
+        const scale = this.form === 'gigamax' ? GIGAMAX_SCALE : DYNAMAX_SCALE;
         return base * scale;
     }
 

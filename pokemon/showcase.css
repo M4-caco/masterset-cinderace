@@ -1,3 +1,11 @@
+@font-face {
+    font-family: 'Barlow Condensed';
+    src: url('./fonts/barlow-condensed-latin-900.woff2') format('woff2');
+    font-style: normal;
+    font-weight: 900;
+    font-display: swap;
+}
+
 @media (min-width: 768px) and (max-width: 980px) {
     header nav:has(#nav-pokemon) button {
         padding-inline: clamp(0.3rem, (100vw - 750px) / 26, 0.875rem);
@@ -138,18 +146,18 @@
     text-align: center;
     white-space: nowrap;
     text-transform: uppercase;
-    font-family: inherit;
+    font-family: 'Barlow Condensed', 'Arial Black', sans-serif;
     font-style: normal;
-    font-weight: 950;
+    font-weight: 900;
     line-height: 1;
-    letter-spacing: -0.065em;
+    letter-spacing: 0.015em;
 }
 
 .pokemon-stage-species {
     top: 4%;
     z-index: 3;
     color: #fff7ed;
-    font-size: clamp(1.1rem, 6.5cqw, 3.2rem);
+    font-size: clamp(1.1rem, 8cqw, 3.4rem);
     opacity: 1;
     text-shadow: 0 0 7px #fff0d7, 0 0 20px #ffaf73, 0 0 38px #fa5e5a;
 }
@@ -741,8 +749,7 @@
     background: var(--dex-tint);
 }
 
-.pokemon-dex-switch button,
-.pokemon-dex-pages button {
+.pokemon-dex-switch button {
     min-height: 2.35rem;
     padding: 0.35rem 0.66rem;
     border: 1px solid transparent;
@@ -752,23 +759,29 @@
     font-weight: 700;
 }
 
-.pokemon-dex-switch button[aria-pressed=true],
-.pokemon-dex-pages button[aria-pressed=true] {
+.pokemon-dex-switch button[aria-pressed=true] {
     background: var(--pk-accent);
     color: var(--pk-on-accent);
 }
 
 .pokemon-dex button:hover { border-color: var(--pk-accent); }
-.pokemon-dex-pages {
+.pokemon-dex-content {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 0.25rem;
-    margin-block: 0.62rem;
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--pk-edge);
+    gap: 0.8rem;
+    margin-top: 0.8rem;
+    font-size: 0.88rem;
 }
 
-.pokemon-dex-content { font-size: 0.88rem; }
+.pokemon-dex-content > section {
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--pk-edge);
+}
+
+.pokemon-dex-content h3 {
+    margin: 0 0 0.3rem;
+    font-size: 0.94rem;
+    font-weight: 750;
+}
 .pokemon-dex-description { line-height: 1.55; }
 .pokemon-dex dl { margin: 0; }
 
