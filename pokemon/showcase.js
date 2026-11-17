@@ -75,6 +75,8 @@ class PokemonViewer {
         this.onSelect = onSelect;
         this.controls = card.querySelector('.pokemon-controls');
         this.stage = card.querySelector('.pokemon-stage');
+        this.stageName = this.stage.querySelector('.pokemon-stage-name');
+        this.stageName.textContent = species.name;
         this.target = card.querySelector('.pokemon-target');
         this.placeholder = card.querySelector('.pokemon-loading');
         this.status = this.placeholder.querySelector('[role=status]');
@@ -656,7 +658,8 @@ class PokemonViewer {
         if (this.attack?.effect) {
             this.battleEffects.draw(this.attack.effect, {
                 time: this.attack.time, duration: this.attack.clipDuration,
-                width: surfaceWidth, height, modelHeight: tall * this.turntable.scale.x,
+                width: surfaceWidth, height, form: this.form, species: this.species.id,
+                modelHeight: tall * this.turntable.scale.x,
                 floor: height * floor + dy,
                 angle: this.angle, x: origin + dx,
                 hit: dash?.hit, hitX: dash?.hitX,
@@ -713,8 +716,11 @@ class PokemonViewer {
         const fitHeight = bounds.max.y - bounds.min.y + MODEL_MARGIN * 2;
         const frameHeight = Math.max(baseFrame, fitWidth, fitHeight);
         const halfHeight = frameHeight / 2;
+        // A taller Max scene gets more sky while keeping the Pokémon lower.
+        const desiredFloor = this.form === 'gigamax' ? 0.915
+            : this.form === 'dynamax' ? 0.905 : FLOOR;
         const y = Math.max(bounds.max.y - halfHeight + MODEL_MARGIN,
-            Math.min(frameHeight * (FLOOR - 0.5), bounds.min.y + halfHeight - MODEL_MARGIN));
+            Math.min(frameHeight * (desiredFloor - 0.5), bounds.min.y + halfHeight - MODEL_MARGIN));
         camera.position.y = y;
         return { frameHeight, floor: 0.5 + y / frameHeight };
     }
@@ -853,6 +859,7 @@ export function mountShowcase(section) {
         slotAnimations.clear();
         panelAnimation?.cancel();
         selected = index;
+        section.toggleAttribute('data-pokemon-selected', index !== -1);
         grid.toggleAttribute('data-focus', index !== -1);
         inspector.hidden = index === -1;
         pagination.hidden = index === -1;
