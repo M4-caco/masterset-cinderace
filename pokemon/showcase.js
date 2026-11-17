@@ -17,7 +17,7 @@ const SPECIES = [
 ];
 const FRAME_HEIGHT = 2.52;
 // A consistent low ground line keeps models from growing downward when focused.
-const FLOOR = 0.91;
+const STAGE_FLOOR = 0.91;
 const DYNAMAX_SCALE = 1.25;
 const GIGAMAX_SCALE = 1.04;
 const CAROUSEL_DURATION = 440;
@@ -31,6 +31,29 @@ const IDLE_BOUNDS = {
     cinderace: [[-0.379, -0.011, -0.325], [0.398, 1.736, 0.367]],
     'cinderace-gigamax': [[-0.987, -0.016, -1.352], [1.041, 2.829, 1.017]],
 };
+// One world-space stage, calculated from the largest *focused* Max form
+// and its cloud orbit. Normal, Dynamax and Gigamax share the same camera
+// height and ground line rather than zooming as forms/carousel slots change.
+const FIXED_STAGE_HEIGHT = (() => {
+    let requiredSky = FRAME_HEIGHT * STAGE_FLOOR;
+    for (const species of SPECIES) {
+        const [min, max] = IDLE_BOUNDS[species.id];
+        const baseHeight = max[1] - min[1];
+        const maxHeight = species.focusHeight * DYNAMAX_SCALE;
+        const cloudScale = species.cloudScale * maxHeight / baseHeight;
+        requiredSky = Math.max(requiredSky,
+            maxHeight + cloudScale * (0.18 + 0.31 + 0.12) + MODEL_MARGIN * 2);
+        if (species.gigamax) {
+            const [gigaMin, gigaMax] = IDLE_BOUNDS['cinderace-gigamax'];
+            const gigaHeight = species.focusHeight * GIGAMAX_SCALE;
+            const gigaCloudScale = 1.9 * gigaHeight / (gigaMax[1] - gigaMin[1]);
+            requiredSky = Math.max(requiredSky,
+                gigaHeight + gigaCloudScale * (0.13 + 0.28 + 0.12) + MODEL_MARGIN * 2);
+        }
+    }
+    return Math.ceil((requiredSky / STAGE_FLOOR) * 100) / 100;
+})();
+
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const mobile = matchMedia('(max-width: 767px)');
 
@@ -187,7 +210,7 @@ class PokemonViewer {
         this.renderer = renderer;
         this.scene = new Scene();
         this.camera = new OrthographicCamera(-1, 1, 1, -1, 0.01, 20);
-        this.camera.position.set(0, FRAME_HEIGHT * (FLOOR - 0.5), 5);
+        this.camera.position.set(0, FIXED_STAGE_HEIGHT * (STAGE_FLOOR - 0.5), 5);
         this.turntable = new Group();
         const fill = new HemisphereLight(0xffffff, 0xffe6d6, 1.85);
         const key = new DirectionalLight(0xfff8f1, 1.45);
@@ -392,17 +415,6 @@ class PokemonViewer {
             this.placementTransition = { from, to: target, start: performance.now() };
         }
         this.invalidate();
-    }
-
-    maxFocusProgress() {
-        if (this.form === 'normal') return 0;
-        if (mobile.matches) return 1;
-        if (!this.focused && !this.placementTransition) return 0;
-        const factor = this.form === 'gigamax' ? GIGAMAX_SCALE : DYNAMAX_SCALE;
-        const sideHeight = this.species.height * 0.84 * factor;
-        const fullHeight = this.species.focusHeight * factor;
-        return smoothstep((this.displayHeight - sideHeight) /
-            Math.max(0.001, fullHeight - sideHeight));
     }
 
     setDisplayHeight(height) {
@@ -684,7 +696,7 @@ class PokemonViewer {
                 positionMaxClouds(this.cloud, this.displayHeight, frameHeight, this.angle,
                     ambient ? now / 1000 : 0, floor, mountScale * this.placement.scale.x,
                     Math.min(-cameraLeft, cameraRight), gigamax,
-                    gigamax && this.model.head ? this.cloudAnchor : null, this.maxFocusProgress());
+                    gigamax && this.model.head ? this.cloudAnchor : null);
             }
         }
         renderer.render(this.scene, camera);
@@ -741,39 +753,19 @@ class PokemonViewer {
         // Use the whole viewing area for the silhouette, including the space beyond the card slot.
         bounds.copy(model.idleBounds).applyMatrix4(placement.matrixWorld);
 
-        // Keep the ground at one screen position as the carousel grows.
-        // Previously the vertical framing clamp moved the feet downward when
-        // switching to a larger Dynamax model.
-        const desiredFloor = this.form === 'gigamax' ? 0.94
-            : this.form === 'dynamax' ? 0.925 : FLOOR;
-        const baseFrame = this.form === 'normal' ? FRAME_HEIGHT
-            : Math.max(FRAME_HEIGHT, (bounds.max.y + 0.25) / desiredFloor);
+        // Identical camera height and floor for all three Pokémon, even while
+        // switching Normal/Dynamax/Gigamax or moving between carousel slots.
+        // The universal frame is measured for the tallest focused Pokémon,
+        // including room for the Max cloud ring.
         const fitWidth = height * Math.max(
             (MODEL_MARGIN - bounds.min.x) / Math.max(1, leftPixels),
             (bounds.max.x + MODEL_MARGIN) / Math.max(1, rightPixels),
         );
-        const fitHeight = bounds.max.y - bounds.min.y + MODEL_MARGIN * 2;
-        let frameHeight = Math.max(baseFrame, fitWidth, fitHeight,
-            (bounds.max.y + MODEL_MARGIN) / desiredFloor,
-            (MODEL_MARGIN - bounds.min.y) / (1 - desiredFloor));
-
-        const focusProgress = this.maxFocusProgress();
-        if (focusProgress > 0 && this.form !== 'normal') {
-            // Reserve sky as the model grows, including while it is moving
-            // back to the side. This prevents the cloud from jumping at focus.
-            const cloudFactor = this.form === 'gigamax' ? 1.9 : this.species.cloudScale;
-            const cloudSize = cloudFactor * this.placement.scale.x;
-            const extraGap = 0.12 * focusProgress;
-            const cloudTop = this.displayHeight + cloudSize * (
-                this.form === 'gigamax' ? 0.13 + extraGap + 0.28
-                    : 0.18 + extraGap + 0.31
-            ) + MODEL_MARGIN;
-            frameHeight = Math.max(frameHeight, cloudTop / desiredFloor);
-        }
-
-        const y = frameHeight * (desiredFloor - 0.5);
-        camera.position.y = y;
-        return { frameHeight, floor: desiredFloor };
+        const frameHeight = Math.max(FIXED_STAGE_HEIGHT, fitWidth,
+            (bounds.max.y + MODEL_MARGIN) / STAGE_FLOOR,
+            (MODEL_MARGIN - bounds.min.y) / (1 - STAGE_FLOOR));
+        camera.position.y = frameHeight * (STAGE_FLOOR - 0.5);
+        return { frameHeight, floor: STAGE_FLOOR };
     }
 
     keepAttackInView(pixelToWorld) {
