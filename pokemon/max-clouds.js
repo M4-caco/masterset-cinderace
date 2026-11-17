@@ -71,19 +71,25 @@ export function loadMaxClouds(loader) {
     return source.then(assets => assets ? makeClouds(assets[0].scene, assets[1]) : null);
 }
 
-export function positionMaxClouds(cloud, headPosition, heading, time, mountScale, gigamax = false) {
-    // The head is a rig bone in world space, not the height of the fireball.
-    // Pin the cloud ring to this anchor so changes in carousel slot, camera
-    // width and special-move pose cannot leave clouds floating far away.
-    const scale = mountScale;
-    const clearance = gigamax ? 0.39 : 0.36;
-    const depth = gigamax ? Math.max(1.6, scale * 1.85)
-        : Math.max(0.45, scale * 1.35);
-    cloud.position.set(
-        headPosition.x,
-        headPosition.y + scale * clearance,
-        headPosition.z - depth,
-    );
+export function positionMaxClouds(cloud, modelHeight, frameHeight, heading, time, floor, mountScale, halfWidth, gigamax = false, headPosition = null) {
+    // Preserve the original Dynamax behavior for Scorbunny and Raboot.
+    // Their orbit should NOT move with the head bone or react to G-Max changes.
+    const scale = Math.min(mountScale, halfWidth / 0.52);
+    const ceiling = frameHeight * floor;
+    if (!gigamax) {
+        const clearSky = scale * 0.31;
+        const y = Math.min(ceiling - clearSky, modelHeight + scale * 0.18);
+        cloud.position.set(0, y, -0.03);
+    } else {
+        // Only Cinderace Gigamax needs a head-relative correction. The shader
+        // moves the clouds above their origin, so leave room below the top edge
+        // rather than allowing the ring to disappear outside the canvas.
+        const headY = headPosition?.y ?? modelHeight;
+        const skyMargin = scale * 0.28;
+        const y = Math.min(ceiling - skyMargin, headY + scale * 0.13);
+        const z = -Math.max(1.6, scale * 1.85);
+        cloud.position.set(headPosition?.x ?? 0, y, z);
+    }
     cloud.scale.setScalar(scale);
     cloud.rotation.set(-0.19, 0, 0);
     cloud.userData.motion.cloudTime.value = time;
