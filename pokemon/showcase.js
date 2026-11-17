@@ -472,10 +472,11 @@ class PokemonViewer {
 
     // Sample only Cinderace's body before the G-Max move. The growing fireball
     // and sparks belong to the attack, not to the camera's framing bounds.
-    measureGigamaxAttack(model, action, duration) {
+    measureGigamaxAttack(model, action, duration, move) {
         // Repeated G-Max attacks at the same view reuse their precomputed bounds.
         const cache = model.gigamaxAttackFrames ??= new Map();
-        const key = `${this.angle.toFixed(3)}:${this.displayHeight.toFixed(3)}`;
+        // Both the roar (tap) and the G-Max fireball need separate pose envelopes.
+        const key = `${move}:${this.angle.toFixed(3)}:${this.displayHeight.toFixed(3)}`;
         if (cache.has(key)) return cache.get(key).clone();
         const envelope = new Box3();
         const poseBounds = new Box3();
@@ -531,16 +532,20 @@ class PokemonViewer {
         action.clampWhenFinished = true;
         const clipDuration = clip.duration;
         const duration = effect === 'charge' ? Math.max(clipDuration, 2.65) : clipDuration;
-        const gigamaxBlast = this.form === 'gigamax' && name === MOVES.special;
-        if (gigamaxBlast && this.placementTransition) {
+        const gigamaxMove = this.form === 'gigamax' &&
+            (name === MOVES.special || name === MOVES.roar);
+        // Focusing the card and playing a clip simultaneously used to resize
+        // its 3D model every frame. Finish that sizing before sampling the move.
+        if (gigamaxMove && this.placementTransition) {
             this.placementTransition = null;
             this.setDisplayHeight(this.normalHeight() * GIGAMAX_SCALE);
         }
-        const framingBounds = gigamaxBlast ? this.measureGigamaxAttack(this.model, action, clipDuration) : null;
-        // Reserve camera space first, then run the unmodified animation at normal speed.
-        const start = performance.now() + (gigamaxBlast ? 180 : 0);
+        const framingBounds = gigamaxMove
+            ? this.measureGigamaxAttack(this.model, action, clipDuration, name) : null;
+        // The original move keeps its timing. Only the framing is locked.
+        const start = performance.now() + (gigamaxMove ? 180 : 0);
         this.attack = { action, effect, start, clipDuration, duration, time: 0,
-            framingBounds, lockFraming: gigamaxBlast };
+            framingBounds, lockFraming: gigamaxMove };
         if (effect && !this.battleEffects) this.battleEffects = new BattleEffects(this.stage, this.target);
         this.stage.dataset.attacking = kind;
         this.stage.toggleAttribute('data-attack-away', Boolean(effect) && Math.cos(this.angle) < -0.25);
@@ -663,6 +668,9 @@ class PokemonViewer {
         const tall = this.displayHeight / pixelToWorld;
         const dash = this.attack?.effect === 'tackle' && this.model.tackle
             ? this.moveTackle(surfaceWidth, origin, tall, pixelToWorld, height * floor, height) : null;
+        // The Gigamax clips have their whole body movement measured ahead of
+        // time. Never include the changing fireball/spark props in a per-frame
+        // camera correction, including when the Pokémon is tapped to roar.
         const adjustment = this.attack?.lockFraming ? null
             : this.attack ? this.keepAttackInView(pixelToWorld) : null;
         const dx = (dash?.pixels ?? 0) + (adjustment?.x ?? 0);
@@ -684,7 +692,7 @@ class PokemonViewer {
                 const mountScale = this.form === 'gigamax' ? 1.9 : this.species.cloudScale;
                 positionMaxClouds(this.cloud, this.displayHeight, frameHeight, this.angle,
                     ambient ? now / 1000 : 0, floor, mountScale * this.placement.scale.x,
-                    Math.min(-cameraLeft, cameraRight));
+                    Math.min(-cameraLeft, cameraRight), this.form === 'gigamax');
             }
         }
         renderer.render(this.scene, camera);
