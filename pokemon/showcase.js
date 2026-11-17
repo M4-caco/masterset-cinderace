@@ -10,6 +10,7 @@ import { effectSpace } from './effect-space.js?v=1';
 import { mountPokedex } from './pokedex.js?v=12';
 import { prepareFace, updateFace } from './face-animation.js?v=12';
 import { createJornadasGreeting } from './jornadas-voices.js?v=4';
+import { isRapidTap, singleTapEffect, SINGLE_TAP_WINDOW_MS, RAPID_TAP_GRACE_MS } from './tap-gestures.mjs?v=1';
 
 const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
 const SPECIES = [
@@ -133,6 +134,9 @@ class PokemonViewer {
         this.frameRequest = 0;
         this.attack = null;
         this.lastAttackTap = -Infinity;
+        this.lastTapAt = -Infinity;
+        this.rapidTapUntil = -Infinity;
+        this.pendingSingleTap = null;
         this.lastGreeting = -Infinity;
         this.hovering = false;
         this.introPending = true;
@@ -384,6 +388,7 @@ class PokemonViewer {
         for (const [key, button] of this.forms) button.setAttribute('aria-pressed', key === form);
         const id = form === 'gigamax' ? 'cinderace-gigamax' : this.species.id;
         const revision = ++this.revision;
+        this.resetTapSequence();
         this.stopAttack();
         this.attackCry?.pause();
         this.loading = true;
@@ -526,7 +531,7 @@ class PokemonViewer {
     setFocus(focused) {
         this.focused = focused;
         if (!focused) {
-            this.lastAttackTap = -Infinity;
+            this.resetTapSequence();
             this.stopAttack();
         }
         this.card.toggleAttribute('data-selected', focused);
@@ -560,16 +565,57 @@ class PokemonViewer {
         }
     }
 
+    clearPendingSingleTap() {
+        if (this.pendingSingleTap !== null) clearTimeout(this.pendingSingleTap);
+        this.pendingSingleTap = null;
+    }
+
+    resetTapSequence() {
+        this.clearPendingSingleTap();
+        this.lastTapAt = -Infinity;
+        this.rapidTapUntil = -Infinity;
+        this.lastAttackTap = -Infinity;
+    }
+
     tapAttack() {
         this.greetingAudio?.pause();
         if (!this.model || this.loading || this.form === 'gigamax') return;
+        // Battle buttons take precedence; normal taps may replace a greeting,
+        // a quick attack or a previous single-tap fire animation.
+        if (this.attack && !['intro', 'greeting', 'combat-fast', 'combat-single'].includes(this.attack.kind)) return;
         this.introPending = false;
-        this.lastAttackTap = performance.now();
-        if (this.attack?.kind === 'combat-fast') return;
-        // Clicking immediately after greeting must take over its animation,
-        // rather than silently rejecting the attack.
-        if (this.attack && this.attack.kind !== 'intro' && this.attack.kind !== 'greeting') return;
-        this.playQuickAttack();
+        const now = performance.now();
+        const rapid = isRapidTap(now, this.lastTapAt, this.rapidTapUntil);
+        this.lastTapAt = now;
+        this.clearPendingSingleTap();
+
+        if (rapid) {
+            // The second quick click cancels the pending fire move and plays
+            // the existing physical attack. More clicks extend that sequence.
+            this.rapidTapUntil = now + RAPID_TAP_GRACE_MS;
+            this.lastAttackTap = now;
+            if (this.attack?.kind === 'combat-fast') return;
+            this.playQuickAttack();
+            return;
+        }
+
+        // A standalone click needs a short interval before it can be
+        // distinguished from the opening click of a rapid sequence.
+        this.rapidTapUntil = -Infinity;
+        this.lastAttackTap = -Infinity;
+        // Play the Pokémon GO cry in the user's click gesture, not inside the
+        // delayed callback (which mobile browsers may block for autoplay).
+        this.playAttackCry();
+        this.pendingSingleTap = setTimeout(() => {
+            this.pendingSingleTap = null;
+            if (this.lastTapAt !== now || this.loading || !this.model || this.form === 'gigamax' ||
+                this.showcase.classList.contains('hidden')) return;
+            if (this.attack && !['intro', 'greeting', 'combat-fast', 'combat-single'].includes(this.attack.kind)) return;
+            const effect = singleTapEffect(this.species.id, this.form);
+            if (effect && this.model.clips.has(MOVES.special)) {
+                this.play(MOVES.special, 'combat-single', effect);
+            }
+        }, SINGLE_TAP_WINDOW_MS);
     }
 
     playQuickAttack() {
@@ -671,6 +717,14 @@ class PokemonViewer {
         const { mixer, clips } = this.model;
         const clip = clips.get(name);
         if (!clip) return false;
+        if (kind !== 'intro' && kind !== 'greeting') {
+            this.clearPendingSingleTap();
+            if (kind === 'battle') {
+                this.lastTapAt = -Infinity;
+                this.rapidTapUntil = -Infinity;
+                this.lastAttackTap = -Infinity;
+            }
+        }
         this.stopAttack();
         const action = mixer.clipAction(clip);
         action.reset().setLoop(LoopOnce, 1).setEffectiveWeight(0).play().paused = true;
@@ -988,8 +1042,8 @@ class PokemonViewer {
     suspend() {
         cancelAnimationFrame(this.frameRequest);
         this.frameRequest = 0;
+        this.resetTapSequence();
         this.stopAttack();
-        this.lastAttackTap = -Infinity;
         this.greetingAudio?.pause();
         this.attackCry?.pause();
     }
