@@ -3,7 +3,7 @@ import {
     LoopOnce, NoToneMapping, OrthographicCamera, Scene, SRGBColorSpace, Vector3, WebGLRenderer,
 } from './vendor/three-gltf.js';
 import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=7';
-import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=8';
+import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=9';
 import { iconControl, mountVolume } from './showcase-controls.js?v=11';
 import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=12';
 import { mountPokedex } from './pokedex.js?v=11';
@@ -422,7 +422,7 @@ class PokemonViewer {
         // A centered Max Pokémon must always have its full display size.
         // Otherwise a click during the 440ms carousel transition could lock
         // the Gigamax at its smaller side-card scale indefinitely.
-        this.updatePlacement(focused && this.form !== 'normal');
+        this.updatePlacement(focused && this.form === 'gigamax');
     }
 
     configureMax(pattern) {
@@ -665,13 +665,14 @@ class PokemonViewer {
             this.cloud.visible = this.form !== 'normal';
             if (this.cloud.visible) {
                 const mountScale = this.form === 'gigamax' ? 1.9 : this.species.cloudScale;
-                // The orbit must follow the actual head, not the fireball's
-                // overall model height or the camera's variable sky ceiling.
-                if (this.model.head) this.model.head.getWorldPosition(this.cloudAnchor);
-                else this.cloudAnchor.set(0, this.displayHeight * 0.78, 0);
-                positionMaxClouds(this.cloud, this.cloudAnchor, this.angle,
-                    ambient ? now / 1000 : 0, mountScale * this.placement.scale.x,
-                    this.form === 'gigamax');
+                // Keep Scorbunny/Raboot's original cloud placement. Only the
+                // Gigamax Cinderace uses a head reference and sky edge safety.
+                const gigamax = this.form === 'gigamax';
+                if (gigamax && this.model.head) this.model.head.getWorldPosition(this.cloudAnchor);
+                positionMaxClouds(this.cloud, this.displayHeight, frameHeight, this.angle,
+                    ambient ? now / 1000 : 0, floor, mountScale * this.placement.scale.x,
+                    Math.min(-cameraLeft, cameraRight), gigamax,
+                    gigamax && this.model.head ? this.cloudAnchor : null);
             }
         }
         renderer.render(this.scene, camera);
