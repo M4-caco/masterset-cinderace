@@ -27,7 +27,7 @@
 }
 
 #view-pokemon {
-    --pokemon-stage-height: min(clamp(11rem, 72svh, 42rem), var(--pokemon-stage-space, 68svh));
+    --pokemon-stage-height: min(clamp(11rem, 84svh, 49rem), var(--pokemon-stage-space, 82svh));
     --pk-text: #261c16;
     --pk-muted: #695447;
     --pk-edge: #bf302638;
@@ -121,18 +121,9 @@
     isolation: isolate;
     container-type: inline-size;
     overflow: visible;
-    --pokemon-sky-room: 0px;
-    height: calc(var(--pokemon-stage-height) + var(--pokemon-sky-room));
+    /* All carousel cards have the same height, independent of Max form. */
+    height: var(--pokemon-stage-height);
     transition: opacity 360ms ease, filter 360ms ease;
-}
-
-/* Reserve real space for the Max cloud orbit instead of overlapping the Dex. */
-.pokemon-stage[data-form="dynamax"] {
-    --pokemon-sky-room: clamp(2.75rem, 8svh, 5.5rem);
-}
-
-.pokemon-stage[data-form="gigamax"] {
-    --pokemon-sky-room: clamp(4.25rem, 12svh, 8rem);
 }
 
 /* Two independent title layers on every Pokémon viewer. The species name
@@ -796,7 +787,7 @@
 
 @media (max-width: 767px) {
     #view-pokemon {
-        --pokemon-stage-height: min(clamp(11rem, min(62svh, 96vw), 30rem), var(--pokemon-stage-space, 60svh));
+        --pokemon-stage-height: min(clamp(11rem, min(74svh, 112vw), 38rem), var(--pokemon-stage-space, 72svh));
     }
     .pokemon-pagination [data-overview],
     .pokemon-grid .pokemon-viewer:not([data-selected]) { display: none; }
@@ -809,12 +800,6 @@
         align-items: center;
         pointer-events: none;
         z-index: 4;
-    }
-    .pokemon-viewing:has(.pokemon-viewer[data-selected] .pokemon-stage[data-form="dynamax"]) .pokemon-pagination {
-        height: calc(var(--pokemon-stage-height) + clamp(2.75rem, 8svh, 5.5rem));
-    }
-    .pokemon-viewing:has(.pokemon-viewer[data-selected] .pokemon-stage[data-form="gigamax"]) .pokemon-pagination {
-        height: calc(var(--pokemon-stage-height) + clamp(4.25rem, 12svh, 8rem));
     }
     .pokemon-pagination button { pointer-events: auto; min-width: 2.75rem; min-height: 2.75rem; }
 
