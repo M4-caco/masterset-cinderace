@@ -19,7 +19,8 @@ const FRAME_HEIGHT = 2.52;
 // A consistent low ground line keeps models from growing downward when focused.
 const STAGE_FLOOR = 0.93;
 const DYNAMAX_SCALE = 1.25;
-const GIGAMAX_SCALE = 1.04;
+// Gigamax must be visibly larger than the same Pokémon in Dynamax.
+const GIGAMAX_SCALE = 1.48;
 const CAROUSEL_DURATION = 440;
 const MAX_FORM_SWAP = 235;
 const MODEL_MARGIN = 0.045;
@@ -31,29 +32,27 @@ const IDLE_BOUNDS = {
     cinderace: [[-0.379, -0.011, -0.325], [0.398, 1.736, 0.367]],
     'cinderace-gigamax': [[-0.987, -0.016, -1.352], [1.041, 2.829, 1.017]],
 };
-// One world-space stage, calculated from the largest *focused* Max form
-// and its cloud orbit. Normal, Dynamax and Gigamax share the same camera
-// height and ground line rather than zooming as forms/carousel slots change.
-const FIXED_STAGE_HEIGHT = (() => {
+// The physical stage and floor line are shared by the whole carousel.
+// Each species gets one fixed camera zoom, calculated from its largest
+// focused form and the cloud ring, so the smaller species are not miniatures
+// inside Cinderace's much larger Gigamax camera framing.
+const STAGE_HEIGHT_BY_SPECIES = Object.fromEntries(SPECIES.map(species => {
     let requiredSky = FRAME_HEIGHT * STAGE_FLOOR;
-    for (const species of SPECIES) {
-        const [min, max] = IDLE_BOUNDS[species.id];
-        const baseHeight = max[1] - min[1];
-        const maxHeight = species.focusHeight * DYNAMAX_SCALE;
-        const cloudScale = species.cloudScale * maxHeight / baseHeight;
+    const [min, max] = IDLE_BOUNDS[species.id];
+    const baseHeight = max[1] - min[1];
+    const maxHeight = species.focusHeight * DYNAMAX_SCALE;
+    const cloudScale = species.cloudScale * maxHeight / baseHeight;
+    requiredSky = Math.max(requiredSky,
+        maxHeight + cloudScale * (0.18 + 0.31 + 0.12) + MODEL_MARGIN * 2);
+    if (species.gigamax) {
+        const [gigaMin, gigaMax] = IDLE_BOUNDS['cinderace-gigamax'];
+        const gigaHeight = species.focusHeight * GIGAMAX_SCALE;
+        const gigaCloudScale = 1.9 * gigaHeight / (gigaMax[1] - gigaMin[1]);
         requiredSky = Math.max(requiredSky,
-            maxHeight + cloudScale * (0.18 + 0.31 + 0.12) + MODEL_MARGIN * 2);
-        if (species.gigamax) {
-            const [gigaMin, gigaMax] = IDLE_BOUNDS['cinderace-gigamax'];
-            const gigaHeight = species.focusHeight * GIGAMAX_SCALE;
-            const gigaCloudScale = 1.9 * gigaHeight / (gigaMax[1] - gigaMin[1]);
-            requiredSky = Math.max(requiredSky,
-                gigaHeight + gigaCloudScale * (0.13 + 0.28 + 0.12) + MODEL_MARGIN * 2);
-        }
+            gigaHeight + gigaCloudScale * (0.13 + 0.28 + 0.12) + MODEL_MARGIN * 2);
     }
-    return Math.ceil((requiredSky / STAGE_FLOOR) * 100) / 100;
-})();
-
+    return [species.id, Math.ceil((requiredSky / STAGE_FLOOR) * 100) / 100];
+}));
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
 const mobile = matchMedia('(max-width: 767px)');
 
@@ -210,7 +209,7 @@ class PokemonViewer {
         this.renderer = renderer;
         this.scene = new Scene();
         this.camera = new OrthographicCamera(-1, 1, 1, -1, 0.01, 20);
-        this.camera.position.set(0, FIXED_STAGE_HEIGHT * (STAGE_FLOOR - 0.5), 5);
+        this.camera.position.set(0, STAGE_HEIGHT_BY_SPECIES[this.species.id] * (STAGE_FLOOR - 0.5), 5);
         this.turntable = new Group();
         const fill = new HemisphereLight(0xffffff, 0xffe6d6, 1.85);
         const key = new DirectionalLight(0xfff8f1, 1.45);
@@ -397,7 +396,9 @@ class PokemonViewer {
 
     normalHeight() {
         const { height, focusHeight } = this.species;
-        if (mobile.matches) return height * 1.07;
+        // Mobile shows only one Pokémon at a time. Give it the same full-size
+        // focus treatment as desktop instead of the tiny side-card height.
+        if (mobile.matches) return focusHeight;
         if (this.focused) return focusHeight;
         return this.card.parentElement.hasAttribute('data-focus') ? height * 0.84 : height;
     }
@@ -764,15 +765,14 @@ class PokemonViewer {
         // Use the whole viewing area for the silhouette, including the space beyond the card slot.
         bounds.copy(model.idleBounds).applyMatrix4(placement.matrixWorld);
 
-        // Identical camera height and floor for all three Pokémon, even while
-        // switching Normal/Dynamax/Gigamax or moving between carousel slots.
-        // The universal frame is measured for the tallest focused Pokémon,
-        // including room for the Max cloud ring.
+        // All cards share the same CSS stage and 93% ground line. Keep zoom
+        // fixed per species across its forms to preserve the intended increase
+        // in apparent size when Dynamax or Gigamax is selected.
         const fitWidth = height * Math.max(
             (MODEL_MARGIN - bounds.min.x) / Math.max(1, leftPixels),
             (bounds.max.x + MODEL_MARGIN) / Math.max(1, rightPixels),
         );
-        const frameHeight = Math.max(FIXED_STAGE_HEIGHT, fitWidth,
+        const frameHeight = Math.max(STAGE_HEIGHT_BY_SPECIES[this.species.id], fitWidth,
             (bounds.max.y + MODEL_MARGIN) / STAGE_FLOOR,
             (MODEL_MARGIN - bounds.min.y) / (1 - STAGE_FLOOR));
         camera.position.y = frameHeight * (STAGE_FLOOR - 0.5);
