@@ -66,6 +66,17 @@
     letter-spacing: -0.045em;
 }
 
+/* Keep the heading accessible while displaying each selected name on stage. */
+#view-pokemon[data-pokemon-selected] .pokemon-header h2 {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    overflow: hidden;
+    white-space: nowrap;
+    clip-path: inset(50%);
+}
+
 .pokemon-viewing {
     position: relative;
     min-width: 0;
@@ -108,9 +119,59 @@
 .pokemon-stage {
     position: relative;
     isolation: isolate;
+    container-type: inline-size;
     overflow: visible;
-    height: var(--pokemon-stage-height);
+    --pokemon-sky-room: 0px;
+    height: calc(var(--pokemon-stage-height) + var(--pokemon-sky-room));
     transition: opacity 360ms ease, filter 360ms ease;
+}
+
+/* Reserve real space for the Max cloud orbit instead of overlapping the Dex. */
+.pokemon-stage[data-form="dynamax"] {
+    --pokemon-sky-room: clamp(2.75rem, 8svh, 5.5rem);
+}
+
+.pokemon-stage[data-form="gigamax"] {
+    --pokemon-sky-room: clamp(4.25rem, 12svh, 8rem);
+}
+
+.pokemon-stage-name {
+    position: absolute;
+    z-index: 0;
+    left: 50%;
+    bottom: 1.2%;
+    transform: translateX(-50%);
+    width: 100%;
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+    text-align: center;
+    color: var(--pk-text);
+    font-size: clamp(1.3rem, 7cqw, 2.4rem);
+    font-weight: 900;
+    letter-spacing: -0.055em;
+    line-height: 1;
+    opacity: 0;
+    transition: opacity 250ms ease;
+}
+
+.pokemon-viewer[data-selected] .pokemon-stage[data-ready] .pokemon-stage-name {
+    opacity: 0.92;
+}
+
+/* The name becomes a deliberately faint backdrop at head/cloud height. */
+.pokemon-viewer[data-selected] .pokemon-stage[data-ready]:is([data-form="dynamax"], [data-form="gigamax"]) .pokemon-stage-name {
+    top: 18%;
+    bottom: auto;
+    color: #bd2f64;
+    font-size: clamp(1.6rem, 14cqw, 7rem);
+    font-weight: 950;
+    letter-spacing: -0.073em;
+    opacity: 0.2;
+}
+
+.dark .pokemon-viewer[data-selected] .pokemon-stage[data-ready]:is([data-form="dynamax"], [data-form="gigamax"]) .pokemon-stage-name {
+    color: #ffb1b8;
 }
 
 .pokemon-max-effects,
@@ -294,6 +355,7 @@
     pointer-events: none;
     left: var(--pokemon-lane-left, 0);
     width: var(--pokemon-lane-width, 100%);
+    z-index: 1;
 }
 
 .pokemon-viewer[data-battle-lane] { z-index: 3; }
@@ -740,6 +802,12 @@
         align-items: center;
         pointer-events: none;
         z-index: 4;
+    }
+    .pokemon-viewing:has(.pokemon-viewer[data-selected] .pokemon-stage[data-form="dynamax"]) .pokemon-pagination {
+        height: calc(var(--pokemon-stage-height) + clamp(2.75rem, 8svh, 5.5rem));
+    }
+    .pokemon-viewing:has(.pokemon-viewer[data-selected] .pokemon-stage[data-form="gigamax"]) .pokemon-pagination {
+        height: calc(var(--pokemon-stage-height) + clamp(4.25rem, 12svh, 8rem));
     }
     .pokemon-pagination button { pointer-events: auto; min-width: 2.75rem; min-height: 2.75rem; }
 
