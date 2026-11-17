@@ -193,7 +193,9 @@
     top: var(--pokemon-aura-y, 24%);
     bottom: 11%;
     translate: -50%;
-    background: radial-gradient(ellipse, #bf227552, #b8215140 48%, transparent 74%);
+    background: radial-gradient(ellipse, #ffe5fa55 0%, #ff73c36e 27%,
+        #ed1d885a 51%, #c60d4b29 69%, transparent 81%);
+    filter: drop-shadow(0 0 1.2rem #ed4b95a1);
 }
 
 .pokemon-max-glow::after {
@@ -224,6 +226,55 @@
 }
 
 .pokemon-transition.is-playing { visibility: visible; }
+
+/* Pokémon GO-style Max evolution: a short brilliant white/pink flash over
+   the 3D model, surrounded by a large energy bloom. Both layers decay after
+   the form is swapped; no permanent veil hides the creature. */
+.pokemon-transition.is-max::before,
+.pokemon-transition.is-max::after {
+    content: '';
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    opacity: 0;
+    mix-blend-mode: screen;
+}
+
+.pokemon-transition.is-max::before {
+    inset: -25%;
+    background: radial-gradient(circle, #ffffff 0 9%, #fff0fb 17%,
+        #ff9be7 31%, #f82a9880 51%, transparent 74%);
+    filter: blur(6px);
+}
+
+.pokemon-transition.is-max::after {
+    inset: -65%;
+    background: radial-gradient(circle, #ffffffed 0 5%, #ffe0fc9e 12%,
+        #ff36ba50 27%, #fa177424 44%, transparent 65%);
+}
+
+.pokemon-transition.is-playing.is-max::before {
+    animation: pokemon-max-strong-flash 860ms ease-out both;
+}
+
+.pokemon-transition.is-playing.is-max::after {
+    animation: pokemon-max-wide-bloom 1000ms ease-out both;
+}
+
+@keyframes pokemon-max-strong-flash {
+    0% { opacity: 0; transform: scale(0.26); }
+    19% { opacity: 0.68; }
+    37% { opacity: 1; transform: scale(0.88); }
+    54% { opacity: 0.76; }
+    100% { opacity: 0; transform: scale(1.40); }
+}
+
+@keyframes pokemon-max-wide-bloom {
+    0% { opacity: 0; transform: scale(0.25); }
+    31% { opacity: 0.67; }
+    49% { opacity: 0.92; transform: scale(1); }
+    100% { opacity: 0; transform: scale(1.35); }
+}
 
 .pokemon-transition > span {
     position: absolute;
@@ -654,6 +705,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+    .pokemon-transition.is-playing.is-max::before,
+    .pokemon-transition.is-playing.is-max::after { animation: none; }
     .pokemon-badge-shiny::after,
     .pokemon-max-glow::after {
         animation: none;
