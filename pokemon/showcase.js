@@ -105,9 +105,7 @@ class PokemonViewer {
         this.controls = card.querySelector('.pokemon-controls');
         this.stage = card.querySelector('.pokemon-stage');
         this.stageSpecies = this.stage.querySelector('.pokemon-stage-species');
-        this.stageForm = this.stage.querySelector('.pokemon-stage-form');
         this.stageSpecies.textContent = species.name.toLocaleUpperCase('pt-BR');
-        this.stageForm.textContent = '';
         this.target = card.querySelector('.pokemon-target');
         this.placeholder = card.querySelector('.pokemon-loading');
         this.status = this.placeholder.querySelector('[role=status]');
@@ -335,7 +333,7 @@ class PokemonViewer {
         this.form = form;
         if (!animateForm) {
             this.stage.dataset.form = form;
-            this.stageForm.textContent = form === 'normal' ? '' : form.toUpperCase();
+            this.stage.toggleAttribute('data-max-active', form !== 'normal');
         }
         this.onFormChange(this);
         for (const [key, button] of this.forms) button.setAttribute('aria-pressed', key === form);
@@ -369,7 +367,7 @@ class PokemonViewer {
                 if (revision !== this.revision) return;
             }
             this.stage.dataset.form = form;
-            this.stageForm.textContent = form === 'normal' ? '' : form.toUpperCase();
+            this.stage.toggleAttribute('data-max-active', form !== 'normal');
             this.model = model;
             this.turntable.clear();
             this.placement = new Group();
