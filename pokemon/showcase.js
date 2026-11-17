@@ -394,6 +394,17 @@ class PokemonViewer {
         this.invalidate();
     }
 
+    maxFocusProgress() {
+        if (this.form === 'normal') return 0;
+        if (mobile.matches) return 1;
+        if (!this.focused && !this.placementTransition) return 0;
+        const factor = this.form === 'gigamax' ? GIGAMAX_SCALE : DYNAMAX_SCALE;
+        const sideHeight = this.species.height * 0.84 * factor;
+        const fullHeight = this.species.focusHeight * factor;
+        return smoothstep((this.displayHeight - sideHeight) /
+            Math.max(0.001, fullHeight - sideHeight));
+    }
+
     setDisplayHeight(height) {
         this.displayHeight = height;
         const { center, size, baseY } = this.model;
@@ -673,7 +684,7 @@ class PokemonViewer {
                 positionMaxClouds(this.cloud, this.displayHeight, frameHeight, this.angle,
                     ambient ? now / 1000 : 0, floor, mountScale * this.placement.scale.x,
                     Math.min(-cameraLeft, cameraRight), gigamax,
-                    gigamax && this.model.head ? this.cloudAnchor : null, this.focused);
+                    gigamax && this.model.head ? this.cloudAnchor : null, this.maxFocusProgress());
             }
         }
         renderer.render(this.scene, camera);
@@ -746,14 +757,16 @@ class PokemonViewer {
             (bounds.max.y + MODEL_MARGIN) / desiredFloor,
             (MODEL_MARGIN - bounds.min.y) / (1 - desiredFloor));
 
-        if (this.focused && this.form !== 'normal') {
-            // Reserve sky for the *entire* selected Max cloud ring before the
-            // renderer places it. Otherwise the top-edge clamp forces clouds
-            // closer to the ears as the Pokémon grows in the center.
+        const focusProgress = this.maxFocusProgress();
+        if (focusProgress > 0 && this.form !== 'normal') {
+            // Reserve sky as the model grows, including while it is moving
+            // back to the side. This prevents the cloud from jumping at focus.
             const cloudFactor = this.form === 'gigamax' ? 1.9 : this.species.cloudScale;
             const cloudSize = cloudFactor * this.placement.scale.x;
+            const extraGap = 0.12 * focusProgress;
             const cloudTop = this.displayHeight + cloudSize * (
-                this.form === 'gigamax' ? 0.13 + 0.12 + 0.28 : 0.18 + 0.12 + 0.31
+                this.form === 'gigamax' ? 0.13 + extraGap + 0.28
+                    : 0.18 + extraGap + 0.31
             ) + MODEL_MARGIN;
             frameHeight = Math.max(frameHeight, cloudTop / desiredFloor);
         }
