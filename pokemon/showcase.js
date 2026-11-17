@@ -9,7 +9,7 @@ import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=15';
 import { effectSpace } from './effect-space.js?v=1';
 import { mountPokedex } from './pokedex.js?v=12';
 import { prepareFace, updateFace } from './face-animation.js?v=12';
-import { createJornadasGreeting } from './jornadas-voices.js?v=3';
+import { createJornadasGreeting } from './jornadas-voices.js?v=4';
 
 const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
 const SPECIES = [
