@@ -97,6 +97,7 @@ class PokemonViewer {
         this.attack = null;
         this.bounds = new Box3();
         this.attackBounds = new Box3();
+        this.cloudAnchor = new Vector3();
         this.shadowCenter = null;
         this.model = null;
         this.inView = false;
@@ -212,10 +213,12 @@ class PokemonViewer {
             const eyes = [];
             let visibilityController;
             let waist;
+            let head;
             root.traverse(object => {
                 if (object.name.startsWith('_jnt_Visibility_')) visibilityController = object;
                 if (/^_jnt_(?:L|R)?Eye_\d+$/i.test(object.name)) eyes.push(object);
                 if (/^Waist_\d+$/.test(object.name)) waist = object;
+                if (/^Head_\d+$/.test(object.name)) head = object;
                 if (!object.isMesh) return;
                 object.frustumCulled = false;
                 meshes.push(object);
@@ -238,7 +241,7 @@ class PokemonViewer {
                 other.parent === mesh.parent && other.skeleton === mesh.skeleton &&
                 other.geometry.attributes.position === mesh.geometry.attributes.position));
             const model = {
-                id, root, mixer, clips, materialPairs, body, props, visibilityController, idleBounds, boundsMeshes, face,
+                id, root, mixer, clips, materialPairs, body, props, head, visibilityController, idleBounds, boundsMeshes, face,
                 tackle: tacklePath(waist, clips.get(MOVES.physical)),
                 idle: clips.get('Repouso da Pokédex') ?? clips.get('Repouso de batalha') ?? clips.get('Repouso'),
             };
@@ -416,7 +419,10 @@ class PokemonViewer {
         this.target.setAttribute('aria-label', focused
             ? `Ver a reação de ${this.species.name}. Use as setas para girar.`
             : `Destacar ${this.species.name}. Use as setas para girar.`);
-        this.updatePlacement();
+        // A centered Max Pokémon must always have its full display size.
+        // Otherwise a click during the 440ms carousel transition could lock
+        // the Gigamax at its smaller side-card scale indefinitely.
+        this.updatePlacement(focused && this.form !== 'normal');
     }
 
     configureMax(pattern) {
@@ -503,9 +509,13 @@ class PokemonViewer {
         const duration = effect === 'charge' ? Math.max(clipDuration, 2.65) : clipDuration;
         const gigamaxMove = this.form === 'gigamax' &&
             (name === MOVES.special || name === MOVES.roar);
-        // Freeze any carousel size transition at the *current* displayed size.
-        // Completing it abruptly was making Cinderace change size on a tap.
-        if (gigamaxMove) this.placementTransition = null;
+        // Never freeze a partially completed carousel transition at its
+        // reduced side-card size. A selected Gigamax keeps its full size.
+        if (gigamaxMove && this.placementTransition) {
+            this.placementTransition = null;
+            this.setDisplayHeight(Math.max(this.displayHeight,
+                this.normalHeight() * GIGAMAX_SCALE));
+        }
         const cameraLock = gigamaxMove ? this.captureGigamaxFrame() : null;
         // The original movement keeps its timeline; only the camera is fixed.
         const start = performance.now();
@@ -655,9 +665,13 @@ class PokemonViewer {
             this.cloud.visible = this.form !== 'normal';
             if (this.cloud.visible) {
                 const mountScale = this.form === 'gigamax' ? 1.9 : this.species.cloudScale;
-                positionMaxClouds(this.cloud, this.displayHeight, frameHeight, this.angle,
-                    ambient ? now / 1000 : 0, floor, mountScale * this.placement.scale.x,
-                    Math.min(-cameraLeft, cameraRight), this.form === 'gigamax');
+                // The orbit must follow the actual head, not the fireball's
+                // overall model height or the camera's variable sky ceiling.
+                if (this.model.head) this.model.head.getWorldPosition(this.cloudAnchor);
+                else this.cloudAnchor.set(0, this.displayHeight * 0.78, 0);
+                positionMaxClouds(this.cloud, this.cloudAnchor, this.angle,
+                    ambient ? now / 1000 : 0, mountScale * this.placement.scale.x,
+                    this.form === 'gigamax');
             }
         }
         renderer.render(this.scene, camera);
