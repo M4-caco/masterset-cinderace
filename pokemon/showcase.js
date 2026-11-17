@@ -2,7 +2,7 @@ import {
     AnimationMixer, Box3, DirectionalLight, GLTFLoader, Group, HemisphereLight,
     LoopOnce, NoToneMapping, OrthographicCamera, Scene, SRGBColorSpace, Vector3, WebGLRenderer,
 } from './vendor/three-gltf.js';
-import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=7';
+import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=8';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=10';
 import { iconControl, mountVolume } from './showcase-controls.js?v=11';
 import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=12';
@@ -120,6 +120,7 @@ class PokemonViewer {
         this.revision = 0;
         this.frameRequest = 0;
         this.attack = null;
+        this.maxBurstStart = null;
         this.bounds = new Box3();
         this.attackBounds = new Box3();
         this.cloudAnchor = new Vector3();
@@ -317,8 +318,11 @@ class PokemonViewer {
         if (this.model && form === this.form && !retry) return;
         const changingForms = this.model && !retry && this.stage.dataset.form !== form;
         const animateForm = changingForms && !reducedMotion.matches && this.stage.hasAttribute('data-ready');
+        const maxTransformation = animateForm && form !== 'normal';
         const flash = this.stage.querySelector('.pokemon-transition');
         flash.classList.remove('is-playing');
+        flash.classList.toggle('is-max', maxTransformation);
+        this.maxBurstStart = null;
         const previousHeight = this.displayHeight;
         if ((this.form === 'gigamax') !== (form === 'gigamax')) this.angle = this.species.angle;
         this.form = form;
@@ -371,6 +375,9 @@ class PokemonViewer {
             this.restStart = performance.now();
             this.updatePlacement(true, changingForms ? previousHeight : undefined);
             this.configureMax(pattern);
+            // Begin the body glow only after the new 3D form is visible;
+            // otherwise it would be spent on the outgoing model.
+            this.maxBurstStart = maxTransformation ? performance.now() : null;
             this.pokedexMove = form === 'gigamax' ? MOVES.roar : MOVES.special;
             this.renderControls();
             this.updateColor();
@@ -481,7 +488,7 @@ class PokemonViewer {
         if (this.form !== 'normal' && !model.max) {
             model.max = {
                 pattern: { value: pattern }, time: { value: 0 }, power: { value: 1 },
-                aspect: { value: 1 },
+                burst: { value: 0 }, aspect: { value: 1 },
             };
             const prepared = new Set();
             for (const [mesh, regular, rare] of model.materialPairs) {
@@ -711,6 +718,13 @@ class PokemonViewer {
         if (this.model.max) {
             this.model.max.time.value = ambient ? now / 1000 : 0;
             this.model.max.aspect.value = surfaceWidth / height;
+            // A strong, brief white/pink shimmer runs on the actual mesh
+            // when a Pokémon enters Dynamax or Gigamax. No model scaling.
+            const burstAge = this.maxBurstStart === null ? Infinity
+                : Math.max(0, (now - this.maxBurstStart) / 1000);
+            this.model.max.burst.value = ambient && burstAge < 0.78
+                ? 1 - smoothstep((burstAge - 0.10) / 0.68) : 0;
+            if (burstAge >= 0.78) this.maxBurstStart = null;
         }
         if (this.cloud) {
             this.cloud.visible = this.form !== 'normal';
