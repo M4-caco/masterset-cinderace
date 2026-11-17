@@ -23,6 +23,7 @@ export function applyMaxMaterial(material, fx) {
     material.onBeforeCompile = shader => {
         Object.assign(shader.uniforms, {
             maxPower: fx.power,
+            maxBurst: fx.burst,
             maxTime: fx.time,
             maxPattern: fx.pattern,
             maxAspect: fx.aspect,
@@ -42,7 +43,7 @@ export function applyMaxMaterial(material, fx) {
                 varying vec4 vMaxProjection;
                 varying vec2 vMaxLight;
                 uniform sampler2D maxPattern;
-                uniform float maxAspect, maxPower, maxTime;`)
+                uniform float maxAspect, maxPower, maxBurst, maxTime;`)
             .replace('#include <opaque_fragment>', `
                 if (maxPower > 0.0) {
                     vec2 screenUv = vMaxProjection.xy / vMaxProjection.w * 0.5 + 0.5;
@@ -56,9 +57,13 @@ export function applyMaxMaterial(material, fx) {
                     float rim = 2.0 * (1.0 - smoothstep(-0.65, 0.65, vMaxLight.x));
                     vec3 maxColor = mix(body, glow, rim) + vec3(0.8, 0.0, 0.2) * caustic;
                     outgoingLight = mix(outgoingLight, maxColor, maxPower);
+                    // Brief in-model emission when the Pokémon becomes Max.
+                    // The pink rim remains, but the burst fades before play.
+                    outgoingLight += maxBurst * (
+                        vec3(1.25, 0.84, 1.20) + rim * vec3(0.52, 0.16, 0.50));
                 }
                 #include <opaque_fragment>`);
     };
-    material.customProgramCacheKey = () => 'scorace-bread-mode';
+    material.customProgramCacheKey = () => 'scorace-bread-mode-max-burst-v1';
     material.needsUpdate = true;
 }
