@@ -725,9 +725,9 @@ class PokemonViewer {
             // when a Pokémon enters Dynamax or Gigamax. No model scaling.
             const burstAge = this.maxBurstStart === null ? Infinity
                 : Math.max(0, (now - this.maxBurstStart) / 1000);
-            this.model.max.burst.value = ambient && burstAge < 0.78
-                ? 1 - smoothstep((burstAge - 0.10) / 0.68) : 0;
-            if (burstAge >= 0.78) this.maxBurstStart = null;
+            this.model.max.burst.value = ambient && burstAge < 0.42
+                ? 1 - smoothstep((burstAge - 0.04) / 0.30) : 0;
+            if (burstAge >= 0.42) this.maxBurstStart = null;
         }
         if (this.cloud) {
             this.cloud.visible = this.form !== 'normal';
