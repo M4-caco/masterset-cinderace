@@ -768,6 +768,16 @@
 .pokemon-dex-source { margin-top: 0.75rem; font-size: 0.78rem; }
 .pokemon-dex-source a { color: var(--pk-accent); text-decoration: underline; }
 
+/* Compact screens show the Pokédex directly after the 3D carousel,
+   instead of hiding it in a separate "Ficha" button. */
+@media (max-width: 1099px), (max-aspect-ratio: 3/2) {
+    .pokemon-layout > .pokemon-panel:not([hidden]) {
+        box-sizing: border-box;
+        width: min(100%, 47rem);
+        margin: clamp(0.55rem, 1.5svh, 1.1rem) auto 0;
+    }
+}
+
 @media (min-width: 1100px) and (min-aspect-ratio: 3/2) {
     main:has(#view-pokemon:not(.hidden)) { max-width: 114rem; }
 
