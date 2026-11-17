@@ -889,3 +889,68 @@
 
 .pokemon-stage[data-attack-away] canvas:not(.pokemon-battle-effects) { z-index: 1; }
 .pokemon-stage[data-attack-away] .pokemon-battle-effects { z-index: auto; }
+
+
+/* Opening trio: a wider, more cinematic presentation. The selected-Pokémon
+   inspector and the mobile single-character carousel keep their existing layout. */
+.pokemon-welcome {
+    margin: 0 auto clamp(0.2rem, 1svh, 0.7rem);
+    text-align: center;
+    font-size: clamp(0.8rem, 1.05vw, 0.98rem);
+    font-weight: 600;
+    letter-spacing: 0.012em;
+    color: var(--pk-muted);
+}
+.pokemon-welcome strong {
+    color: var(--pk-accent);
+    font-weight: 800;
+}
+#view-pokemon[data-pokemon-selected] .pokemon-welcome { display: none; }
+
+@media (min-width: 768px) {
+    #view-pokemon:not([data-pokemon-selected]) .pokemon-grid {
+        width: min(100%, 84rem);
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.14fr) minmax(0, 1fr);
+        gap: clamp(0.4rem, 1.4vw, 1.5rem);
+    }
+    #view-pokemon:not([data-pokemon-selected]) .pokemon-viewing {
+        isolation: isolate;
+    }
+    #view-pokemon:not([data-pokemon-selected]) .pokemon-viewing::before {
+        content: '';
+        position: absolute;
+        z-index: -1;
+        inset: 10% 4% 4%;
+        pointer-events: none;
+        background:
+            radial-gradient(ellipse 31% 34% at 50% 67%, #ff9c4938, transparent 100%),
+            radial-gradient(ellipse 30% 35% at 17% 70%, #e9983030, transparent 100%),
+            radial-gradient(ellipse 30% 35% at 83% 70%, #dc5d282a, transparent 100%);
+        filter: blur(26px);
+    }
+    #view-pokemon:not([data-pokemon-selected]) .pokemon-stage {
+        transition: transform 300ms ease, filter 360ms ease, opacity 360ms ease;
+    }
+    #view-pokemon:not([data-pokemon-selected]) .pokemon-stage::before {
+        content: '';
+        position: absolute;
+        z-index: 0;
+        pointer-events: none;
+        width: 76%;
+        height: 24%;
+        left: 50%;
+        bottom: 0;
+        transform: translateX(-50%);
+        background: radial-gradient(ellipse at center, #ffba6550, transparent 71%);
+        filter: blur(18px);
+        opacity: 0.75;
+    }
+}
+@media (min-width: 768px) and (hover: hover) and (prefers-reduced-motion: no-preference) {
+    #view-pokemon:not([data-pokemon-selected]) .pokemon-viewer:hover .pokemon-stage {
+        transform: translateY(-7px);
+    }
+}
+@media (max-width: 767px) {
+    .pokemon-welcome { font-size: 0.78rem; padding-inline: 0.8rem; }
+}
