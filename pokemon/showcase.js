@@ -2,13 +2,13 @@ import {
     AnimationMixer, Box3, DirectionalLight, GLTFLoader, Group, HemisphereLight,
     LoopOnce, NoToneMapping, OrthographicCamera, Scene, SRGBColorSpace, Vector3, WebGLRenderer,
 } from './vendor/three-gltf.js';
-import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=2';
+import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=7';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=5';
 import { iconControl, mountVolume } from './showcase-controls.js?v=3';
-import { BattleEffects } from './battle-effects.js?v=6';
-import { mountPokedex } from './pokedex.js?v=5';
+import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=8';
+import { mountPokedex } from './pokedex.js?v=7';
 
-const FORMS = { normal: 'Normal', dynamax: 'Dynamax', gigamax: 'Gigamax' };
+const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
 const SPECIES = [
     { id: 'scorbunny', name: 'Scorbunny', height: 0.67, angle: 0.07, cloudScale: 0.4 },
     { id: 'raboot', name: 'Raboot', height: 0.95, angle: 0, cloudScale: 0.5 },
@@ -16,9 +16,10 @@ const SPECIES = [
 ];
 const FRAME_HEIGHT = 2.4;
 const FLOOR = 0.84;
-const DYNAMAX_SCALE = 1.55;
-const GIGAMAX_SCALE = 1.7;
+const DYNAMAX_SCALE = 1.25;
+const GIGAMAX_SCALE = 1.04;
 const CAROUSEL_DURATION = 440;
+const MAX_FORM_SWAP = 235;
 const MODEL_MARGIN = 0.045;
 
 // Local bounds sampled from the exported idle loops. The Gigamax bounds include the fireball.
@@ -57,6 +58,7 @@ class PokemonViewer {
         this.moves = card.querySelector('.pokemon-moves');
         this.models = new Map();
         this.forms = new Map();
+        this.colors = new Map();
         this.form = 'normal';
         this.color = 'color';
         this.focused = false;
@@ -85,13 +87,17 @@ class PokemonViewer {
             forms.append(button);
             this.forms.set(form, button);
         }
-        this.shiny = iconControl('Shiny', 'shiny', 'shiny', () => {
-            this.color = this.color === 'shiny' ? 'color' : 'shiny';
-            this.shiny.setAttribute('aria-pressed', String(this.color === 'shiny'));
-            this.updateColor(true);
-        });
-        this.shiny.setAttribute('aria-pressed', 'false');
-        forms.append(this.shiny);
+        const colors = this.controls.querySelector('.pokemon-colors');
+        for (const [value, label, symbol] of [['color', 'Normal', 'ball'], ['shiny', 'Shiny', 'shiny']]) {
+            const button = iconControl(label, symbol, value, () => {
+                if (this.color === value) return;
+                this.color = value;
+                this.updateColor(value === 'shiny');
+            });
+            button.setAttribute('aria-pressed', String(value === this.color));
+            this.colors.set(value, button);
+            colors.append(button);
+        }
         this.retry.addEventListener('click', () => this.select(this.form, true));
         this.webp.addEventListener('load', () => {
             this.previewReady = this.webp.currentSrc;
@@ -253,35 +259,46 @@ class PokemonViewer {
     async select(form, retry = false) {
         if (this.loading && form === this.form && !retry) return;
         if (this.model && form === this.form && !retry) return;
-        const changingForms = this.model && !retry && this.form !== form;
+        const changingForms = this.model && !retry && this.stage.dataset.form !== form;
+        const animateForm = changingForms && !reducedMotion.matches && this.stage.hasAttribute('data-ready');
+        const flash = this.stage.querySelector('.pokemon-transition');
+        flash.classList.remove('is-playing');
         const previousHeight = this.displayHeight;
         if ((this.form === 'gigamax') !== (form === 'gigamax')) this.angle = this.species.angle;
         this.form = form;
-        this.stage.dataset.form = form;
+        if (!animateForm) this.stage.dataset.form = form;
         this.onFormChange(this);
         for (const [key, button] of this.forms) button.setAttribute('aria-pressed', key === form);
         const id = form === 'gigamax' ? 'cinderace-gigamax' : this.species.id;
         const revision = ++this.revision;
         this.stopAttack();
         this.loading = true;
-        this.syncPreview();
+        if (!animateForm) this.syncPreview();
         this.target.disabled = true;
-        this.moves.replaceChildren();
-        this.placeholder.hidden = false;
-        this.retry.hidden = true;
-        this.preview.hidden = false;
-        this.preview.src = asset(id, 'webp');
-        this.status.textContent = 'Carregando modelo 3D…';
-        delete this.stage.dataset.ready;
+        for (const button of this.moves.querySelectorAll('button')) button.disabled = true;
+        if (!animateForm) {
+            this.placeholder.hidden = false;
+            this.retry.hidden = true;
+            this.preview.hidden = false;
+            this.preview.src = asset(id, 'webp');
+            this.status.textContent = 'Carregando modelo 3D…';
+            delete this.stage.dataset.ready;
+        }
         try {
             this.ensureRenderer();
-            this.renderer.domElement.hidden = true;
+            if (!animateForm) this.renderer.domElement.hidden = true;
             const [model, pattern, clouds] = await Promise.all([
                 this.getModel(id),
                 form === 'normal' ? null : loadMaxPattern(),
                 form === 'normal' || this.cloud ? null : loadMaxClouds(loader),
             ]);
             if (revision !== this.revision) return;
+            if (animateForm) {
+                flash.classList.add('is-playing');
+                await new Promise(resolve => setTimeout(resolve, MAX_FORM_SWAP));
+                if (revision !== this.revision) return;
+            }
+            this.stage.dataset.form = form;
             this.model = model;
             this.turntable.clear();
             this.placement = new Group();
@@ -306,11 +323,13 @@ class PokemonViewer {
             this.renderer.domElement.hidden = false;
             this.target.disabled = false;
             this.syncPreview();
-            if (changingForms) this.flashTransformation();
             this.invalidate();
         } catch (error) {
             if (revision !== this.revision) return;
             console.error(`Scorace · ${this.species.name}`, error);
+            this.renderer?.domElement.setAttribute('hidden', '');
+            this.placeholder.hidden = false;
+            delete this.stage.dataset.ready;
             this.model = null;
             this.loading = false;
             this.preview.removeAttribute('src');
@@ -374,31 +393,20 @@ class PokemonViewer {
         this.updatePlacement();
     }
 
-    flashTransformation() {
-        if (reducedMotion.matches) return;
-        const flash = this.stage.querySelector('.pokemon-transition');
-        for (const animation of flash.getAnimations()) animation.cancel();
-        flash.animate([
-            { opacity: 0, transform: 'scale(0.45)' },
-            { opacity: 0.95, transform: 'scale(0.95)', offset: 0.23 },
-            { opacity: 0, transform: 'scale(1.28)' },
-        ], { duration: 520, easing: 'ease-out' });
-    }
-
     configureMax(pattern) {
         const { model } = this;
         if (this.form !== 'normal' && !model.max) {
             model.max = {
                 pattern: { value: pattern }, time: { value: 0 }, power: { value: 1 },
-                center: { value: model.center }, height: { value: model.size.y },
+                aspect: { value: 1 },
             };
             const prepared = new Set();
             for (const [mesh, regular, rare] of model.materialPairs) {
-                const fireball = model.id === 'cinderace-gigamax' && !model.body.includes(mesh);
+                if (!model.body.includes(mesh)) continue;
                 for (const material of [regular, rare]) {
                     if (prepared.has(material)) continue;
                     prepared.add(material);
-                    applyMaxMaterial(material, model.max, fireball);
+                    applyMaxMaterial(material, model.max);
                 }
             }
         }
@@ -414,7 +422,7 @@ class PokemonViewer {
                 : this.species.gigamax
                     ? [['Chama Furacão', fire, MOVES.physical, 'spin'], ['Ataque de Chamas', fire, MOVES.special, 'charge'],
                         ['Bola Incendiária', fire, MOVES.alternate, 'ball']]
-                    : [['Investida', 'normal', MOVES.physical], ['Ataque de Chamas', fire, MOVES.special, 'charge']];
+                    : [['Investida', 'normal', MOVES.physical, 'tackle'], ['Ataque de Chamas', fire, MOVES.special, 'charge']];
         const buttons = entries.filter(([, , clip]) => this.model.clips.has(clip))
             .map(([name, symbol, clip, effect]) => iconControl(name, symbol, symbol === fire ? 'fire' : 'move-normal',
                 () => this.play(clip, 'battle', effect)));
@@ -422,6 +430,9 @@ class PokemonViewer {
     }
 
     updateColor(showSparkles = false) {
+        for (const [value, button] of this.colors) {
+            button.setAttribute('aria-pressed', String(value === this.color));
+        }
         if (!this.model) return;
         const shiny = this.color === 'shiny';
         for (const [mesh, regular, rare] of this.model.materialPairs) mesh.material = shiny ? rare : regular;
@@ -465,7 +476,9 @@ class PokemonViewer {
         const action = mixer.clipAction(clip);
         action.reset().setLoop(LoopOnce, 1).play();
         action.clampWhenFinished = true;
-        this.attack = { action, name, effect, start: performance.now(), duration: clip.duration };
+        const clipDuration = clip.duration;
+        const duration = effect === 'charge' ? Math.max(clipDuration, 2.97) : clipDuration;
+        this.attack = { action, name, effect, start: performance.now(), clipDuration, duration, time: 0 };
         if (effect && !this.battleEffects) this.battleEffects = new BattleEffects(this.stage, this.target);
         this.stage.dataset.attacking = kind;
         this.syncPreview();
@@ -510,10 +523,12 @@ class PokemonViewer {
         const clouds = this.cloud && this.form !== 'normal';
         const ambient = !reducedMotion.matches && (!this.stage.hasAttribute('data-webp') || clouds);
         if (this.attack) {
-            const { action, start, duration } = this.attack;
-            action.time = Math.max(0, (now - start) / 1000);
-            if (action.time >= duration) this.stopAttack();
+            const { action, start, duration, clipDuration } = this.attack;
+            const time = Math.max(0, (now - start) / 1000);
+            if (time >= duration) this.stopAttack();
             else {
+                this.attack.time = time;
+                action.time = Math.min(time, clipDuration - 0.0001);
                 this.model.mixer.update(0);
                 this.updateProps(this.model, true);
             }
@@ -522,7 +537,10 @@ class PokemonViewer {
             action.time = ((now - this.restStart) / 1000) % this.model.idle.duration;
             this.model.mixer.update(0);
         }
-        if (this.model.max) this.model.max.time.value = reducedMotion.matches ? 0 : now / 1000;
+        if (this.model.max) {
+            this.model.max.time.value = reducedMotion.matches ? 0 : now / 1000;
+            this.model.max.aspect.value = width / height;
+        }
         if (ambient || this.attack || this.placementTransition) this.invalidate();
 
         const { renderer, camera } = this;
@@ -554,9 +572,10 @@ class PokemonViewer {
         }
         if (this.webp.hidden || clouds) renderer.render(this.scene, camera);
         if (this.attack?.effect) {
-            this.battleEffects.draw(this.attack.effect, this.attack.action.time / this.attack.duration,
+            const bodyCenter = (this.bounds.min.x + this.bounds.max.x) / 2;
+            this.battleEffects.draw(this.attack.effect, this.attack.time, this.attack.clipDuration,
                 width, height, this.displayHeight * height / frameHeight, height * floor, this.angle,
-                reducedMotion.matches, width * centerX);
+                reducedMotion.matches, width * centerX + bodyCenter * height / frameHeight);
         }
     }
 
@@ -574,7 +593,7 @@ class PokemonViewer {
         }
 
         // Keep the same reference frame across forms so it doesn't cancel out the size increase.
-        const largest = this.normalHeight() * (this.species.gigamax ? GIGAMAX_SCALE : DYNAMAX_SCALE);
+        const largest = this.normalHeight() * DYNAMAX_SCALE;
         const baseFrame = Math.max(FRAME_HEIGHT, (largest + 0.38) / FLOOR);
         const fitWidth = (bounds.max.x - bounds.min.x + MODEL_MARGIN * 2) / aspect;
         const fitHeight = bounds.max.y - bounds.min.y + MODEL_MARGIN * 2;
@@ -635,6 +654,8 @@ export function mountShowcase(section) {
     const dexHeader = dex.querySelector('.pokemon-dex-header');
     const enlarge = section.querySelector('[data-enlarge]');
     const webp = section.querySelector('[data-webp]');
+    const mobile = matchMedia('(max-width: 767px)');
+    const wide = matchMedia('(min-width: 1200px) and (min-aspect-ratio: 8/5)');
     let selected = -1;
     const slotAnimations = new Map();
     let inspectorAnimation;
@@ -648,9 +669,10 @@ export function mountShowcase(section) {
     });
 
     function selectPokemon(index) {
+        if (index === -1 && mobile.matches) return;
         if (selected === index) return;
         const previous = selected;
-        const smooth = !reducedMotion.matches && typeof grid.animate === 'function';
+        const smooth = !mobile.matches && !reducedMotion.matches && typeof grid.animate === 'function';
         const oldCenters = smooth ? cards.map(({ card }) => {
             const bounds = card.getBoundingClientRect();
             return { x: bounds.left + bounds.width / 2, y: bounds.top };
@@ -667,6 +689,7 @@ export function mountShowcase(section) {
             card.setFocus(position === index, order);
         }
         updatePokedex(index === -1 ? null : cards[index]);
+        if (mobile.matches) loadViewer(cards[index]);
         fitOpening();
         if (smooth) {
             const positions = cards.map(({ card }) => card.getBoundingClientRect());
@@ -722,8 +745,10 @@ export function mountShowcase(section) {
     function fitOpening() {
         if (section.classList.contains('hidden')) return;
         const gridRect = grid.getBoundingClientRect();
-        const stageHeight = cards[0].stage.offsetHeight;
-        const bottom = selected === -1 ? gridRect.bottom : dexHeader.getBoundingClientRect().bottom;
+        const stageHeight = (cards[selected] ?? cards[0]).stage.offsetHeight;
+        const bottom = selected === -1 ? gridRect.bottom : wide.matches
+            ? inspector.getBoundingClientRect().bottom
+            : dexHeader.getBoundingClientRect().bottom;
         const surroundingHeight = bottom + window.scrollY - stageHeight;
         const availableHeight = window.innerHeight - surroundingHeight - 12;
         section.style.setProperty('--pokemon-opening-stage', `${Math.floor(availableHeight)}px`);
@@ -734,9 +759,21 @@ export function mountShowcase(section) {
         inspector, dexHeader]) openingObserver.observe(element);
     window.addEventListener('resize', fitOpening);
 
+    function loadViewer(viewer) {
+        if (!viewer.model && !viewer.loading) viewer.select(viewer.form);
+    }
+
+    function refreshView() {
+        if ((mobile.matches || wide.matches) && selected === -1) selectPokemon(0);
+        if (!mobile.matches) cards.forEach(loadViewer);
+        fitOpening();
+    }
+
     mountVolume(section, cards);
-    for (const card of cards) card.select('normal');
-    fitOpening();
+    loadAttackSprites();
+    mobile.addEventListener('change', refreshView);
+    wide.addEventListener('change', refreshView);
+    refreshView();
 
     return {
         show: () => {
