@@ -453,7 +453,6 @@
 
 .pokemon-pagination button,
 .pokemon-header [data-open-dex],
-.pokemon-combat-toggle,
 .pokemon-retry {
     border: 1px solid var(--pk-edge);
     border-radius: 0.7rem;
@@ -467,7 +466,6 @@
 
 .pokemon-pagination button:hover,
 .pokemon-header [data-open-dex]:hover,
-.pokemon-combat-toggle:hover,
 .pokemon-retry:hover { border-color: var(--pk-accent); }
 
 .pokemon-options {
@@ -477,19 +475,6 @@
     flex-wrap: wrap;
     gap: 0.35rem 0.65rem;
     margin-inline-start: auto;
-}
-
-.pokemon-combat-toggle { min-height: 2.75rem; }
-
-.pokemon-combat-toggle[aria-pressed=true] {
-    background: var(--pk-accent);
-    color: var(--pk-on-accent);
-}
-
-.pokemon-combat-status {
-    color: var(--pk-muted);
-    font-size: 0.78rem;
-    text-align: end;
 }
 
 .pokemon-volume {

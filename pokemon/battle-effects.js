@@ -187,28 +187,38 @@ function drawGmaxFireball(ctx, time, frame) {
     }
 }
 
-function drawChargeOrbit(ctx, time, frame, behind) {
-    const { x, floor, modelHeight, extent, angle, chargeLevel, pulse, motion } = frame;
-    const count = chargeLevel * 4;
-    const y = floor - modelHeight * (frame.form === 'gigamax' ? 0.38 : 0.45);
-    if (behind && motion) {
-        const flash = extent * (0.42 + (1 - pulse) * 0.29);
-        sprite(ctx, 2, x, y, flash, flash, pulse * 0.68);
-    }
-    for (let i = 0; i < count; i++) {
-        const orbit = i * TAU / count + time * 1.9 + angle;
+function drawGroundFire(ctx, time, frame, behind) {
+    const { x, floor, extent, angle } = frame;
+    for (let i = 0; i < 16; i++) {
+        const orbit = i * TAU / 16 + angle;
         const depth = Math.cos(orbit);
         if ((depth < 0) !== behind) continue;
-        const size = extent * (0.11 + chargeLevel * 0.035) * (1 + depth * 0.24);
-        const orbitX = x + Math.sin(orbit) * extent * (0.22 + chargeLevel * 0.06);
-        const orbitY = y + depth * extent * 0.095 + Math.sin(orbit * 2 + time * 3) * extent * 0.14;
-        sprite(ctx, 5 + Math.floor(time * 11 + i) % 4, orbitX, orbitY, size, size,
-            (behind ? 0.58 : 0.85) * (0.76 + pulse * 0.24), orbit * 0.16);
+        const life = (time * 1.8 + i * 0.37) % 1;
+        const flameHeight = extent * (0.10 + life * 0.15);
+        const px = x + Math.sin(orbit) * extent * 0.35;
+        const py = floor + depth * extent * 0.065 - flameHeight * 0.5;
+        sprite(ctx, 5 + Math.floor(life * 4), px, py,
+            extent * 0.15, flameHeight, Math.sin(life * Math.PI) * 0.85);
+    }
+}
+
+function drawFlamethrower(ctx, time, frame) {
+    const phase = time / frame.duration;
+    if (phase < 0.16 || phase > 0.91) return;
+    const strength = ramp(0.16, 0.30, phase) * (1 - ramp(0.73, 0.91, phase));
+    for (let i = 0; i < 24; i++) {
+        const travel = (time * 2.7 + i / 24) % 1;
+        const y = frame.floor - frame.modelHeight * 0.58;
+        const point = attackPoint(frame, y, frame.extent * travel * 1.15);
+        const size = frame.extent * (0.08 + travel * 0.26) * point.scale;
+        sprite(ctx, 5 + Math.floor((time * 14 + i) % 4),
+            point.x, point.y + Math.sin(i * 2.4 + time * 12) * size * 0.16,
+            size * 1.6, size, strength * (1 - travel * 0.6), frame.direction);
     }
 }
 
 const drawMoves = {
-    tackle: drawTackle, spin: drawFireSpin, charge: drawFlameCharge,
+    flamethrower: drawFlamethrower, tackle: drawTackle, spin: drawFireSpin, charge: drawFlameCharge,
     ball: drawPyroBall, max: drawMaxFlare, gmax: drawGmaxFireball,
 };
 
@@ -256,13 +266,13 @@ export class BattleEffects {
         const direction = Math.atan2(depth * 0.28, forward);
         const context = { ...frame, extent, forward, depth, direction };
         const front = prepareSurface(this.front, width, height);
-        if (kind === 'charging') {
+        if (frame.groundFire) {
             const back = prepareSurface(this.back, width, height);
-            if (back) drawChargeOrbit(back, time, context, true);
-            if (front) drawChargeOrbit(front, time, context, false);
+            if (back) drawGroundFire(back, frame.groundTime, context, true);
+            if (front) drawGroundFire(front, frame.groundTime, context, false);
         } else {
             this.back.canvas.hidden = true;
-            if (front) drawMoves[kind]?.(front, time, context);
         }
+        if (front) drawMoves[kind]?.(front, time, context);
     }
 }
