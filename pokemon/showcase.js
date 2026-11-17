@@ -844,7 +844,6 @@ export function mountShowcase(section) {
     const header = section.querySelector('.pokemon-header');
     const dialog = section.querySelector('.pokemon-dex-dialog');
     const openDetailsButton = section.querySelector('[data-open-dex]');
-    const inlineDetails = matchMedia('(min-width: 1100px) and (min-aspect-ratio: 3/2)');
     const mobileOrder = [0, 2, 1];
     const updatePokedex = mountPokedex(panel);
     let selected = -1;
@@ -868,21 +867,19 @@ export function mountShowcase(section) {
     }
 
     function refreshDetails() {
-        if (dialog.open && (selected === -1 || inlineDetails.matches)) dialog.close();
-        if (!dialog.open && panel.parentElement !== layout) layout.append(panel);
-        panel.hidden = selected === -1 || (!inlineDetails.matches && !dialog.open);
-        openDetailsButton.hidden = selected === -1 || inlineDetails.matches;
+        // Restore the original direct selection: the Pokédex is always visible
+        // for the selected Pokémon. On wide screens CSS places it at the side;
+        // on mobile it follows the 3D viewer without blocking tap attacks.
+        if (dialog.open) dialog.close();
+        if (panel.parentElement !== layout) layout.append(panel);
+        panel.hidden = selected === -1;
+        openDetailsButton.hidden = true;
     }
 
-    openDetailsButton.addEventListener('click', () => {
-        if (selected === -1 || inlineDetails.matches || dialog.open) return;
-        dialog.append(panel);
-        panel.hidden = false;
-        dialog.showModal();
+    section.querySelector('[data-close-dex]').addEventListener('click', () => {
+        if (dialog.open) dialog.close();
     });
-    section.querySelector('[data-close-dex]').addEventListener('click', () => dialog.close());
     dialog.addEventListener('close', refreshDetails);
-    inlineDetails.addEventListener('change', refreshDetails);
 
     function fitViewport() {
         if (section.classList.contains('hidden')) return;
