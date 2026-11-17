@@ -208,67 +208,8 @@
     opacity: 0 !important;
 }
 
-.pokemon-max-effects,
-.pokemon-max-glow {
-    position: absolute;
-    pointer-events: none;
-}
-
-.pokemon-max-effects {
-    inset: 0;
-    display: none;
-    z-index: 0; /* Behind transparent WebGL canvas, never over the body */
-    transition: opacity 200ms ease;
-}
-
-/* Nearby Pokémon keep the pink material shader and clouds, but do not
-   compete visually with the main Pokémon's large rear light bloom. */
-.pokemon-viewer:not([data-selected]) .pokemon-max-effects {
-    opacity: 0;
-}
-
-.pokemon-stage:is([data-form=dynamax], [data-form=gigamax])[data-ready] .pokemon-max-effects {
-    display: block;
-}
-
-.pokemon-max-glow {
-    width: calc(var(--pokemon-aura-width, 100px) * 1.25);
-    left: 50%;
-    top: calc(var(--pokemon-aura-y, 24%) - 0.85rem);
-    bottom: 8%;
-    translate: -50%;
-    background: radial-gradient(ellipse at 50% 53%,
-        #fff0fc86 0%, #ff8cda87 22%, #fc2f9880 43%,
-        #cc0a704c 65%, transparent 84%);
-}
-
-/* A large, soft pink light *behind* the silhouette, separate from the
-   existing magenta shading on the Pokémon's 3D body. */
-.pokemon-max-glow::before {
-    content: '';
-    position: absolute;
-    inset: -14% -32% -11%;
-    border-radius: 50%;
-    background: radial-gradient(ellipse,
-        #ffe5f888 0%, #ff74c77f 24%, #ec167882 45%,
-        #a705453d 67%, transparent 85%);
-    filter: blur(clamp(14px, 3vw, 26px));
-}
-
-.pokemon-max-glow::after {
-    content: '';
-    position: absolute;
-    inset: 25% -18% -8%;
-    background: #fb1e6580;
-    mask: url("visuals/max-glow.webp") center / 100% 100% no-repeat;
-    mask-mode: luminance;
-    animation: pokemon-cloud-drift 2.8s ease-in-out infinite alternate;
-}
-
-@keyframes pokemon-cloud-drift {
-    from { transform: translate(-2%, 0); }
-    to { transform: translate(2%, -5%); }
-}
+/* Max color stays on the 3D model's shader; no persistent pink
+   spotlight, bloom, or vignette is painted behind the Pokémon. */
 
 .pokemon-transition {
     position: absolute;
@@ -764,8 +705,7 @@
 @media (prefers-reduced-motion: reduce) {
     .pokemon-transition.is-playing.is-max::before,
     .pokemon-transition.is-playing.is-max::after { animation: none; }
-    .pokemon-badge-shiny::after,
-    .pokemon-max-glow::after {
+    .pokemon-badge-shiny::after {
         animation: none;
     }
 
