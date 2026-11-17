@@ -24,7 +24,11 @@ const DYNAMAX_SCALE = 1.25;
 // Dynamax and Gigamax appear at the same size in every carousel position.
 const GIGAMAX_SCALE = 1.48;
 const CAROUSEL_DURATION = 440;
-const MAX_FORM_SWAP = 235;
+// Replace the Pokémon around the 155ms peak of the 420ms Max flash;
+// finish growth while the bright overlay still hides the change.
+const MAX_FORM_SWAP = 145;
+const NORMAL_FORM_SWAP = 235;
+const MAX_GROW_DURATION = 155;
 const MODEL_MARGIN = 0.045;
 
 // Local bounds sampled from the exported idle loops. The Gigamax bounds include the fireball.
@@ -360,7 +364,8 @@ class PokemonViewer {
             if (revision !== this.revision) return;
             if (animateForm) {
                 flash.classList.add('is-playing');
-                await new Promise(resolve => setTimeout(resolve, MAX_FORM_SWAP));
+                await new Promise(resolve => setTimeout(resolve,
+                    maxTransformation ? MAX_FORM_SWAP : NORMAL_FORM_SWAP));
                 if (revision !== this.revision) return;
             }
             this.stage.dataset.form = form;
@@ -376,7 +381,8 @@ class PokemonViewer {
             }
             this.setRest(model);
             this.restStart = performance.now();
-            this.updatePlacement(true, changingForms ? previousHeight : undefined);
+            this.updatePlacement(true, changingForms ? previousHeight : undefined,
+                maxTransformation ? MAX_GROW_DURATION : CAROUSEL_DURATION);
             this.configureMax(pattern);
             // Begin the body glow only after the new 3D form is visible;
             // otherwise it would be spent on the outgoing model.
@@ -427,7 +433,7 @@ class PokemonViewer {
         return base * scale;
     }
 
-    updatePlacement(immediate = false, previousHeight) {
+    updatePlacement(immediate = false, previousHeight, duration = CAROUSEL_DURATION) {
         if (!this.model || !this.placement) return;
         const target = this.targetDisplayHeight();
         const from = previousHeight ?? this.displayHeight;
@@ -436,7 +442,7 @@ class PokemonViewer {
             this.setDisplayHeight(target);
         } else {
             this.setDisplayHeight(from);
-            this.placementTransition = { from, to: target, start: performance.now() };
+            this.placementTransition = { from, to: target, start: performance.now(), duration };
         }
         this.invalidate();
     }
@@ -465,7 +471,8 @@ class PokemonViewer {
     advancePlacement(now) {
         const transition = this.placementTransition;
         if (!transition) return;
-        const progress = Math.min(1, Math.max(0, (now - transition.start) / CAROUSEL_DURATION));
+        const progress = Math.min(1, Math.max(0,
+            (now - transition.start) / (transition.duration ?? CAROUSEL_DURATION)));
         const eased = progress * progress * (3 - 2 * progress);
         this.setDisplayHeight(transition.from + (transition.to - transition.from) * eased);
         if (progress === 1) this.placementTransition = null;
