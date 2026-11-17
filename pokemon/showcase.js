@@ -4,7 +4,7 @@ import {
 } from './vendor/three-gltf.js';
 import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=8';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=10';
-import { iconControl, mountVolume } from './showcase-controls.js?v=11';
+import { iconControl, mountVolume } from './showcase-controls.js?v=12';
 import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=15';
 import { effectSpace } from './effect-space.js?v=1';
 import { mountPokedex } from './pokedex.js?v=12';
