@@ -11,10 +11,10 @@ import { prepareFace, updateFace } from './face-animation.js?v=12';
 
 const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
 const SPECIES = [
-    { id: 'scorbunny', name: 'Scorbunny', height: 0.84, focusHeight: 1.59, angle: 0.07, cloudScale: 0.4 },
+    { id: 'scorbunny', name: 'Scorbunny', height: 0.84, focusHeight: 1.59, angle: -0.44, cloudScale: 0.4 },
     { id: 'cinderace', name: 'Cinderace', height: 1.76, focusHeight: 2.34,
-        maxFocusHeight: 2.92, angle: -0.12, cloudScale: 0.8, gigamax: true },
-    { id: 'raboot', name: 'Raboot', height: 0.99, focusHeight: 1.73, angle: -0.08, cloudScale: 0.5 },
+        maxFocusHeight: 2.92, angle: -0.45, cloudScale: 0.8, gigamax: true },
+    { id: 'raboot', name: 'Raboot', height: 0.99, focusHeight: 1.73, angle: -0.50, cloudScale: 0.5 },
 ];
 const FRAME_HEIGHT = 2.52;
 // A consistent low ground line keeps models from growing downward when focused.
