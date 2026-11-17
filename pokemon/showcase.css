@@ -254,11 +254,11 @@
 }
 
 .pokemon-transition.is-playing.is-max::before {
-    animation: pokemon-max-strong-flash 860ms ease-out both;
+    animation: pokemon-max-strong-flash 420ms ease-out both;
 }
 
 .pokemon-transition.is-playing.is-max::after {
-    animation: pokemon-max-wide-bloom 1000ms ease-out both;
+    animation: pokemon-max-wide-bloom 520ms ease-out both;
 }
 
 @keyframes pokemon-max-strong-flash {
@@ -312,13 +312,13 @@
     filter: drop-shadow(0 0 0.3rem #ff17b3);
 }
 
-.is-playing .pokemon-transition-cloud { animation: pokemon-max-burst 700ms ease-out both; }
-.is-playing .pokemon-transition-ring { animation: pokemon-max-ring 470ms ease-out 135ms both; }
-.is-playing .pokemon-transition-rays { animation: pokemon-max-rays 410ms ease-out 130ms both; }
-.is-playing .pokemon-transition-core { animation: pokemon-max-core 570ms ease-out both; }
+.is-playing .pokemon-transition-cloud { animation: pokemon-max-burst 360ms ease-out both; }
+.is-playing .pokemon-transition-ring { animation: pokemon-max-ring 280ms ease-out 70ms both; }
+.is-playing .pokemon-transition-rays { animation: pokemon-max-rays 240ms ease-out 60ms both; }
+.is-playing .pokemon-transition-core { animation: pokemon-max-core 320ms ease-out both; }
 .is-playing .pokemon-transition-electric {
-    animation: pokemon-max-electric-x 112ms steps(4, jump-none) 4,
-        pokemon-max-electric-y 448ms steps(4, jump-none), pokemon-max-electric 570ms ease-out both;
+    animation: pokemon-max-electric-x 72ms steps(4, jump-none) 3,
+        pokemon-max-electric-y 216ms steps(4, jump-none), pokemon-max-electric 320ms ease-out both;
 }
 
 @keyframes pokemon-max-burst {
