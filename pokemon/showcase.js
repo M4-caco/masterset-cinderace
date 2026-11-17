@@ -144,10 +144,12 @@ class PokemonViewer {
         this.model = null;
         this.inView = false;
         this.restStart = 0;
-        // Anime voice is independent of the Pokémon GO attack assets.
-        // Never play an attack cry as a greeting fallback.
+        // Two independent soundtracks: anime voices for welcome hover,
+        // original Pokémon GO cries for attacking or pressing a move button.
         this.greetingAudio = createJornadasGreeting(species.id);
-        this.cry = this.greetingAudio;
+        this.attackCry = new Audio(new URL(`./audio/${species.id}.wav`, import.meta.url).href);
+        this.attackCry.preload = 'auto';
+        this.attackCry.volume = 0.55;
 
         this.target.setAttribute('aria-pressed', 'false');
         this.target.setAttribute('aria-label', `Destacar ${species.name}. Use as setas para girar.`);
@@ -383,6 +385,7 @@ class PokemonViewer {
         const id = form === 'gigamax' ? 'cinderace-gigamax' : this.species.id;
         const revision = ++this.revision;
         this.stopAttack();
+        this.attackCry?.pause();
         this.loading = true;
         this.target.disabled = true;
         for (const button of this.moves.querySelectorAll('button')) button.disabled = true;
@@ -563,7 +566,9 @@ class PokemonViewer {
         this.introPending = false;
         this.lastAttackTap = performance.now();
         if (this.attack?.kind === 'combat-fast') return;
-        if (this.attack && this.attack.kind !== 'intro') return;
+        // Clicking immediately after greeting must take over its animation,
+        // rather than silently rejecting the attack.
+        if (this.attack && this.attack.kind !== 'intro' && this.attack.kind !== 'greeting') return;
         this.playQuickAttack();
     }
 
@@ -572,6 +577,19 @@ class PokemonViewer {
         if (this.form === 'gigamax' || !this.model?.clips.has(MOVES.physical)) return;
         const clip = MOVES.physical;
         this.play(clip, 'combat-fast', 'spin');
+    }
+
+    playAttackCry() {
+        // Deliberately never use this sound for mouseover happiness animations.
+        const cry = this.attackCry;
+        if (!cry || this.showcase.classList.contains('hidden')) return;
+        try {
+            cry.pause();
+            cry.currentTime = 0;
+            void cry.play().catch(() => {});
+        } catch (error) {
+            console.debug('Pokémon GO: vocalização de ataque indisponível', error);
+        }
     }
 
     configureMax(pattern) {
@@ -676,6 +694,10 @@ class PokemonViewer {
         if (effect) this.battleEffects ??= new BattleEffects(this.stage, this.target);
         this.stage.dataset.attacking = kind;
         this.stage.toggleAttribute('data-attack-away', Boolean(effect) && Math.cos(this.angle) < -0.25);
+        if (kind === 'combat-fast' || kind === 'battle') {
+            this.greetingAudio?.pause();
+            this.playAttackCry();
+        }
         this.invalidate();
         return true;
     }
@@ -969,6 +991,7 @@ class PokemonViewer {
         this.stopAttack();
         this.lastAttackTap = -Infinity;
         this.greetingAudio?.pause();
+        this.attackCry?.pause();
     }
 }
 
