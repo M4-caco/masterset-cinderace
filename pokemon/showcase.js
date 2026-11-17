@@ -470,6 +470,50 @@ class PokemonViewer {
         this.invalidate();
     }
 
+    // Sample only Cinderace's body before the G-Max move. The growing fireball
+    // and sparks belong to the attack, not to the camera's framing bounds.
+    measureGigamaxAttack(model, action, duration) {
+        const envelope = new Box3();
+        const poseBounds = new Box3();
+        const { mixer, restAction, body } = model;
+        const previousRestTime = restAction.time;
+        this.turntable.position.set(0, 0, 0);
+        this.turntable.scale.setScalar(1);
+        this.turntable.rotation.y = this.angle;
+        restAction.setEffectiveWeight(0);
+        action.setEffectiveWeight(1);
+        try {
+            const samples = 24;
+            for (let i = 0; i <= samples; i++) {
+                action.time = duration * i / samples;
+                mixer.update(0);
+                this.turntable.updateMatrixWorld(true);
+                for (const mesh of body) {
+                    if (!mesh.visible) continue;
+                    // A skinned mesh must have its bounds recomputed at each pose.
+                    if (mesh.isSkinnedMesh) mesh.boundingBox = null;
+                    poseBounds.makeEmpty().expandByObject(mesh, true);
+                    envelope.union(poseBounds);
+                }
+            }
+        } finally {
+            action.time = 0;
+            action.setEffectiveWeight(0);
+            restAction.time = previousRestTime;
+            restAction.setEffectiveWeight(1);
+            mixer.update(0);
+            this.turntable.updateMatrixWorld(true);
+        }
+        if (envelope.isEmpty()) {
+            // Fallback stays fixed for the entire attack too.
+            envelope.copy(model.idleBounds).applyMatrix4(this.placement.matrixWorld);
+            envelope.expandByScalar(this.displayHeight * 0.25);
+        } else {
+            envelope.expandByScalar(Math.max(MODEL_MARGIN * 2, this.displayHeight * 0.09));
+        }
+        return envelope;
+    }
+
     play(name, kind = 'battle', effect) {
         if (!this.model || this.loading || (this.attack && kind === 'pokedex')) return false;
         const { mixer, clips } = this.model;
@@ -481,7 +525,16 @@ class PokemonViewer {
         action.clampWhenFinished = true;
         const clipDuration = clip.duration;
         const duration = effect === 'charge' ? Math.max(clipDuration, 2.65) : clipDuration;
-        this.attack = { action, effect, start: performance.now(), clipDuration, duration, time: 0 };
+        const gigamaxBlast = this.form === 'gigamax' && name === MOVES.special;
+        if (gigamaxBlast && this.placementTransition) {
+            this.placementTransition = null;
+            this.setDisplayHeight(this.normalHeight() * GIGAMAX_SCALE);
+        }
+        const framingBounds = gigamaxBlast ? this.measureGigamaxAttack(this.model, action, clipDuration) : null;
+        // Reserve camera space first, then run the unmodified animation at normal speed.
+        const start = performance.now() + (gigamaxBlast ? 180 : 0);
+        this.attack = { action, effect, start, clipDuration, duration, time: 0,
+            framingBounds, lockFraming: gigamaxBlast };
         if (effect && !this.battleEffects) this.battleEffects = new BattleEffects(this.stage, this.target);
         this.stage.dataset.attacking = kind;
         this.stage.toggleAttribute('data-attack-away', Boolean(effect) && Math.cos(this.angle) < -0.25);
@@ -604,7 +657,8 @@ class PokemonViewer {
         const tall = this.displayHeight / pixelToWorld;
         const dash = this.attack?.effect === 'tackle' && this.model.tackle
             ? this.moveTackle(surfaceWidth, origin, tall, pixelToWorld, height * floor, height) : null;
-        const adjustment = this.attack ? this.keepAttackInView(pixelToWorld) : null;
+        const adjustment = this.attack?.lockFraming ? null
+            : this.attack ? this.keepAttackInView(pixelToWorld) : null;
         const dx = (dash?.pixels ?? 0) + (adjustment?.x ?? 0);
         const dy = (dash?.floorOffset ?? 0) + (adjustment?.y ?? 0);
         if (this.attack) this.stage.style.setProperty('--pokemon-shadow-depth', `${dy}px`);
@@ -671,6 +725,7 @@ class PokemonViewer {
         turntable.updateMatrixWorld(true);
         // Use the whole viewing area for the silhouette, including the space beyond the card slot.
         bounds.copy(model.idleBounds).applyMatrix4(placement.matrixWorld);
+        if (this.attack?.framingBounds) bounds.union(this.attack.framingBounds);
 
         const baseFrame = this.form === 'normal' ? FRAME_HEIGHT : Math.max(FRAME_HEIGHT, (bounds.max.y + 0.25) / 0.93);
         const fitWidth = height * Math.max(
