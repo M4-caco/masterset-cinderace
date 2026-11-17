@@ -12,10 +12,10 @@ import { prepareFace, updateFace } from './face-animation.js?v=12';
 
 const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
 const SPECIES = [
-    { id: 'scorbunny', name: 'Scorbunny', height: 0.84, focusHeight: 1.59, normalScale: 0.92, angle: -0.44, cloudScale: 0.4 },
+    { id: 'scorbunny', name: 'Scorbunny', height: 0.84, focusHeight: 1.59, normalScale: 0.92, angle: 0, cloudScale: 0.4 },
     { id: 'cinderace', name: 'Cinderace', height: 1.76, focusHeight: 2.34,
-        maxFocusHeight: 2.92, angle: -0.45, cloudScale: 0.8, gigamax: true },
-    { id: 'raboot', name: 'Raboot', height: 0.99, focusHeight: 1.73, normalScale: 0.92, angle: -0.50, cloudScale: 0.5 },
+        maxFocusHeight: 2.92, angle: 0, cloudScale: 0.8, gigamax: true },
+    { id: 'raboot', name: 'Raboot', height: 0.99, focusHeight: 1.73, normalScale: 0.92, angle: 0, cloudScale: 0.5 },
 ];
 const FRAME_HEIGHT = 2.52;
 // A consistent low ground line keeps models from growing downward when focused.
@@ -124,6 +124,9 @@ class PokemonViewer {
         this.frameRequest = 0;
         this.attack = null;
         this.lastAttackTap = -Infinity;
+        this.lastGreeting = -Infinity;
+        this.hovering = false;
+        this.introPending = true;
         this.maxBurstStart = null;
         this.bounds = new Box3();
         this.attackBounds = new Box3();
@@ -198,6 +201,36 @@ class PokemonViewer {
             event.preventDefault();
             this.rotate(this.angle + (event.key === 'ArrowLeft' ? -0.22 : 0.22));
         });
+        // The transparent stage button covers the entire slot. Only greet when
+        // the pointer actually enters the rendered Pokémon's projected bounds.
+        target.addEventListener('pointermove', event => {
+            if (event.pointerType !== 'mouse' && event.pointerType !== 'pen') return;
+            if (start || this.showcase.hasAttribute('data-pokemon-selected')) {
+                this.hovering = false;
+                return;
+            }
+            const hovering = this.overPokemon(event);
+            if (hovering && !this.hovering) this.greet();
+            this.hovering = hovering;
+        });
+        target.addEventListener('pointerleave', () => { this.hovering = false; });
+    }
+
+    overPokemon(event) {
+        if (!this.model || this.loading || !this.frameHeight ||
+            this.form !== 'normal' || this.bounds.isEmpty()) return false;
+        const stage = this.stage.getBoundingClientRect();
+        const scale = stage.height / this.frameHeight;
+        const box = this.bounds;
+        const left = stage.width * 0.5 + box.min.x * scale;
+        const right = stage.width * 0.5 + box.max.x * scale;
+        const top = stage.height * STAGE_FLOOR - box.max.y * scale;
+        const bottom = stage.height * STAGE_FLOOR - box.min.y * scale;
+        const extraX = Math.max(8, (right - left) * 0.13);
+        const extraY = Math.max(8, (bottom - top) * 0.06);
+        const x = event.clientX - stage.left, y = event.clientY - stage.top;
+        return x >= left - extraX && x <= right + extraX &&
+            y >= top - extraY && y <= bottom + extraY;
     }
 
     ensureRenderer() {
@@ -417,7 +450,7 @@ class PokemonViewer {
         // focus treatment as desktop instead of the tiny side-card height.
         if (mobile.matches) return focusHeight;
         if (this.focused) return focusHeight;
-        return this.card.parentElement.hasAttribute('data-focus') ? height * 0.84 : height;
+        return this.card.parentElement.hasAttribute('data-focus') ? height * 0.84 : focusHeight * 1.12;
     }
 
     targetDisplayHeight() {
@@ -495,6 +528,25 @@ class PokemonViewer {
         // Otherwise a click during the 440ms carousel transition could lock
         // the Gigamax at its smaller side-card scale indefinitely.
         this.updatePlacement(focused && this.form === 'gigamax');
+    }
+
+    greet() {
+        if (!this.model || this.loading || this.showcase.classList.contains('hidden')) return;
+        const now = performance.now();
+        if (now - this.lastGreeting < 1800) return;
+        // A greeting must not interrupt battle attacks, especially G-Max.
+        if (this.attack && this.attack.kind !== 'intro' && this.attack.kind !== 'greeting') return;
+        this.lastGreeting = now;
+        if (!this.attack && !reducedMotion.matches) this.play('Felicidade', 'greeting');
+        // Use the per-Pokémon cry already shipped with the Master Set.
+        // Browsers may require a prior click/touch before playing hover audio.
+        try {
+            this.cry.pause();
+            this.cry.currentTime = 0;
+            void this.cry.play().catch(() => {});
+        } catch (error) {
+            console.debug('Vocalização indisponível', error);
+        }
     }
 
     tapAttack() {
@@ -669,7 +721,7 @@ class PokemonViewer {
         const ambient = !reducedMotion.matches;
         if (this.introPending) {
             this.introPending = false;
-            this.play('Felicidade', 'intro');
+            if (!reducedMotion.matches) this.play('Felicidade', 'intro');
         }
         const rest = this.model.restAction;
         if (this.attack) {
@@ -1062,7 +1114,13 @@ export function mountShowcase(section) {
         show: () => {
             if (!mobile.matches) selectPokemon(-1);
             fitViewport();
-            cards.forEach(card => { card.introPending = true; card.invalidate(); });
+            cards.forEach(card => {
+                card.angle = card.species.angle;
+                card.hovering = false;
+                card.lastGreeting = -Infinity;
+                card.introPending = true;
+                card.invalidate();
+            });
         },
         hide: () => {
             if (dialog.open) dialog.close();
