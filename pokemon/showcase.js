@@ -9,7 +9,7 @@ import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=15';
 import { effectSpace } from './effect-space.js?v=1';
 import { mountPokedex } from './pokedex.js?v=12';
 import { prepareFace, updateFace } from './face-animation.js?v=12';
-import { createJornadasGreeting } from './jornadas-voices.js?v=1';
+import { createJornadasGreeting } from './jornadas-voices.js?v=2';
 
 const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
 const SPECIES = [
@@ -558,6 +558,7 @@ class PokemonViewer {
     }
 
     tapAttack() {
+        this.greetingAudio?.pause();
         if (!this.model || this.loading || this.form === 'gigamax') return;
         this.introPending = false;
         this.lastAttackTap = performance.now();
@@ -1048,6 +1049,7 @@ export function mountShowcase(section) {
         slotAnimations.clear();
         panelAnimation?.cancel();
         selected = index;
+        if (index !== -1) cards.forEach(viewer => viewer.greetingAudio?.pause());
         section.toggleAttribute('data-pokemon-selected', index !== -1);
         grid.toggleAttribute('data-focus', index !== -1);
         inspector.hidden = index === -1;
