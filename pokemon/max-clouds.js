@@ -74,12 +74,12 @@ export function loadMaxClouds(loader) {
 export function positionMaxClouds(cloud, modelHeight, frameHeight, heading, time, floor, mountScale, halfWidth, gigamax = false) {
     const scale = Math.min(mountScale, halfWidth / 0.52);
     const ceiling = frameHeight * floor;
-    // The original orbit shader extends forward beyond the cloud's origin.
-    // Merely raising it leaves a red cloud across Cinderace's face at some
-    // angles. Keep the entire G-Max cloud ring behind the 3D character.
-    const y = gigamax
-        ? Math.min(ceiling - scale * 0.10, modelHeight + scale * 0.31)
-        : Math.min(ceiling - scale * 0.19, modelHeight + scale * 0.12);
+    // Max models now have dedicated sky above the character. Reserve enough
+    // room for the entire animated ring, not just its mesh pivot, so clouds
+    // stay below the header and do not run across the Pokédex panel.
+    const clearSky = scale * (gigamax ? 0.35 : 0.31);
+    const y = Math.min(ceiling - clearSky,
+        modelHeight + scale * (gigamax ? 0.31 : 0.18));
     const z = gigamax ? -Math.max(1.6, scale * 1.85) : -0.03;
     cloud.position.set(0, y, z);
     cloud.scale.setScalar(scale);
