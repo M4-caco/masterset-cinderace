@@ -50,7 +50,7 @@ export function mountVolume(section, cards) {
     function apply() {
         const level = Number(range.value);
         const percent = level + '%';
-        for (const card of cards) card.cry.volume = level / 100;
+        for (const card of cards) if (card.greetingAudio) card.greetingAudio.volume = level / 100;
         button.replaceChildren(glyph(level ? 'volume' : 'muted'));
         button.setAttribute('aria-label', `Volume dos Pokémon (${percent})`);
         button.title = `Volume ${percent}`;
