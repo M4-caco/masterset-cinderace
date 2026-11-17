@@ -468,8 +468,8 @@
 #item-detail #item-copy-status:empty{display:none}
 @media(max-width:640px){#item-detail{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:17px}#item-detail .it-detail-grid{grid-template-columns:minmax(0,1fr);gap:12px}#item-detail .it-detail-image{width:100%;height:220px;max-height:30dvh;aspect-ratio:auto}#item-detail .it-detail-image img{max-height:30dvh}}
 </style><link rel="stylesheet" href="scorace-binder.css?v=6">
-    <link rel="stylesheet" href="pokemon/showcase.css?v=6">
-    <script type="module" src="pokemon/entry.js?v=6"></script>
+    <link rel="stylesheet" href="pokemon/showcase.css?v=7">
+    <script type="module" src="pokemon/entry.js?v=7"></script>
 </head>
 <body class="text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
 
@@ -766,7 +766,8 @@
         <div class="pokemon-header">
             <div>
                 <h2 id="pokemon-title">Pokémon</h2>
-                <p>Toque em um Pokémon para destacar. Arraste para girar.</p>
+                <p class="pokemon-trio-instructions">Toque em um Pokémon para destacar. Arraste para girar.</p>
+                <p class="pokemon-mobile-instructions">Use as setas para trocar de Pokémon. Arraste para girar.</p>
             </div>
             <div class="pokemon-options">
                 <div class="pokemon-display">
@@ -781,15 +782,19 @@
         </div>
         <p class="pokemon-message" role="status" hidden></p>
         <button type="button" class="pokemon-retry" hidden>Tentar novamente</button>
-        <div id="pokemon-lineup" class="pokemon-grid"></div>
-        <div id="pokemon-inspector" class="pokemon-inspector" hidden>
-            <nav class="pokemon-pagination" aria-label="Navegar entre Pokémon">
-                <button type="button" data-prev aria-label="Pokémon anterior">‹</button>
-                <button type="button" data-overview>Ver trio</button>
-                <button type="button" data-next aria-label="Próximo Pokémon">›</button>
-            </nav>
+        <div class="pokemon-layout">
+            <div class="pokemon-viewing">
+                <div id="pokemon-lineup" class="pokemon-grid"></div>
+                <div id="pokemon-inspector" class="pokemon-inspector" hidden>
+                    <nav class="pokemon-pagination" aria-label="Navegar entre Pokémon">
+                        <button type="button" data-prev aria-label="Pokémon anterior">‹</button>
+                        <button type="button" data-overview>Ver trio</button>
+                        <button type="button" data-next aria-label="Próximo Pokémon">›</button>
+                    </nav>
+                </div>
+            </div>
+            <section class="pokemon-dex" aria-labelledby="pokemon-dex-title" hidden></section>
         </div>
-        <section class="pokemon-dex" aria-labelledby="pokemon-dex-title" hidden></section>
         <template id="pokemon-card-template">
             <article class="pokemon-viewer">
                 <div class="pokemon-stage">
@@ -799,7 +804,13 @@
                     <div class="pokemon-shadow" aria-hidden="true"></div>
                     <img class="pokemon-webp" alt="" hidden>
                     <button type="button" class="pokemon-target" disabled></button>
-                    <div class="pokemon-transition" aria-hidden="true"></div>
+                    <div class="pokemon-transition" aria-hidden="true">
+                        <span class="pokemon-transition-cloud"></span>
+                        <span class="pokemon-transition-ring"></span>
+                        <span class="pokemon-transition-rays"></span>
+                        <span class="pokemon-transition-core"></span>
+                        <span class="pokemon-transition-electric"></span>
+                    </div>
                     <div class="pokemon-shiny-sparkles" aria-hidden="true">
                         <span>✦</span><span>✦</span><span>✦</span><span>✦</span><span>✦</span>
                     </div>
@@ -811,8 +822,18 @@
                 </div>
                 <h3><button type="button" class="pokemon-name"></button></h3>
                 <div class="pokemon-controls" hidden>
-                    <div class="pokemon-forms" role="group" aria-label="Forma e cor"></div>
-                    <div class="pokemon-moves" role="group" aria-label="Golpes"></div>
+                    <div class="pokemon-control-group" role="group" aria-label="Cor">
+                        <span class="pokemon-control-heading" aria-hidden="true">Cor</span>
+                        <div class="pokemon-colors"></div>
+                    </div>
+                    <div class="pokemon-control-group" role="group" aria-label="Transformação">
+                        <span class="pokemon-control-heading" aria-hidden="true">Transformação</span>
+                        <div class="pokemon-forms"></div>
+                    </div>
+                    <div class="pokemon-control-group" role="group" aria-label="Golpes">
+                        <span class="pokemon-control-heading" aria-hidden="true">Golpes</span>
+                        <div class="pokemon-moves"></div>
+                    </div>
                 </div>
             </article>
         </template>

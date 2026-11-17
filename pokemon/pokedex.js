@@ -68,13 +68,17 @@ export function mountPokedex(panel, speciesList, selectPokemon) {
     const evolutionButtons = speciesList.map((species, index) => {
         const step = document.createElement('li');
         const requirement = document.createElement('span');
+        requirement.className = 'pokemon-evolution-requirement';
+        const label = document.createElement('span');
+        label.className = 'pokemon-evolution-name';
+        label.textContent = species.name;
         const button = document.createElement('button');
         button.type = 'button';
         button.textContent = species.name;
         button.addEventListener('click', () => selectPokemon(index));
-        step.append(requirement, button);
+        step.append(requirement, button, label);
         evolution.append(step);
-        return { button, requirement };
+        return { button, label, requirement };
     });
     let current;
     let game = 'go';
@@ -87,7 +91,7 @@ export function mountPokedex(panel, speciesList, selectPokemon) {
         const dyna = form === 'dynamax';
         const giga = form === 'gigamax';
         const cinderace = species.id === 'cinderace';
-        const mode = dyna ? ' Dynamax' : giga ? ' Gigamax' : '';
+        const mode = dyna ? ' Dinamax' : giga ? ' Gigamax' : '';
         const baseMoves = cinderace
             ? `${chargedMoves} · Explosão Focalizada · Bola Incendiária · Queimadura Explosiva (especial)`
             : chargedMoves;
@@ -123,8 +127,10 @@ export function mountPokedex(panel, speciesList, selectPokemon) {
                 ...(giga || dyna ? [['Movimento Max', maxMoves]]
                     : cinderace ? [['Golpe característico', 'Pyro Ball (Bola Incendiária)']] : [])]);
         const steps = go ? ['', '25 Doces', '100 Doces'] : ['', 'Nível 16', 'Nível 35'];
-        for (const [i, { button, requirement }] of evolutionButtons.entries()) {
-            button.setAttribute('aria-current', speciesList[i].id === species.id ? 'true' : 'false');
+        for (const [i, { button, label, requirement }] of evolutionButtons.entries()) {
+            const active = String(speciesList[i].id === species.id);
+            button.setAttribute('aria-current', active);
+            label.setAttribute('aria-current', active);
             requirement.textContent = steps[i];
         }
         source.href = go ? `${goUrl}${info.number}${giga ? '-Gigantamax' : dyna ? '-Dynamax' : ''}`
