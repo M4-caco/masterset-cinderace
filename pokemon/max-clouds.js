@@ -71,10 +71,17 @@ export function loadMaxClouds(loader) {
     return source.then(assets => assets ? makeClouds(assets[0].scene, assets[1]) : null);
 }
 
-export function positionMaxClouds(cloud, modelHeight, frameHeight, heading, time, floor, mountScale, halfWidth) {
+export function positionMaxClouds(cloud, modelHeight, frameHeight, heading, time, floor, mountScale, halfWidth, gigamax = false) {
     const scale = Math.min(mountScale, halfWidth / 0.52);
     const ceiling = frameHeight * floor;
-    cloud.position.set(0, Math.min(ceiling - scale * 0.19, modelHeight + scale * 0.12), -0.03);
+    // The original orbit shader extends forward beyond the cloud's origin.
+    // Merely raising it leaves a red cloud across Cinderace's face at some
+    // angles. Keep the entire G-Max cloud ring behind the 3D character.
+    const y = gigamax
+        ? Math.min(ceiling - scale * 0.10, modelHeight + scale * 0.31)
+        : Math.min(ceiling - scale * 0.19, modelHeight + scale * 0.12);
+    const z = gigamax ? -Math.max(1.6, scale * 1.85) : -0.03;
+    cloud.position.set(0, y, z);
     cloud.scale.setScalar(scale);
     cloud.rotation.set(-0.19, 0, 0);
     cloud.userData.motion.cloudTime.value = time;
