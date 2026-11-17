@@ -473,6 +473,10 @@ class PokemonViewer {
     // Sample only Cinderace's body before the G-Max move. The growing fireball
     // and sparks belong to the attack, not to the camera's framing bounds.
     measureGigamaxAttack(model, action, duration) {
+        // Repeated G-Max attacks at the same view reuse their precomputed bounds.
+        const cache = model.gigamaxAttackFrames ??= new Map();
+        const key = `${this.angle.toFixed(3)}:${this.displayHeight.toFixed(3)}`;
+        if (cache.has(key)) return cache.get(key).clone();
         const envelope = new Box3();
         const poseBounds = new Box3();
         const { mixer, restAction, body } = model;
@@ -511,6 +515,8 @@ class PokemonViewer {
         } else {
             envelope.expandByScalar(Math.max(MODEL_MARGIN * 2, this.displayHeight * 0.09));
         }
+        if (cache.size >= 12) cache.delete(cache.keys().next().value);
+        cache.set(key, envelope.clone());
         return envelope;
     }
 
