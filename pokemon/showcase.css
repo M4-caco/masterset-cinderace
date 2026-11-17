@@ -126,10 +126,8 @@
     transition: opacity 360ms ease, filter 360ms ease;
 }
 
-/* Two independent title layers on every Pokémon viewer. The species name
-   stays bright above the head; the Max form sits behind the 3D scene. */
-.pokemon-stage-species,
-.pokemon-stage-form {
+/* The species name stays readable above the Pokémon and Max effects. */
+.pokemon-stage-species {
     position: absolute;
     left: 50%;
     width: max-content;
@@ -156,21 +154,53 @@
     text-shadow: 0 0 7px #fff0d7, 0 0 20px #ffaf73, 0 0 38px #fa5e5a;
 }
 
-.pokemon-stage-form {
-    top: 13%;
+/* Pokémon GO Max emblem: the characteristic spiked crown and 3 diagonal
+   slashes, using the same vector silhouette as our in-game Max controls.
+   An outlined X means Dynamax; a solid one means Gigamax. */
+.pokemon-stage-maxmark {
+    position: absolute;
+    left: 50%;
+    top: 53%;
+    width: min(88cqw, 35rem);
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
     z-index: 0;
-    color: #ffb1cf;
-    font-size: clamp(2rem, 18cqw, 8rem);
     opacity: 0;
-    text-shadow: 0 0 16px #f43e83, 0 0 38px #f43e83;
-    transition: opacity 260ms ease;
+    pointer-events: none;
+    user-select: none;
+    transition: opacity 220ms ease;
 }
 
-/* Exactly 20% visual opacity for DYNAMAX/GIGAMAX across the whole trio. */
-.pokemon-stage[data-form="dynamax"] .pokemon-stage-form,
-.pokemon-stage[data-form="gigamax"] .pokemon-stage-form {
-    opacity: 0.2;
+.pokemon-stage-maxmark svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
 }
+
+.pokemon-stage-maxmark-dynamax,
+.pokemon-stage-maxmark-gigamax { display: none; }
+
+.pokemon-stage-maxmark-dynamax {
+    fill: none;
+    stroke: #fff2fc;
+    stroke-width: 0.72;
+    stroke-linejoin: round;
+}
+
+.pokemon-stage-maxmark-gigamax {
+    fill: #ff368e;
+    stroke: none;
+}
+
+/* Exactly 20% opacity, only on the currently selected Max Pokémon. */
+.pokemon-viewer[data-selected] .pokemon-stage[data-max-active][data-form="dynamax"] .pokemon-stage-maxmark,
+.pokemon-viewer[data-selected] .pokemon-stage[data-max-active][data-form="gigamax"] .pokemon-stage-maxmark {
+    opacity: 0.20;
+}
+
+.pokemon-stage[data-form="dynamax"] .pokemon-stage-maxmark-dynamax,
+.pokemon-stage[data-form="gigamax"] .pokemon-stage-maxmark-gigamax { display: block; }
 
 .pokemon-max-effects,
 .pokemon-max-glow {
@@ -181,6 +211,14 @@
 .pokemon-max-effects {
     inset: 0;
     display: none;
+    z-index: 0; /* Behind transparent WebGL canvas, never over the body */
+    transition: opacity 200ms ease;
+}
+
+/* Nearby Pokémon keep the pink material shader and clouds, but do not
+   compete visually with the main Pokémon's large rear light bloom. */
+.pokemon-viewer:not([data-selected]) .pokemon-max-effects {
+    opacity: 0;
 }
 
 .pokemon-stage:is([data-form=dynamax], [data-form=gigamax])[data-ready] .pokemon-max-effects {
@@ -188,14 +226,27 @@
 }
 
 .pokemon-max-glow {
-    width: var(--pokemon-aura-width, 100px);
+    width: calc(var(--pokemon-aura-width, 100px) * 1.25);
     left: 50%;
-    top: var(--pokemon-aura-y, 24%);
-    bottom: 11%;
+    top: calc(var(--pokemon-aura-y, 24%) - 0.85rem);
+    bottom: 8%;
     translate: -50%;
-    background: radial-gradient(ellipse, #ffe5fa55 0%, #ff73c36e 27%,
-        #ed1d885a 51%, #c60d4b29 69%, transparent 81%);
-    filter: drop-shadow(0 0 1.2rem #ed4b95a1);
+    background: radial-gradient(ellipse at 50% 53%,
+        #fff0fc86 0%, #ff8cda87 22%, #fc2f9880 43%,
+        #cc0a704c 65%, transparent 84%);
+}
+
+/* A large, soft pink light *behind* the silhouette, separate from the
+   existing magenta shading on the Pokémon's 3D body. */
+.pokemon-max-glow::before {
+    content: '';
+    position: absolute;
+    inset: -14% -32% -11%;
+    border-radius: 50%;
+    background: radial-gradient(ellipse,
+        #ffe5f888 0%, #ff74c77f 24%, #ec167882 45%,
+        #a705453d 67%, transparent 85%);
+    filter: blur(clamp(14px, 3vw, 26px));
 }
 
 .pokemon-max-glow::after {
