@@ -135,43 +135,50 @@
     --pokemon-sky-room: clamp(4.25rem, 12svh, 8rem);
 }
 
-.pokemon-stage-name {
+/* Two independent title layers on every Pokémon viewer. The species name
+   stays bright above the head; the Max form sits behind the 3D scene. */
+.pokemon-stage-species,
+.pokemon-stage-form {
     position: absolute;
-    z-index: 0;
     left: 50%;
-    bottom: 1.2%;
+    width: max-content;
+    max-width: 100%;
     transform: translateX(-50%);
-    width: 100%;
     pointer-events: none;
     user-select: none;
-    white-space: nowrap;
     text-align: center;
-    color: var(--pk-text);
-    font-size: clamp(1.3rem, 7cqw, 2.4rem);
-    font-weight: 900;
-    letter-spacing: -0.055em;
-    line-height: 1;
-    opacity: 0;
-    transition: opacity 250ms ease;
-}
-
-.pokemon-viewer[data-selected] .pokemon-stage[data-ready] .pokemon-stage-name {
-    opacity: 0.92;
-}
-
-/* The name becomes a deliberately faint backdrop at head/cloud height. */
-.pokemon-viewer[data-selected] .pokemon-stage[data-ready]:is([data-form="dynamax"], [data-form="gigamax"]) .pokemon-stage-name {
-    top: 18%;
-    bottom: auto;
-    color: #bd2f64;
-    font-size: clamp(1.6rem, 14cqw, 7rem);
+    white-space: nowrap;
+    text-transform: uppercase;
+    font-family: inherit;
+    font-style: normal;
     font-weight: 950;
-    letter-spacing: -0.073em;
-    opacity: 0.2;
+    line-height: 1;
+    letter-spacing: -0.065em;
 }
 
-.dark .pokemon-viewer[data-selected] .pokemon-stage[data-ready]:is([data-form="dynamax"], [data-form="gigamax"]) .pokemon-stage-name {
-    color: #ffb1b8;
+.pokemon-stage-species {
+    top: 4%;
+    z-index: 3;
+    color: #fff7ed;
+    font-size: clamp(1.1rem, 6.5cqw, 3.2rem);
+    opacity: 1;
+    text-shadow: 0 0 7px #fff0d7, 0 0 20px #ffaf73, 0 0 38px #fa5e5a;
+}
+
+.pokemon-stage-form {
+    top: 13%;
+    z-index: 0;
+    color: #ffb1cf;
+    font-size: clamp(2rem, 18cqw, 8rem);
+    opacity: 0;
+    text-shadow: 0 0 16px #f43e83, 0 0 38px #f43e83;
+    transition: opacity 260ms ease;
+}
+
+/* Exactly 20% visual opacity for DYNAMAX/GIGAMAX across the whole trio. */
+.pokemon-stage[data-form="dynamax"] .pokemon-stage-form,
+.pokemon-stage[data-form="gigamax"] .pokemon-stage-form {
+    opacity: 0.2;
 }
 
 .pokemon-max-effects,
