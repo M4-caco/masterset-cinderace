@@ -3,9 +3,9 @@ import {
     LoopOnce, NoToneMapping, OrthographicCamera, Scene, SRGBColorSpace, Vector3, WebGLRenderer,
 } from './vendor/three-gltf.js';
 import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=7';
-import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=6';
+import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=7';
 import { iconControl, mountVolume } from './showcase-controls.js?v=11';
-import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=11';
+import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=12';
 import { mountPokedex } from './pokedex.js?v=11';
 import { prepareFace, updateFace } from './face-animation.js?v=12';
 
