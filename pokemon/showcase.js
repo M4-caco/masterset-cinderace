@@ -17,7 +17,7 @@ const SPECIES = [
 ];
 const FRAME_HEIGHT = 2.52;
 // A consistent low ground line keeps models from growing downward when focused.
-const STAGE_FLOOR = 0.91;
+const STAGE_FLOOR = 0.93;
 const DYNAMAX_SCALE = 1.25;
 const GIGAMAX_SCALE = 1.04;
 const CAROUSEL_DURATION = 440;
@@ -417,6 +417,17 @@ class PokemonViewer {
         this.invalidate();
     }
 
+    maxFocusProgress() {
+        if (this.form === 'normal') return 0;
+        if (mobile.matches) return 1;
+        if (!this.focused && !this.placementTransition) return 0;
+        const factor = this.form === 'gigamax' ? GIGAMAX_SCALE : DYNAMAX_SCALE;
+        const sideHeight = this.species.height * 0.84 * factor;
+        const fullHeight = this.species.focusHeight * factor;
+        return smoothstep((this.displayHeight - sideHeight) /
+            Math.max(0.001, fullHeight - sideHeight));
+    }
+
     setDisplayHeight(height) {
         this.displayHeight = height;
         const { center, size, baseY } = this.model;
@@ -696,7 +707,7 @@ class PokemonViewer {
                 positionMaxClouds(this.cloud, this.displayHeight, frameHeight, this.angle,
                     ambient ? now / 1000 : 0, floor, mountScale * this.placement.scale.x,
                     Math.min(-cameraLeft, cameraRight), gigamax,
-                    gigamax && this.model.head ? this.cloudAnchor : null);
+                    gigamax && this.model.head ? this.cloudAnchor : null, this.maxFocusProgress());
             }
         }
         renderer.render(this.scene, camera);
