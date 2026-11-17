@@ -468,8 +468,8 @@
 #item-detail #item-copy-status:empty{display:none}
 @media(max-width:640px){#item-detail{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:17px}#item-detail .it-detail-grid{grid-template-columns:minmax(0,1fr);gap:12px}#item-detail .it-detail-image{width:100%;height:220px;max-height:30dvh;aspect-ratio:auto}#item-detail .it-detail-image img{max-height:30dvh}}
 </style><link rel="stylesheet" href="scorace-binder.css?v=6">
-    <link rel="stylesheet" href="pokemon/showcase.css?v=7">
-    <script type="module" src="pokemon/entry.js?v=8"></script>
+    <link rel="stylesheet" href="pokemon/showcase.css?v=9">
+    <script type="module" src="pokemon/entry.js?v=9"></script>
 </head>
 <body class="text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
 
@@ -770,10 +770,6 @@
                 <p class="pokemon-mobile-instructions">Use as setas para trocar de Pokémon. Arraste para girar.</p>
             </div>
             <div class="pokemon-options">
-                <div class="pokemon-display">
-                    <button type="button" data-webp aria-pressed="false" aria-controls="pokemon-lineup">WebP</button>
-                    <button type="button" data-enlarge aria-pressed="false" aria-controls="pokemon-lineup">Ampliar trio</button>
-                </div>
                 <div class="pokemon-volume" role="group" aria-label="Som da aba Pokémon">
                     <button type="button" aria-label="Silenciar sons dos Pokémon" title="Sons dos Pokémon"></button>
                     <input type="range" min="0" max="100" value="55" aria-label="Volume dos Pokémon">
@@ -785,15 +781,16 @@
         <div class="pokemon-layout">
             <div class="pokemon-viewing">
                 <div id="pokemon-lineup" class="pokemon-grid"></div>
-                <div id="pokemon-inspector" class="pokemon-inspector" hidden>
-                    <nav class="pokemon-pagination" aria-label="Navegar entre Pokémon">
-                        <button type="button" data-prev aria-label="Pokémon anterior">‹</button>
-                        <button type="button" data-overview>Ver trio</button>
-                        <button type="button" data-next aria-label="Próximo Pokémon">›</button>
-                    </nav>
-                </div>
+                <nav class="pokemon-pagination" aria-label="Navegar entre Pokémon" hidden>
+                    <button type="button" data-prev aria-label="Pokémon anterior">‹</button>
+                    <button type="button" data-overview>Ver trio</button>
+                    <button type="button" data-next aria-label="Próximo Pokémon">›</button>
+                </nav>
             </div>
-            <section class="pokemon-dex" aria-labelledby="pokemon-dex-title" hidden></section>
+            <div class="pokemon-panel" hidden>
+                <div id="pokemon-inspector" class="pokemon-inspector"></div>
+                <section class="pokemon-dex" aria-labelledby="pokemon-dex-title" hidden></section>
+            </div>
         </div>
         <template id="pokemon-card-template">
             <article class="pokemon-viewer">
@@ -802,7 +799,6 @@
                         <div class="pokemon-max-glow"></div>
                     </div>
                     <div class="pokemon-shadow" aria-hidden="true"></div>
-                    <img class="pokemon-webp" alt="" hidden>
                     <button type="button" class="pokemon-target" disabled></button>
                     <div class="pokemon-transition" aria-hidden="true">
                         <span class="pokemon-transition-cloud"></span>

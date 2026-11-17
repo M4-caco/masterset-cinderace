@@ -5,14 +5,14 @@ import {
 import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=7';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=5';
 import { iconControl, mountVolume } from './showcase-controls.js?v=3';
-import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=8';
+import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=9';
 import { mountPokedex } from './pokedex.js?v=7';
 
 const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
 const SPECIES = [
     { id: 'scorbunny', name: 'Scorbunny', height: 0.67, angle: 0.07, cloudScale: 0.4 },
-    { id: 'raboot', name: 'Raboot', height: 0.95, angle: 0, cloudScale: 0.5 },
-    { id: 'cinderace', name: 'Cinderace', height: 1.49, angle: -0.24, cloudScale: 0.8, gigamax: true },
+    { id: 'cinderace', name: 'Cinderace', height: 1.49, angle: -0.12, cloudScale: 0.8, gigamax: true },
+    { id: 'raboot', name: 'Raboot', height: 0.95, angle: -0.08, cloudScale: 0.5 },
 ];
 const FRAME_HEIGHT = 2.4;
 const FLOOR = 0.84;
@@ -30,6 +30,32 @@ const IDLE_BOUNDS = {
     'cinderace-gigamax': [[-0.987, -0.016, -1.352], [1.041, 2.829, 1.017]],
 };
 const reducedMotion = matchMedia('(prefers-reduced-motion: reduce)');
+const mobile = matchMedia('(max-width: 767px)');
+
+function smoothstep(value) {
+    const t = Math.max(0, Math.min(1, value));
+    return t * t * (3 - 2 * t);
+}
+
+function tacklePath(waist, clip) {
+    const track = clip?.tracks.find(({ name }) => name === `${waist?.name}.position`);
+    if (!track) return null;
+    const { values, times } = track;
+    const x = values[0], z = values[2];
+    let range = 0, dx = 0, dz = 0, hit = 0;
+    for (let index = 0; index < times.length; index++) {
+        const offset = index * 3;
+        const alongX = values[offset] - x;
+        const alongZ = values[offset + 2] - z;
+        const distance = Math.hypot(alongX, alongZ);
+        if (distance <= range) continue;
+        range = distance;
+        dx = alongX;
+        dz = alongZ;
+        hit = times[index];
+    }
+    return range ? { waist, x, z, dx: dx / range, dz: dz / range, range, hit, angle: Math.atan2(dz, dx) } : null;
+}
 const MOVES = {
     physical: 'Ataque físico',
     special: 'Ataque especial',
@@ -53,7 +79,6 @@ class PokemonViewer {
         this.placeholder = card.querySelector('.pokemon-loading');
         this.status = this.placeholder.querySelector('[role=status]');
         this.preview = this.placeholder.querySelector('img');
-        this.webp = card.querySelector('.pokemon-webp');
         this.retry = this.placeholder.querySelector('button');
         this.moves = card.querySelector('.pokemon-moves');
         this.models = new Map();
@@ -67,10 +92,9 @@ class PokemonViewer {
         this.frameRequest = 0;
         this.attack = null;
         this.bounds = new Box3();
+        this.shadowCenter = null;
         this.model = null;
         this.inView = false;
-        this.previewReady = '';
-        this.rotated = false;
         this.restStart = 0;
         this.cry = new Audio(new URL(`./audio/${species.id}.wav`, import.meta.url).href);
         this.cry.preload = 'none';
@@ -99,11 +123,6 @@ class PokemonViewer {
             colors.append(button);
         }
         this.retry.addEventListener('click', () => this.select(this.form, true));
-        this.webp.addEventListener('load', () => {
-            this.previewReady = this.webp.currentSrc;
-            this.syncPreview();
-            this.invalidate();
-        });
         this.bindPointer();
     }
 
@@ -189,8 +208,10 @@ class PokemonViewer {
             const body = [];
             const props = [];
             let visibilityController;
+            let waist;
             root.traverse(object => {
                 if (object.name.startsWith('_jnt_Visibility_')) visibilityController = object;
+                if (/^Waist_\d+$/.test(object.name)) waist = object;
                 if (!object.isMesh) return;
                 object.frustumCulled = false;
                 meshes.push(object);
@@ -204,15 +225,10 @@ class PokemonViewer {
             }));
             const mixer = new AnimationMixer(root);
             const clips = new Map(gltf.animations.map(clip => [clip.name, clip]));
-            // The exported body shares vertices and skinning across its material groups.
-            const parts = meshes.filter((mesh, index) => !meshes.slice(0, index).some(other =>
-                other.parent === mesh.parent && other.skeleton === mesh.skeleton &&
-                other.geometry.attributes.position === mesh.geometry.attributes.position &&
-                other.geometry.attributes.skinWeight === mesh.geometry.attributes.skinWeight &&
-                other.geometry.attributes.skinIndex === mesh.geometry.attributes.skinIndex));
             const idleBounds = new Box3(...IDLE_BOUNDS[id].map(point => new Vector3(...point)));
             const model = {
-                id, root, mixer, clips, materialPairs, body, props, visibilityController, parts, idleBounds,
+                id, root, mixer, clips, materialPairs, body, props, visibilityController, idleBounds,
+                tackle: tacklePath(waist, clips.get(MOVES.physical)),
                 idle: clips.get('Repouso da Pokédex') ?? clips.get('Repouso de batalha') ?? clips.get('Repouso'),
             };
             this.setRest(model);
@@ -232,10 +248,11 @@ class PokemonViewer {
         return pending;
     }
 
-    setRest(model) {
+    setRest(model, time = 0) {
         model.mixer.stopAllAction();
         const pose = model.mixer.clipAction(model.idle);
-        pose.reset().play().paused = true;
+        pose.reset().setEffectiveWeight(1).play().paused = true;
+        pose.time = time;
         model.restAction = pose;
         model.mixer.update(0);
         this.updateProps(model, false);
@@ -273,7 +290,6 @@ class PokemonViewer {
         const revision = ++this.revision;
         this.stopAttack();
         this.loading = true;
-        if (!animateForm) this.syncPreview();
         this.target.disabled = true;
         for (const button of this.moves.querySelectorAll('button')) button.disabled = true;
         if (!animateForm) {
@@ -308,7 +324,6 @@ class PokemonViewer {
                 this.cloud = clouds;
                 this.scene.add(this.cloud);
             }
-            this.stage.toggleAttribute('data-max-cloud', Boolean(this.cloud && form !== 'normal'));
             this.setRest(model);
             this.restStart = performance.now();
             this.updatePlacement(true, changingForms ? previousHeight : undefined);
@@ -322,7 +337,6 @@ class PokemonViewer {
             this.stage.dataset.ready = '';
             this.renderer.domElement.hidden = false;
             this.target.disabled = false;
-            this.syncPreview();
             this.invalidate();
         } catch (error) {
             if (revision !== this.revision) return;
@@ -340,9 +354,9 @@ class PokemonViewer {
     }
 
     normalHeight() {
-        const side = this.card.parentElement.hasAttribute('data-focus') && !this.focused;
-        const height = this.focused ? Math.max(this.species.height, 1.62) : this.species.height;
-        return height * (side ? 0.73 : 1);
+        const { height } = this.species;
+        if (!this.focused) return height;
+        return mobile.matches ? 1.62 : Math.max(height * 1.07, 0.82);
     }
 
     updatePlacement(immediate = false, previousHeight) {
@@ -374,15 +388,12 @@ class PokemonViewer {
         const progress = Math.min(1, Math.max(0, (now - transition.start) / CAROUSEL_DURATION));
         const eased = progress * progress * (3 - 2 * progress);
         this.setDisplayHeight(transition.from + (transition.to - transition.from) * eased);
-        if (progress === 1) {
-            this.placementTransition = null;
-            this.syncPreview();
-        }
+        if (progress === 1) this.placementTransition = null;
     }
 
-    setFocus(focused, order) {
+    setFocus(focused) {
+        if (!focused) this.stopAttack();
         this.focused = focused;
-        this.card.style.order = order;
         this.card.toggleAttribute('data-selected', focused);
         this.controls.hidden = !focused;
         this.name.setAttribute('aria-pressed', String(focused));
@@ -449,39 +460,23 @@ class PokemonViewer {
                 }
             }
         }
-        this.syncPreview();
         this.invalidate();
-    }
-
-    syncPreview() {
-        const show = this.showcase.dataset.webp === 'true' && this.model;
-        if (show) {
-            const color = this.color;
-            const src = new URL(`./previews/${this.species.id}-${this.form}-${color}.webp`, import.meta.url).href;
-            if (this.webp.src !== src) this.webp.src = src;
-        }
-        const active = show && !this.attack && !this.loading && !this.rotated && !this.placementTransition &&
-            this.previewReady && this.previewReady === this.webp.src;
-        this.stage.toggleAttribute('data-webp', Boolean(active));
-        this.webp.hidden = !active;
     }
 
     play(name, kind = 'battle', effect) {
         if (!this.model || this.loading || (this.attack && kind === 'pokedex')) return false;
-        if (this.attack) this.stopAttack();
         const { mixer, clips } = this.model;
         const clip = clips.get(name);
         if (!clip) return false;
-        mixer.stopAllAction();
+        this.stopAttack();
         const action = mixer.clipAction(clip);
-        action.reset().setLoop(LoopOnce, 1).play();
+        action.reset().setLoop(LoopOnce, 1).setEffectiveWeight(0).play().paused = true;
         action.clampWhenFinished = true;
         const clipDuration = clip.duration;
-        const duration = effect === 'charge' ? Math.max(clipDuration, 2.97) : clipDuration;
-        this.attack = { action, name, effect, start: performance.now(), clipDuration, duration, time: 0 };
+        const duration = effect === 'charge' ? Math.max(clipDuration, 2.65) : clipDuration;
+        this.attack = { action, effect, start: performance.now(), clipDuration, duration, time: 0 };
         if (effect && !this.battleEffects) this.battleEffects = new BattleEffects(this.stage, this.target);
         this.stage.dataset.attacking = kind;
-        this.syncPreview();
         this.invalidate();
         return true;
     }
@@ -491,16 +486,18 @@ class PokemonViewer {
         this.attack = null;
         this.battleEffects?.clear();
         delete this.stage.dataset.attacking;
-        this.setRest(this.model);
-        this.restStart = performance.now();
-        this.syncPreview();
+        this.setBattleLane(false);
+        this.turntable.position.set(0, 0, 0);
+        this.setRest(this.model, this.restTime(performance.now()));
+    }
+
+    restTime(now) {
+        return ((now - this.restStart) / 1000) % this.model.idle.duration;
     }
 
     rotate(angle) {
-        if (this.loading || !this.model) return;
+        if (this.loading || !this.model || this.attack) return;
         this.angle = angle % (2 * Math.PI);
-        this.rotated = true;
-        this.syncPreview();
         this.invalidate();
     }
 
@@ -513,6 +510,15 @@ class PokemonViewer {
         });
     }
 
+    setBattleLane(active, width = 0, offset = 0) {
+        if (active) {
+            this.stage.style.setProperty('--pokemon-lane-width', `${width}px`);
+            this.stage.style.setProperty('--pokemon-lane-left', `${-offset}px`);
+        }
+        this.stage.toggleAttribute('data-battle-lane', active);
+        this.card.toggleAttribute('data-battle-lane', active);
+    }
+
     render(now) {
         if (this.showcase.classList.contains('hidden') || !this.model || this.loading || !this.inView) return;
         const width = this.stage.clientWidth;
@@ -520,37 +526,58 @@ class PokemonViewer {
         if (!width || !height) return;
         this.advancePlacement(now);
 
-        const clouds = this.cloud && this.form !== 'normal';
-        const ambient = !reducedMotion.matches && (!this.stage.hasAttribute('data-webp') || clouds);
+        const ambient = !reducedMotion.matches;
+        const rest = this.model.restAction;
         if (this.attack) {
             const { action, start, duration, clipDuration } = this.attack;
             const time = Math.max(0, (now - start) / 1000);
             if (time >= duration) this.stopAttack();
             else {
+                const weight = smoothstep(time / 0.1) * (1 - smoothstep((time - clipDuration + 0.16) / 0.16));
                 this.attack.time = time;
-                action.time = Math.min(time, clipDuration - 0.0001);
+                action.time = Math.min(time, clipDuration);
+                action.setEffectiveWeight(weight);
+                if (ambient) rest.time = this.restTime(now);
+                rest.setEffectiveWeight(1 - weight);
                 this.model.mixer.update(0);
                 this.updateProps(this.model, true);
             }
-        } else if (ambient && this.webp.hidden) {
-            const action = this.model.restAction;
-            action.time = ((now - this.restStart) / 1000) % this.model.idle.duration;
+        } else if (ambient) {
+            rest.time = this.restTime(now);
             this.model.mixer.update(0);
-        }
-        if (this.model.max) {
-            this.model.max.time.value = reducedMotion.matches ? 0 : now / 1000;
-            this.model.max.aspect.value = width / height;
         }
         if (ambient || this.attack || this.placementTransition) this.invalidate();
 
         const { renderer, camera } = this;
-        if (width !== this.width || height !== this.height) {
-            renderer.setSize(width, height, false);
-            this.width = width;
+        const frame = this.fitFrame(width / height);
+        const { frameHeight, floor, centerX, halfWidth } = frame;
+        const pixelToWorld = frameHeight / height;
+        let surfaceWidth = width;
+        let offset = 0;
+        const battle = this.attack && this.stage.dataset.attacking === 'battle';
+        if (battle) {
+            const lane = this.card.parentElement.getBoundingClientRect();
+            const stage = this.stage.getBoundingClientRect();
+            const left = Math.min(lane.left, stage.left);
+            surfaceWidth = Math.ceil(Math.max(lane.right, stage.right) - left);
+            offset = stage.left - left;
+            this.setBattleLane(true, surfaceWidth, offset);
+        }
+        if (surfaceWidth !== this.width || height !== this.height) {
+            renderer.setSize(surfaceWidth, height, false);
+            this.width = surfaceWidth;
             this.height = height;
         }
-        const frame = this.fitFrame(width / height);
-        const { frameHeight, floor, centerX } = frame;
+        const cameraLeft = -halfWidth - offset * pixelToWorld;
+        const cameraRight = cameraLeft + surfaceWidth * pixelToWorld;
+        const cameraTop = frameHeight / 2;
+        if (cameraLeft !== camera.left || cameraRight !== camera.right || cameraTop !== camera.top) {
+            camera.left = cameraLeft;
+            camera.right = cameraRight;
+            camera.top = cameraTop;
+            camera.bottom = -cameraTop;
+            camera.updateProjectionMatrix();
+        }
         if (frameHeight !== this.frameHeight || floor !== this.effectsFloor || centerX !== this.effectsCenterX ||
             width !== this.effectsWidth || height !== this.effectsPixels || this.displayHeight !== this.effectsHeight) {
             this.frameHeight = frameHeight;
@@ -559,40 +586,71 @@ class PokemonViewer {
             this.effectsWidth = width;
             this.effectsPixels = height;
             this.effectsHeight = this.displayHeight;
-            this.positionEffects(width, height, frameHeight, floor, centerX);
+            this.positionEffects(width, height, frameHeight, floor);
         }
-        this.turntable.visible = this.webp.hidden;
+        const origin = offset + width * centerX;
+        const tall = this.displayHeight / pixelToWorld;
+        const dash = this.attack?.effect === 'tackle' && this.model.tackle
+            ? this.moveTackle(surfaceWidth, origin, tall, pixelToWorld) : null;
+        const shadowCenter = 100 * (width * centerX + (dash?.pixels ?? 0)) / width;
+        if (shadowCenter !== this.shadowCenter) {
+            this.stage.style.setProperty('--pokemon-shadow-center', `${shadowCenter}%`);
+            this.shadowCenter = shadowCenter;
+        }
+
+        if (this.model.max) {
+            this.model.max.time.value = ambient ? now / 1000 : 0;
+            this.model.max.aspect.value = surfaceWidth / height;
+        }
         if (this.cloud) {
-            this.cloud.visible = Boolean(clouds);
-            if (clouds) {
+            this.cloud.visible = this.form !== 'normal';
+            if (this.cloud.visible) {
                 const mountScale = this.form === 'gigamax' ? 1.9 : this.species.cloudScale;
                 positionMaxClouds(this.cloud, this.displayHeight, frameHeight, this.angle,
-                    reducedMotion.matches ? 0 : now / 1000, floor, mountScale * this.placement.scale.x, camera.right);
+                    ambient ? now / 1000 : 0, floor, mountScale * this.placement.scale.x, halfWidth);
             }
         }
-        if (this.webp.hidden || clouds) renderer.render(this.scene, camera);
+        renderer.render(this.scene, camera);
         if (this.attack?.effect) {
-            const bodyCenter = (this.bounds.min.x + this.bounds.max.x) / 2;
-            this.battleEffects.draw(this.attack.effect, this.attack.time, this.attack.clipDuration,
-                width, height, this.displayHeight * height / frameHeight, height * floor, this.angle,
-                reducedMotion.matches, width * centerX + bodyCenter * height / frameHeight);
+            this.battleEffects.draw(this.attack.effect, {
+                time: this.attack.time, duration: this.attack.clipDuration,
+                width: surfaceWidth, height, modelHeight: tall, floor: height * floor,
+                angle: this.angle, x: origin + (dash?.pixels ?? 0),
+                hit: dash?.hit, hitX: dash?.hitX,
+            });
         }
+    }
+
+    moveTackle(width, origin, tall, pixelToWorld) {
+        const { waist, x, z, dx, dz, range, hit, angle } = this.model.tackle;
+        const { time, clipDuration } = this.attack;
+        const turn = smoothstep(time / 0.25) * (1 - smoothstep((time / clipDuration - 0.83) / 0.17));
+        const direction = this.attack.direction ??= origin <= width / 2 + 1 ? 1 : -1;
+        const heading = angle + (direction < 0 ? Math.PI : 0);
+        const delta = Math.atan2(Math.sin(heading - this.angle), Math.cos(heading - this.angle));
+        const yaw = this.angle + turn * delta;
+        const moveX = waist.position.x - x;
+        const moveZ = waist.position.z - z;
+        const progress = Math.max(0, Math.min(1, (moveX * dx + moveZ * dz) / range));
+        const room = direction > 0 ? width - origin : origin;
+        const length = Math.max(0, room - Math.min(tall * 0.27, width * 0.20) - 8);
+        const pixels = direction * length * progress;
+        const sin = Math.sin(yaw), cos = Math.cos(yaw);
+        const scale = this.placement.scale.x;
+        this.turntable.rotation.y = yaw;
+        this.turntable.position.set(pixels * pixelToWorld - scale * (cos * moveX + sin * moveZ), 0,
+            scale * (sin * moveX - cos * moveZ));
+        return { pixels, hit, hitX: origin + direction * length };
     }
 
     fitFrame(aspect) {
         const { bounds, camera, model, turntable, placement } = this;
+        turntable.position.set(0, 0, 0);
         turntable.rotation.y = this.angle;
         turntable.updateMatrixWorld(true);
-        if (this.attack) {
-            bounds.makeEmpty();
-            for (const part of model.parts) {
-                if (part.visible) bounds.expandByObject(part, true);
-            }
-        } else {
-            bounds.copy(model.idleBounds).applyMatrix4(placement.matrixWorld);
-        }
+        // Always frame the resting silhouette. The battle animation moves inside this fixed view.
+        bounds.copy(model.idleBounds).applyMatrix4(placement.matrixWorld);
 
-        // Keep the same reference frame across forms so it doesn't cancel out the size increase.
         const largest = this.normalHeight() * DYNAMAX_SCALE;
         const baseFrame = Math.max(FRAME_HEIGHT, (largest + 0.38) / FLOOR);
         const fitWidth = (bounds.max.x - bounds.min.x + MODEL_MARGIN * 2) / aspect;
@@ -604,19 +662,12 @@ class PokemonViewer {
             Math.min(0, bounds.min.x + halfWidth - MODEL_MARGIN));
         const y = Math.max(bounds.max.y - halfHeight + MODEL_MARGIN,
             Math.min(frameHeight * (FLOOR - 0.5), bounds.min.y + halfHeight - MODEL_MARGIN));
-        if (halfWidth !== camera.right || halfHeight !== camera.top) {
-            camera.left = -halfWidth;
-            camera.right = halfWidth;
-            camera.top = halfHeight;
-            camera.bottom = -halfHeight;
-            camera.updateProjectionMatrix();
-        }
         camera.position.x = x;
         camera.position.y = y;
-        return { frameHeight, floor: 0.5 + y / frameHeight, centerX: 0.5 - x / (2 * halfWidth) };
+        return { frameHeight, halfWidth, floor: 0.5 + y / frameHeight, centerX: 0.5 - x / (2 * halfWidth) };
     }
 
-    positionEffects(width, height, frameHeight, floor, centerX) {
+    positionEffects(width, height, frameHeight, floor) {
         const pixelsPerUnit = height / frameHeight;
         const tall = this.displayHeight * pixelsPerUnit;
         const baseline = height * floor;
@@ -628,10 +679,7 @@ class PokemonViewer {
             'aura-y': Math.max(0, baseline - tall - 14),
             'flash-y': baseline - tall * 0.52,
             'flash-width': limit(tall * 1.55, 85, 0.96),
-            'webp-size': Math.min(tall * 1.27, width, baseline / 0.945),
-            'webp-bottom': height - baseline - tall * 0.055,
         };
-        this.stage.style.setProperty('--pokemon-shadow-center', `${centerX * 100}%`);
         for (const [name, size] of Object.entries(effects)) {
             this.stage.style.setProperty(`--pokemon-${name}`, `${size}px`);
         }
@@ -647,18 +695,17 @@ class PokemonViewer {
 
 export function mountShowcase(section) {
     const grid = section.querySelector('.pokemon-grid');
+    const panel = section.querySelector('.pokemon-panel');
     const inspector = section.querySelector('.pokemon-inspector');
+    const pagination = section.querySelector('.pokemon-pagination');
     const template = section.querySelector('template');
     const dex = section.querySelector('.pokemon-dex');
-    const updatePokedex = mountPokedex(dex, SPECIES, selectPokemon);
-    const dexHeader = dex.querySelector('.pokemon-dex-header');
-    const enlarge = section.querySelector('[data-enlarge]');
-    const webp = section.querySelector('[data-webp]');
-    const mobile = matchMedia('(max-width: 767px)');
-    const wide = matchMedia('(min-width: 1200px) and (min-aspect-ratio: 8/5)');
+    const evolutionOrder = [0, 2, 1];
+    const updatePokedex = mountPokedex(dex, evolutionOrder.map(index => SPECIES[index]),
+        index => selectPokemon(evolutionOrder[index]));
     let selected = -1;
     const slotAnimations = new Map();
-    let inspectorAnimation;
+    let panelAnimation;
     const cards = SPECIES.map((species, index) => {
         const card = template.content.firstElementChild.cloneNode(true);
         const viewer = new PokemonViewer(species, card, section, () => selectPokemon(index));
@@ -668,9 +715,12 @@ export function mountShowcase(section) {
         return viewer;
     });
 
+    function loadViewer(viewer) {
+        if (!viewer.model && !viewer.loading) viewer.select(viewer.form);
+    }
+
     function selectPokemon(index) {
-        if (index === -1 && mobile.matches) return;
-        if (selected === index) return;
+        if (selected === index || (index === -1 && mobile.matches)) return;
         const previous = selected;
         const smooth = !mobile.matches && !reducedMotion.matches && typeof grid.animate === 'function';
         const oldCenters = smooth ? cards.map(({ card }) => {
@@ -679,105 +729,68 @@ export function mountShowcase(section) {
         }) : [];
         for (const animation of slotAnimations.values()) animation.cancel();
         slotAnimations.clear();
-        inspectorAnimation?.cancel();
+        panelAnimation?.cancel();
         selected = index;
-        inspector.hidden = index === -1;
         grid.toggleAttribute('data-focus', index !== -1);
-        for (const [position, card] of cards.entries()) {
-            const offset = (position - index + cards.length) % cards.length;
-            const order = index === -1 ? position : offset === cards.length - 1 ? -1 : offset;
-            card.setFocus(position === index, order);
-        }
+        panel.hidden = index === -1;
+        pagination.hidden = index === -1;
+        for (const [position, viewer] of cards.entries()) viewer.setFocus(position === index);
         updatePokedex(index === -1 ? null : cards[index]);
         if (mobile.matches) loadViewer(cards[index]);
-        fitOpening();
         if (smooth) {
-            const positions = cards.map(({ card }) => card.getBoundingClientRect());
             for (const [position, { card }] of cards.entries()) {
                 const before = oldCenters[position];
-                const after = positions[position];
-                const x = before.x - (after.left + after.width / 2);
+                const after = card.getBoundingClientRect();
+                const x = before.x - after.left - after.width / 2;
                 const y = before.y - after.top;
                 if (Math.abs(x) + Math.abs(y) < 1) continue;
-                const animation = card.animate([
+                slotAnimations.set(card, card.animate([
                     { transform: `translate(${x}px, ${y}px)` },
                     { transform: 'translate(0, 0)' },
-                ], { duration: CAROUSEL_DURATION, easing: 'cubic-bezier(0.23, 0.72, 0.24, 1)' });
-                slotAnimations.set(card, animation);
+                ], { duration: CAROUSEL_DURATION, easing: 'cubic-bezier(0.23, 0.72, 0.24, 1)' }));
             }
-            if (index !== -1) {
-                inspectorAnimation = cards[index].controls.animate([
-                    { opacity: 0, transform: 'translateY(5px)' },
-                    { opacity: 1, transform: 'translateY(0)' },
-                ], { duration: 270, delay: 65, easing: 'ease-out', fill: 'backwards' });
+            if (index !== -1 && previous === -1) {
+                panelAnimation = panel.animate([
+                    { opacity: 0, transform: 'translateX(10px)' },
+                    { opacity: 1, transform: 'translateX(0)' },
+                ], { duration: 300, delay: 60, easing: 'ease-out', fill: 'backwards' });
             }
         }
-        if (index === -1 && previous >= 0) cards[previous].name.focus({ preventScroll: true });
     }
 
     for (const [selector, step] of [['[data-prev]', -1], ['[data-next]', 1]]) {
-        section.querySelector(selector).addEventListener('click', () =>
-            selectPokemon((selected + step + cards.length) % cards.length));
+        section.querySelector(selector).addEventListener('click', () => {
+            const order = mobile.matches ? evolutionOrder : [0, 1, 2];
+            const position = order.indexOf(selected);
+            selectPokemon(order[(position + step + order.length) % order.length]);
+        });
     }
-    section.querySelector('[data-overview]').addEventListener('click', () => selectPokemon(-1));
+
+    function showTrio() {
+        if (selected < 0 || mobile.matches) return;
+        const previous = cards[selected];
+        selectPokemon(-1);
+        previous.name.focus({ preventScroll: true });
+    }
+    section.querySelector('[data-overview]').addEventListener('click', showTrio);
     section.addEventListener('keydown', event => {
-        if (event.key === 'Escape' && selected >= 0) selectPokemon(-1);
+        if (event.key === 'Escape') showTrio();
     });
-
-    function resizeLineup(large) {
-        grid.dataset.display = large ? 'large' : 'normal';
-        enlarge.setAttribute('aria-pressed', String(large));
-        enlarge.textContent = large ? 'Reduzir trio' : 'Ampliar trio';
-    }
-    enlarge.addEventListener('click', () => resizeLineup(grid.dataset.display !== 'large'));
-    webp.addEventListener('click', () => {
-        const enabled = section.dataset.webp !== 'true';
-        section.dataset.webp = String(enabled);
-        webp.setAttribute('aria-pressed', String(enabled));
-        if (enabled) resizeLineup(true);
-        for (const card of cards) {
-            card.rotated = false;
-            if (enabled) card.angle = card.species.angle;
-            card.syncPreview();
-            card.invalidate();
-        }
-    });
-    function fitOpening() {
-        if (section.classList.contains('hidden')) return;
-        const gridRect = grid.getBoundingClientRect();
-        const stageHeight = (cards[selected] ?? cards[0]).stage.offsetHeight;
-        const bottom = selected === -1 ? gridRect.bottom : wide.matches
-            ? inspector.getBoundingClientRect().bottom
-            : dexHeader.getBoundingClientRect().bottom;
-        const surroundingHeight = bottom + window.scrollY - stageHeight;
-        const availableHeight = window.innerHeight - surroundingHeight - 12;
-        section.style.setProperty('--pokemon-opening-stage', `${Math.floor(availableHeight)}px`);
-    }
-
-    const openingObserver = new ResizeObserver(fitOpening);
-    for (const element of [document.querySelector('header'), section.querySelector('.pokemon-header'),
-        inspector, dexHeader]) openingObserver.observe(element);
-    window.addEventListener('resize', fitOpening);
-
-    function loadViewer(viewer) {
-        if (!viewer.model && !viewer.loading) viewer.select(viewer.form);
-    }
 
     function refreshView() {
-        if ((mobile.matches || wide.matches) && selected === -1) selectPokemon(0);
+        if (mobile.matches && selected === -1) selectPokemon(0);
         if (!mobile.matches) cards.forEach(loadViewer);
-        fitOpening();
+        cards.forEach(card => card.updatePlacement());
     }
 
     mountVolume(section, cards);
     loadAttackSprites();
     mobile.addEventListener('change', refreshView);
-    wide.addEventListener('change', refreshView);
     refreshView();
 
     return {
         show: () => {
-            fitOpening();
+            if (!mobile.matches) selectPokemon(-1);
             cards.forEach(card => card.invalidate());
         },
         hide: () => cards.forEach(card => card.suspend()),
