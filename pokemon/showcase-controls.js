@@ -51,9 +51,13 @@ export function mountVolume(section, cards) {
         const level = Number(range.value);
         const percent = level + '%';
         for (const card of cards) {
-            if (!card.greetingAudio) continue;
-            const gain = Number(card.greetingAudio.dataset.gain) || 1;
-            card.greetingAudio.volume = Math.min(1, level / 100 * gain);
+            // The shared volume slider controls welcome and attack audio.
+            // Each track retains its own gain (the v2 greetings are balanced).
+            for (const audio of [card.greetingAudio, card.attackCry]) {
+                if (!audio) continue;
+                const gain = Number(audio.dataset.gain) || 1;
+                audio.volume = Math.min(1, level / 100 * gain);
+            }
         }
         button.replaceChildren(glyph(level ? 'volume' : 'muted'));
         button.setAttribute('aria-label', `Volume dos Pokémon (${percent})`);
