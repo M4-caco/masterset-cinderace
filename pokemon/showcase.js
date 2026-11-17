@@ -9,6 +9,7 @@ import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=15';
 import { effectSpace } from './effect-space.js?v=1';
 import { mountPokedex } from './pokedex.js?v=12';
 import { prepareFace, updateFace } from './face-animation.js?v=12';
+import { createJornadasGreeting } from './jornadas-voices.js?v=1';
 
 const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
 const SPECIES = [
@@ -43,6 +44,14 @@ const IDLE_BOUNDS = {
 // Each species gets one fixed camera zoom, calculated from its largest
 // focused form and the cloud ring, so the smaller species are not miniatures
 // inside Cinderace's much larger Gigamax camera framing.
+// On the opening trio, apparent sizes are deliberate rather than locked
+// to the large Max-form safety camera. Cinderace is twice Scorbunny's
+// onscreen height; Raboot is only a little taller than Scorbunny.
+const WELCOME_HEIGHT_FRACTIONS = {
+    scorbunny: 0.41,
+    raboot: 0.45,
+    cinderace: 0.82,
+};
 const STAGE_HEIGHT_BY_SPECIES = Object.fromEntries(SPECIES.map(species => {
     let requiredSky = FRAME_HEIGHT * STAGE_FLOOR;
     const [min, max] = IDLE_BOUNDS[species.id];
@@ -135,9 +144,10 @@ class PokemonViewer {
         this.model = null;
         this.inView = false;
         this.restStart = 0;
-        this.cry = new Audio(new URL(`./audio/${species.id}.wav`, import.meta.url).href);
-        this.cry.preload = 'none';
-        this.cry.volume = 0.55;
+        // Anime voice is independent of the Pokémon GO attack assets.
+        // Never play an attack cry as a greeting fallback.
+        this.greetingAudio = createJornadasGreeting(species.id);
+        this.cry = this.greetingAudio;
 
         this.target.setAttribute('aria-pressed', 'false');
         this.target.setAttribute('aria-label', `Destacar ${species.name}. Use as setas para girar.`);
@@ -538,14 +548,12 @@ class PokemonViewer {
         if (this.attack && this.attack.kind !== 'intro' && this.attack.kind !== 'greeting') return;
         this.lastGreeting = now;
         if (!this.attack && !reducedMotion.matches) this.play('Felicidade', 'greeting');
-        // Use the per-Pokémon cry already shipped with the Master Set.
-        // Browsers may require a prior click/touch before playing hover audio.
-        try {
-            this.cry.pause();
-            this.cry.currentTime = 0;
-            void this.cry.play().catch(() => {});
-        } catch (error) {
-            console.debug('Vocalização indisponível', error);
+        // Only play a verified PT-BR Journeys voice once its separate
+        // file is provided. No Pokémon GO cry is used here.
+        if (this.greetingAudio) {
+            this.greetingAudio.pause();
+            this.greetingAudio.currentTime = 0;
+            void this.greetingAudio.play().catch(() => {});
         }
     }
 
@@ -896,7 +904,12 @@ class PokemonViewer {
             (MODEL_MARGIN - bounds.min.x) / Math.max(1, leftPixels),
             (bounds.max.x + MODEL_MARGIN) / Math.max(1, rightPixels),
         );
-        const frameHeight = Math.max(STAGE_HEIGHT_BY_SPECIES[this.species.id], fitWidth,
+        const welcome = !this.showcase.hasAttribute('data-pokemon-selected') &&
+            this.form === 'normal' && !mobile.matches;
+        const frameGoal = welcome
+            ? this.displayHeight / WELCOME_HEIGHT_FRACTIONS[this.species.id]
+            : STAGE_HEIGHT_BY_SPECIES[this.species.id];
+        const frameHeight = Math.max(frameGoal, fitWidth,
             (bounds.max.y + MODEL_MARGIN) / STAGE_FLOOR,
             (MODEL_MARGIN - bounds.min.y) / (1 - STAGE_FLOOR));
         camera.position.y = frameHeight * (STAGE_FLOOR - 0.5);
@@ -954,7 +967,7 @@ class PokemonViewer {
         this.frameRequest = 0;
         this.stopAttack();
         this.lastAttackTap = -Infinity;
-        this.cry.pause();
+        this.greetingAudio?.pause();
     }
 }
 
