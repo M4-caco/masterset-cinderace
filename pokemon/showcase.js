@@ -12,14 +12,16 @@ import { prepareFace, updateFace } from './face-animation.js?v=12';
 const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
 const SPECIES = [
     { id: 'scorbunny', name: 'Scorbunny', height: 0.84, focusHeight: 1.59, angle: 0.07, cloudScale: 0.4 },
-    { id: 'cinderace', name: 'Cinderace', height: 1.76, focusHeight: 2.12, angle: -0.12, cloudScale: 0.8, gigamax: true },
+    { id: 'cinderace', name: 'Cinderace', height: 1.76, focusHeight: 2.34,
+        maxFocusHeight: 2.92, angle: -0.12, cloudScale: 0.8, gigamax: true },
     { id: 'raboot', name: 'Raboot', height: 0.99, focusHeight: 1.73, angle: -0.08, cloudScale: 0.5 },
 ];
 const FRAME_HEIGHT = 2.52;
 // A consistent low ground line keeps models from growing downward when focused.
 const STAGE_FLOOR = 0.93;
 const DYNAMAX_SCALE = 1.25;
-// Gigamax must be visibly larger than the same Pokémon in Dynamax.
+// Default fallback scale. Cinderace has an explicit shared Max height so
+// Dynamax and Gigamax appear at the same size in every carousel position.
 const GIGAMAX_SCALE = 1.48;
 const CAROUSEL_DURATION = 440;
 const MAX_FORM_SWAP = 235;
@@ -40,13 +42,13 @@ const STAGE_HEIGHT_BY_SPECIES = Object.fromEntries(SPECIES.map(species => {
     let requiredSky = FRAME_HEIGHT * STAGE_FLOOR;
     const [min, max] = IDLE_BOUNDS[species.id];
     const baseHeight = max[1] - min[1];
-    const maxHeight = species.focusHeight * DYNAMAX_SCALE;
+    const maxHeight = species.maxFocusHeight ?? (species.focusHeight * DYNAMAX_SCALE);
     const cloudScale = species.cloudScale * maxHeight / baseHeight;
     requiredSky = Math.max(requiredSky,
         maxHeight + cloudScale * (0.18 + 0.31 + 0.12) + MODEL_MARGIN * 2);
     if (species.gigamax) {
         const [gigaMin, gigaMax] = IDLE_BOUNDS['cinderace-gigamax'];
-        const gigaHeight = species.focusHeight * GIGAMAX_SCALE;
+        const gigaHeight = species.maxFocusHeight ?? (species.focusHeight * GIGAMAX_SCALE);
         const gigaCloudScale = 1.9 * gigaHeight / (gigaMax[1] - gigaMin[1]);
         requiredSky = Math.max(requiredSky,
             gigaHeight + gigaCloudScale * (0.13 + 0.28 + 0.12) + MODEL_MARGIN * 2);
@@ -403,10 +405,21 @@ class PokemonViewer {
         return this.card.parentElement.hasAttribute('data-focus') ? height * 0.84 : height;
     }
 
+    targetDisplayHeight() {
+        const base = this.normalHeight();
+        if (this.form !== 'normal' && this.species.maxFocusHeight) {
+            // Apply the same multiplier to both Max forms, even on the side
+            // slots. Keep Scorbunny and Raboot on their existing scales.
+            return base * this.species.maxFocusHeight / this.species.focusHeight;
+        }
+        const scale = this.form === 'gigamax' ? GIGAMAX_SCALE
+            : this.form === 'dynamax' ? DYNAMAX_SCALE : 1;
+        return base * scale;
+    }
+
     updatePlacement(immediate = false, previousHeight) {
         if (!this.model || !this.placement) return;
-        const scale = this.form === 'gigamax' ? GIGAMAX_SCALE : this.form === 'dynamax' ? DYNAMAX_SCALE : 1;
-        const target = this.normalHeight() * scale;
+        const target = this.targetDisplayHeight();
         const from = previousHeight ?? this.displayHeight;
         if ((immediate && previousHeight === undefined) || reducedMotion.matches || from === undefined || from === target) {
             this.placementTransition = null;
@@ -422,7 +435,9 @@ class PokemonViewer {
         if (this.form === 'normal') return 0;
         if (mobile.matches) return 1;
         if (!this.focused && !this.placementTransition) return 0;
-        const factor = this.form === 'gigamax' ? GIGAMAX_SCALE : DYNAMAX_SCALE;
+        const factor = this.species.maxFocusHeight
+            ? this.species.maxFocusHeight / this.species.focusHeight
+            : this.form === 'gigamax' ? GIGAMAX_SCALE : DYNAMAX_SCALE;
         const sideHeight = this.species.height * 0.84 * factor;
         const fullHeight = this.species.focusHeight * factor;
         return smoothstep((this.displayHeight - sideHeight) /
@@ -550,7 +565,7 @@ class PokemonViewer {
         if (gigamaxMove && this.placementTransition) {
             this.placementTransition = null;
             this.setDisplayHeight(Math.max(this.displayHeight,
-                this.normalHeight() * GIGAMAX_SCALE));
+                this.targetDisplayHeight()));
         }
         const cameraLock = gigamaxMove ? this.captureGigamaxFrame() : null;
         // The original movement keeps its timeline; only the camera is fixed.
