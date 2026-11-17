@@ -34,22 +34,14 @@ function drawTackle(ctx, time, { x, hit, hitX = x, floor, modelHeight, extent })
 }
 
 function attackPoint(frame, y, distance) {
-    const { x, extent, width, depth, forward } = frame;
-    const margin = Math.min(extent * 0.19, width * 0.2);
-    const along = forward * distance;
-    const room = along >= 0 ? width - margin - x : x - margin;
-    return {
-        x: x + Math.sign(along) * Math.min(Math.abs(along), Math.max(0, room)),
-        y: y + depth * distance * 0.28,
-        scale: 1 + depth * distance / extent * 0.32,
-    };
+    return frame.projectAttack(distance, y - frame.source.y);
 }
 
 function drawFireSpin(ctx, time, frame) {
     const { floor, modelHeight, extent, direction } = frame;
     const age = time - 0.23;
     if (age < 0 || age > 0.62) return;
-    const y = floor - modelHeight * 0.43;
+    const y = frame.source.y;
     for (let i = 0; i < 3; i++) {
         const travel = (age - i * 0.086) / 0.28;
         if (travel < 0 || travel >= 1) continue;
@@ -66,12 +58,12 @@ function drawFireSpin(ctx, time, frame) {
 
 function drawFlameCharge(ctx, time, frame) {
     const { x, floor, modelHeight, extent, direction } = frame;
-    const y = floor - modelHeight * 0.35;
+    const y = frame.source.y;
     const buildup = ramp(0.10, 0.36, time) * (1 - ramp(1.32, 1.85, time));
     for (let i = 0; i < 3; i++) {
         const angle = i * TAU / 3 + time * 7;
         const size = extent * 0.34;
-        sprite(ctx, 5 + Math.floor(time * 14 + i) % 4, x + Math.cos(angle) * extent * 0.22,
+        sprite(ctx, 5 + Math.floor(time * 14 + i) % 4, frame.source.x + Math.cos(angle) * extent * 0.22,
             y + Math.sin(angle) * extent * 0.13, size, size, buildup * 0.82, angle * 0.4);
     }
     const release = (time - 1.85) / 0.39;
@@ -95,8 +87,8 @@ function drawPyroBall(ctx, time, frame) {
     const age = time - 0.37;
     if (age < 0 || age >= 1.47) return;
     const flight = ramp(0.715, 1, age);
-    const y = floor - modelHeight * 0.22 - Math.sin(Math.PI * flight) * extent * 0.21;
-    const point = attackPoint(frame, y, extent * lerp(0.18, 0.93, flight));
+    const y = frame.source.y - Math.sin(Math.PI * flight) * extent * 0.21;
+    const point = attackPoint(frame, y, extent * 0.93 * flight);
     const intensity = ramp(0.02, 0.24, age) * (1 - ramp(1, 1.24, age));
     const size = extent * point.scale * lerp(0.15, 0.40, ramp(0.1, 0.715, age));
     if (flight > 0) {
@@ -117,13 +109,12 @@ function drawPyroBall(ctx, time, frame) {
 function drawMaxFlare(ctx, time, frame) {
     const { floor, modelHeight, extent, duration, species } = frame;
     const phase = clamp(time / Math.max(duration, 0.01));
-    // Max Flare must originate high above a Dynamax Pokémon, rather than
-    // reusing the ordinary chest-height Flame Charge path.
-    const originY = floor - modelHeight * (species === 'cinderace' ? 0.70 : 0.61);
+    // Web adaptation: anchored to the animated emitter in world space.
+    const originY = frame.source.y;
     const charge = ramp(0.06, 0.28, phase) * (1 - ramp(0.45, 0.59, phase));
     for (let i = 0; i < 3; i++) {
         const angle = phase * 8 + i * TAU / 3;
-        sprite(ctx, 5 + (i % 4), frame.x + Math.cos(angle) * extent * 0.21,
+        sprite(ctx, 5 + (i % 4), frame.source.x + Math.cos(angle) * extent * 0.21,
             originY + Math.sin(angle) * extent * 0.11, extent * 0.43, extent * 0.46,
             charge * 0.8, angle * 0.24);
     }
@@ -168,8 +159,8 @@ function drawGmaxFireball(ctx, time, frame) {
     const age = time - 0.76;
     if (age < 0 || age >= 1.1) return;
     const flight = ramp(0, 0.57, age);
-    const y = floor - modelHeight * 0.42 - Math.sin(Math.PI * flight) * extent * 0.23;
-    const point = attackPoint(frame, y, extent * lerp(0.03, 1.12, flight));
+    const y = frame.source.y - Math.sin(Math.PI * flight) * extent * 0.23;
+    const point = attackPoint(frame, y, extent * 1.12 * flight);
     const size = extent * point.scale * lerp(0.41, 0.69, flight);
     const life = ramp(0, 0.10, age) * (1 - ramp(0.57, 0.68, age));
     sprite(ctx, 1, point.x - forward * size * 0.38, point.y - depth * size * 0.1,
@@ -191,12 +182,12 @@ function drawGroundFire(ctx, time, frame, behind) {
     const { x, floor, extent, angle } = frame;
     for (let i = 0; i < 16; i++) {
         const orbit = i * TAU / 16 + angle;
-        const depth = Math.cos(orbit);
-        if ((depth < 0) !== behind) continue;
+        const point = frame.groundPoint(orbit, extent * 0.35);
+        if (point.behind !== behind) continue;
         const life = (time * 1.8 + i * 0.37) % 1;
         const flameHeight = extent * (0.10 + life * 0.15);
-        const px = x + Math.sin(orbit) * extent * 0.35;
-        const py = floor + depth * extent * 0.065 - flameHeight * 0.5;
+        const px = point.x;
+        const py = point.y - flameHeight * 0.5;
         sprite(ctx, 5 + Math.floor(life * 4), px, py,
             extent * 0.15, flameHeight, Math.sin(life * Math.PI) * 0.85);
     }
@@ -208,7 +199,7 @@ function drawFlamethrower(ctx, time, frame) {
     const strength = ramp(0.16, 0.30, phase) * (1 - ramp(0.73, 0.91, phase));
     for (let i = 0; i < 24; i++) {
         const travel = (time * 2.7 + i / 24) % 1;
-        const y = frame.floor - frame.modelHeight * 0.58;
+        const y = frame.source.y;
         const point = attackPoint(frame, y, frame.extent * travel * 1.15);
         const size = frame.extent * (0.08 + travel * 0.26) * point.scale;
         sprite(ctx, 5 + Math.floor((time * 14 + i) % 4),
@@ -263,7 +254,7 @@ export class BattleEffects {
         const extent = Math.min(Math.max(26, modelHeight), width * 0.58);
         const forward = Math.sin(angle);
         const depth = Math.cos(angle);
-        const direction = Math.atan2(depth * 0.28, forward);
+        const direction = frame.direction;
         const context = { ...frame, extent, forward, depth, direction };
         const front = prepareSurface(this.front, width, height);
         if (frame.groundFire) {

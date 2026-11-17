@@ -20,6 +20,12 @@ Master set de Scorbunny, Raboot e Cinderace. O site estático é publicado a par
 ## Verificação local
 
 - Rode `python -m http.server 8000` a partir da raiz e abra `http://localhost:8000/`. Os módulos ES carregam por HTTP.
-- Para a aba Pokémon, abra `http://localhost:8000/?aba=pokemon` com WebGL ativo. Confira o trio e a ficha lateral no desktop, e as setas com a ficha abaixo no celular. Teste a seleção, as formas e o seletor de jogo quando a mudança afetar essas interações. Selecione um Pokémon, teste os ataques rápidos por toque e os especiais pelos botões e confira se arrastar só gira o modelo.
+- Para a aba Pokémon, abra `http://localhost:8000/` e selecione Pokémon com WebGL ativo. Confira o trio e a ficha lateral no desktop, e as setas com a ficha abaixo no celular. Teste a seleção, as formas e o seletor de jogo quando a mudança afetar essas interações. Selecione um Pokémon, teste os ataques rápidos por toque e os especiais pelos botões e confira se arrastar só gira o modelo.
 - Ao editar CSS ou módulos com URLs versionadas por `?v=`, atualize as referências afetadas, incluindo os módulos importadores quando necessário. Para Pokémon, confira a cadeia `index.html` → `entry.js` → `showcase.js` → módulos da aba.
 - Para alterações na coleção ou no fichário, confira a aba real e a passagem do estado das cartas entre o site e o iframe.
+
+## Ancoragem dos ataques
+
+`pokemon/effect-space.js` projeta os pontos do esqueleto e o centro deformado da bola Gigamax com a mesma câmera do modelo. `battle-effects.js` ainda usa sprites adaptados; não representa uma reprodução integral dos sistemas de partículas do jogo. Toques no Gigamax só selecionam: o especial é acionado pelo botão. A cena com adversário Max e seu impacto ainda não foi implementada.
+
+Teste das projeções com os modelos reais e bloqueio de toques Gigamax: `node tests/pokemon-effect-space.mjs`. Esse teste não substitui a inspeção visual em WebGL.

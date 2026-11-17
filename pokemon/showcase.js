@@ -5,7 +5,8 @@ import {
 import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=8';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=10';
 import { iconControl, mountVolume } from './showcase-controls.js?v=11';
-import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=14';
+import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=15';
+import { effectSpace } from './effect-space.js?v=1';
 import { mountPokedex } from './pokedex.js?v=12';
 import { prepareFace, updateFace } from './face-animation.js?v=12';
 
@@ -329,6 +330,7 @@ class PokemonViewer {
         const previousHeight = this.displayHeight;
         if ((this.form === 'gigamax') !== (form === 'gigamax')) this.angle = this.species.angle;
         this.form = form;
+        this.lastAttackTap = -Infinity;
         if (!animateForm) {
             this.stage.dataset.form = form;
             this.stage.toggleAttribute('data-max-active', form !== 'normal');
@@ -392,6 +394,7 @@ class PokemonViewer {
             this.stage.dataset.ready = '';
             this.renderer.domElement.hidden = false;
             this.target.disabled = false;
+            this.setFocus(this.focused);
             this.invalidate();
         } catch (error) {
             if (revision !== this.revision) return;
@@ -483,7 +486,9 @@ class PokemonViewer {
         this.card.toggleAttribute('data-selected', focused);
         this.controls.hidden = !focused;
         this.target.setAttribute('aria-pressed', String(focused));
-        this.target.setAttribute('aria-label', focused
+        this.target.setAttribute('aria-label', this.form === 'gigamax'
+            ? `${this.species.name} Gigamax. Arraste para girar. Use o botão para o especial.`
+            : focused
             ? `Atacar com ${this.species.name}. Arraste ou use as setas para girar.`
             : `Selecionar ${this.species.name} e atacar.`);
         // A centered Max Pokémon must always have its full display size.
@@ -493,7 +498,7 @@ class PokemonViewer {
     }
 
     tapAttack() {
-        if (!this.model || this.loading) return;
+        if (!this.model || this.loading || this.form === 'gigamax') return;
         this.introPending = false;
         this.lastAttackTap = performance.now();
         if (this.attack?.kind === 'combat-fast') return;
@@ -503,7 +508,8 @@ class PokemonViewer {
 
     playQuickAttack() {
         this.lastAttackTap = -Infinity;
-        const clip = this.model.clips.has(MOVES.physical) ? MOVES.physical : this.model.idle.name;
+        if (this.form === 'gigamax' || !this.model?.clips.has(MOVES.physical)) return;
+        const clip = MOVES.physical;
         this.play(clip, 'combat-fast', 'spin');
     }
 
@@ -777,6 +783,7 @@ class PokemonViewer {
         renderer.render(this.scene, camera);
         if (this.attack?.effect) {
             this.battleEffects.draw(this.attack.effect, {
+                ...effectSpace(this.model, this.turntable, camera, surfaceWidth, height, this.attack),
                 time: this.attack.time, duration: this.attack.clipDuration,
                 groundFire: this.focused && this.attack.kind === 'combat-fast',
                 groundTime: now / 1000,
