@@ -5,7 +5,7 @@ import {
 import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=7';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=5';
 import { iconControl, mountVolume } from './showcase-controls.js?v=3';
-import { BattleEffects } from './battle-effects.js?v=6';
+import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=8';
 import { mountPokedex } from './pokedex.js?v=7';
 
 const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
@@ -422,7 +422,7 @@ class PokemonViewer {
                 : this.species.gigamax
                     ? [['Chama Furacão', fire, MOVES.physical, 'spin'], ['Ataque de Chamas', fire, MOVES.special, 'charge'],
                         ['Bola Incendiária', fire, MOVES.alternate, 'ball']]
-                    : [['Investida', 'normal', MOVES.physical], ['Ataque de Chamas', fire, MOVES.special, 'charge']];
+                    : [['Investida', 'normal', MOVES.physical, 'tackle'], ['Ataque de Chamas', fire, MOVES.special, 'charge']];
         const buttons = entries.filter(([, , clip]) => this.model.clips.has(clip))
             .map(([name, symbol, clip, effect]) => iconControl(name, symbol, symbol === fire ? 'fire' : 'move-normal',
                 () => this.play(clip, 'battle', effect)));
@@ -476,7 +476,9 @@ class PokemonViewer {
         const action = mixer.clipAction(clip);
         action.reset().setLoop(LoopOnce, 1).play();
         action.clampWhenFinished = true;
-        this.attack = { action, name, effect, start: performance.now(), duration: clip.duration };
+        const clipDuration = clip.duration;
+        const duration = effect === 'charge' ? Math.max(clipDuration, 2.97) : clipDuration;
+        this.attack = { action, name, effect, start: performance.now(), clipDuration, duration, time: 0 };
         if (effect && !this.battleEffects) this.battleEffects = new BattleEffects(this.stage, this.target);
         this.stage.dataset.attacking = kind;
         this.syncPreview();
@@ -521,10 +523,12 @@ class PokemonViewer {
         const clouds = this.cloud && this.form !== 'normal';
         const ambient = !reducedMotion.matches && (!this.stage.hasAttribute('data-webp') || clouds);
         if (this.attack) {
-            const { action, start, duration } = this.attack;
-            action.time = Math.max(0, (now - start) / 1000);
-            if (action.time >= duration) this.stopAttack();
+            const { action, start, duration, clipDuration } = this.attack;
+            const time = Math.max(0, (now - start) / 1000);
+            if (time >= duration) this.stopAttack();
             else {
+                this.attack.time = time;
+                action.time = Math.min(time, clipDuration - 0.0001);
                 this.model.mixer.update(0);
                 this.updateProps(this.model, true);
             }
@@ -568,9 +572,10 @@ class PokemonViewer {
         }
         if (this.webp.hidden || clouds) renderer.render(this.scene, camera);
         if (this.attack?.effect) {
-            this.battleEffects.draw(this.attack.effect, this.attack.action.time / this.attack.duration,
+            const bodyCenter = (this.bounds.min.x + this.bounds.max.x) / 2;
+            this.battleEffects.draw(this.attack.effect, this.attack.time, this.attack.clipDuration,
                 width, height, this.displayHeight * height / frameHeight, height * floor, this.angle,
-                reducedMotion.matches, width * centerX);
+                reducedMotion.matches, width * centerX + bodyCenter * height / frameHeight);
         }
     }
 
@@ -765,6 +770,7 @@ export function mountShowcase(section) {
     }
 
     mountVolume(section, cards);
+    loadAttackSprites();
     mobile.addEventListener('change', refreshView);
     wide.addEventListener('change', refreshView);
     refreshView();

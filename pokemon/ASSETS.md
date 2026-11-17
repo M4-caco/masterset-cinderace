@@ -14,4 +14,6 @@ A transição web segue a sequência observada na tela de atributos do jogo e us
 
 Os nomes dos golpes selecionados seguem os nomes em português do Pokémon GO. Os botões reproduzem os clipes corporais disponíveis para ataques físicos, especiais e Max do visualizador.
 
-Os efeitos de fogo em Canvas dos golpes das formas Normal e Dynamax foram desenhados para a página. A Bola de Chamas G-Max usa a animação e a malha da bola de fogo do pacote `pm815.floaf_assets_all`.
+Investida, Chama Furacão, Ataque de Chamas e Bola Incendiária usam texturas do pacote Android `attackfx_assets_all`. As fases são adaptadas dos prefabs `tackle_fast_hit`, `fire_spin_fast_emit`, `flame_charge` e `pyroball`. O visualizador compõe os sprites sem reproduzir toda a simulação de partículas e os materiais Unity.
+
+O catálogo Android registra `max_flare` e `gmax_fireball` em `breadattackfx_assets_all` e a transformação em `breadbattlefx_assets_all`. A Chama Max ainda usa o efeito web. A Bola de Chamas G-Max usa a animação e a malha da bola de fogo do pacote `pm815.floaf_assets_all`.
