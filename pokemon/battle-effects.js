@@ -78,7 +78,9 @@ function drawFlameCharge(ctx, time, frame) {
     if (release >= 0 && release < 1) {
         const point = attackPoint(frame, y, extent * release * 0.72);
         const size = extent * point.scale * lerp(0.34, 0.62, release);
-        sprite(ctx, 5 + Math.floor(release * 4), point.x, point.y, size, size, 1 - release * 0.36, direction);
+        sprite(ctx, 1, point.x - frame.forward * size * 0.28, point.y - frame.depth * size * 0.1,
+            size * 1.55, size * 0.76, 0.8 - release * 0.36, direction);
+        sprite(ctx, 4, point.x, point.y, size, size, 1, time * 7);
     }
     const impact = (time - 2.24) / 0.41;
     if (impact >= 0 && impact < 1) {
@@ -138,6 +140,13 @@ function drawMaxFlare(ctx, time, frame) {
         sprite(ctx, 5 + Math.min(3, Math.floor(age * 4)), point.x, point.y,
             size, size * 1.07, (1 - age) * 0.9, (i - 2.5) * 0.17);
     }
+    const flight = ramp(0.39, 0.69, phase);
+    if (flight > 0 && phase < 0.75) {
+        const point = attackPoint(frame, originY - Math.sin(Math.PI * flight) * extent * 0.27,
+            extent * flight * 0.98);
+        const size = extent * point.scale * lerp(0.28, 0.53, flight);
+        sprite(ctx, 4, point.x, point.y, size, size, 1 - ramp(0.68, 0.75, phase), time * 6);
+    }
     const hit = (phase - 0.69) / 0.25;
     if (hit >= 0 && hit < 1) {
         const point = attackPoint(frame, originY - extent * 0.11, extent * 0.98);
@@ -152,42 +161,108 @@ function drawMaxFlare(ctx, time, frame) {
     }
 }
 
-const drawMoves = { tackle: drawTackle, spin: drawFireSpin, charge: drawFlameCharge, ball: drawPyroBall, max: drawMaxFlare };
+function drawGmaxFireball(ctx, time, frame) {
+    const { floor, modelHeight, extent, forward, depth, direction } = frame;
+    // The original clip lifts the 3D ball at the kick, but keeps it on stage.
+    // Launch the projectile from the lift and keep the scene camera fixed.
+    const age = time - 0.76;
+    if (age < 0 || age >= 1.1) return;
+    const flight = ramp(0, 0.57, age);
+    const y = floor - modelHeight * 0.42 - Math.sin(Math.PI * flight) * extent * 0.23;
+    const point = attackPoint(frame, y, extent * lerp(0.03, 1.12, flight));
+    const size = extent * point.scale * lerp(0.41, 0.69, flight);
+    const life = ramp(0, 0.10, age) * (1 - ramp(0.57, 0.68, age));
+    sprite(ctx, 1, point.x - forward * size * 0.38, point.y - depth * size * 0.1,
+        size * 1.55, size * 0.78, life * 0.85, direction);
+    sprite(ctx, 4, point.x, point.y, size, size, life, time * 5);
+    const impact = (age - 0.57) / 0.53;
+    if (impact < 0 || impact >= 1) return;
+    const burst = size * lerp(0.55, 1.65, impact);
+    sprite(ctx, 2, point.x, point.y, burst, burst, (1 - impact) * 0.88);
+    for (let i = 0; i < 8; i++) {
+        const angle = i * TAU / 8;
+        const spread = burst * lerp(0.24, 0.60, impact);
+        sprite(ctx, 3, point.x + Math.cos(angle) * spread,
+            point.y + Math.sin(angle) * spread * 0.7, size * 0.35, size * 0.35, 1 - impact, angle);
+    }
+}
+
+function drawChargeOrbit(ctx, time, frame, behind) {
+    const { x, floor, modelHeight, extent, angle, chargeLevel, pulse, motion } = frame;
+    const count = chargeLevel * 4;
+    const y = floor - modelHeight * (frame.form === 'gigamax' ? 0.38 : 0.45);
+    if (behind && motion) {
+        const flash = extent * (0.42 + (1 - pulse) * 0.29);
+        sprite(ctx, 2, x, y, flash, flash, pulse * 0.68);
+    }
+    for (let i = 0; i < count; i++) {
+        const orbit = i * TAU / count + time * 1.9 + angle;
+        const depth = Math.cos(orbit);
+        if ((depth < 0) !== behind) continue;
+        const size = extent * (0.11 + chargeLevel * 0.035) * (1 + depth * 0.24);
+        const orbitX = x + Math.sin(orbit) * extent * (0.22 + chargeLevel * 0.06);
+        const orbitY = y + depth * extent * 0.095 + Math.sin(orbit * 2 + time * 3) * extent * 0.14;
+        sprite(ctx, 5 + Math.floor(time * 11 + i) % 4, orbitX, orbitY, size, size,
+            (behind ? 0.58 : 0.85) * (0.76 + pulse * 0.24), orbit * 0.16);
+    }
+}
+
+const drawMoves = {
+    tackle: drawTackle, spin: drawFireSpin, charge: drawFlameCharge,
+    ball: drawPyroBall, max: drawMaxFlare, gmax: drawGmaxFireball,
+};
+
+function createSurface(stage, before, extraClass = '') {
+    const canvas = document.createElement('canvas');
+    canvas.className = 'pokemon-battle-effects' + extraClass;
+    canvas.setAttribute('aria-hidden', 'true');
+    canvas.hidden = true;
+    stage.insertBefore(canvas, before);
+    return { canvas, ctx: canvas.getContext('2d') };
+}
+
+function prepareSurface({ canvas, ctx }, width, height) {
+    if (!ctx) return null;
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const pixelWidth = Math.round(width * dpr);
+    const pixelHeight = Math.round(height * dpr);
+    if (canvas.width !== pixelWidth || canvas.height !== pixelHeight) {
+        canvas.width = pixelWidth;
+        canvas.height = pixelHeight;
+    }
+    canvas.hidden = false;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+    return ctx;
+}
 
 export class BattleEffects {
     constructor(stage, target) {
         loadAttackSprites();
-        this.canvas = document.createElement('canvas');
-        this.canvas.className = 'pokemon-battle-effects';
-        this.canvas.setAttribute('aria-hidden', 'true');
-        this.canvas.hidden = true;
-        this.ctx = this.canvas.getContext('2d');
-        stage.insertBefore(this.canvas, target);
+        this.front = createSurface(stage, target);
+        this.back = createSurface(stage, target, ' pokemon-battle-effects-back');
     }
 
     clear() {
-        this.canvas.hidden = true;
+        this.front.canvas.hidden = true;
+        this.back.canvas.hidden = true;
     }
 
     draw(kind, frame) {
-        const ctx = this.ctx;
-        const drawMove = drawMoves[kind];
-        if (!ctx || !drawMove) return;
         const { time, width, height, modelHeight, angle } = frame;
-        const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-        const pixelWidth = Math.round(width * dpr);
-        const pixelHeight = Math.round(height * dpr);
-        if (this.canvas.width !== pixelWidth || this.canvas.height !== pixelHeight) {
-            this.canvas.width = pixelWidth;
-            this.canvas.height = pixelHeight;
-        }
-        this.canvas.hidden = false;
-        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-        ctx.clearRect(0, 0, width, height);
         const extent = Math.min(Math.max(26, modelHeight), width * 0.58);
         const forward = Math.sin(angle);
         const depth = Math.cos(angle);
         const direction = Math.atan2(depth * 0.28, forward);
-        drawMove(ctx, time, { ...frame, extent, forward, depth, direction });
+        const context = { ...frame, extent, forward, depth, direction };
+        const front = prepareSurface(this.front, width, height);
+        if (kind === 'charging') {
+            const back = prepareSurface(this.back, width, height);
+            if (back) drawChargeOrbit(back, time, context, true);
+            if (front) drawChargeOrbit(front, time, context, false);
+        } else {
+            this.back.canvas.hidden = true;
+            if (front) drawMoves[kind]?.(front, time, context);
+        }
     }
 }

@@ -5,7 +5,7 @@ import {
 import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=8';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=10';
 import { iconControl, mountVolume } from './showcase-controls.js?v=11';
-import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=12';
+import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=13';
 import { mountPokedex } from './pokedex.js?v=12';
 import { prepareFace, updateFace } from './face-animation.js?v=12';
 
@@ -30,6 +30,7 @@ const MAX_FORM_SWAP = 145;
 const NORMAL_FORM_SWAP = 235;
 const MAX_GROW_DURATION = 155;
 const MODEL_MARGIN = 0.045;
+const COMBAT_TAPS = 3;
 
 // Local bounds sampled from the exported idle loops. The Gigamax bounds include the fireball.
 const IDLE_BOUNDS = {
@@ -122,6 +123,9 @@ class PokemonViewer {
         this.revision = 0;
         this.frameRequest = 0;
         this.attack = null;
+        this.chargeLevel = 0;
+        this.lastChargeTap = 0;
+        this.combatStatus = showcase.querySelector('.pokemon-combat-status');
         this.maxBurstStart = null;
         this.bounds = new Box3();
         this.attackBounds = new Box3();
@@ -186,8 +190,11 @@ class PokemonViewer {
         target.addEventListener('dragstart', event => event.preventDefault());
         target.addEventListener('click', event => {
             if (event.detail === 0 || !dragged) {
+                const wasFocused = this.focused;
                 this.onSelect();
-                if (this.play(this.pokedexMove, 'pokedex')) {
+                if (this.showcase.hasAttribute('data-combat')) {
+                    if (wasFocused) this.chargeAttack();
+                } else if (this.play(this.pokedexMove, 'pokedex')) {
                     this.cry.currentTime = 0;
                     this.cry.play().catch(() => {});
                 }
@@ -340,6 +347,7 @@ class PokemonViewer {
         const id = form === 'gigamax' ? 'cinderace-gigamax' : this.species.id;
         const revision = ++this.revision;
         this.stopAttack();
+        this.resetBattleCharge();
         this.loading = true;
         this.target.disabled = true;
         for (const button of this.moves.querySelectorAll('button')) button.disabled = true;
@@ -477,18 +485,54 @@ class PokemonViewer {
     }
 
     setFocus(focused) {
-        if (!focused) this.stopAttack();
         this.focused = focused;
+        if (!focused) {
+            this.stopAttack();
+            this.resetBattleCharge();
+        }
         this.card.toggleAttribute('data-selected', focused);
         this.controls.hidden = !focused;
         this.target.setAttribute('aria-pressed', String(focused));
-        this.target.setAttribute('aria-label', focused
-            ? `Ver a reação de ${this.species.name}. Use as setas para girar.`
-            : `Destacar ${this.species.name}. Use as setas para girar.`);
+        this.updateCombatFeedback();
         // A centered Max Pokémon must always have its full display size.
         // Otherwise a click during the 440ms carousel transition could lock
         // the Gigamax at its smaller side-card scale indefinitely.
         this.updatePlacement(focused && this.form === 'gigamax');
+    }
+
+    updateCombatFeedback() {
+        const combat = this.showcase.hasAttribute('data-combat');
+        const name = this.species.name;
+        const action = !this.focused ? `Destacar ${name}`
+            : combat ? `Carregar golpe de ${name}` : `Ver a reação de ${name}`;
+        this.target.setAttribute('aria-label', `${action}. Use as setas para girar.`);
+        if (!combat || !this.focused) return;
+        const hint = this.attack?.kind === 'combat' ? 'Golpe lançado!'
+            : this.chargeLevel ? `Carga: ${this.chargeLevel}/${COMBAT_TAPS}`
+                : `Toque ${COMBAT_TAPS} vezes para lançar o golpe`;
+        if (this.combatStatus.textContent !== hint) this.combatStatus.textContent = hint;
+    }
+
+    chargeAttack() {
+        if (!this.model || this.loading || this.attack) return;
+        if (this.chargeLevel + 1 === COMBAT_TAPS) {
+            const [, , clip, effect] = this.battleMoves().at(-1);
+            this.play(clip, 'combat', effect);
+            return;
+        }
+        this.chargeLevel += 1;
+        this.lastChargeTap = performance.now();
+        this.battleEffects ??= new BattleEffects(this.stage, this.target);
+        this.updateCombatFeedback();
+        this.invalidate();
+    }
+
+    resetBattleCharge() {
+        if (!this.chargeLevel) return;
+        this.chargeLevel = 0;
+        this.battleEffects?.clear();
+        this.updateCombatFeedback();
+        this.invalidate();
     }
 
     configureMax(pattern) {
@@ -511,18 +555,21 @@ class PokemonViewer {
         if (model.max) model.max.power.value = this.form === 'normal' ? 0 : 1;
     }
 
-    renderControls() {
+    battleMoves() {
         const fire = 'fire';
-        const entries = this.form === 'gigamax'
-            ? [['Bola de Chamas G-Max', fire, MOVES.special]]
+        return this.form === 'gigamax'
+            ? [['Bola de Chamas G-Max', fire, MOVES.special, 'gmax']]
             : this.form === 'dynamax'
                 ? [['Chama Max', fire, MOVES.special, 'max']]
                 : this.species.gigamax
                     ? [['Chama Furacão', fire, MOVES.physical, 'spin'], ['Ataque de Chamas', fire, MOVES.special, 'charge'],
                         ['Bola Incendiária', fire, MOVES.alternate, 'ball']]
                     : [['Investida', 'normal', MOVES.physical, 'tackle'], ['Ataque de Chamas', fire, MOVES.special, 'charge']];
-        const buttons = entries.filter(([, , clip]) => this.model.clips.has(clip))
-            .map(([name, symbol, clip, effect]) => iconControl(name, symbol, symbol === fire ? 'fire' : 'move-normal',
+    }
+
+    renderControls() {
+        const buttons = this.battleMoves().filter(([, , clip]) => this.model.clips.has(clip))
+            .map(([name, symbol, clip, effect]) => iconControl(name, symbol, symbol === 'fire' ? 'fire' : 'move-normal',
                 () => this.play(clip, 'battle', effect)));
         this.moves.replaceChildren(...buttons);
     }
@@ -568,6 +615,7 @@ class PokemonViewer {
         const clip = clips.get(name);
         if (!clip) return false;
         this.stopAttack();
+        this.resetBattleCharge();
         const action = mixer.clipAction(clip);
         action.reset().setLoop(LoopOnce, 1).setEffectiveWeight(0).play().paused = true;
         action.clampWhenFinished = true;
@@ -585,10 +633,11 @@ class PokemonViewer {
         const cameraLock = gigamaxMove ? this.captureGigamaxFrame() : null;
         // The original movement keeps its timeline; only the camera is fixed.
         const start = performance.now();
-        this.attack = { action, effect, start, clipDuration, duration, time: 0,
+        this.attack = { action, effect, kind, start, clipDuration, duration, time: 0,
             cameraLock, lockFraming: gigamaxMove };
-        if (effect && !this.battleEffects) this.battleEffects = new BattleEffects(this.stage, this.target);
+        if (effect) this.battleEffects ??= new BattleEffects(this.stage, this.target);
         this.stage.dataset.attacking = kind;
+        this.updateCombatFeedback();
         this.stage.toggleAttribute('data-attack-away', Boolean(effect) && Math.cos(this.angle) < -0.25);
         this.invalidate();
         return true;
@@ -598,6 +647,7 @@ class PokemonViewer {
         if (!this.attack) return;
         this.attack = null;
         this.battleEffects?.clear();
+        this.updateCombatFeedback();
         delete this.stage.dataset.attacking;
         this.stage.removeAttribute('data-attack-away');
         this.stage.style.removeProperty('--pokemon-shadow-depth');
@@ -749,9 +799,13 @@ class PokemonViewer {
             }
         }
         renderer.render(this.scene, camera);
-        if (this.attack?.effect) {
-            this.battleEffects.draw(this.attack.effect, {
-                time: this.attack.time, duration: this.attack.clipDuration,
+        if (this.attack?.effect || this.chargeLevel) {
+            const chargeAge = (now - this.lastChargeTap) / 1000;
+            this.battleEffects.draw(this.attack?.effect ?? 'charging', {
+                time: this.attack?.time ?? (ambient ? now / 1000 : 0),
+                duration: this.attack?.clipDuration,
+                chargeLevel: this.chargeLevel, motion: ambient,
+                pulse: ambient ? 1 - smoothstep(chargeAge / 0.48) : 0,
                 width: surfaceWidth, height, form: this.form, species: this.species.id,
                 modelHeight: tall * this.turntable.scale.x,
                 floor: height * floor + dy,
@@ -866,6 +920,7 @@ class PokemonViewer {
         cancelAnimationFrame(this.frameRequest);
         this.frameRequest = 0;
         this.stopAttack();
+        this.resetBattleCharge();
         this.cry.pause();
     }
 }
@@ -881,6 +936,8 @@ export function mountShowcase(section) {
     const header = section.querySelector('.pokemon-header');
     const dialog = section.querySelector('.pokemon-dex-dialog');
     const openDetailsButton = section.querySelector('[data-open-dex]');
+    const combatToggle = section.querySelector('.pokemon-combat-toggle');
+    const combatStatus = section.querySelector('.pokemon-combat-status');
     const mobileOrder = [0, 2, 1];
     const updatePokedex = mountPokedex(panel);
     let selected = -1;
@@ -893,6 +950,24 @@ export function mountShowcase(section) {
         grid.append(card);
         inspector.append(viewer.controls);
         return viewer;
+    });
+
+    combatToggle.hidden = false;
+    combatToggle.addEventListener('click', () => {
+        const enabled = section.toggleAttribute('data-combat');
+        combatToggle.setAttribute('aria-pressed', String(enabled));
+        combatStatus.hidden = !enabled;
+        if (!enabled) combatStatus.textContent = '';
+        const viewer = cards[selected];
+        if (viewer) {
+            if (!enabled) {
+                if (viewer.attack?.kind === 'combat') viewer.stopAttack();
+                viewer.resetBattleCharge();
+            }
+            viewer.updateCombatFeedback();
+        } else if (enabled) {
+            combatStatus.textContent = 'Selecione um Pokémon';
+        }
     });
 
     function updateProfile(viewer) {
@@ -960,6 +1035,9 @@ export function mountShowcase(section) {
             viewer.setFocus(position === index);
         }
         updateProfile(index === -1 ? null : cards[index]);
+        if (index === -1 && section.hasAttribute('data-combat')) {
+            combatStatus.textContent = 'Selecione um Pokémon';
+        }
         if (mobile.matches) loadViewer(cards[index]);
         fitViewport();
         if (smooth) {

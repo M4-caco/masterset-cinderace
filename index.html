@@ -468,8 +468,8 @@
 #item-detail #item-copy-status:empty{display:none}
 @media(max-width:640px){#item-detail{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:17px}#item-detail .it-detail-grid{grid-template-columns:minmax(0,1fr);gap:12px}#item-detail .it-detail-image{width:100%;height:220px;max-height:30dvh;aspect-ratio:auto}#item-detail .it-detail-image img{max-height:30dvh}}
 </style><link rel="stylesheet" href="scorace-binder.css?v=6">
-    <link rel="stylesheet" href="pokemon/showcase.css?v=22">
-    <script type="module" src="pokemon/entry.js?v=31"></script>
+    <link rel="stylesheet" href="pokemon/showcase.css?v=23">
+    <script type="module" src="pokemon/entry.js?v=32"></script>
 </head>
 <body class="text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
 
@@ -766,6 +766,9 @@
         <div class="pokemon-header">
             <h2 id="pokemon-title" tabindex="-1" aria-live="polite">Pokémon</h2>
             <div class="pokemon-options">
+                <button type="button" class="pokemon-combat-toggle" aria-pressed="false"
+                    aria-describedby="pokemon-combat-status" hidden>Modo combate</button>
+                <span id="pokemon-combat-status" class="pokemon-combat-status" role="status" hidden></span>
                 <button type="button" data-open-dex aria-haspopup="dialog" aria-controls="pokemon-dex-dialog" hidden>Ficha</button>
             </div>
         </div>
@@ -793,18 +796,21 @@
                 <output for="pokemon-volume-slider" aria-hidden="true">55%</output>
             </div>
         </div>
+        <svg class="pokemon-max-definitions" width="0" height="0" aria-hidden="true" focusable="false">
+            <defs>
+                <path id="pokemon-max-silhouette" d="M763,753 788,803 900,820 1022,849 1116,881 1187,914 1071,760 986,662 910,582 862,632Z M829,504 705,653 738,708 875,549Z M749,433 641,560 677,612 794,474Z M475,433 364,532 243,656 126,793 37,914 110,880 201,849 293,826 437,801 502,680 583,561Z M137,82 261,172 406,297 522,415 612,522 710,406 836,280 951,181 1087,82 1003,110 893,157 773,220 672,284 666,281 612,98 557,282 552,284 459,225 339,161 236,116Z"/>
+                <clipPath id="pokemon-max-interior">
+                    <use href="#pokemon-max-silhouette"/>
+                </clipPath>
+            </defs>
+        </svg>
         <template id="pokemon-card-template">
             <article class="pokemon-viewer">
                 <div class="pokemon-stage">
-                    <!-- Exact silhouettes vector-traced from the two user-provided references. -->
-                    <span class="pokemon-stage-maxmark" aria-hidden="true">
-                        <svg class="pokemon-stage-maxmark-dynamax" viewBox="0 0 1065 850" xmlns="http://www.w3.org/2000/svg" focusable="false">
-                            <path fill-rule="evenodd" d="M672,692 681,725 692,734 779,746 928,780 1059,834 1015,759 952,669 936,653 923,630 863,554 820,510 800,523 785,545 757,574Z M693,693 720,652 806,546 816,538 823,538 935,675 958,714 971,725 1008,783 989,787 930,763 836,739 826,740 769,727 724,724 699,715Z M748,434 739,434 724,448 673,508 623,581 621,595 648,645 656,645 671,628 728,548 778,494 787,479 779,464Z M758,465 763,480 685,575 666,604 658,609 650,607 641,592 644,579 738,462 745,459Z M671,362 664,360 654,367 561,486 563,500 594,543 606,540 647,480 712,406 713,400Z M674,389 683,401 683,412 638,461 607,507 600,511 592,509 583,491 595,469 664,388Z M412,363 404,359 390,367 286,473 270,485 210,558 191,575 107,684 13,823 15,829 29,828 101,795 188,768 275,749 365,738 383,732 434,616 485,529 503,507 509,491 475,440 425,383Z M409,389 480,477 485,495 482,505 431,584 371,712 361,720 275,732 166,756 85,785 63,789 63,778 119,697 224,563 242,548 247,536 292,494 338,440 378,407 386,396 402,388Z M942,46 929,45 921,51 858,70 815,88 703,143 606,201 596,200 589,192 543,65 534,56 522,75 479,197 474,202 450,195 365,142 310,118 291,105 162,53 142,48 134,50 153,72 259,155 294,191 310,202 414,306 423,322 474,377 525,444 536,452 550,437 559,420 648,321 656,307 783,180Z M837,104 814,131 739,195 685,253 672,262 537,420 526,416 484,358 383,248 280,149 270,145 252,125 243,121 234,109 236,105 244,105 301,130 403,185 459,221 475,224 485,221 491,214 505,168 524,125 524,116 536,107 548,125 580,216 593,224 606,224 724,151 821,105Z"/>
-                        </svg>
-                        <svg class="pokemon-stage-maxmark-gigamax" viewBox="0 0 1195 940" xmlns="http://www.w3.org/2000/svg" focusable="false">
-                            <path fill-rule="evenodd" d="M763,753 788,803 900,820 1022,849 1116,881 1187,914 1071,760 986,662 910,582 862,632Z M829,504 705,653 738,708 875,549Z M749,433 641,560 677,612 794,474Z M475,433 364,532 243,656 126,793 37,914 110,880 201,849 293,826 437,801 502,680 583,561Z M137,82 261,172 406,297 522,415 612,522 710,406 836,280 951,181 1087,82 1003,110 893,157 773,220 672,284 666,281 612,98 557,282 552,284 459,225 339,161 236,116Z"/>
-                        </svg>
-                    </span>
+                    <svg class="pokemon-stage-maxmark" viewBox="0 0 1195 940" aria-hidden="true" focusable="false">
+                        <use class="pokemon-stage-maxmark-dynamax" href="#pokemon-max-silhouette" clip-path="url(#pokemon-max-interior)"/>
+                        <use class="pokemon-stage-maxmark-gigamax" href="#pokemon-max-silhouette"/>
+                    </svg>
                     <span class="pokemon-stage-species" aria-hidden="true"></span>
                     <div class="pokemon-shadow" aria-hidden="true"></div>
                     <button type="button" class="pokemon-target" disabled></button>
