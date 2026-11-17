@@ -154,53 +154,59 @@
     text-shadow: 0 0 7px #fff0d7, 0 0 20px #ffaf73, 0 0 38px #fa5e5a;
 }
 
-/* Pokémon GO Max emblem: the characteristic spiked crown and 3 diagonal
-   slashes, using the same vector silhouette as our in-game Max controls.
-   An outlined X means Dynamax; a solid one means Gigamax. */
+/* Reference-traced Max emblems: sharp white outlines for Dynamax and
+   separate filled Gigamax silhouette. No pink tint, blur or glow. */
 .pokemon-stage-maxmark {
     position: absolute;
     left: 50%;
     top: 53%;
-    width: min(88cqw, 35rem);
+    width: min(92cqw, 37rem);
     aspect-ratio: 1;
     transform: translate(-50%, -50%);
     z-index: 0;
     opacity: 0;
     pointer-events: none;
     user-select: none;
+    filter: none;
+    mix-blend-mode: normal;
     transition: opacity 220ms ease;
 }
 
 .pokemon-stage-maxmark svg {
-    display: block;
     width: 100%;
     height: 100%;
     overflow: visible;
+    filter: none;
 }
 
-.pokemon-stage-maxmark-dynamax,
-.pokemon-stage-maxmark-gigamax { display: none; }
-
-.pokemon-stage-maxmark-dynamax {
-    fill: none;
-    stroke: #fff2fc;
-    stroke-width: 0.72;
-    stroke-linejoin: round;
+/* Explicit SVG selectors prevent both Max marks from showing together. */
+.pokemon-stage-maxmark svg.pokemon-stage-maxmark-dynamax,
+.pokemon-stage-maxmark svg.pokemon-stage-maxmark-gigamax {
+    display: none;
 }
 
-.pokemon-stage-maxmark-gigamax {
-    fill: #ff368e;
+.pokemon-stage-maxmark svg path {
+    fill: #ffffff;
+    fill-rule: evenodd;
     stroke: none;
+    filter: none;
 }
 
-/* Exactly 20% opacity, only on the currently selected Max Pokémon. */
 .pokemon-viewer[data-selected] .pokemon-stage[data-max-active][data-form="dynamax"] .pokemon-stage-maxmark,
 .pokemon-viewer[data-selected] .pokemon-stage[data-max-active][data-form="gigamax"] .pokemon-stage-maxmark {
     opacity: 0.20;
 }
 
-.pokemon-stage[data-form="dynamax"] .pokemon-stage-maxmark-dynamax,
-.pokemon-stage[data-form="gigamax"] .pokemon-stage-maxmark-gigamax { display: block; }
+.pokemon-stage[data-form="dynamax"] .pokemon-stage-maxmark svg.pokemon-stage-maxmark-dynamax,
+.pokemon-stage[data-form="gigamax"] .pokemon-stage-maxmark svg.pokemon-stage-maxmark-gigamax {
+    display: block;
+}
+
+/* In the two flanking cards and in Normal form, the mark is invisible. */
+.pokemon-viewer:not([data-selected]) .pokemon-stage-maxmark,
+.pokemon-stage[data-form="normal"] .pokemon-stage-maxmark {
+    opacity: 0 !important;
+}
 
 .pokemon-max-effects,
 .pokemon-max-glow {
