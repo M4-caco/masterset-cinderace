@@ -38,27 +38,69 @@ export function iconControl(label, symbol, kind, action) {
 export function mountVolume(section, cards) {
     const control = section.querySelector('.pokemon-volume');
     const button = control.querySelector('button');
+    const panel = control.querySelector('.pokemon-volume-popover');
     const range = control.querySelector('input');
+    const output = control.querySelector('output');
     const key = 'scorace-pokemon-volume';
     try {
         const saved = localStorage.getItem(key);
         if (saved !== null && /^\d+$/.test(saved)) range.value = saved;
     } catch {}
-    let audible = Number(range.value) || 55;
+
     function apply() {
         const level = Number(range.value);
-        if (level > 0) audible = level;
+        const percent = level + '%';
         for (const card of cards) card.cry.volume = level / 100;
         button.replaceChildren(glyph(level ? 'volume' : 'muted'));
-        button.setAttribute('aria-pressed', String(level === 0));
-        button.setAttribute('aria-label', level ? 'Silenciar sons dos Pokémon' : 'Reativar sons dos Pokémon');
-        range.setAttribute('aria-valuetext', level + '%');
+        button.setAttribute('aria-label', `Volume dos Pokémon (${percent})`);
+        button.title = `Volume ${percent}`;
+        range.setAttribute('aria-valuetext', percent);
+        output.value = percent;
         try { localStorage.setItem(key, range.value); } catch {}
     }
+
+    function setOpen(open) {
+        panel.hidden = !open;
+        button.setAttribute('aria-expanded', String(open));
+    }
+
+    function close() {
+        if (panel.hidden) return false;
+        setOpen(false);
+        if (panel.contains(document.activeElement)) button.focus({ preventScroll: true });
+        return true;
+    }
+
     range.addEventListener('input', apply);
-    button.addEventListener('click', () => {
-        range.value = Number(range.value) ? 0 : audible;
-        apply();
+    button.addEventListener('click', event => {
+        if (!panel.hidden) {
+            close();
+            return;
+        }
+        setOpen(true);
+        if (event.detail === 0) range.focus({ preventScroll: true });
     });
+    document.addEventListener('pointerdown', event => {
+        if (!control.contains(event.target)) close();
+    });
+
+    // Accumulate small trackpad deltas before applying a single volume step.
+    let pending = 0;
+    let lastWheel = 0;
+    control.addEventListener('wheel', event => {
+        if (event.ctrlKey || !event.deltaY) return;
+        event.preventDefault();
+        if (event.timeStamp - lastWheel > 200 || Math.sign(pending) !== Math.sign(event.deltaY)) pending = 0;
+        lastWheel = event.timeStamp;
+        const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 40 : 1;
+        pending += event.deltaY * unit;
+        const steps = Math.trunc(pending / 40);
+        if (!steps) return;
+        pending -= steps * 40;
+        range.value = String(Math.max(0, Math.min(100, Number(range.value) - steps * 5)));
+        apply();
+    }, { passive: false });
+
     apply();
+    return close;
 }

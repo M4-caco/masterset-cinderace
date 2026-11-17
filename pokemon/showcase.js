@@ -4,9 +4,9 @@ import {
 } from './vendor/three-gltf.js';
 import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=7';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=5';
-import { iconControl, mountVolume } from './showcase-controls.js?v=3';
-import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=9';
-import { mountPokedex } from './pokedex.js?v=7';
+import { iconControl, mountVolume } from './showcase-controls.js?v=11';
+import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=11';
+import { mountPokedex } from './pokedex.js?v=11';
 
 const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
 const SPECIES = [
@@ -54,7 +54,7 @@ function tacklePath(waist, clip) {
         dz = alongZ;
         hit = times[index];
     }
-    return range ? { waist, x, z, dx: dx / range, dz: dz / range, range, hit, angle: Math.atan2(dz, dx) } : null;
+    return range ? { waist, x, z, dx: dx / range, dz: dz / range, range, hit } : null;
 }
 const MOVES = {
     physical: 'Ataque físico',
@@ -73,7 +73,6 @@ class PokemonViewer {
         this.showcase = showcase;
         this.onSelect = onSelect;
         this.controls = card.querySelector('.pokemon-controls');
-        this.name = card.querySelector('.pokemon-name');
         this.stage = card.querySelector('.pokemon-stage');
         this.target = card.querySelector('.pokemon-target');
         this.placeholder = card.querySelector('.pokemon-loading');
@@ -100,11 +99,8 @@ class PokemonViewer {
         this.cry.preload = 'none';
         this.cry.volume = 0.55;
 
-        this.name.textContent = species.name;
-        this.name.setAttribute('aria-pressed', 'false');
         this.target.setAttribute('aria-pressed', 'false');
         this.target.setAttribute('aria-label', `Destacar ${species.name}. Use as setas para girar.`);
-        this.name.addEventListener('click', this.onSelect);
         const forms = this.controls.querySelector('.pokemon-forms');
         for (const form of species.gigamax ? Object.keys(FORMS) : ['normal', 'dynamax']) {
             const button = iconControl(FORMS[form], form === 'normal' ? 'ball' : form, form, () => this.select(form));
@@ -356,7 +352,7 @@ class PokemonViewer {
     normalHeight() {
         const { height } = this.species;
         if (!this.focused) return height;
-        return mobile.matches ? 1.62 : Math.max(height * 1.07, 0.82);
+        return mobile.matches ? 1.62 : Math.max(1.62, height * 1.20);
     }
 
     updatePlacement(immediate = false, previousHeight) {
@@ -396,7 +392,6 @@ class PokemonViewer {
         this.focused = focused;
         this.card.toggleAttribute('data-selected', focused);
         this.controls.hidden = !focused;
-        this.name.setAttribute('aria-pressed', String(focused));
         this.target.setAttribute('aria-pressed', String(focused));
         this.target.setAttribute('aria-label', focused
             ? `Ver a reação de ${this.species.name}. Use as setas para girar.`
@@ -477,6 +472,7 @@ class PokemonViewer {
         this.attack = { action, effect, start: performance.now(), clipDuration, duration, time: 0 };
         if (effect && !this.battleEffects) this.battleEffects = new BattleEffects(this.stage, this.target);
         this.stage.dataset.attacking = kind;
+        this.stage.toggleAttribute('data-attack-away', Boolean(effect) && Math.cos(this.angle) < -0.25);
         this.invalidate();
         return true;
     }
@@ -486,8 +482,11 @@ class PokemonViewer {
         this.attack = null;
         this.battleEffects?.clear();
         delete this.stage.dataset.attacking;
+        this.stage.removeAttribute('data-attack-away');
+        this.stage.style.removeProperty('--pokemon-shadow-depth');
         this.setBattleLane(false);
         this.turntable.position.set(0, 0, 0);
+        this.turntable.scale.setScalar(1);
         this.setRest(this.model, this.restTime(performance.now()));
     }
 
@@ -591,7 +590,8 @@ class PokemonViewer {
         const origin = offset + width * centerX;
         const tall = this.displayHeight / pixelToWorld;
         const dash = this.attack?.effect === 'tackle' && this.model.tackle
-            ? this.moveTackle(surfaceWidth, origin, tall, pixelToWorld) : null;
+            ? this.moveTackle(surfaceWidth, origin, tall, pixelToWorld, height * floor, height) : null;
+        if (dash) this.stage.style.setProperty('--pokemon-shadow-depth', `${dash.floorOffset}px`);
         const shadowCenter = 100 * (width * centerX + (dash?.pixels ?? 0)) / width;
         if (shadowCenter !== this.shadowCenter) {
             this.stage.style.setProperty('--pokemon-shadow-center', `${shadowCenter}%`);
@@ -614,44 +614,49 @@ class PokemonViewer {
         if (this.attack?.effect) {
             this.battleEffects.draw(this.attack.effect, {
                 time: this.attack.time, duration: this.attack.clipDuration,
-                width: surfaceWidth, height, modelHeight: tall, floor: height * floor,
+                width: surfaceWidth, height, modelHeight: tall * (dash?.scale ?? 1),
+                floor: height * floor + (dash?.floorOffset ?? 0),
                 angle: this.angle, x: origin + (dash?.pixels ?? 0),
                 hit: dash?.hit, hitX: dash?.hitX,
             });
         }
     }
 
-    moveTackle(width, origin, tall, pixelToWorld) {
-        const { waist, x, z, dx, dz, range, hit, angle } = this.model.tackle;
-        const { time, clipDuration } = this.attack;
-        const turn = smoothstep(time / 0.25) * (1 - smoothstep((time / clipDuration - 0.83) / 0.17));
-        const direction = this.attack.direction ??= origin <= width / 2 + 1 ? 1 : -1;
-        const heading = angle + (direction < 0 ? Math.PI : 0);
-        const delta = Math.atan2(Math.sin(heading - this.angle), Math.cos(heading - this.angle));
-        const yaw = this.angle + turn * delta;
+    moveTackle(width, origin, tall, pixelToWorld, floor, height) {
+        const { waist, x, z, dx, dz, range, hit } = this.model.tackle;
+        const forward = Math.sin(this.angle);
+        const depth = Math.cos(this.angle);
         const moveX = waist.position.x - x;
         const moveZ = waist.position.z - z;
         const progress = Math.max(0, Math.min(1, (moveX * dx + moveZ * dz) / range));
-        const room = direction > 0 ? width - origin : origin;
-        const length = Math.max(0, room - Math.min(tall * 0.27, width * 0.20) - 8);
-        const pixels = direction * length * progress;
-        const sin = Math.sin(yaw), cos = Math.cos(yaw);
-        const scale = this.placement.scale.x;
-        this.turntable.rotation.y = yaw;
-        this.turntable.position.set(pixels * pixelToWorld - scale * (cos * moveX + sin * moveZ), 0,
-            scale * (sin * moveX - cos * moveZ));
-        return { pixels, hit, hitX: origin + direction * length };
+        const room = forward >= 0 ? width - origin : origin;
+        const stride = forward * Math.max(0, room - Math.min(tall * 0.29, width * 0.20) - 8);
+        const pixels = stride * progress;
+        const depthProgress = depth * progress;
+        // The orthographic view uses scale and ground contact to show movement into depth.
+        const scale = 1 + depthProgress * 0.19;
+        const floorOffset = depthProgress * Math.min(height * 0.085, Math.max(0, height - floor) * 0.62);
+        const placementScale = this.placement.scale.x * scale;
+        this.turntable.scale.setScalar(scale);
+        this.turntable.position.set(
+            pixels * pixelToWorld - placementScale * (depth * moveX + forward * moveZ),
+            -floorOffset * pixelToWorld,
+            depthProgress * 1.1 + placementScale * (forward * moveX - depth * moveZ),
+        );
+        return { pixels, scale, floorOffset, hit, hitX: origin + stride };
     }
 
     fitFrame(aspect) {
         const { bounds, camera, model, turntable, placement } = this;
         turntable.position.set(0, 0, 0);
+        turntable.scale.setScalar(1);
         turntable.rotation.y = this.angle;
         turntable.updateMatrixWorld(true);
-        // Always frame the resting silhouette. The battle animation moves inside this fixed view.
+        // Frame the resting silhouette so the battle animation doesn't move the camera.
         bounds.copy(model.idleBounds).applyMatrix4(placement.matrixWorld);
 
-        const largest = this.normalHeight() * DYNAMAX_SCALE;
+        const frameReference = this.form === 'normal' && !mobile.matches ? this.species.height : this.normalHeight();
+        const largest = frameReference * DYNAMAX_SCALE;
         const baseFrame = Math.max(FRAME_HEIGHT, (largest + 0.38) / FLOOR);
         const fitWidth = (bounds.max.x - bounds.min.x + MODEL_MARGIN * 2) / aspect;
         const fitHeight = bounds.max.y - bounds.min.y + MODEL_MARGIN * 2;
@@ -694,26 +699,68 @@ class PokemonViewer {
 }
 
 export function mountShowcase(section) {
+    const layout = section.querySelector('.pokemon-layout');
     const grid = section.querySelector('.pokemon-grid');
     const panel = section.querySelector('.pokemon-panel');
     const inspector = section.querySelector('.pokemon-inspector');
     const pagination = section.querySelector('.pokemon-pagination');
     const template = section.querySelector('template');
-    const dex = section.querySelector('.pokemon-dex');
-    const evolutionOrder = [0, 2, 1];
-    const updatePokedex = mountPokedex(dex, evolutionOrder.map(index => SPECIES[index]),
-        index => selectPokemon(evolutionOrder[index]));
+    const title = section.querySelector('#pokemon-title');
+    const header = section.querySelector('.pokemon-header');
+    const dialog = section.querySelector('.pokemon-dex-dialog');
+    const openDetailsButton = section.querySelector('[data-open-dex]');
+    const inlineDetails = matchMedia('(min-width: 1100px) and (min-aspect-ratio: 3/2)');
+    const mobileOrder = [0, 2, 1];
+    const updatePokedex = mountPokedex(panel);
     let selected = -1;
     const slotAnimations = new Map();
     let panelAnimation;
     const cards = SPECIES.map((species, index) => {
         const card = template.content.firstElementChild.cloneNode(true);
         const viewer = new PokemonViewer(species, card, section, () => selectPokemon(index));
-        viewer.onFormChange = changed => { if (changed.focused) updatePokedex(changed); };
+        viewer.onFormChange = changed => { if (changed.focused) updateProfile(changed); };
         grid.append(card);
         inspector.append(viewer.controls);
         return viewer;
     });
+
+    function updateProfile(viewer) {
+        const label = viewer
+            ? viewer.species.name + (viewer.form === 'normal' ? '' : ` ${FORMS[viewer.form]}`)
+            : 'Pokémon';
+        if (title.textContent !== label) title.textContent = label;
+        updatePokedex(viewer);
+    }
+
+    function refreshDetails() {
+        if (dialog.open && (selected === -1 || inlineDetails.matches)) dialog.close();
+        if (!dialog.open && panel.parentElement !== layout) layout.append(panel);
+        panel.hidden = selected === -1 || (!inlineDetails.matches && !dialog.open);
+        openDetailsButton.hidden = selected === -1 || inlineDetails.matches;
+    }
+
+    openDetailsButton.addEventListener('click', () => {
+        if (selected === -1 || inlineDetails.matches || dialog.open) return;
+        dialog.append(panel);
+        panel.hidden = false;
+        dialog.showModal();
+    });
+    section.querySelector('[data-close-dex]').addEventListener('click', () => dialog.close());
+    dialog.addEventListener('close', refreshDetails);
+    inlineDetails.addEventListener('change', refreshDetails);
+
+    function fitViewport() {
+        if (section.classList.contains('hidden')) return;
+        const top = layout.getBoundingClientRect().top + window.scrollY;
+        const padding = parseFloat(getComputedStyle(section.parentElement).paddingBottom) || 0;
+        const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+        const available = Math.max(0, Math.floor(viewportHeight - top - padding - 2));
+        const controls = inspector.offsetHeight + (mobile.matches ? 0 : pagination.offsetHeight) + 12;
+        // Reserve the control row on desktop so revealing it doesn't counteract the selection zoom.
+        const reserved = mobile.matches ? controls : Math.max(106, controls);
+        section.style.setProperty('--pokemon-layout-space', `${available}px`);
+        section.style.setProperty('--pokemon-stage-space', `${Math.max(76, available - reserved)}px`);
+    }
 
     function loadViewer(viewer) {
         if (!viewer.model && !viewer.loading) viewer.select(viewer.form);
@@ -732,8 +779,9 @@ export function mountShowcase(section) {
         panelAnimation?.cancel();
         selected = index;
         grid.toggleAttribute('data-focus', index !== -1);
-        panel.hidden = index === -1;
+        inspector.hidden = index === -1;
         pagination.hidden = index === -1;
+        refreshDetails();
         const count = cards.length;
         for (const [position, viewer] of cards.entries()) {
             // In the carousel, the cards reached by the previous and next arrows flank the selection.
@@ -741,8 +789,9 @@ export function mountShowcase(section) {
             viewer.card.style.order = slot;
             viewer.setFocus(position === index);
         }
-        updatePokedex(index === -1 ? null : cards[index]);
+        updateProfile(index === -1 ? null : cards[index]);
         if (mobile.matches) loadViewer(cards[index]);
+        fitViewport();
         if (smooth) {
             for (const [position, { card }] of cards.entries()) {
                 const before = oldCenters[position];
@@ -755,7 +804,7 @@ export function mountShowcase(section) {
                     { transform: 'translate(0, 0)' },
                 ], { duration: CAROUSEL_DURATION, easing: 'cubic-bezier(0.23, 0.72, 0.24, 1)' }));
             }
-            if (index !== -1 && previous === -1) {
+            if (index !== -1 && previous === -1 && !panel.hidden) {
                 panelAnimation = panel.animate([
                     { opacity: 0, transform: 'translateX(10px)' },
                     { opacity: 1, transform: 'translateX(0)' },
@@ -766,7 +815,7 @@ export function mountShowcase(section) {
 
     for (const [selector, step] of [['[data-prev]', -1], ['[data-next]', 1]]) {
         section.querySelector(selector).addEventListener('click', () => {
-            const order = mobile.matches ? evolutionOrder : [0, 1, 2];
+            const order = mobile.matches ? mobileOrder : [0, 1, 2];
             const position = order.indexOf(selected);
             selectPokemon(order[(position + step + order.length) % order.length]);
         });
@@ -776,20 +825,29 @@ export function mountShowcase(section) {
         if (selected < 0 || mobile.matches) return;
         const previous = cards[selected];
         selectPokemon(-1);
-        previous.name.focus({ preventScroll: true });
+        (previous.target.disabled ? title : previous.target).focus({ preventScroll: true });
     }
     section.querySelector('[data-overview]').addEventListener('click', showTrio);
     section.addEventListener('keydown', event => {
-        if (event.key === 'Escape') showTrio();
+        if (event.key === 'Escape' && !dialog.open && !closeVolume()) showTrio();
     });
 
     function refreshView() {
         if (mobile.matches && selected === -1) selectPokemon(0);
         if (!mobile.matches) cards.forEach(loadViewer);
         cards.forEach(card => card.updatePlacement());
+        refreshDetails();
+        fitViewport();
     }
 
-    mountVolume(section, cards);
+    const layoutObserver = new ResizeObserver(fitViewport);
+    for (const element of [document.querySelector('body > header'), header, inspector, pagination]) {
+        if (element) layoutObserver.observe(element);
+    }
+    window.addEventListener('resize', fitViewport);
+    window.visualViewport?.addEventListener('resize', fitViewport);
+
+    const closeVolume = mountVolume(section, cards);
     loadAttackSprites();
     mobile.addEventListener('change', refreshView);
     refreshView();
@@ -797,8 +855,13 @@ export function mountShowcase(section) {
     return {
         show: () => {
             if (!mobile.matches) selectPokemon(-1);
+            fitViewport();
             cards.forEach(card => card.invalidate());
         },
-        hide: () => cards.forEach(card => card.suspend()),
+        hide: () => {
+            if (dialog.open) dialog.close();
+            closeVolume();
+            cards.forEach(card => card.suspend());
+        },
     };
 }
