@@ -113,17 +113,42 @@ function drawPyroBall(ctx, time, frame) {
 }
 
 function drawMaxFlare(ctx, time, frame) {
-    const { floor, modelHeight, extent, duration } = frame;
-    const phase = time / duration;
-    for (let i = 0; i < 5; i++) {
-        const age = (phase - 0.37 - i * 0.035) / 0.43;
+    const { floor, modelHeight, extent, duration, species } = frame;
+    const phase = clamp(time / Math.max(duration, 0.01));
+    // Max Flare must originate high above a Dynamax Pokémon, rather than
+    // reusing the ordinary chest-height Flame Charge path.
+    const originY = floor - modelHeight * (species === 'cinderace' ? 0.70 : 0.61);
+    const charge = ramp(0.06, 0.28, phase) * (1 - ramp(0.45, 0.59, phase));
+    for (let i = 0; i < 3; i++) {
+        const angle = phase * 8 + i * TAU / 3;
+        sprite(ctx, 5 + (i % 4), frame.x + Math.cos(angle) * extent * 0.21,
+            originY + Math.sin(angle) * extent * 0.11, extent * 0.43, extent * 0.46,
+            charge * 0.8, angle * 0.24);
+    }
+    // The enlarged flames rise in an arc and strike farther away than the
+    // normal move; the source animation and its duration are not changed.
+    for (let i = 0; i < 6; i++) {
+        const age = (phase - 0.34 - i * 0.028) / 0.45;
         if (age < 0 || age >= 1) continue;
-        const progress = ramp(0, 0.58, age);
-        const y = floor - modelHeight * (0.35 + i * 0.034) - extent * age * 0.18;
-        const point = attackPoint(frame, y, extent * progress * 0.82);
-        const size = extent * point.scale * lerp(0.40, 0.8, progress);
+        const progress = ramp(0, 0.75, age);
+        const arc = Math.sin(Math.PI * progress) * extent * 0.26;
+        const y = originY - i * extent * 0.023 - arc;
+        const point = attackPoint(frame, y, extent * progress * 0.98);
+        const size = extent * point.scale * lerp(0.52, 0.99, progress);
         sprite(ctx, 5 + Math.min(3, Math.floor(age * 4)), point.x, point.y,
-            size, size * 1.07, (1 - age) * 0.82, (i - 2) * 0.19);
+            size, size * 1.07, (1 - age) * 0.9, (i - 2.5) * 0.17);
+    }
+    const hit = (phase - 0.69) / 0.25;
+    if (hit >= 0 && hit < 1) {
+        const point = attackPoint(frame, originY - extent * 0.11, extent * 0.98);
+        const radius = extent * lerp(0.33, 1.08, hit) * point.scale;
+        sprite(ctx, 2, point.x, point.y, radius, radius * 0.82, (1 - hit) * 0.95);
+        for (let i = 0; i < 6; i++) {
+            const angle = i * TAU / 6;
+            sprite(ctx, 3, point.x + Math.cos(angle) * radius * 0.47,
+                point.y + Math.sin(angle) * radius * 0.4,
+                extent * 0.19, extent * 0.19, (1 - hit) * 0.8, angle);
+        }
     }
 }
 
