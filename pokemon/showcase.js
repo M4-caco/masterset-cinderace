@@ -734,7 +734,13 @@ export function mountShowcase(section) {
         grid.toggleAttribute('data-focus', index !== -1);
         panel.hidden = index === -1;
         pagination.hidden = index === -1;
-        for (const [position, viewer] of cards.entries()) viewer.setFocus(position === index);
+        const count = cards.length;
+        for (const [position, viewer] of cards.entries()) {
+            // In the carousel, the cards reached by the previous and next arrows flank the selection.
+            const slot = index === -1 ? position : (position - index + 1 + count) % count;
+            viewer.card.style.order = slot;
+            viewer.setFocus(position === index);
+        }
         updatePokedex(index === -1 ? null : cards[index]);
         if (mobile.matches) loadViewer(cards[index]);
         if (smooth) {

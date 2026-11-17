@@ -417,6 +417,12 @@
 .pokemon-name:hover { color: var(--pk-accent); }
 .pokemon-viewer[data-selected] .pokemon-name { color: var(--pk-accent); }
 
+@media (min-width: 768px) {
+    .pokemon-grid[data-focus] {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.65fr) minmax(0, 1fr);
+    }
+}
+
 .pokemon-grid[data-focus] .pokemon-viewer:not([data-selected]) .pokemon-stage {
     filter: brightness(0.59) saturate(0.82);
 }
