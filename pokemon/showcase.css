@@ -159,7 +159,7 @@
     color: #fff7ed;
     font-size: clamp(1.1rem, 8cqw, 3.4rem);
     opacity: 1;
-    text-shadow: 0 0 7px #fff0d7, 0 0 20px #ffaf73, 0 0 38px #fa5e5a;
+    text-shadow: none;
 }
 
 /* Both forms use the same silhouette. The clip keeps the Dynamax stroke inside its edge. */
