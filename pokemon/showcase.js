@@ -16,7 +16,8 @@ const SPECIES = [
     { id: 'raboot', name: 'Raboot', height: 0.99, focusHeight: 1.73, angle: -0.08, cloudScale: 0.5 },
 ];
 const FRAME_HEIGHT = 2.52;
-const FLOOR = 0.89;
+// A consistent low ground line keeps models from growing downward when focused.
+const FLOOR = 0.91;
 const DYNAMAX_SCALE = 1.25;
 const GIGAMAX_SCALE = 1.04;
 const CAROUSEL_DURATION = 440;
@@ -672,7 +673,7 @@ class PokemonViewer {
                 positionMaxClouds(this.cloud, this.displayHeight, frameHeight, this.angle,
                     ambient ? now / 1000 : 0, floor, mountScale * this.placement.scale.x,
                     Math.min(-cameraLeft, cameraRight), gigamax,
-                    gigamax && this.model.head ? this.cloudAnchor : null);
+                    gigamax && this.model.head ? this.cloudAnchor : null, this.focused);
             }
         }
         renderer.render(this.scene, camera);
@@ -729,21 +730,37 @@ class PokemonViewer {
         // Use the whole viewing area for the silhouette, including the space beyond the card slot.
         bounds.copy(model.idleBounds).applyMatrix4(placement.matrixWorld);
 
-        const baseFrame = this.form === 'normal' ? FRAME_HEIGHT : Math.max(FRAME_HEIGHT, (bounds.max.y + 0.25) / 0.93);
+        // Keep the ground at one screen position as the carousel grows.
+        // Previously the vertical framing clamp moved the feet downward when
+        // switching to a larger Dynamax model.
+        const desiredFloor = this.form === 'gigamax' ? 0.94
+            : this.form === 'dynamax' ? 0.925 : FLOOR;
+        const baseFrame = this.form === 'normal' ? FRAME_HEIGHT
+            : Math.max(FRAME_HEIGHT, (bounds.max.y + 0.25) / desiredFloor);
         const fitWidth = height * Math.max(
             (MODEL_MARGIN - bounds.min.x) / Math.max(1, leftPixels),
             (bounds.max.x + MODEL_MARGIN) / Math.max(1, rightPixels),
         );
         const fitHeight = bounds.max.y - bounds.min.y + MODEL_MARGIN * 2;
-        const frameHeight = Math.max(baseFrame, fitWidth, fitHeight);
-        const halfHeight = frameHeight / 2;
-        // A taller Max scene gets more sky while keeping the Pokémon lower.
-        const desiredFloor = this.form === 'gigamax' ? 0.915
-            : this.form === 'dynamax' ? 0.905 : FLOOR;
-        const y = Math.max(bounds.max.y - halfHeight + MODEL_MARGIN,
-            Math.min(frameHeight * (desiredFloor - 0.5), bounds.min.y + halfHeight - MODEL_MARGIN));
+        let frameHeight = Math.max(baseFrame, fitWidth, fitHeight,
+            (bounds.max.y + MODEL_MARGIN) / desiredFloor,
+            (MODEL_MARGIN - bounds.min.y) / (1 - desiredFloor));
+
+        if (this.focused && this.form !== 'normal') {
+            // Reserve sky for the *entire* selected Max cloud ring before the
+            // renderer places it. Otherwise the top-edge clamp forces clouds
+            // closer to the ears as the Pokémon grows in the center.
+            const cloudFactor = this.form === 'gigamax' ? 1.9 : this.species.cloudScale;
+            const cloudSize = cloudFactor * this.placement.scale.x;
+            const cloudTop = this.displayHeight + cloudSize * (
+                this.form === 'gigamax' ? 0.13 + 0.12 + 0.28 : 0.18 + 0.12 + 0.31
+            ) + MODEL_MARGIN;
+            frameHeight = Math.max(frameHeight, cloudTop / desiredFloor);
+        }
+
+        const y = frameHeight * (desiredFloor - 0.5);
         camera.position.y = y;
-        return { frameHeight, floor: 0.5 + y / frameHeight };
+        return { frameHeight, floor: desiredFloor };
     }
 
     keepAttackInView(pixelToWorld) {
