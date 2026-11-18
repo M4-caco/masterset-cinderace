@@ -30,9 +30,9 @@
   const cardsPerPage = 9;
   const storageKey = 'scorace_binder_mode_v1';
   const binderBaseUrl = new URL(frame.dataset.src, location.href);
-  window.scoraceBinderSetProfile = function(uid) {
+  window.scoraceBinderSetProfile = function(uid, useLegacyLibrary = false) {
     const url = new URL(binderBaseUrl);
-    url.searchParams.set('profile', uid || 'guest');
+    url.searchParams.set('profile', useLegacyLibrary && uid ? 'legacy' : (uid || 'guest'));
     const newSrc = url.pathname + url.search;
     if (frame.dataset.src === newSrc) return;
     frameReady = false;
