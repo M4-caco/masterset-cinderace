@@ -434,7 +434,6 @@ class PokemonViewer {
             this.stage.dataset.form = form;
             this.stage.toggleAttribute('data-max-active', form !== 'normal');
             this.model = model;
-            if (this.species.id === 'cinderace') window.__scoraceShinyDebug = this; // temporary QA only
             this.turntable.clear();
             this.placement = new Group();
             this.placement.add(model.root);
