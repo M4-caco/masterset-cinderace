@@ -36,6 +36,20 @@ assert.equal(pixel(out,128,78)[3],0,'dark nose mark removed');
 assert.equal(pixel(out,128,102)[3],0,'central white line removed');
 assert.equal(pixel(out,128,210)[3],0,'original lavender background transparent');
 assert.deepEqual(pixel(source,128,78),[40,36,40,255],'input remains immutable');
+// The closed-eye pose has no red iris in its upper section. Reuse the first
+// frame's anchors, retaining the black eyelid in exactly the same UVs.
+const blink=new Uint8ClampedArray(width*height*4);
+for(let i=0;i<blink.length;i+=4)blink.set([230,228,238,255],i);
+for(const center of [70,185]){
+    for(let dx=-8;dx<=8;dx++)
+        blink.set([35,31,32,255],(65*width+center+dx)*4);
+    blink.set([35,31,32,255],(170*width+center)*4); // stray lower cheek mark
+}
+const closed=isolateShinyEyeArtwork(blink,width,height,centers);
+for(const center of [70,185]){
+    assert.equal(pixel(closed,center,65)[3],255,'original blink line preserved');
+    assert.equal(pixel(closed,center,170)[3],0,'stray cheek black mark remains invisible');
+}
 assert.throws(()=>isolateShinyEyeArtwork(new Uint8ClampedArray(13),width,height,centers));
 
 const eyes=await readFile(new URL('../pokemon/face-animation.js',import.meta.url),'utf8');
