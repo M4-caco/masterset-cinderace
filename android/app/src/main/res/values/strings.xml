@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SCORACE</string>
+    <string name="offline_title">Sem conexão com o SCORACE</string>
+    <string name="offline_message">Confira sua internet e toque para tentar novamente. Sua coleção permanece salva no Firebase.</string>
+    <string name="retry">Tentar novamente</string>
+    <string name="no_file_picker">Nenhum seletor de arquivos encontrado.</string>
+    <string name="download_started">Download iniciado</string>
+    <string name="download_failed">Não foi possível baixar o arquivo.</string>
+</resources>
