@@ -45,3 +45,11 @@ jobs:
         run: node tests/pokemon-no-attack-effects.mjs
       - name: Testar gestos dos ataques
         run: node tests/pokemon-tap-gestures.mjs
+      - name: Verificar ícones reais dos golpes
+        run: node tests/pokemon-move-icons.mjs
+      - name: Instalar navegador para conferir ícones (somente PR)
+        if: github.event_name == 'pull_request'
+        run: npm install --no-save --no-package-lock --ignore-scripts playwright-core@1.56.0
+      - name: Testar e capturar ícones em Chromium (somente PR)
+        if: github.event_name == 'pull_request'
+        run: node tests/pokemon-move-icons-browser.mjs
