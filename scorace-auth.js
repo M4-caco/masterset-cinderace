@@ -18,6 +18,22 @@ export function initScoraceAuth(firebaseApp, onUserChanged) {
   let currentUser = null;
   let busy = false;
 
+  // Firebase Console accounts may have no displayName. For the existing
+  // SCORACE owner only, display the confirmed nickname instead of email prefix.
+  const ownerUid = 'ni2UkOT32qUXU2UB7g5omv06JZj2';
+  const ownerNickname = 'M4caco';
+  const emailPrefix = user => user?.email?.split('@')[0] || '';
+  function needsOwnerNickname(user) {
+    if (!user || user.uid !== ownerUid) return false;
+    const name = (user.displayName || '').trim();
+    return !name || name.toLowerCase() === emailPrefix(user).toLowerCase();
+  }
+  function nicknameFor(user) {
+    if (!user) return '';
+    if (needsOwnerNickname(user)) return ownerNickname;
+    return user.displayName?.trim() || emailPrefix(user) || 'Colecionador';
+  }
+
   const errorMessages = {
     'auth/email-already-in-use': 'Este e-mail já tem conta. Use Entrar.',
     'auth/invalid-email': 'Confira o endereço de e-mail.',
@@ -52,9 +68,9 @@ export function initScoraceAuth(firebaseApp, onUserChanged) {
       ? 'Seu progresso fica associado à sua conta.'
       : 'Use sua conta para sincronizar a coleção no site e no futuro aplicativo.';
     if (mode === 'account' && currentUser) {
-      document.getElementById('scorace-account-name').textContent = currentUser.displayName || 'Colecionador';
+      document.getElementById('scorace-account-name').textContent = nicknameFor(currentUser);
       document.getElementById('scorace-account-email').textContent = currentUser.email || '';
-      document.getElementById('scorace-edit-nickname').value = currentUser.displayName || '';
+      document.getElementById('scorace-edit-nickname').value = nicknameFor(currentUser);
       const verification = document.getElementById('scorace-verification');
       verification.hidden = !!currentUser.emailVerified;
     }
@@ -62,7 +78,7 @@ export function initScoraceAuth(firebaseApp, onUserChanged) {
   }
   function updateTriggers() {
     triggers.forEach(button => {
-      const nickname = currentUser?.displayName || currentUser?.email?.split('@')[0];
+      const nickname = nicknameFor(currentUser);
       button.textContent = currentUser ? '👤 ' + nickname : '👤 Entrar / Criar conta';
       button.setAttribute('aria-label', currentUser ? 'Abrir minha conta' : 'Entrar ou criar uma conta');
     });
@@ -75,7 +91,7 @@ export function initScoraceAuth(firebaseApp, onUserChanged) {
   // Neste caso, use o apelido salvo no perfil individual do Firestore.
   window.scoraceSyncNickname = async nickname => {
     const clean = typeof nickname === 'string' ? nickname.trim().slice(0, 32) : '';
-    if (!clean || !currentUser || currentUser.displayName) return;
+    if (!clean || !currentUser || (currentUser.displayName && currentUser.displayName.toLowerCase() !== emailPrefix(currentUser).toLowerCase())) return;
     const account = currentUser;
     try {
       await updateProfile(account, {displayName: clean});
@@ -191,6 +207,16 @@ export function initScoraceAuth(firebaseApp, onUserChanged) {
     window.scoraceAccountUser = user;
     updateTriggers();
     if (dialog.open) showMode(user ? 'account' : 'login');
+    if (needsOwnerNickname(user)) {
+      const owner = user;
+      updateProfile(owner, {displayName: ownerNickname}).then(() => {
+        if (currentUser !== owner) return;
+        updateTriggers();
+        if (dialog.open) showMode('account');
+      }).catch(error => {
+        console.warn('Não foi possível salvar o apelido da conta:', error.code || 'desconhecido');
+      });
+    }
     try { await onUserChanged(user); }
     catch (error) {
       console.error('Não foi possível carregar o perfil:', error);
