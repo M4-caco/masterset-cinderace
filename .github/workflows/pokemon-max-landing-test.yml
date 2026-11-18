@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - fix/disable-all-experimental-attack-fx
       - fix/cinderace-shiny-face-attack-anchors
       - feature/max-landing-impact
       - fix/gigamax-tap-ground-fire
@@ -30,16 +31,13 @@ jobs:
         run: |
           node --check pokemon/face-animation.js
           node --check pokemon/showcase.js
-          node --check pokemon/battle-effects.js
-          node --check pokemon/ground-fire.js
+          node --check pokemon/tap-gestures.mjs
           node --check pokemon/entry.js
       - name: Conferir olhos originais Shiny do Cinderace
         run: node tests/pokemon-face-shiny.mjs
       - name: Testar colisão e limpeza de partículas Max
         run: node tests/pokemon-max-landing.mjs
-      - name: Testar fogo 3D de contato e toque Gigamax
-        run: node tests/pokemon-ground-fire.mjs
-      - name: Testar ancoragem dos golpes Pokémon
-        run: node tests/pokemon-effect-space.mjs
+      - name: Verificar remoção completa dos efeitos experimentais de golpes
+        run: node tests/pokemon-no-attack-effects.mjs
       - name: Testar gestos dos ataques
         run: node tests/pokemon-tap-gestures.mjs
