@@ -36,3 +36,14 @@ O módulo `max-landing.js` adiciona uma explosão leve de fragmentos tridimensio
 **Limite dos recursos:** os fragmentos e a poeira desta implementação são materiais e geometrias procedurais, não as texturas exatas de `breadbattlefx_assets_all`. O repositório ainda não contém os arquivos de textura da aterrissagem Max que foram mencionados em um teste anterior. Substituí-los pela extração original e fazer uma comparação visual com Pokémon GO são tarefas distintas; não afirmar equivalência exata enquanto isso não for verificado.
 
 Teste de trajetória, limpeza e cem reativações por perfil de renderização: `node tests/pokemon-max-landing.mjs`.
+
+
+## Fogo no chão e reação Gigamax (2026-11)
+
+O efeito anterior de fogo no solo desenhava dezesseis chamas idênticas em uma órbita 2D, sem nascer da malha ou considerar a profundidade da cena. Esse desenho foi removido de `battle-effects.js`. O módulo `ground-fire.js` utiliza partículas WebGL em três dimensões, ancoradas no pé animado no momento da emissão, com crescimento, movimento, quadros e dissipação individuais. As partículas são reutilizadas e reduzidas no mobile. Este efeito acompanha a sequência de golpes físicos rápidos, sem criar uma aura permanente ao redor do Pokémon.
+
+As imagens das chamas ainda vêm do atlas `visuals/attack-fx.webp`, adaptado de `attackfx_assets_all`. O efeito ainda **não** é a reprodução literal do prefab do Pokémon GO, cujo grafo original de partículas não está neste repositório. É necessário confrontar o timing e o desenho com vídeo do jogo em WebGL.
+
+Um toque isolado sobre Cinderace Gigamax reproduz a animação original de `Rugido` após a janela de diferenciação de 300 ms. Toques rápidos em sequência cancelam essa reação e não executam golpes. A Bola de Chamas G-Max continua exclusivamente no botão especial.
+
+Teste: `node tests/pokemon-ground-fire.mjs`.
