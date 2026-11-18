@@ -89,7 +89,7 @@ scheduled.forEach(fn => fn());
 assert.equal(roars, 0, 'rapid double tap must cancel the isolated roar');
 clock = 2100;
 method.call(actor);
-scheduled[2]();
+scheduled[scheduled.length - 1]();
 assert.equal(roars, 1, 'isolated Gigamax tap must play the roar');
 assert.equal(cries, 2);
 console.log('PASS: 100 ground fire reuses per profile, physical floor, 3D integration, Gigamax single and rapid taps.');
