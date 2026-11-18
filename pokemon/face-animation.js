@@ -113,15 +113,16 @@ async function loadFrames(id, original, shiny) {
 
 export async function prepareFace(id, materials, controllers) {
     if (id === 'cinderace') {
-        // The opaque rare FaceBase lies above the original Shiny body skin.
-        // At the nose/cheek it generates dark colour islands and a pale edge.
-        // The real BodyAll_SHINY already has the correct grey face beneath it;
-        // leave that skin visible and draw the original eyes over it.
+        // FaceBase is needed to cover the dark eye-hole surface in the model.
+        // Its previous tint (#98918a) was darker than the surrounding skin,
+        // leaving visible brown islands on nose and cheeks. Keep this surface
+        // opaque, but move it toward the body skin colour instead.
         for (const [, normal, rare] of materials) {
             if (!/_FaceBase$/.test(normal.name)) continue;
-            rare.transparent = true;
-            rare.opacity = 0;
-            rare.depthWrite = false;
+            rare.transparent = false;
+            rare.opacity = 1;
+            rare.color.set('#b5aaa1');
+            rare.depthWrite = true;
             rare.needsUpdate = true;
         }
     }
