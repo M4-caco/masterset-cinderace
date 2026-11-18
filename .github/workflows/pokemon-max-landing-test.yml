@@ -110,6 +110,20 @@ jobs:
               page.locator('#pokemon-lineup .pokemon-viewer').nth(1).locator('button.pokemon-target').click()
               page.locator('#pokemon-inspector .pokemon-controls').nth(1).locator('.pokemon-colors button').nth(1).click()
               page.wait_for_timeout(1300)
+              print('FACE_MATERIALS',page.evaluate("""() => {
+                  const v=window.__scoraceShinyDebug;
+                  if(!v?.model)return 'no-debug-model';
+                  return v.model.materialPairs
+                    .filter(([mesh,n,r]) => n.name.includes('_Face'))
+                    .map(([mesh,n,r]) => ({
+                      normal:n.name,rare:r.name,selected:mesh.material.name,
+                      matchesRare:mesh.material===r,
+                      opacity:mesh.material.opacity,transparent:mesh.material.transparent,
+                      alphaTest:mesh.material.alphaTest,
+                      color:mesh.material.color.getHexString(),
+                      imageWidth:mesh.material.map?.image?.width
+                    }));
+              }"""))
               stage=page.locator('#pokemon-lineup .pokemon-viewer').nth(1).locator('.pokemon-stage')
               shot=stage.screenshot()
               img=Image.open(io.BytesIO(shot)).convert('RGB')
