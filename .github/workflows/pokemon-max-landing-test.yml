@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - fix/cinderace-shiny-eye-edge-artifacts-v4
       - fix/cinderace-shiny-face-attack-anchors
       - feature/max-landing-impact
       - fix/gigamax-tap-ground-fire
@@ -43,3 +44,40 @@ jobs:
         run: node tests/pokemon-effect-space.mjs
       - name: Testar gestos dos ataques
         run: node tests/pokemon-tap-gestures.mjs
+
+      - name: Revisar face Shiny em WebGL real (temporário)
+        run: |
+          python -m pip install --quiet playwright Pillow
+          (python -m http.server 8765 --bind 127.0.0.1 >/tmp/scorace-http.log 2>&1 &)
+          python - <<'PY'
+          from playwright.sync_api import sync_playwright
+          from PIL import Image
+          import io,base64
+          with sync_playwright() as p:
+              browser=p.chromium.launch(headless=True,executable_path='/usr/bin/google-chrome',args=['--no-sandbox','--use-gl=angle','--use-angle=swiftshader','--enable-unsafe-swiftshader','--disable-dev-shm-usage'])
+              page=browser.new_page(viewport={'width':1440,'height':900})
+              errors=[]
+              page.on('pageerror',lambda e:errors.append(str(e)))
+              page.goto('http://127.0.0.1:8765/',wait_until='domcontentloaded')
+              page.locator('#nav-pokemon').click()
+              card=page.locator('#pokemon-lineup .pokemon-viewer').nth(1)
+              card.locator('.pokemon-stage[data-ready]').wait_for(timeout=30000)
+              card.locator('button.pokemon-target').click()
+              page.locator('#pokemon-inspector .pokemon-controls').nth(1).locator('.pokemon-colors button').nth(1).click()
+              page.wait_for_timeout(850)
+              stage=card.locator('.pokemon-stage')
+              im=Image.open(io.BytesIO(stage.screenshot())).convert('RGB')
+              face=im.crop((int(im.width*.24),int(im.height*.43),int(im.width*.76),int(im.height*.68)))
+              face=face.resize((face.width*4,face.height*4))
+              full=im.resize((im.width*2,im.height*2))
+              canvas=Image.new('RGB',(face.width+full.width,max(face.height,full.height)),(96,96,96))
+              canvas.paste(face,(0,0))
+              canvas.paste(full,(face.width,0))
+              stream=io.BytesIO()
+              canvas.save(stream,format='JPEG',quality=78,optimize=True)
+              print('FACE_QA_BROWSER_ERRORS',errors[:5])
+              print('FACE_QA_JPEG_BEGIN')
+              print(base64.b64encode(stream.getvalue()).decode())
+              print('FACE_QA_JPEG_END')
+              browser.close()
+          PY
