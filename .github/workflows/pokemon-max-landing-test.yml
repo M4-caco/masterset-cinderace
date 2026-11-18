@@ -67,7 +67,7 @@ jobs:
               page.wait_for_timeout(1600)
               stage=card.locator('.pokemon-stage')
               full=Image.open(io.BytesIO(stage.screenshot())).convert('RGB')
-              crop=full.crop((int(full.width*.31),int(full.height*.50),int(full.width*.69),int(full.height*.71)))
+              crop=full.crop((int(full.width*.17),int(full.height*.25),int(full.width*.83),int(full.height*.55)))
               crop=crop.resize((crop.width*3,crop.height*3))
               data=io.BytesIO()
               crop.save(data,format='JPEG',quality=88,optimize=True)
