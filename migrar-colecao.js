@@ -12,7 +12,6 @@ const config={
   appId:"1:612860563936:web:9e2c47620127cbb0e05b85"
 };
 const OWNER_UID='ni2UkOT32qUXU2UB7g5omv06JZj2';
-const OWNER_EMAIL='yhtam712@gmail.com';
 const SOURCE_PATH='users_data/cinderace_masterset';
 const DEST_PATH='users_data/'+OWNER_UID;
 const app=initializeApp(config,'scorace-migration');
@@ -31,7 +30,7 @@ function status(message,type='') {
 }
 function visible(id,show) {$ (id).hidden=!show;}
 function owner(user) {
-  return !!user && user.uid===OWNER_UID && user.email?.toLowerCase()===OWNER_EMAIL;
+  return !!user && user.uid===OWNER_UID;
 }
 function needOwner() {
   if (!owner(auth.currentUser)) throw new Error('Somente a conta M4caco pode migrar esta coleção.');
@@ -255,6 +254,7 @@ onAuthStateChanged(auth,user=>{
   visible('step-data',!!user);
   if(user){
     $('account-email').textContent=user.email||'';
+    $('destination-path').textContent=DEST_PATH;
     status('Conta M4caco reconhecida. Clique em “Verificar coleção atual no Firebase”.');
   }else{
     status('Entre na sua conta M4caco para começar. Nenhum dado será modificado sem sua confirmação.');
