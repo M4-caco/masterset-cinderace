@@ -523,6 +523,7 @@
               <button type="button" id="scorace-refresh-verification" data-scorace-auth-action class="scorace-auth-secondary">Já verifiquei</button>
             </div>
           </div>
+          <button type="button" id="scorace-import-legacy-items" class="scorace-auth-secondary" hidden>Importar itens deste navegador</button>
           <p id="scorace-account-sync" class="scorace-auth-status">Carregando conta...</p>
           <button type="button" id="scorace-logout" data-scorace-auth-action class="scorace-auth-secondary">Sair da conta</button>
         </div>
@@ -1752,6 +1753,25 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 } catch (error) { console.warn('Cache local indisponível:', error); }
                 window.scoraceItemsApplyCloud?.(data.itemsOwned || {});
                 window.scoraceBinderSetProfile?.(user.uid, data.migratedLegacy === true);
+                if (data.migratedLegacy === true) {
+                    // Local Mercado drafts belong to the original browser, not the old
+                    // shared Firestore doc. Copy only for the migrated owner profile.
+                    const savedDraft = localStorage.getItem('scorace_market_draft_v1');
+                    if (savedDraft && !localStorage.getItem(userStorageKey('scorace_market_draft_v1'))) {
+                        localStorage.setItem(userStorageKey('scorace_market_draft_v1'), savedDraft);
+                        restoreMarketDraft();
+                    }
+                }
+                const importButton = document.getElementById('scorace-import-legacy-items');
+                let hasLocalLegacyItems = false;
+                try {
+                    const items = JSON.parse(localStorage.getItem('scorace_official_items_owned_v1') || '{}');
+                    hasLocalLegacyItems = items && typeof items === 'object' && Object.values(items).some(Boolean);
+                } catch (_) {}
+                importButton.hidden = !(data.migratedLegacy === true
+                  && !data.legacyItemsImportedAt
+                  && !Object.values(data.itemsOwned || {}).some(Boolean)
+                  && hasLocalLegacyItems);
                 sync.textContent = 'Coleção sincronizada';
                 renderMarketReview();
                 if (isInitialLoad) {
@@ -1768,6 +1788,38 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             });
         }
         initScoraceAuth(firebaseApp, loadAccountCollection);
+        document.getElementById('scorace-import-legacy-items').addEventListener('click', async () => {
+            if (!collectionReady || !activeAccount || !docRef) return;
+            const button = document.getElementById('scorace-import-legacy-items');
+            const status = document.getElementById('scorace-account-sync');
+            let items;
+            try { items = JSON.parse(localStorage.getItem('scorace_official_items_owned_v1') || '{}'); }
+            catch (_) { status.textContent = 'Os itens salvos neste navegador estão inválidos.'; return; }
+            if (!items || typeof items !== 'object' || !Object.values(items).some(Boolean)) return;
+            if (!window.confirm('Importar os itens marcados como adquiridos neste navegador para sua conta SCORACE?')) return;
+            button.disabled = true;
+            try {
+                const target = docRef;
+                await runTransaction(db, async transaction => {
+                    const snapshot = await transaction.get(target);
+                    const data = snapshot.data() || {};
+                    if (!snapshot.exists() || !data.migratedLegacy || data.legacyItemsImportedAt
+                        || Object.values(data.itemsOwned || {}).some(Boolean)) {
+                        throw new Error('O perfil já possui itens ou não está autorizado para importação.');
+                    }
+                    transaction.update(target, {
+                        itemsOwned: items,
+                        legacyItemsImportedAt: new Date().toISOString()
+                    });
+                });
+                status.textContent = 'Itens antigos importados para sua conta.';
+                button.hidden = true;
+            } catch (error) {
+                console.error('Falha ao importar itens:', error);
+                status.textContent = 'Não foi possível importar itens. Tente novamente.';
+            } finally { button.disabled = false; }
+        });
+
 
         window.toggleMobileMenu = function() {
             const menu = document.getElementById('mobile-menu');
