@@ -1,0 +1,82 @@
+name: SCORACE Android APK (teste)
+
+on:
+  push:
+    branches:
+      - feature/scorace-android
+    paths:
+      - 'android/**'
+      - '.github/workflows/scorace-android-apk.yml'
+      - 'scorace-symbol-256.webp'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Gradle 8.11.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.11.1'
+
+      - name: Python 3
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Icones oficiais
+        run: |
+          python -m pip install 'Pillow==11.3.0'
+          python android/scripts/generate_icons.py
+
+      - name: Android SDK 35
+        run: |
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null || true
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Compilar APK Android
+        run: gradle -p android :app:assembleDebug --no-daemon --stacktrace
+
+      - name: Validar APK gerado
+        run: |
+          test -s android/app/build/outputs/apk/debug/app-debug.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk SCORACE-Android-Teste.apk
+          sha256sum SCORACE-Android-Teste.apk
+
+      - name: Anexar APK como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: SCORACE-Android-Teste
+          path: SCORACE-Android-Teste.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Disponibilizar APK no GitHub Releases
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: scorace-android-teste-${{ github.run_number }}
+          target_commitish: ${{ github.sha }}
+          name: SCORACE Android | Teste ${{ github.run_number }}
+          prerelease: true
+          make_latest: false
+          files: SCORACE-Android-Teste.apk
+          fail_on_unmatched_files: true
+          body: |
+            APK de TESTE do SCORACE para Android, assinado temporariamente para instalacao direta.
+            Abre o site HTTPS oficial e utiliza a mesma conta Firebase do SCORACE.
+            A colecao na nuvem e sincronizada, mas capas e ficharios personalizados locais ainda nao.
+            O aplicativo nao foi testado em aparelhos Android reais.
+            Futuras atualizacoes poderao exigir desinstalar este APK de teste.
