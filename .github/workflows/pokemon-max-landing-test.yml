@@ -1,0 +1,31 @@
+name: Pokémon 3D smoke test
+
+on:
+  push:
+    branches:
+      - feature/max-landing-impact
+    paths:
+      - 'pokemon/**'
+      - 'tests/pokemon-*.mjs'
+      - '.github/workflows/pokemon-max-landing-test.yml'
+      - 'index.html'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  max-impact:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Testar colisão e limpeza de partículas Max
+        run: node tests/pokemon-max-landing.mjs
+      - name: Testar ancoragem dos golpes Pokémon
+        run: node tests/pokemon-effect-space.mjs
+      - name: Testar gestos dos ataques
+        run: node tests/pokemon-tap-gestures.mjs
