@@ -29,47 +29,71 @@ export function restoreShinyFaceArtwork(pixels, width, height) {
     if (pixels.length !== width * height * 4)
         throw new Error('Invalid Shiny face frame');
     const output = new Uint8ClampedArray(pixels);
-    const bg = (Math.floor(height * .92) * width + Math.floor(width * .5)) * 4;
-    const skin = (Math.floor(height * .20) * width + Math.floor(width * .08)) * 4;
-    const background = [pixels[bg], pixels[bg + 1], pixels[bg + 2]];
-    const patch = [pixels[skin], pixels[skin + 1], pixels[skin + 2]];
+    const sample = (Math.floor(height * .92) * width + Math.floor(width / 2)) * 4;
+    const background = [pixels[sample], pixels[sample + 1], pixels[sample + 2]];
     const count = width * height;
-    const connectedBackground = new Uint8Array(count);
+    const visited = new Uint8Array(count);
     const queue = new Int32Array(count);
-    const distance = (at, tone) => {
-        const i=at*4;
+    let first = 0, last = 0;
+    const distance = position => {
+        const i = position * 4;
         return Math.hypot(
-            pixels[i]-tone[0], pixels[i+1]-tone[1], pixels[i+2]-tone[2]
+            pixels[i] - background[0],
+            pixels[i + 1] - background[1],
+            pixels[i + 2] - background[2]
         );
     };
-    let head=0, tail=0;
-    const enqueue = at => {
-        if (connectedBackground[at] || distance(at,background)>15) return;
-        connectedBackground[at]=1;
-        queue[tail++]=at;
+    // Flood-fill only the backdrop: preserve pale whites surrounded by the
+    // red iris, dark lash or warm Shiny skin, even if close to lilac in RGB.
+    const visit = position => {
+        if (visited[position] || distance(position) > 16) return;
+        visited[position] = 1;
+        queue[last++] = position;
     };
-    for(let x=0;x<width;x++){
-        enqueue(x);enqueue((height-1)*width+x);
+    for (let x = 0; x < width; x++) {
+        visit(x);
+        visit((height - 1) * width + x);
     }
-    for(let y=0;y<height;y++){
-        enqueue(y*width);enqueue(y*width+width-1);
+    for (let y = 0; y < height; y++) {
+        visit(y * width);
+        visit(y * width + width - 1);
     }
-    while(head<tail){
-        const at=queue[head++],x=at%width,y=Math.floor(at/width);
-        if(x>0)enqueue(at-1);
-        if(x+1<width)enqueue(at+1);
-        if(y>0)enqueue(at-width);
-        if(y+1<height)enqueue(at+width);
+    while (first < last) {
+        const position = queue[first++];
+        const x = position % width;
+        const y = Math.floor(position / width);
+        if (x > 0) visit(position - 1);
+        if (x + 1 < width) visit(position + 1);
+        if (y > 0) visit(position - width);
+        if (y + 1 < height) visit(position + width);
     }
-    for(let at=0;at<count;at++){
-        const patchDistance=distance(at,patch);
-        // The disconnected original white sclera keeps full opacity even
-        // when its RGB is close to lavender: do not threshold it by colour.
-        const skinMask=Math.max(0,Math.min(1,(patchDistance-9)/15));
-        const backdropMask=connectedBackground[at]
-            ? Math.max(0,Math.min(1,(distance(at,background)-5)/10))
-            : 1;
-        output[at*4+3]=Math.round(pixels[at*4+3]*skinMask*backdropMask);
+    for (let position = 0; position < count; position++) {
+        if (!visited[position]) continue;
+        // Transparent lavender outside the original illustration; a subtle
+        // only-at-the-border fade retains texture antialias without a halo.
+        const d = distance(position);
+        output[position * 4 + 3] = Math.round(
+            pixels[position * 4 + 3] * Math.max(0, Math.min(1, (d - 5) / 11))
+        );
+    }
+    // Keep the opaque skin islands that cover the dark model underlay.
+    // Harmonize ONLY their warm tan pixels with the existing FaceBase tint;
+    // red iris, white sclera, black lashes and eyelids are outside this range.
+    const skinSample = (Math.floor(height*.20)*width+Math.floor(width*.08))*4;
+    const skinTone = [pixels[skinSample],pixels[skinSample+1],pixels[skinSample+2]];
+    const correctedTone = [181,170,161]; // same as rare FaceBase (#b5aaa1)
+    for (let p=0;p<count;p++) {
+        if (visited[p]) continue;
+        const i=p*4;
+        const d=Math.hypot(
+            pixels[i]-skinTone[0],pixels[i+1]-skinTone[1],pixels[i+2]-skinTone[2]
+        );
+        if (d>=20) continue;
+        const strength=Math.max(0,Math.min(1,(20-d)/12));
+        for(let channel=0;channel<3;channel++)
+            output[i+channel]=Math.round(
+                pixels[i+channel]+strength*(correctedTone[channel]-skinTone[channel])
+            );
     }
     return output;
 }
