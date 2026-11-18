@@ -44,3 +44,47 @@ jobs:
         run: node tests/pokemon-effect-space.mjs
       - name: Testar gestos dos ataques
         run: node tests/pokemon-tap-gestures.mjs
+      - name: Preview temporário da textura Shiny (diagnóstico)
+        run: |
+          python -m pip install --quiet Pillow
+          python - <<'PY'
+          import json,io
+          from PIL import Image
+          j=json.load(open('pokemon/models/cinderace.gltf'))
+          b=open('pokemon/models/cinderace-2.bin','rb').read()
+          for i,name in [(5,'base'),(7,'original')]:
+              v=j['bufferViews'][j['images'][i]['bufferView']]
+              raw=b[v['byteOffset']:v['byteOffset']+v['byteLength']]
+              im=Image.open(io.BytesIO(raw)).convert('RGBA').resize((256,256))
+              open('/tmp/'+name+'.rgba','wb').write(im.tobytes())
+          atlas=Image.open('pokemon/visuals/cinderace-face-shiny.webp').convert('RGBA')
+          for i in range(3):
+              im=atlas.crop((0,i*256,256,(i+1)*256))
+              open('/tmp/pose'+str(i)+'.rgba','wb').write(im.tobytes())
+          PY
+          node --input-type=module - <<'JS'
+          import fs from 'node:fs';
+          import { composeShinyEyePixels } from './pokemon/face-animation.js';
+          const native=new Uint8ClampedArray(fs.readFileSync('/tmp/original.rgba'));
+          for(let i=0;i<3;i++){
+            const pose=new Uint8ClampedArray(fs.readFileSync('/tmp/pose'+i+'.rgba'));
+            const pixels=composeShinyEyePixels(native,pose,256,256);
+            fs.writeFileSync('/tmp/out'+i+'.rgba',Buffer.from(pixels));
+          }
+          JS
+          python - <<'PY'
+          import base64,io
+          from PIL import Image
+          base=Image.frombytes('RGBA',(256,256),open('/tmp/base.rgba','rb').read())
+          result=Image.new('RGBA',(768,256))
+          for i in range(3):
+              eye=Image.frombytes('RGBA',(256,256),open('/tmp/out'+str(i)+'.rgba','rb').read())
+              frame=base.copy()
+              frame.alpha_composite(eye)
+              result.paste(frame,(i*256,0))
+          bio=io.BytesIO()
+          result.convert('RGB').save(bio,format='PNG',optimize=True)
+          print('PREVIEW_PNG_BASE64_START')
+          print(base64.b64encode(bio.getvalue()).decode())
+          print('PREVIEW_PNG_BASE64_END')
+          PY
