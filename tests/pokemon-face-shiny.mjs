@@ -17,17 +17,37 @@ for(const pose of ['idle','angry','blink']){
         put(input,center+7,65,[247,246,244,255]); // sclera
         put(input,center-11,lidY-2,[233,229,222,255]); // pale lid
     }
+    // A very pale white patch is intentionally close to the lavender RGB;
+    // it must remain when surrounded by the true facial art, not be erased
+    // merely because its colour resembles the background.
+    for(let y=77;y<89;y++)for(let x=54;x<80;x++)
+        put(input,x,y,[184,171,159,255]);
+    put(input,68,83,[235,233,239,255]); // delicate sclera
+    put(input,69,83,[36,32,35,255]); // one-pixel lash/liner
+    // The original tan decal's antialiased edge blends toward lilac.
+    // Previously these pixels caused a grey outline even when the pure
+    // tan interiors were retinted correctly.
+    const mix=(t)=>[...([184,171,159].map((v,k)=>
+        Math.round(v+t*([230,228,238][k]-v)))),255];
+    put(input,115,85,mix(.50)); // half-tan / half-backdrop fringe
+    put(input,114,86,mix(.77)); // very pale border fringe
     put(input,55,175,[42,36,40,255]); // original mouth details
     put(input,198,203,[188,70,50,255]);
     put(input,120,124,[229,229,237,255]); // background variation
     const out=restoreShinyFaceArtwork(input,width,height);
-    for(const x of [30,155])assert.deepEqual(at(out,x,100),[184,171,159,255],pose+' skin');
+    for(const x of [30,155])assert.deepEqual(at(out,x,100),[181,170,161,255],pose+' skin coverage harmonized to FaceBase');
     for(const center of [68,187]){
         assert.deepEqual(at(out,center,lidY),[32,29,31,255],pose+' eyeliner');
         assert.deepEqual(at(out,center,65),[183,66,48,255],pose+' iris');
         assert.deepEqual(at(out,center+7,65),[247,246,244,255],pose+' sclera');
         assert.deepEqual(at(out,center-11,lidY-2),[233,229,222,255],pose+' eyelid');
     }
+    assert.deepEqual(at(out,115,85),[181,170,161,255],
+        'antialiased tan-lavender rim corrected, with full skin coverage');
+    assert.deepEqual(at(out,114,86),[181,170,161,255],
+        'pale outer rim corrected without producing grey contours');
+    assert.deepEqual(at(out,68,83),[235,233,239,255],'pale white inside eye preserved');
+    assert.deepEqual(at(out,69,83),[36,32,35,255],'thin eyelash line preserved');
     assert.deepEqual(at(out,55,175),[42,36,40,255]);
     assert.deepEqual(at(out,198,203),[188,70,50,255]);
     assert.equal(at(out,128,235)[3],0,'lilac backing transparent');
