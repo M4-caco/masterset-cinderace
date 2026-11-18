@@ -66,6 +66,6 @@ const gltf=JSON.parse(await readFile(new URL('../pokemon/models/cinderace.gltf',
 assert.equal(gltf.images[7].name,'pm0815_00_Eye_Col_rare');
 const entry=await readFile(new URL('../pokemon/entry.js',import.meta.url),'utf8');
 const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
-assert.match(entry,/showcase\.js\?v=47/);
-assert.match(html,/pokemon\/entry\.js\?v=47/);
+assert.match(entry,/showcase\.js\?v=48/);
+assert.match(html,/pokemon\/entry\.js\?v=48/);
 console.log('PASS: two original eyes and blink frames preserved, dark nose/cheek marks and white face border removed.');
