@@ -29,6 +29,19 @@
   const smallScreen = matchMedia('(max-width: 740px), (pointer: coarse) and (max-width: 1024px)');
   const cardsPerPage = 9;
   const storageKey = 'scorace_binder_mode_v1';
+  const binderBaseUrl = new URL(frame.dataset.src, location.href);
+  window.scoraceBinderSetProfile = function(uid) {
+    const url = new URL(binderBaseUrl);
+    url.searchParams.set('profile', uid || 'guest');
+    const newSrc = url.pathname + url.search;
+    if (frame.dataset.src === newSrc) return;
+    frameReady = false;
+    frame.removeAttribute('src');
+    frame.dataset.src = newSrc;
+    if (!binder.classList.contains('hidden')) requestAnimationFrame(updateBinderView);
+  };
+  window.scoraceBinderSetProfile(window.scoraceAccountUser?.uid || '');
+
   let mode = 'all';
   let page = 0;
   let pageCount = 0;
