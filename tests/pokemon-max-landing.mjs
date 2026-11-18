@@ -52,6 +52,6 @@ assert.match(showcase, /if \(maxTransformation\) this\.maxLanding\.start/);
 assert.match(showcase, /this\.maxLanding\?\.update\(now\);[\s\S]*?renderer\.render\(this\.scene, camera\)/);
 const entry = await readFile(new URL('../pokemon/entry.js', import.meta.url), 'utf8');
 const index = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-assert.match(entry, /showcase\.js\?v=42/);
-assert.match(index, /pokemon\/entry\.js\?v=42/);
+assert.match(entry, /showcase\.js\?v=43/);
+assert.match(index, /pokemon\/entry\.js\?v=43/);
 console.log('PASS: 100 rapid Max effect restarts for desktop and mobile, bounce physics, cleanup and cache chain.');
