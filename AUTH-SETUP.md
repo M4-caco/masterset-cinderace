@@ -22,6 +22,7 @@ cd scripts
 npm install
 export GOOGLE_APPLICATION_CREDENTIALS="/local/privado/service-account.json"
 export SCORACE_OWNER_UID="UID_DA_CONTA_M4CACO"
+export SCORACE_OWNER_EMAIL="EMAIL_PRIVADO_DA_CONTA"
 npm run preview
 npm run migrate
 ```
