@@ -47,3 +47,11 @@ As imagens das chamas ainda vêm do atlas `visuals/attack-fx.webp`, adaptado de 
 Um toque isolado sobre Cinderace Gigamax reproduz a animação original de `Rugido` após a janela de diferenciação de 300 ms. Toques rápidos em sequência cancelam essa reação e não executam golpes. A Bola de Chamas G-Max continua exclusivamente no botão especial.
 
 Teste: `node tests/pokemon-ground-fire.mjs`.
+
+## Cinderace Shiny: rosto e pontos dos ataques
+
+O Cinderace Shiny agora usa diretamente a textura facial nativa `pm0815_00_Eye_Col_rare` do glTF durante o repouso. O antigo atlas de expressões Shiny trazia áreas bege grandes que cobriam o rosto; os quadros de raiva e piscada são reconstruídos por cima do mapa original e filtram essa máscara. A textura normal, os demais Pokémon e a troca de materiais Shiny permanecem intactos. As transições de expressão ainda são uma adaptação do navegador, não novos frames extraídos do Unity.
+
+A projeção de ataques deixou de usar o centro do maxilar ou a origem global como se fossem a abertura da boca. Scorbunny calcula a saída no espaço entre as pontas das mandíbulas animadas; Raboot vincula o `Feeding_Socket` do glTF à cabeça na pose de repouso e acompanha os movimentos subsequentes dela. O vetor de saída deriva da posição física boca–cabeça, inclusive quando o usuário gira o Pokémon em 360°. Golpes chutados usam `EndRToe2`, não o centro do tornozelo. O G-Max preserva a origem da malha animada `FireBallInSkin`.
+
+**Limitação importante:** estes ajustes corrigem o posicionamento dos efeitos já presentes; os shaders/prefabs de partículas originais dos golpes ainda não foram exportados integralmente ao navegador. Não os apresentar como uma reprodução visual exata do Pokémon GO até testar os recursos originais em WebGL. Testes: `node tests/pokemon-face-shiny.mjs` e `node tests/pokemon-effect-space.mjs`.
