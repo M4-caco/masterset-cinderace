@@ -17,6 +17,13 @@ for(const pose of ['idle','angry','blink']){
         put(input,center+7,65,[247,246,244,255]); // sclera
         put(input,center-11,lidY-2,[233,229,222,255]); // pale lid
     }
+    // A very pale white patch is intentionally close to the lavender RGB;
+    // it must remain when surrounded by the true facial art, not be erased
+    // merely because its colour resembles the background.
+    for(let y=77;y<89;y++)for(let x=54;x<80;x++)
+        put(input,x,y,[184,171,159,255]);
+    put(input,68,83,[235,233,239,255]); // delicate sclera
+    put(input,69,83,[36,32,35,255]); // one-pixel lash/liner
     put(input,55,175,[42,36,40,255]); // original mouth details
     put(input,198,203,[188,70,50,255]);
     put(input,120,124,[229,229,237,255]); // background variation
@@ -28,6 +35,8 @@ for(const pose of ['idle','angry','blink']){
         assert.deepEqual(at(out,center+7,65),[247,246,244,255],pose+' sclera');
         assert.deepEqual(at(out,center-11,lidY-2),[233,229,222,255],pose+' eyelid');
     }
+    assert.deepEqual(at(out,68,83),[235,233,239,255],'pale white inside eye preserved');
+    assert.deepEqual(at(out,69,83),[36,32,35,255],'thin eyelash line preserved');
     assert.deepEqual(at(out,55,175),[42,36,40,255]);
     assert.deepEqual(at(out,198,203),[188,70,50,255]);
     assert.equal(at(out,128,235)[3],0,'lilac backing transparent');
