@@ -29,6 +29,7 @@ export function isolateShinyEyeArtwork(pixels, width, height, centers) {
     if (pixels.length !== width * height * 4) throw new Error('Invalid Shiny face frame');
     const out = new Uint8ClampedArray(width * height * 4);
     const seeded = new Uint8Array(width * height);
+    const redSeeded = new Uint8Array(width * height);
     const nearEye = (x, y) => centers.some(([cx, cy]) =>
         Math.abs(x - cx) <= width * .135 && Math.abs(y - cy) <= height * .16);
     const inside = (x,y) => y <= height * .435 && nearEye(x,y);
@@ -41,11 +42,14 @@ export function isolateShinyEyeArtwork(pixels, width, height, centers) {
         if(!inside(x,y))continue;
         const i=(y*width+x)*4;
         if(ink(pixels[i],pixels[i+1],pixels[i+2]))seeded[y*width+x]=1;
+        if (pixels[i]>115 && pixels[i+1]<165 &&
+            pixels[i]>pixels[i+1]*1.42 && pixels[i]>pixels[i+2]*1.4)
+            redSeeded[y*width+x]=1;
     }
-    const nearInk=(x,y,radius)=>{
+    const nearInk=(x,y,radius,seeds=seeded)=>{
         for(let yy=Math.max(0,y-radius);yy<=Math.min(height-1,y+radius);yy++)
             for(let xx=Math.max(0,x-radius);xx<=Math.min(width-1,x+radius);xx++)
-                if(seeded[yy*width+xx])return true;
+                if(seeds[yy*width+xx])return true;
         return false;
     };
     for(let y=0;y<height;y++)for(let x=0;x<width;x++){
@@ -57,7 +61,7 @@ export function isolateShinyEyeArtwork(pixels, width, height, centers) {
         // outline. Everything elsewhere, including lower decals, disappears.
         const antialias = Math.abs(r-g)<16 && Math.abs(g-b)<16 &&
             r>=118 && r<=203;
-        if(seeded[y*width+x] || (white && nearInk(x,y,4)) ||
+        if(seeded[y*width+x] || (white && nearInk(x,y,3,redSeeded)) ||
            (antialias && nearInk(x,y,2))) {
             out[i]=r;out[i+1]=g;out[i+2]=b;out[i+3]=pixels[i+3];
         }
@@ -109,14 +113,15 @@ async function loadFrames(id, original, shiny) {
 
 export async function prepareFace(id, materials, controllers) {
     if (id === 'cinderace') {
-        // The original Shiny eye geometry and atlas are already oriented
-        // correctly. Its separate FaceBase rare map, however, is nearly
-        // white and leaks through as stray white marks. Only tint that
-        // underlying face base to match the original grey Shiny skin.
-        // Keep the complete original eye atlas, UVs and animation intact.
+        // The opaque rare FaceBase lies above the original Shiny body skin.
+        // At the nose/cheek it generates dark colour islands and a pale edge.
+        // The real BodyAll_SHINY already has the correct grey face beneath it;
+        // leave that skin visible and draw the original eyes over it.
         for (const [, normal, rare] of materials) {
             if (!/_FaceBase$/.test(normal.name)) continue;
-            rare.color.set('#98918a');
+            rare.transparent = true;
+            rare.opacity = 0;
+            rare.depthWrite = false;
             rare.needsUpdate = true;
         }
     }
