@@ -72,6 +72,27 @@ for (const id of ['scorbunny', 'raboot', 'cinderace', 'cinderace-gigamax']) {
             count++;
         }
     }
+    // Verify the toes, rather than the hip/waist, drive every kicked shot.
+    if (id !== 'cinderace-gigamax') {
+        let toe;
+        model.root.traverse(node => {
+            if (/^EndRToe2_\d+$/.test(node.name)) toe = node;
+        });
+        assert.ok(toe, 'original animated right toe must exist');
+        for (const angle of [0, Math.PI / 2, Math.PI, Math.PI * 1.5]) {
+            turntable.rotation.y = angle;
+            mixer.setTime(0.25);
+            const kicked = effectSpace(model, turntable, camera, 800, 800,
+                { effect: 'ball', time: 0.25, clipDuration: clip.duration });
+            assert.equal(kicked.anchorType, 'foot');
+            const tip = toe.getWorldPosition(new Vector3()).project(camera);
+            assert.ok(Math.abs(kicked.source.x - (tip.x + 1) * 400) < 1e-4);
+            assert.ok(Math.abs(kicked.source.y - (1 - tip.y) * 400) < 1e-4);
+            const max = effectSpace(model, turntable, camera, 800, 800,
+                { effect: 'max', time: 0.25, clipDuration: clip.duration });
+            assert.equal(max.anchorType, id === 'cinderace' ? 'foot' : 'mouth');
+        }
+    }
     const attack = { effect: 'ball', time: 1.1, clipDuration: clip.duration };
     const frame1 = effectSpace(model, turntable, camera, 800, 800, attack);
     mixer.setTime(1.4); turntable.position.x += 1;
