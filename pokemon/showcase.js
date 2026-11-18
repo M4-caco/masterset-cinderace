@@ -5,7 +5,7 @@ import {
 import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=8';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=10';
 import { MaxLandingImpact } from './max-landing.js?v=1';
-import { iconControl, mountVolume } from './showcase-controls.js?v=14';
+import { iconControl, mountVolume } from './showcase-controls.js?v=15';
 import { mountPokedex } from './pokedex.js?v=12';
 import { prepareFace, updateFace } from './face-animation.js?v=17';
 import { createJornadasGreeting } from './jornadas-voices.js?v=4';
@@ -691,8 +691,13 @@ class PokemonViewer {
     renderControls() {
         const buttons = this.battleMoves()
             .filter(([, clip]) => this.model.clips.has(clip))
-            .map(([name, clip]) => iconControl(name, 'move-normal', 'move-normal',
-                () => this.play(clip, 'battle')));
+            .map(([name, clip]) => {
+                const symbol = this.form !== 'normal' ? 'move-max'
+                    : clip === MOVES.physical ? 'move-physical'
+                    : clip === MOVES.alternate ? 'move-alternate' : 'fire';
+                return iconControl(name, symbol, 'move-normal',
+                    () => this.play(clip, 'battle'));
+            });
         this.moves.replaceChildren(...buttons);
     }
 
