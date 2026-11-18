@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - fix/cinderace-shiny-face-attack-anchors
       - feature/max-landing-impact
       - fix/gigamax-tap-ground-fire
     paths:
@@ -27,10 +28,13 @@ jobs:
           node-version: '22'
       - name: Validar sintaxe dos módulos JavaScript alterados
         run: |
+          node --check pokemon/face-animation.js
           node --check pokemon/showcase.js
           node --check pokemon/battle-effects.js
           node --check pokemon/ground-fire.js
           node --check pokemon/entry.js
+      - name: Conferir olhos originais Shiny do Cinderace
+        run: node tests/pokemon-face-shiny.mjs
       - name: Testar colisão e limpeza de partículas Max
         run: node tests/pokemon-max-landing.mjs
       - name: Testar fogo 3D de contato e toque Gigamax
