@@ -8,9 +8,9 @@ import { MaxLandingImpact } from './max-landing.js?v=1';
 import { GroundFireTrail } from './ground-fire.js?v=1';
 import { iconControl, mountVolume } from './showcase-controls.js?v=14';
 import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=16';
-import { effectSpace } from './effect-space.js?v=1';
+import { effectSpace } from './effect-space.js?v=2';
 import { mountPokedex } from './pokedex.js?v=12';
-import { prepareFace, updateFace } from './face-animation.js?v=12';
+import { prepareFace, updateFace } from './face-animation.js?v=13';
 import { createJornadasGreeting } from './jornadas-voices.js?v=4';
 import { isRapidTap, singleTapEffect, SINGLE_TAP_WINDOW_MS, RAPID_TAP_GRACE_MS } from './tap-gestures.mjs?v=1';
 
@@ -294,11 +294,13 @@ class PokemonViewer {
             let visibilityController;
             let waist;
             let head;
+            let feeding;
             root.traverse(object => {
                 if (object.name.startsWith('_jnt_Visibility_')) visibilityController = object;
                 if (/^_jnt_(?:L|R)?Eye_\d+$/i.test(object.name)) eyes.push(object);
                 if (/^Waist_\d+$/.test(object.name)) waist = object;
                 if (/^Head_\d+$/.test(object.name)) head = object;
+                if (/^Feeding_Socket_\d+$/.test(object.name)) feeding = object;
                 if (!object.isMesh) return;
                 object.frustumCulled = false;
                 meshes.push(object);
@@ -326,6 +328,12 @@ class PokemonViewer {
                 idle: clips.get('Repouso da Pokédex') ?? clips.get('Repouso de batalha') ?? clips.get('Repouso'),
             };
             this.setRest(model);
+            // Capture the game's static feeding socket relative to Raboot's
+            // head in the original idle pose, before any attack can shift it.
+            if (id === 'raboot' && head && feeding) {
+                root.updateMatrixWorld(true);
+                model.mouthLocal = head.worldToLocal(feeding.getWorldPosition(new Vector3()));
+            }
             const bounds = new Box3();
             const restParts = id === 'cinderace-gigamax' ? [...body, ...props.filter(part => part.visible)] : body;
             for (const part of restParts) bounds.expandByObject(part, true);
