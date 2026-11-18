@@ -67,8 +67,8 @@ jobs:
               page.wait_for_timeout(1600)
               stage=card.locator('.pokemon-stage')
               full=Image.open(io.BytesIO(stage.screenshot())).convert('RGB')
-              crop=full
-              crop=crop.resize((crop.width*2,crop.height*2))
+              crop=full.crop((int(full.width*.29),int(full.height*.45),int(full.width*.71),int(full.height*.66)))
+              crop=crop.resize((crop.width*4,crop.height*4))
               data=io.BytesIO()
               crop.save(data,format='JPEG',quality=88,optimize=True)
               print('SHINY_VISUAL_ERRORS',errors[:3])
