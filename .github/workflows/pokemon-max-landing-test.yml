@@ -45,3 +45,9 @@ jobs:
         run: node tests/pokemon-no-attack-effects.mjs
       - name: Testar gestos dos ataques
         run: node tests/pokemon-tap-gestures.mjs
+      - name: Instalar navegador de testes (somente PR)
+        if: github.event_name == 'pull_request'
+        run: npm install --no-save --no-package-lock --ignore-scripts playwright-core@1.56.0
+      - name: Capturar Cinderace Shiny real no Chromium local (sem Vercel)
+        if: github.event_name == 'pull_request'
+        run: node tests/pokemon-shiny-browser-preview.mjs
