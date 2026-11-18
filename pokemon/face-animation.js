@@ -76,24 +76,38 @@ export function restoreShinyFaceArtwork(pixels, width, height) {
             pixels[position * 4 + 3] * Math.max(0, Math.min(1, (d - 5) / 11))
         );
     }
-    // Keep the opaque skin islands that cover the dark model underlay.
-    // Harmonize ONLY their warm tan pixels with the existing FaceBase tint;
-    // red iris, white sclera, black lashes and eyelids are outside this range.
-    const skinSample = (Math.floor(height*.20)*width+Math.floor(width*.08))*4;
-    const skinTone = [pixels[skinSample],pixels[skinSample+1],pixels[skinSample+2]];
-    const correctedTone = [181,170,161]; // same as rare FaceBase (#b5aaa1)
-    for (let p=0;p<count;p++) {
-        if (visited[p]) continue;
+    // Recover the flat tan mask and its antialiased rim as a clean,
+    // skin-matched decal. Earlier corrections recoloured only near-identical
+    // tan pixels, leaving a thin grey/lilac contour on the outer eye corners.
+    //
+    // Tan and lavender are opposite endpoints of an antialiased boundary.
+    // Project a pixel onto that colour segment and reject anything outside
+    // a small tolerance: the white sclera, eyelid and dark lashes are NOT
+    // on that segment, so their original artwork remains untouched.
+    const skinSample=(Math.floor(height*.20)*width+Math.floor(width*.08))*4;
+    const skinTone=[
+        pixels[skinSample],pixels[skinSample+1],pixels[skinSample+2]
+    ];
+    const skinColor=[181,170,161];
+    const direction=background.map((value,i)=>value-skinTone[i]);
+    const directionLength=direction.reduce((sum,d)=>sum+d*d,0);
+    for(let p=0;p<count;p++){
         const i=p*4;
-        const d=Math.hypot(
-            pixels[i]-skinTone[0],pixels[i+1]-skinTone[1],pixels[i+2]-skinTone[2]
-        );
-        if (d>=20) continue;
-        const strength=Math.max(0,Math.min(1,(20-d)/12));
-        for(let channel=0;channel<3;channel++)
-            output[i+channel]=Math.round(
-                pixels[i+channel]+strength*(correctedTone[channel]-skinTone[channel])
-            );
+        const c=[pixels[i],pixels[i+1],pixels[i+2]];
+        const t=Math.max(0,Math.min(1,
+            c.reduce((sum,value,k)=>sum+(value-skinTone[k])*direction[k],0)
+              / directionLength
+        ));
+        const residual=Math.hypot(...c.map((value,k)=>
+            value-(skinTone[k]+t*direction[k])
+        ));
+        if(residual>8 || t>.98)continue;
+        // This only changes matte pixels. The alpha ramp occupies the
+        // outermost <5% of the original tan/lavender antialiased edge, rather
+        // than exposing the dark underlying face near the eyelashes.
+        for(let k=0;k<3;k++)output[i+k]=skinColor[k];
+        output[i+3]=Math.round(pixels[i+3]*
+            Math.max(0,Math.min(1,(.98-t)/.05)));
     }
     return output;
 }
