@@ -42,7 +42,7 @@
 <section class="panel">
   <h2>1. Entrar na sua conta</h2>
   <form id="signin-form">
-    <label for="email">E-mail</label><input id="email" type="email" autocomplete="username" required value="yhtam712@gmail.com">
+    <label for="email">E-mail</label><input id="email" type="email" autocomplete="username" required placeholder="E-mail da sua conta no Firebase">
     <label for="password">Senha</label><input id="password" type="password" autocomplete="current-password" required placeholder="Sua senha do Firebase">
     <p class="muted">Sua senha será enviada somente ao Firebase Authentication. Ela não é gravada no GitHub nem nesta página.</p>
     <button type="submit" id="signin">Entrar</button>
@@ -74,7 +74,7 @@
 </section>
 <section class="panel" id="step-write" hidden>
   <h2>3. Copiar para a conta M4caco</h2>
-  <p>Destino: <code>users_data/ni2UkOT32qUXU2UB7g5omv06JZj2</code></p>
+  <p>Destino: <code id="destination-path">users_data/(sua conta)</code></p>
   <p id="destination-status"></p>
   <label class="check"><input type="checkbox" id="confirm-copy"> Conferi as quantidades e autorizo copiar a coleção para minha conta, sem apagar a original.</label>
   <label class="check" id="backup-ack-wrap" hidden><input type="checkbox" id="confirm-backup"> Entendo que estou usando uma cópia local, que pode não refletir alterações recentes no Firebase.</label>
