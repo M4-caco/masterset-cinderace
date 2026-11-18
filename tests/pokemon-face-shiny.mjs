@@ -7,6 +7,8 @@ const gltf = JSON.parse(await readFile(new URL('pokemon/models/cinderace.gltf', 
 const materials = gltf.materials.map(x => x.name);
 assert.ok(materials.includes('BodyAll_SHINY _FaceComposite'));
 assert.ok(materials.includes('BodyAll_SHINY _FaceBase'));
+assert.ok(materials.includes('BodyAll_SHINY'));
+
 assert.ok(materials.includes('BodyAll _FaceComposite'));
 
 assert.equal(shinyFaceInk(230, 228, 238), false, 'lavender atlas background must be transparent');
@@ -56,6 +58,9 @@ assert.match(face, /transparentCinderaceShinyFrame\(original, atlas, i\)/);
 assert.match(face, /shiny\.transparent = true/);
 assert.match(face, /shiny\.alphaTest = 0\.05/);
 assert.match(face, /shiny\.depthWrite = false/);
+assert.match(face, /\/_FaceBase\$\/\.test\(normal\.name\)/);
+assert.match(face, /shiny\.opacity = 0/);
+
 assert.doesNotMatch(face, /nativeCinderaceShinyFrame/);
 const entry = await readFile(new URL('pokemon/entry.js', root), 'utf8');
 const html = await readFile(new URL('index.html', root), 'utf8');
