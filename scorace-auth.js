@@ -71,6 +71,21 @@ export function initScoraceAuth(firebaseApp, onUserChanged) {
     showMode(currentUser ? 'account' : 'login');
     if (!dialog.open) dialog.showModal();
   }
+  // Contas criadas pelo Console do Firebase podem não ter displayName.
+  // Neste caso, use o apelido salvo no perfil individual do Firestore.
+  window.scoraceSyncNickname = async nickname => {
+    const clean = typeof nickname === 'string' ? nickname.trim().slice(0, 32) : '';
+    if (!clean || !currentUser || currentUser.displayName) return;
+    const account = currentUser;
+    try {
+      await updateProfile(account, {displayName: clean});
+      if (currentUser !== account) return;
+      updateTriggers();
+      if (dialog.open) showMode('account');
+    } catch (error) {
+      console.warn('Não foi possível atualizar o apelido do perfil:', error.code || 'desconhecido');
+    }
+  };
   window.openScoraceAccount = open;
   triggers.forEach(button => button.addEventListener('click', open));
   document.getElementById('scorace-auth-close').addEventListener('click', () => dialog.close());
