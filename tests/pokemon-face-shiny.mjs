@@ -22,6 +22,7 @@ put(75,53,[245,244,241,255]);     // legitimate thin sclera near iris
 put(180,54,[245,244,241,255]);    // legitimate sclera on other eye
 put(24,50,[248,248,246,255]);     // unwanted white spot far from left iris
 put(231,50,[248,248,246,255]);    // unwanted white spot far from right iris
+put(80,53,[239,236,235,255]);       // thick pale ring outside natural sclera
 put(100,98,[230,228,238,255]);    // lilac background must NOT be replaced
 put(50,115,[178,169,158,255]);    // warm face colour stays original
 const output=removeStrayShinyWhites(base,w,h);
@@ -31,6 +32,7 @@ assert.deepEqual(pixel(output,75,53),[245,244,241,255]);
 assert.deepEqual(pixel(output,180,54),[245,244,241,255]);
 assert.deepEqual(pixel(output,24,50),[184,171,159,255]);
 assert.deepEqual(pixel(output,231,50),[184,171,159,255]);
+assert.deepEqual(pixel(output,80,53),[184,171,159,255]);
 assert.deepEqual(pixel(output,100,98),[230,228,238,255]);
 assert.deepEqual(pixel(output,50,115),[178,169,158,255]);
 assert.deepEqual(pixel(base,24,50),[248,248,246,255],'input remains untouched');
