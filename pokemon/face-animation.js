@@ -26,11 +26,11 @@ export function removeStrayShinyWhites(pixels, width, height) {
         const index = (y * width + x) * 4;
         const r = pixels[index], g = pixels[index + 1], b = pixels[index + 2];
         // Reject the lavender atlas background, tan skin and red pupils.
-        const white = r > 222 && g > 218 && b > 215 &&
-            r >= b - 2 && g >= b - 2 && Math.abs(r - g) < 20;
+        const white = r > 210 && g > 208 && b > 207 &&
+            r >= b - 3 && g >= b - 3 && Math.abs(r - g) < 20;
         if (!white) continue;
         const nearbyIris = irises.some(([cx, cy]) =>
-            (cx - x) ** 2 + (cy - y) ** 2 <= 12 ** 2);
+            (cx - x) ** 2 + (cy - y) ** 2 <= 8 ** 2);
         if (nearbyIris) continue; // keep the real thin sclera and highlights
         // The untouched atlas has a warm taupe skin colour around the eyes.
         // Use that same colour instead of inventing transparency/UV offsets.
