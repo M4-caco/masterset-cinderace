@@ -475,6 +475,7 @@
 #item-detail #item-copy-status:empty{display:none}
 @media(max-width:640px){#item-detail{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:17px}#item-detail .it-detail-grid{grid-template-columns:minmax(0,1fr);gap:12px}#item-detail .it-detail-image{width:100%;height:220px;max-height:30dvh;aspect-ratio:auto}#item-detail .it-detail-image img{max-height:30dvh}}
 </style><link rel="stylesheet" href="scorace-binder.css?v=6">
+    <link rel="stylesheet" href="scorace-auth.css?v=1">
     <link rel="stylesheet" href="pokemon/showcase.css?v=26">
     <script type="module" src="pokemon/entry.js?v=41"></script>
 </head>
@@ -494,6 +495,49 @@
         </button>
     </div>
 
+
+    <dialog id="scorace-auth-dialog" aria-labelledby="scorace-auth-heading">
+      <div class="scorace-auth-content">
+        <div class="scorace-auth-top"><div><img class="scorace-auth-emblem" src="./scorace-symbol.svg?v=1" alt="" width="88" height="88" decoding="async"><h2 class="scorace-auth-title" id="scorace-auth-heading">Entrar no SCORACE</h2>
+          <p class="scorace-auth-subtitle" id="scorace-auth-description">Sua coleção em qualquer dispositivo.</p></div>
+          <button type="button" class="scorace-auth-close" id="scorace-auth-close" aria-label="Fechar">×</button></div>
+        <div class="scorace-auth-modes" role="group" aria-label="Tipo de acesso">
+          <button type="button" data-scorace-auth-mode="login" aria-pressed="true">Entrar</button>
+          <button type="button" data-scorace-auth-mode="register" aria-pressed="false">Criar conta</button>
+        </div>
+        <form id="scorace-login-form" class="scorace-auth-form">
+          <label>E-mail<input type="email" id="scorace-login-email" autocomplete="email" required></label>
+          <label>Senha<input type="password" id="scorace-login-password" autocomplete="current-password" required></label>
+          <button type="submit" class="scorace-auth-primary">Entrar na minha coleção</button>
+          <button type="button" data-scorace-auth-action class="scorace-auth-link" id="scorace-reset-password">Esqueci minha senha</button>
+        </form>
+        <form id="scorace-register-form" class="scorace-auth-form" hidden>
+          <label>Apelido<input type="text" id="scorace-register-nickname" autocomplete="nickname" maxlength="32" required></label>
+          <label>E-mail<input type="email" id="scorace-register-email" autocomplete="email" required></label>
+          <label>Senha<input type="password" id="scorace-register-password" autocomplete="new-password" minlength="8" required></label>
+          <label>Repetir senha<input type="password" id="scorace-register-confirm" autocomplete="new-password" minlength="8" required></label>
+          <button type="submit" class="scorace-auth-primary">Criar minha conta</button>
+        </form>
+        <div id="scorace-account-panel" class="scorace-auth-form" hidden>
+          <div class="scorace-account-identity"><p id="scorace-account-name"></p><p id="scorace-account-email"></p></div>
+          <form class="scorace-auth-form" id="scorace-nickname-form">
+            <label>Meu apelido<input id="scorace-edit-nickname" maxlength="32" autocomplete="nickname" required></label>
+            <button type="submit" class="scorace-auth-secondary">Atualizar apelido</button>
+          </form>
+          <div id="scorace-verification" hidden><p>Confirme seu e-mail para proteger sua conta.</p>
+            <div class="scorace-verification-actions">
+              <button type="button" id="scorace-verify-email" data-scorace-auth-action class="scorace-auth-secondary">Reenviar e-mail</button>
+              <button type="button" id="scorace-refresh-verification" data-scorace-auth-action class="scorace-auth-secondary">Já verifiquei</button>
+            </div>
+          </div>
+          <button type="button" id="scorace-import-legacy-items" class="scorace-auth-secondary" hidden>Importar itens deste navegador</button>
+          <p id="scorace-account-sync" class="scorace-auth-status">Carregando conta...</p>
+          <button type="button" id="scorace-logout" data-scorace-auth-action class="scorace-auth-secondary">Sair da conta</button>
+        </div>
+        <p id="scorace-auth-status" class="scorace-auth-status" role="status" aria-live="polite"></p>
+      </div>
+    </dialog>
+
     <header class="px-3.5 py-3 sm:px-6 sm:py-4 glass-panel sticky top-0 z-30 transition-colors duration-200 border-b border-cinder-orange/30 shadow-xl">
         <div class="max-w-7xl mx-auto flex flex-col gap-2.5">
             <div class="flex justify-between items-center w-full gap-2">
@@ -510,6 +554,7 @@
                 </nav>
 
                 <div class="flex items-center gap-2 sm:gap-3">
+                    <button type="button" data-scorace-account-trigger class="scorace-auth-trigger hidden md:inline-flex items-center justify-center">👤 Entrar / Criar conta</button>
                     <button onclick="toggleTheme()" aria-label="Alternar Tema" class="theme-switch-track relative w-11 sm:w-14 h-6 sm:h-7 rounded-full bg-white/70 dark:bg-[#181818]/80 border border-slate-300 dark:border-slate-800 transition-colors duration-300 flex items-center px-1 shrink-0 overflow-hidden cursor-pointer shadow-sm">
                         <svg class="absolute right-1.5 w-3.5 h-3.5 text-slate-400 dark:opacity-0 transition-opacity duration-300 pointer-events-none" fill="currentColor" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-2.24-5-5-5zm0 8c-1.65 0-3-1.35-3-3s1.35-3 3-3 3 1.35 3 3-1.35 3-3 3zm0-13C11.45 2 11 2.45 11 3v2c0 .55.45 1 1 1s1-.45 1-1V3c0-.55-.45-1-1-1zm0 16c-.55 0-1 .45-1 1v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1zm9-9c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1h2zM5 12c0-.55-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1h2c.55 0 1-.45 1-1zm14.36-6.36c.39-.39.39-1.02 0-1.41s-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41zM7.05 18.36c-.39-.39-1.02-.39-1.41 0l-1.41 1.41c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.41-1.41c.39-.38.39-1.02 0-1.41zM18.36 18.36l1.41 1.41c.39.39 1.02.39 1.41 0s.39-1.02 0-1.41l-1.41-1.41c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41zM6.34 5.64L4.93 4.23c-.39-.39-1.02-.39-1.41 0s-.39 1.02 0 1.41l1.41 1.41c.39.39 1.02.39 1.41 0s-.39-1.02 0-1.41z"/></svg>
                         <div class="absolute left-1 opacity-0 dark:opacity-100 transition-opacity duration-300 pointer-events-none flex items-center gap-0.5 text-slate-400">
@@ -542,6 +587,7 @@
             </div>
 
             <div id="mobile-menu" class="hidden md:hidden flex-col gap-2 pt-3 border-t border-cinder-orange/20 animate-fade-in">
+                <button type="button" data-scorace-account-trigger class="scorace-auth-trigger scorace-auth-trigger-mobile">👤 Entrar / Criar conta</button>
                 <p class="text-[10px] uppercase tracking-wider font-extrabold text-cinder-orange dark:text-cinder-yellow px-1">Navegação das Abas</p>
                 <div class="grid grid-cols-2 gap-2">
                     <button id="mob-nav-dashboard" onclick="switchTab('dashboard')" class="glass-card p-2.5 rounded-2xl text-xs font-bold text-left border border-cinder-orange/25 transition">Resumo</button>
@@ -876,6 +922,7 @@
         import {prepareReverseCatalog, cardImage, reverseBaseIds} from './foil/catalog.mjs';
         import {mountFoil} from './foil/interaction.mjs';
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { initScoraceAuth } from './scorace-auth.js?v=1';
         import { getFirestore, doc, setDoc, onSnapshot, runTransaction } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
         window.toggleTheme = function() {
@@ -905,7 +952,17 @@
 
         const firebaseApp = initializeApp(firebaseConfig);
         const db = getFirestore(firebaseApp);
-        const docRef = doc(db, "users_data", "cinderace_masterset");
+        let docRef = null;
+        let activeAccount = null;
+        let collectionUnsubscribe = null;
+        let accountGeneration = 0;
+        function userStorageKey(key) { return 'scorace:profile:' + (activeAccount?.uid || 'guest') + ':' + key; }
+        window.scoraceUserStorageKey = userStorageKey;
+        window.scoraceRequireAccount = () => {
+            if (collectionReady) return true;
+            window.openScoraceAccount?.();
+            return false;
+        };
 
         let obtainedMap = {};
         let captureDataMap = {};
@@ -1593,33 +1650,24 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         });
         const COLLECTION_RESET_VERSION = 'fresh-collection-20261030-v1';
         let collectionReady = false;
-        let collectionResetPending = false;
-        async function ensureFreshCollection() {
-            await runTransaction(db, async transaction => {
-                const snapshot = await transaction.get(docRef);
-                if (snapshot.exists() && snapshot.data().collectionResetVersion === COLLECTION_RESET_VERSION) return;
-                transaction.set(docRef, {
-                    obtainedMap: {}, captureDataMap: {}, duplicateCaptures: [],
-                    collectionResetVersion: COLLECTION_RESET_VERSION,
-                    updatedAt: new Date().toISOString()
-                });
-            });
-        }
+
         async function saveToCloud() {
-            if (!collectionReady) return;
+            if (!collectionReady || !docRef || !activeAccount) return;
             try {
                 await setDoc(docRef, {
-                    obtainedMap,
-                    captureDataMap,
-                    duplicateCaptures,
+                    obtainedMap, captureDataMap, duplicateCaptures,
                     collectionResetVersion: COLLECTION_RESET_VERSION,
                     updatedAt: new Date().toISOString()
-                });
-            } catch (e) {
-                console.error("Erro ao salvar no Firestore:", e);
+                }, {merge:true});
+            } catch (error) {
+                console.error('Falha ao sincronizar coleção:', error);
+                document.getElementById('scorace-account-sync').textContent = 'Erro ao sincronizar. Verifique a conexão.';
             }
         }
-
+        window.scoraceSaveItems = async itemsOwned => {
+            if (!collectionReady || !docRef || !activeAccount) throw new Error('Entre na sua conta primeiro.');
+            await setDoc(docRef, {itemsOwned, updatedAt: new Date().toISOString()}, {merge:true});
+        };
         function refreshCurrentView() {
             window.refreshScoraceBinder?.();
             updateHeaderCounters();
@@ -1633,53 +1681,183 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 renderCaptureView();
             }
         }
-
-        onSnapshot(docRef, async (docSnap) => {
-            if (!docSnap.exists() || docSnap.data().collectionResetVersion !== COLLECTION_RESET_VERSION) {
-                collectionReady = false;
-                if (collectionResetPending) return;
-                collectionResetPending = true;
-                try { await ensureFreshCollection(); }
-                catch (error) {
-                    console.error('Não foi possível iniciar a coleção limpa:', error);
-                    document.getElementById('market-message').textContent = 'Conecte-se à internet e recarregue para concluir a limpeza inicial da coleção.';
-                } finally { collectionResetPending = false; }
+        function restoreMarketDraft() {
+            marketRows = [];
+            marketDrafts = {check:[], import:[]};
+            marketRemoved = null;
+            marketMode = 'check';
+            document.getElementById('market-paste-check').value = '';
+            document.getElementById('market-paste').value = '';
+            try {
+                const draft = JSON.parse(localStorage.getItem(userStorageKey('scorace_market_draft_v1')) || 'null');
+                if (!draft) return;
+                marketMode = draft.mode === 'import' ? 'import' : 'check';
+                if (draft.drafts) {
+                    marketDrafts = {
+                        check:Array.isArray(draft.drafts.check) ? draft.drafts.check : [],
+                        import:Array.isArray(draft.drafts.import) ? draft.drafts.import : []
+                    };
+                } else if (Array.isArray(draft.rows)) {
+                    marketDrafts[marketMode] = draft.rows;
+                }
+                marketRows = marketDrafts[marketMode];
+                document.getElementById('market-paste-check').value = draft.texts?.check || '';
+                document.getElementById('market-paste').value = draft.texts?.import || '';
+            } catch (error) { console.warn('Rascunho da conta inválido:', error); }
+        }
+        // Optional screen components must never block Firestore authentication/sync.
+        function safelyRefreshCollectionUI(task, label) {
+            try { task(); }
+            catch (error) { console.error('Falha na interface ' + label + ':', error); }
+        }
+        async function loadAccountCollection(user) {
+            const generation = ++accountGeneration;
+            const sync = document.getElementById('scorace-account-sync');
+            sync.textContent = user ? 'Conectado. Consultando sua coleção no Firebase...' : 'Entre para salvar sua coleção';
+            try { collectionUnsubscribe?.(); }
+            catch (error) { console.warn('Falha ao cancelar sincronização anterior:', error); }
+            collectionUnsubscribe = null;
+            collectionReady = false;
+            activeAccount = user;
+            docRef = null;
+            obtainedMap = {};
+            captureDataMap = {};
+            duplicateCaptures = [];
+            safelyRefreshCollectionUI(() => window.scoraceBinderSetProfile?.(user?.uid || ''), 'fichário');
+            safelyRefreshCollectionUI(() => window.scoraceItemsApplyCloud?.({}), 'itens');
+            safelyRefreshCollectionUI(restoreMarketDraft, 'rascunho de mercado');
+            safelyRefreshCollectionUI(renderMarketReview, 'mercado');
+            safelyRefreshCollectionUI(refreshCurrentView, 'resumo inicial');
+            if (!user) return;
+            const userRef = doc(db, 'users_data', user.uid);
+            try {
+                // Never overwrite existing data; the original owner profile must be migrated, not auto-created empty.
+                await runTransaction(db, async transaction => {
+                    const existing = await transaction.get(userRef);
+                    if (!existing.exists()) {
+                        if (user.uid === 'ni2UkOT32qUXU2UB7g5omv06JZj2') {
+                            throw new Error('OWNER_MIGRATION_MISSING');
+                        }
+                        transaction.set(userRef, {
+                            obtainedMap: {}, captureDataMap: {}, duplicateCaptures: [],
+                            itemsOwned: {}, nickname: user.displayName || '',
+                            collectionResetVersion: COLLECTION_RESET_VERSION,
+                            createdAt: new Date().toISOString()
+                        });
+                    }
+                });
+            } catch (error) {
+                if (generation !== accountGeneration) return;
+                console.error('Erro ao abrir perfil:', error);
+                sync.textContent = error.message === 'OWNER_MIGRATION_MISSING'
+                  ? 'Coleção não migrada: o documento M4caco ainda não existe no Firebase. Nenhum dado foi apagado.'
+                  : error.code === 'permission-denied'
+                    ? 'Acesso negado pelo Firestore. Confira as regras antes de editar a coleção.'
+                    : 'Falha ao carregar a coleção do Firebase. Confira sua conexão e as permissões.';
                 return;
             }
-            collectionReady = true;
-            if (localStorage.getItem('scorace_collection_reset_version') !== COLLECTION_RESET_VERSION) {
-                localStorage.removeItem('scorace_market_draft_v1');
-                marketRows = []; marketDrafts = {check:[],import:[]}; marketRemoved = null;
-                document.getElementById('market-paste').value = '';
-                document.getElementById('market-paste-check').value = '';
-                localStorage.setItem('scorace_collection_reset_version', COLLECTION_RESET_VERSION);
-            }
-            if (docSnap.exists()) {
-                const cloudData = docSnap.data();
-                obtainedMap = cloudData.obtainedMap || {};
-                captureDataMap = cloudData.captureDataMap || {};
-                duplicateCaptures = Array.isArray(cloudData.duplicateCaptures) ? cloudData.duplicateCaptures : [];
-                localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(duplicateCaptures));
-                
-                localStorage.setItem('pokedex_obtained_v2', JSON.stringify(obtainedMap));
-                localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
-            } else {
-                obtainedMap = JSON.parse(localStorage.getItem('pokedex_obtained_v2') || '{}');
-                captureDataMap = JSON.parse(localStorage.getItem('pokedex_capture_data_v1') || '{}');
-                duplicateCaptures = JSON.parse(localStorage.getItem('scorace_duplicate_captures_v1') || '[]');
-                saveToCloud();
-            }
-            
-            renderMarketReview();
-            if (isInitialLoad) {
-                isInitialLoad = false;
-                if (!document.getElementById('nav-pokemon').hasAttribute('aria-current')) {
-                    switchTab('dashboard');
+            if (generation !== accountGeneration) return;
+            docRef = userRef;
+            sync.textContent = 'Conectado. Recebendo cartas do Firebase...';
+            collectionUnsubscribe = onSnapshot(userRef, snapshot => {
+                if (generation !== accountGeneration) return;
+                const data = snapshot.data();
+                if (!data) { collectionReady = false; sync.textContent = 'Documento da conta não encontrado.'; return; }
+                obtainedMap = data.obtainedMap && typeof data.obtainedMap === 'object' ? data.obtainedMap : {};
+                captureDataMap = data.captureDataMap && typeof data.captureDataMap === 'object' ? data.captureDataMap : {};
+                duplicateCaptures = Array.isArray(data.duplicateCaptures) ? data.duplicateCaptures : [];
+                const count = Object.values(obtainedMap).filter(Boolean).length;
+                if (user.uid === 'ni2UkOT32qUXU2UB7g5omv06JZj2'
+                    && data.migratedLegacy !== true && count === 0) {
+                    collectionReady = false;
+                    sync.textContent = 'Sua conta existe, mas a coleção antiga ainda não aparece neste documento. Verifique a migração.';
+                } else {
+                    collectionReady = true;
+                    sync.textContent = 'Coleção sincronizada: ' + count + ' cartas adquiridas.';
                 }
-            } else {
-                refreshCurrentView();
-            }
+                try {
+                    localStorage.setItem(userStorageKey('pokedex_obtained_v2'),JSON.stringify(obtainedMap));
+                    localStorage.setItem(userStorageKey('pokedex_capture_data_v1'),JSON.stringify(captureDataMap));
+                    localStorage.setItem(userStorageKey('scorace_duplicate_captures_v1'),JSON.stringify(duplicateCaptures));
+                } catch (error) { console.warn('Cache local indisponível:', error); }
+                safelyRefreshCollectionUI(() => window.scoraceItemsApplyCloud?.(data.itemsOwned || {}), 'itens da conta');
+                if (!user.displayName && data.nickname) {
+                    safelyRefreshCollectionUI(() => window.scoraceSyncNickname?.(data.nickname), 'apelido');
+                }
+                safelyRefreshCollectionUI(() => window.scoraceBinderSetProfile?.(user.uid, data.migratedLegacy === true), 'fichário da conta');
+                if (data.migratedLegacy === true) {
+                    safelyRefreshCollectionUI(() => {
+                        const savedDraft = localStorage.getItem('scorace_market_draft_v1');
+                        if (savedDraft && !localStorage.getItem(userStorageKey('scorace_market_draft_v1'))) {
+                            localStorage.setItem(userStorageKey('scorace_market_draft_v1'), savedDraft);
+                            restoreMarketDraft();
+                        }
+                    }, 'rascunho legado do mercado');
+                }
+                safelyRefreshCollectionUI(() => {
+                    const importButton = document.getElementById('scorace-import-legacy-items');
+                    let hasLocalLegacyItems = false;
+                    try {
+                        const items = JSON.parse(localStorage.getItem('scorace_official_items_owned_v1') || '{}');
+                        hasLocalLegacyItems = items && typeof items === 'object' && Object.values(items).some(Boolean);
+                    } catch (_) {}
+                    importButton.hidden = !(data.migratedLegacy === true
+                      && !data.legacyItemsImportedAt
+                      && !Object.values(data.itemsOwned || {}).some(Boolean)
+                      && hasLocalLegacyItems);
+                }, 'importação de itens');
+                safelyRefreshCollectionUI(renderMarketReview, 'mercado sincronizado');
+                if (isInitialLoad) {
+                    isInitialLoad = false;
+                    safelyRefreshCollectionUI(() => {
+                        if (!document.getElementById('nav-pokemon').hasAttribute('aria-current')) {
+                            switchTab('dashboard');
+                        }
+                    }, 'tela inicial');
+                } else safelyRefreshCollectionUI(refreshCurrentView, 'coleção sincronizada');
+                safelyRefreshCollectionUI(updateHeaderCounters, 'contadores');
+            }, error => {
+                if (generation !== accountGeneration) return;
+                collectionReady = false;
+                console.error('Erro de acesso à coleção:', error);
+                sync.textContent = error.code === 'permission-denied'
+                  ? 'Sem acesso às cartas: regras do Firebase bloquearam a leitura.'
+                  : 'Falha na sincronização da coleção. Confira sua conexão com o Firebase.';
+            });
+        }
+        initScoraceAuth(firebaseApp, loadAccountCollection);
+        document.getElementById('scorace-import-legacy-items').addEventListener('click', async () => {
+            if (!collectionReady || !activeAccount || !docRef) return;
+            const button = document.getElementById('scorace-import-legacy-items');
+            const status = document.getElementById('scorace-account-sync');
+            let items;
+            try { items = JSON.parse(localStorage.getItem('scorace_official_items_owned_v1') || '{}'); }
+            catch (_) { status.textContent = 'Os itens salvos neste navegador estão inválidos.'; return; }
+            if (!items || typeof items !== 'object' || !Object.values(items).some(Boolean)) return;
+            if (!window.confirm('Importar os itens marcados como adquiridos neste navegador para sua conta SCORACE?')) return;
+            button.disabled = true;
+            try {
+                const target = docRef;
+                await runTransaction(db, async transaction => {
+                    const snapshot = await transaction.get(target);
+                    const data = snapshot.data() || {};
+                    if (!snapshot.exists() || !data.migratedLegacy || data.legacyItemsImportedAt
+                        || Object.values(data.itemsOwned || {}).some(Boolean)) {
+                        throw new Error('O perfil já possui itens ou não está autorizado para importação.');
+                    }
+                    transaction.update(target, {
+                        itemsOwned: items,
+                        legacyItemsImportedAt: new Date().toISOString()
+                    });
+                });
+                status.textContent = 'Itens antigos importados para sua conta.';
+                button.hidden = true;
+            } catch (error) {
+                console.error('Falha ao importar itens:', error);
+                status.textContent = 'Não foi possível importar itens. Tente novamente.';
+            } finally { button.disabled = false; }
         });
+
 
         window.toggleMobileMenu = function() {
             const menu = document.getElementById('mobile-menu');
@@ -1997,6 +2175,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         };
 
         window.toggleCard = function(id) {
+            if (!window.scoraceRequireAccount()) return;
             const isLocked = captureDataMap[id] && captureDataMap[id].locked;
             if (obtainedMap[id] && isLocked) {
                 alert("🔒 Esta carta está BLOQUEADA pela aba Captura!\nPara desmarcar, desative o cadeado na aba Captura primeiro.");
@@ -2004,7 +2183,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             }
 
             obtainedMap[id] = !obtainedMap[id];
-            localStorage.setItem('pokedex_obtained_v2', JSON.stringify(obtainedMap));
+            localStorage.setItem(userStorageKey('pokedex_obtained_v2'), JSON.stringify(obtainedMap));
             saveToCloud();
             refreshCurrentView();
         };
@@ -2379,8 +2558,8 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             scanBusy=true;const oldOwned={...obtainedMap},oldCaptures=JSON.parse(JSON.stringify(captureDataMap)),oldCopies=JSON.parse(JSON.stringify(duplicateCaptures));const extra=!!obtainedMap[id];
             const data={type,booster:type==='booster'?scanEl('scan-booster').value:'',entity:type==='booster'?'':scanEl('scan-shop').value.trim(),price:price===null?'':price.toFixed(2).replace('.',','),locked:false};
             if(extra)duplicateCaptures.push({id:duplicateId(),cardId:id,...data});else{obtainedMap[id]=true;captureDataMap[id]=data;}
-            try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(obtainedMap));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(captureDataMap));localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(duplicateCaptures));}
-            catch(e){obtainedMap=oldOwned;captureDataMap=oldCaptures;duplicateCaptures=oldCopies;try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(oldOwned));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(oldCaptures));localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(oldCopies));}catch(_){}scanBusy=false;scanStatus('Não foi possível salvar. Libere espaço e tente novamente.');return;}
+            try{localStorage.setItem(userStorageKey('pokedex_obtained_v2'),JSON.stringify(obtainedMap));localStorage.setItem(userStorageKey('pokedex_capture_data_v1'),JSON.stringify(captureDataMap));localStorage.setItem(userStorageKey('scorace_duplicate_captures_v1'),JSON.stringify(duplicateCaptures));}
+            catch(e){obtainedMap=oldOwned;captureDataMap=oldCaptures;duplicateCaptures=oldCopies;try{localStorage.setItem(userStorageKey('pokedex_obtained_v2'),JSON.stringify(oldOwned));localStorage.setItem(userStorageKey('pokedex_capture_data_v1'),JSON.stringify(oldCaptures));localStorage.setItem(userStorageKey('scorace_duplicate_captures_v1'),JSON.stringify(oldCopies));}catch(_){}scanBusy=false;scanStatus('Não foi possível salvar. Libere espaço e tente novamente.');return;}
             scanChosen='';scanEl('scan-selection').hidden=true;scanEl('scan-selection').innerHTML='';scanBusy=false;saveToCloud();updateHeaderCounters();updateCaptureFilterOptions();renderCaptureView();scanStatus(extra?'Duplicata registrada. Feche e abra o leitor para ler outra carta.':'Carta adicionada à coleção. Feche e abra o leitor para ler outra carta.');
         };
         scanEl('live-scanner').addEventListener('close',()=>scannerStop());
@@ -2388,7 +2567,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         window.addEventListener('pagehide',()=>scannerStop());
 
         function marketCardLabel(c) {return [c.nome,c.numero,c.lingua,c.acabamento,c.padrao,c.selo].filter(x=>x&&x!=='A conferir'&&x!=='Sem selo informado'&&x!=='Sem padrão foil').join(' · ');}
-        function persistMarketDraft(){marketDrafts[marketMode]=marketRows;try{localStorage.setItem('scorace_market_draft_v1',JSON.stringify({rows:marketRows,mode:marketMode,drafts:marketDrafts,texts:{check:document.getElementById('market-paste-check').value,import:document.getElementById('market-paste').value}}));}catch(e){}}
+        function persistMarketDraft(){marketDrafts[marketMode]=marketRows;try{localStorage.setItem(userStorageKey('scorace_market_draft_v1'),JSON.stringify({rows:marketRows,mode:marketMode,drafts:marketDrafts,texts:{check:document.getElementById('market-paste-check').value,import:document.getElementById('market-paste').value}}));}catch(e){}}
         window.persistMarketDraft=persistMarketDraft;
         window.marketSetMode=function(mode){persistMarketDraft();marketMode=mode==='import'?'import':'check';marketRows=marketDrafts[marketMode];marketRemoved=null;document.getElementById('market-message').textContent='';persistMarketDraft();renderMarketReview();};
         window.marketAnalyze=function(append=false){const input=document.getElementById(marketMode==='import'?'market-paste':'market-paste-check');const parsed=parseMarketText(input.value);const message=document.getElementById('market-message');if(!parsed.length){message.textContent='Nenhuma carta reconhecida. Cole os itens da página, com nome, número, idioma e preço; um link sozinho não contém os pedidos.';return;}marketRows=append?[...marketRows,...parsed]:parsed;marketRemoved=null;persistMarketDraft();renderMarketReview();message.textContent=parsed.length+(marketMode==='import'?' cartas lidas. Confira e confirme a importação.':' cartas conferidas. Veja as sugestões abaixo.');};
@@ -2460,6 +2639,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             return {primary,extras,skipped};
         }
         window.marketConfirm=function(){
+            if (!window.scoraceRequireAccount()) return;
             if(marketMode!=='import')return;
             if(!collectionReady){document.getElementById('market-message').textContent='Aguarde a sincronização inicial da coleção.';return;}
             const plan=planMarketImport(marketRows),message=document.getElementById('market-message');
@@ -2469,17 +2649,14 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             const data=row=>({type:'compra',entity:row.shop.trim(),price:(row.price+(row.freight||0)).toFixed(2).replace('.',','),cardPrice:row.price,freightPerCard:row.freight??null,quantity:1,order:row.order,condition:row.condition||'',orderStatus:row.status});
             plan.primary.forEach(({id,row})=>{obtainedMap[id]=true;captureDataMap[id]={...data(row),locked:false};});
             plan.extras.forEach(({id,row})=>duplicateCaptures.push({id:duplicateId(),cardId:id,...data(row),locked:false}));
-            try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(obtainedMap));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(captureDataMap));localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(duplicateCaptures));}
-            catch(error){obtainedMap=oldOwned;captureDataMap=oldCaptures;duplicateCaptures=oldExtras;try{localStorage.setItem('pokedex_obtained_v2',JSON.stringify(oldOwned));localStorage.setItem('pokedex_capture_data_v1',JSON.stringify(oldCaptures));localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(oldExtras));}catch(e){}message.textContent='Não foi possível salvar. Importação não enviada à nuvem.';return;}
+            try{localStorage.setItem(userStorageKey('pokedex_obtained_v2'),JSON.stringify(obtainedMap));localStorage.setItem(userStorageKey('pokedex_capture_data_v1'),JSON.stringify(captureDataMap));localStorage.setItem(userStorageKey('scorace_duplicate_captures_v1'),JSON.stringify(duplicateCaptures));}
+            catch(error){obtainedMap=oldOwned;captureDataMap=oldCaptures;duplicateCaptures=oldExtras;try{localStorage.setItem(userStorageKey('pokedex_obtained_v2'),JSON.stringify(oldOwned));localStorage.setItem(userStorageKey('pokedex_capture_data_v1'),JSON.stringify(oldCaptures));localStorage.setItem(userStorageKey('scorace_duplicate_captures_v1'),JSON.stringify(oldExtras));}catch(e){}message.textContent='Não foi possível salvar. Importação não enviada à nuvem.';return;}
             const importedRows=new Set([...plan.primary,...plan.extras].map(item=>item.row));
             marketRows=marketRows.filter(row=>!importedRows.has(row)&&(!marketResolved(row).id||row.include));
             marketRemoved=null;
             document.getElementById('market-paste').value='';
             saveToCloud();updateHeaderCounters();persistMarketDraft();renderMarketReview();message.textContent=plan.primary.length+' aquisições principais e '+plan.extras.length+' duplicatas salvas.'+(marketRows.length?' Restam '+marketRows.length+' cartas para identificar ou corrigir.':' Lista de importação limpa.');
         };
-        try{const draft=JSON.parse(localStorage.getItem('scorace_market_draft_v1')||'null');if(draft){marketMode=draft.mode==='import'?'import':'check';if(draft.drafts){marketDrafts={check:Array.isArray(draft.drafts.check)?draft.drafts.check:[],import:Array.isArray(draft.drafts.import)?draft.drafts.import:[]};}else if(Array.isArray(draft.rows)){marketDrafts[marketMode]=draft.rows;}marketRows=marketDrafts[marketMode];document.getElementById('market-paste-check').value=draft.texts?.check||'';document.getElementById('market-paste').value=draft.texts?.import||'';}}catch(error){}
-
-
         function updateHeaderCounters() {
             let totalObtainedCount = 0;
             allCards.forEach(card => {
@@ -2736,21 +2913,23 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         }
 
         window.saveCaptureData = function(cardId, key, value) {
+            if (!window.scoraceRequireAccount()) return;
             if(duplicateCaptures.some(copy=>copy.id===cardId)){window.editDuplicateCapture(cardId,key,value);return;}
             if(captureDataMap[cardId]?.locked)return;
             if(!captureDataMap[cardId]) captureDataMap[cardId] = {};
             captureDataMap[cardId][key] = value;
             if(key==='entity'||key==='type')updateCaptureFilterOptions();
             renderAcquisitionChart();
-            localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
+            localStorage.setItem(userStorageKey('pokedex_capture_data_v1'), JSON.stringify(captureDataMap));
             saveToCloud();
         };
 
         window.toggleLock = function(cardId) {
+            if (!window.scoraceRequireAccount()) return;
             if(duplicateCaptures.some(copy=>copy.id===cardId)){window.lockDuplicateCapture(cardId);return;}
             if(!captureDataMap[cardId]) captureDataMap[cardId] = {};
             captureDataMap[cardId].locked = !captureDataMap[cardId].locked;
-            localStorage.setItem('pokedex_capture_data_v1', JSON.stringify(captureDataMap));
+            localStorage.setItem(userStorageKey('pokedex_capture_data_v1'), JSON.stringify(captureDataMap));
             saveToCloud();
             renderCaptureView();
         };
@@ -2796,22 +2975,23 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
         };
 
         function saveDuplicateCaptures() {
-            localStorage.setItem('scorace_duplicate_captures_v1',JSON.stringify(duplicateCaptures));
+            localStorage.setItem(userStorageKey('scorace_duplicate_captures_v1'),JSON.stringify(duplicateCaptures));
             saveToCloud();updateCaptureFilterOptions();
         }
         function duplicateId(){return 'dup-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);}
         window.addDuplicateCapture=function(){
+            if (!window.scoraceRequireAccount()) return;
             const cardId=document.getElementById('duplicate-add-card').value;
             if(!allCards.some(c=>c.id===cardId))return;
             duplicateCaptures.push({id:duplicateId(),cardId,type:'compra',entity:'',price:'',locked:false});
             saveDuplicateCaptures();renderDuplicateCaptures();
         };
-        window.editDuplicateCapture=function(id,key,value){
+        window.editDuplicateCapture=function(id,key,value){if(!window.scoraceRequireAccount())return;
             const copy=duplicateCaptures.find(c=>c.id===id);if(!copy||copy.locked||!['entity','price','type','booster'].includes(key))return;
             copy[key]=value;saveDuplicateCaptures();
         };
-        window.lockDuplicateCapture=function(id){const copy=duplicateCaptures.find(c=>c.id===id);if(!copy)return;copy.locked=!copy.locked;saveDuplicateCaptures();renderDuplicateCaptures();};
-        window.removeDuplicateCapture=function(id){const copy=duplicateCaptures.find(c=>c.id===id);if(!copy||copy.locked)return;if(!window.confirm('Remover somente esta cópia extra? A carta da coleção principal será mantida.'))return;duplicateCaptures=duplicateCaptures.filter(c=>c.id!==id);saveDuplicateCaptures();renderDuplicateCaptures();};
+        window.lockDuplicateCapture=function(id){if(!window.scoraceRequireAccount())return;const copy=duplicateCaptures.find(c=>c.id===id);if(!copy)return;copy.locked=!copy.locked;saveDuplicateCaptures();renderDuplicateCaptures();};
+        window.removeDuplicateCapture=function(id){if(!window.scoraceRequireAccount())return;const copy=duplicateCaptures.find(c=>c.id===id);if(!copy||copy.locked)return;if(!window.confirm('Remover somente esta cópia extra? A carta da coleção principal será mantida.'))return;duplicateCaptures=duplicateCaptures.filter(c=>c.id!==id);saveDuplicateCaptures();renderDuplicateCaptures();};
         function renderDuplicateCaptures(){
             const host=document.getElementById('capture-grid');
             const visible=duplicateCaptures.filter(copy=>{
@@ -2960,7 +3140,12 @@ const byId=new Map(catalog.map(item=>[item.id,item]));
 const storageKey='scorace_official_items_owned_v1';
 const state={pokemon:'',category:'',region:'',status:'photo',query:'',sort:'name',limit:30};
 const el=id=>document.getElementById(id),escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let owned={};try{const saved=JSON.parse(localStorage.getItem(storageKey)||'{}');if(saved&&typeof saved==='object'&&!Array.isArray(saved))owned=saved;}catch(_){}
+let owned={};
+window.scoraceItemsApplyCloud = function(items) {
+    owned = items && typeof items === 'object' && !Array.isArray(items) ? {...items} : {};
+    try {localStorage.setItem(window.scoraceUserStorageKey(storageKey),JSON.stringify(owned));}catch(_){}
+    if (!el('view-items').classList.contains('hidden')) render();
+};
 const normalize=value=>String(value??'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase();
 const boxIcon='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" aria-hidden="true"><path d="m12 2 9 5v10l-9 5-9-5V7l9-5Z"/><path d="m3 7 9 5 9-5M12 12v10M7.5 4.5l9 5"/></svg>';
 const ebay=item=>'https://www.ebay.com/sch/i.html?_nkw='+encodeURIComponent(item.search||item.name);
@@ -2973,7 +3158,7 @@ function counters(){el('items-total').textContent=catalog.length;el('items-pokem
 function imageMarkup(item){return item.thumbnail?`<img src="${item.thumbnail}" alt="${escape(item.name)}" loading="lazy" decoding="async" data-item-image="${item.id}" onerror="if(!this.dataset.pathRetried){this.dataset.pathRetried='1';this.src='itens/'+this.getAttribute('src');}">`:`<span class="it-placeholder">${boxIcon}<span>Foto individual<br>em pesquisa</span></span>`;}
 function cardMarkup(item){return `<article class="it-card"><button type="button" class="it-image-button" data-open="${item.id}" aria-label="Ver ${escape(item.name)}">${imageMarkup(item)}${item.imageNote?`<span class="it-image-note">${escape(item.imageNote)}</span>`:''}</button><div class="it-card-body"><div class="it-meta"><span>${escape(item.category)}</span><span>${item.year||'s/data'}</span></div><h3><button type="button" data-open="${item.id}">${escape(item.name)}</button></h3><p class="it-card-pokemon">${escape(item.region)} · ${escape(item.pokemon.join(' / '))}</p><div class="it-card-footer"><button type="button" class="it-have" data-toggle="${item.id}" aria-pressed="${!!owned[item.id]}">${owned[item.id]?'✓ Tenho':'+ Tenho'}</button><a class="it-ebay" href="${escape(primarySearch(item))}" target="_blank" rel="noopener noreferrer" aria-label="Buscar ${escape(item.name)} no ${primaryLabel(item)}">${primaryLabel(item)} ↗</a></div></div></article>`;}
 function render(){counters();const list=filtered();el('items-grid').innerHTML=list.length?list.slice(0,state.limit).map(cardMarkup).join(''):'<p class="it-empty">Nenhum item corresponde aos filtros.</p>';el('items-result-count').textContent=`${list.length} ${list.length===1?'item encontrado':'itens encontrados'} · ${list.filter(item=>owned[item.id]).length} tenho`;el('items-more').hidden=list.length<=state.limit;el('items-clear').hidden=!state.pokemon&&!state.category&&!state.region&&!state.query&&state.status==='all'&&state.sort==='name';el('items-status').querySelectorAll('button').forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.status===state.status));if(b.dataset.status==='photo')b.textContent='Com foto ('+catalog.filter(i=>i.thumbnail).length+')';if(b.dataset.status==='pending'){const pending=catalog.filter(i=>!i.thumbnail).length;b.textContent='Foto pendente ('+pending+')';b.hidden=pending===0;}});prepareImages(el('items-grid'));}
-function toggle(id){if(!byId.has(id))return;const next={...owned};if(next[id])delete next[id];else next[id]=true;try{localStorage.setItem(storageKey,JSON.stringify(next));owned=next;el('items-notice').textContent='';render();const b=el('item-detail').querySelector('[data-toggle]');if(b?.dataset.toggle===id)b.textContent=owned[id]?'✓ Tenho este item':'+ Tenho este item';}catch(_){el('items-notice').textContent='Não foi possível salvar. Verifique o espaço disponível no navegador.';}}
+function toggle(id){if(!byId.has(id)||!window.scoraceRequireAccount())return;const next={...owned};if(next[id])delete next[id];else next[id]=true;try{localStorage.setItem(window.scoraceUserStorageKey(storageKey),JSON.stringify(next));owned=next;el('items-notice').textContent='';render();const b=el('item-detail').querySelector('[data-toggle]');if(b?.dataset.toggle===id)b.textContent=owned[id]?'✓ Tenho este item':'+ Tenho este item';window.scoraceSaveItems(next).catch(error=>{console.error(error);el('items-notice').textContent='Não foi possível sincronizar este item. Confira sua internet.';});}catch(_){el('items-notice').textContent='Não foi possível salvar. Verifique o espaço disponível no navegador.';}}
 const dialog=document.createElement('dialog');dialog.id='item-detail';dialog.setAttribute('aria-labelledby','item-detail-title');document.body.appendChild(dialog);
 dialog.addEventListener('click',event=>{if(event.target!==dialog)return;const r=dialog.getBoundingClientRect();if(event.clientX<r.left||event.clientX>r.right||event.clientY<r.top||event.clientY>r.bottom)dialog.close();});
 function open(id){const item=byId.get(id);if(!item)return;dialog.innerHTML=`<div class="it-detail-top"><span>${escape(item.category)} · ${item.year||'Data em pesquisa'}</span><button type="button" data-close>Fechar</button></div><div class="it-detail-grid"><div class="it-detail-image">${imageMarkup(item)}</div><div><h3 id="item-detail-title">${escape(item.name)}</h3><dl><dt>Pokémon</dt><dd>${escape(item.pokemon.join(' · '))}</dd><dt>Região</dt><dd>${escape(item.region)}</dd><dt>Aparição</dt><dd>${escape(item.appearance||'Produto / arte oficial')}</dd>${item.code?`<dt>Código</dt><dd>${escape(item.code)}</dd>`:''}${item.japanese?`<dt>Nome original</dt><dd>${escape(item.japanese)}</dd>`:''}<dt>Verificação</dt><dd>${escape(item.verification||'Fonte consultada')}</dd></dl><p class="it-detail-notes">${escape(item.notes||'')}</p><div class="it-detail-actions"><a href="${escape(primarySearch(item))}" target="_blank" rel="noopener noreferrer">Buscar no ${primaryLabel(item)} ↗</a><a href="${escape(aliSearch(item))}" target="_blank" rel="noopener noreferrer">Buscar no AliExpress ↗</a><button type="button" data-toggle="${item.id}">${owned[id]?'✓ Tenho este item':'+ Tenho este item'}</button><a href="${escape(item.source)}" target="_blank" rel="noopener noreferrer">Ver fonte ↗</a><button type="button" data-copy="${item.id}">Copiar busca</button></div><p class="it-term">Busca: ${escape(item.search||item.name)}</p><p class="it-term">AliExpress: busca de ofertas; avaliações e autenticidade de cada anúncio ainda não verificadas.</p><p id="item-copy-status" class="it-term" role="status"></p></div></div>`;dialog.showModal();dialog.scrollTop=0;dialog.querySelector('.it-detail-grid').scrollTop=0;prepareImages(dialog);}
@@ -2993,7 +3178,7 @@ function update(){state.limit=30;render();}
 el('items-search').addEventListener('input',event=>{state.query=event.target.value;update();});for(const field of ['category','region','sort'])el('items-'+field).addEventListener('change',event=>{state[field]=event.target.value;update();});el('items-pokemon').addEventListener('click',event=>{const b=event.target.closest('[data-pokemon]');if(b){state.pokemon=state.pokemon===b.dataset.pokemon?'':b.dataset.pokemon;update();}});el('items-status').addEventListener('click',event=>{const b=event.target.closest('[data-status]');if(b){state.status=b.dataset.status;update();}});el('items-more').addEventListener('click',()=>{state.limit+=30;render();});el('items-clear').addEventListener('click',()=>{Object.assign(state,{pokemon:'',category:'',region:'',status:'all',query:'',sort:'name',limit:30});el('items-search').value='';for(const f of ['category','region','sort'])el('items-'+f).value=state[f];render();});
 for(const field of ['category','region'])[...new Set(catalog.map(item=>item[field]))].sort().forEach(value=>{const option=document.createElement('option');option.value=value;option.textContent=value;el('items-'+field).appendChild(option);});
 function actions(event){const close=event.target.closest('[data-close]');if(close){dialog.close();return;}const toggleButton=event.target.closest('[data-toggle]');if(toggleButton){toggle(toggleButton.dataset.toggle);return;}const openButton=event.target.closest('[data-open]');if(openButton){open(openButton.dataset.open);return;}const copy=event.target.closest('[data-copy]');if(copy){const item=byId.get(copy.dataset.copy);if(navigator.clipboard?.writeText)navigator.clipboard.writeText(item.search||item.name).then(()=>el('item-copy-status').textContent='Busca copiada.').catch(()=>el('item-copy-status').textContent='Selecione e copie o texto da busca acima.');else el('item-copy-status').textContent='Selecione e copie o texto da busca acima.';}}
-el('items-grid').addEventListener('click',actions);dialog.addEventListener('click',actions);window.addEventListener('storage',event=>{if(event.key===storageKey){try{owned=JSON.parse(event.newValue||'{}')||{};if(!el('view-items').classList.contains('hidden'))render();}catch(_){}}});
+el('items-grid').addEventListener('click',actions);dialog.addEventListener('click',actions);window.addEventListener('storage',event=>{if(event.key===window.scoraceUserStorageKey(storageKey)){try{owned=JSON.parse(event.newValue||'{}')||{};if(!el('view-items').classList.contains('hidden'))render();}catch(_){}}});
 el('items-coverage').textContent='Revisão visual em 01/11/2026. Produtos e acessórios de TCG e figuras selecionadas, com ao menos um dos três Pokémon visível na apresentação catalogada. Itens sem foto específica ou com apenas uma promo escondida / aleatória foram retirados. Versões equivalentes com outro Pokémon como destaque foram excluídas quando há uma versão com Scorbunny, Raboot ou Cinderace como principal. O catálogo continua em expansão; reedições e embalagens regionais exigem conferência adicional.';
 window.renderItems=render;
 

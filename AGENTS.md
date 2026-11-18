@@ -29,3 +29,13 @@ Master set de Scorbunny, Raboot e Cinderace. O site estático é publicado a par
 `pokemon/effect-space.js` projeta os pontos do esqueleto e o centro deformado da bola Gigamax com a mesma câmera do modelo. `battle-effects.js` ainda usa sprites adaptados; não representa uma reprodução integral dos sistemas de partículas do jogo. Toques no Gigamax só selecionam: o especial é acionado pelo botão. A cena com adversário Max e seu impacto ainda não foi implementada.
 
 Teste das projeções com os modelos reais e bloqueio de toques Gigamax: `node tests/pokemon-effect-space.mjs`. Esse teste não substitui a inspeção visual em WebGL.
+
+
+## Contas, dados e APK
+
+- Autenticação via `scorace-auth.js` / `scorace-auth.css`, integrada aos botões e ao modal em `index.html`.
+- Dados individuais no Firestore: `users_data/{Firebase Auth UID}`. Nunca reinicializar ou apagar `users_data/cinderace_masterset` no navegador.
+- Catálogo público e Pokémon podem ser vistos sem conta; marcações da coleção e itens exigem login.
+- Itens são sincronizados no campo `itemsOwned`, e caches locais usam `userStorageKey`.
+- `scorace-binder.js` fornece o perfil ao iframe. `fichario/app.js` separa IndexedDB por usuário; o perfil migrado mantém acesso à biblioteca antiga no navegador original.
+- Leia `AUTH-SETUP.md`, `firestore.rules` e `scripts/migrate-legacy-collection.mjs` antes de publicar. A configuração Firebase é obrigatória, e o APK fica para a próxima fase.

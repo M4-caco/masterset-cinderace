@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "preview": "node migrate-legacy-collection.mjs",
+    "migrate": "node migrate-legacy-collection.mjs --apply"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
+  }
+}
