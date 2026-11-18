@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scorace — Minha coleção</title>
+    <meta name="theme-color" content="#101010">
+    <meta name="application-name" content="SCORACE">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <link rel="manifest" href="./manifest.webmanifest?v=1">
+    <link rel="icon" href="./scorace-symbol.svg?v=1" type="image/svg+xml" sizes="any">
+    <link rel="alternate icon" href="./scorace-symbol-256.webp?v=1" type="image/webp">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -491,7 +498,7 @@
 
     <dialog id="scorace-auth-dialog" aria-labelledby="scorace-auth-heading">
       <div class="scorace-auth-content">
-        <div class="scorace-auth-top"><div><h2 class="scorace-auth-title" id="scorace-auth-heading">Entrar no SCORACE</h2>
+        <div class="scorace-auth-top"><div><img class="scorace-auth-emblem" src="./scorace-symbol.svg?v=1" alt="" width="88" height="88" decoding="async"><h2 class="scorace-auth-title" id="scorace-auth-heading">Entrar no SCORACE</h2>
           <p class="scorace-auth-subtitle" id="scorace-auth-description">Sua coleção em qualquer dispositivo.</p></div>
           <button type="button" class="scorace-auth-close" id="scorace-auth-close" aria-label="Fechar">×</button></div>
         <div class="scorace-auth-modes" role="group" aria-label="Tipo de acesso">
