@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - fix/cinderace-shiny-face-reference-v2
       - fix/cinderace-shiny-face-attack-anchors
       - feature/max-landing-impact
       - fix/gigamax-tap-ground-fire
