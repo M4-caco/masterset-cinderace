@@ -5,5 +5,8 @@ const model=JSON.parse(await readFile(new URL('../pokemon/models/cinderace.gltf'
 assert.match(source,/loadFrames\(id, shiny\.map, true\)/);
 assert.match(source,/canvas\.getContext\('2d', \{ alpha: false \}\)\.drawImage/);
 assert.doesNotMatch(source,/nativeCinderaceRareEyes|composeShinyEyePixels/);
+assert.match(source,/if \(id === 'cinderace'\)/);
+assert.match(source,/\/_FaceBase\$\/\.test\(normal\.name\)/);
+assert.match(source,/rare\.color\.set\('#98918a'\)/);
 assert.equal(model.images[7].name,'pm0815_00_Eye_Col_rare');
 console.log('PASS: preserving original Shiny eye orientation in original three-frame atlas.');
