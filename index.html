@@ -1705,9 +1705,17 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                 document.getElementById('market-paste').value = draft.texts?.import || '';
             } catch (error) { console.warn('Rascunho da conta inválido:', error); }
         }
+        // Optional screen components must never block Firestore authentication/sync.
+        function safelyRefreshCollectionUI(task, label) {
+            try { task(); }
+            catch (error) { console.error('Falha na interface ' + label + ':', error); }
+        }
         async function loadAccountCollection(user) {
             const generation = ++accountGeneration;
-            collectionUnsubscribe?.();
+            const sync = document.getElementById('scorace-account-sync');
+            sync.textContent = user ? 'Conectado. Consultando sua coleção no Firebase...' : 'Entre para salvar sua coleção';
+            try { collectionUnsubscribe?.(); }
+            catch (error) { console.warn('Falha ao cancelar sincronização anterior:', error); }
             collectionUnsubscribe = null;
             collectionReady = false;
             activeAccount = user;
@@ -1715,20 +1723,21 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             obtainedMap = {};
             captureDataMap = {};
             duplicateCaptures = [];
-            window.scoraceBinderSetProfile?.(user?.uid || '');
-            window.scoraceItemsApplyCloud?.({});
-            restoreMarketDraft();
-            renderMarketReview();
-            refreshCurrentView();
-            const sync = document.getElementById('scorace-account-sync');
-            sync.textContent = user ? 'Carregando coleção...' : 'Entre para salvar sua coleção';
+            safelyRefreshCollectionUI(() => window.scoraceBinderSetProfile?.(user?.uid || ''), 'fichário');
+            safelyRefreshCollectionUI(() => window.scoraceItemsApplyCloud?.({}), 'itens');
+            safelyRefreshCollectionUI(restoreMarketDraft, 'rascunho de mercado');
+            safelyRefreshCollectionUI(renderMarketReview, 'mercado');
+            safelyRefreshCollectionUI(refreshCurrentView, 'resumo inicial');
             if (!user) return;
             const userRef = doc(db, 'users_data', user.uid);
             try {
-                // Never overwrite an existing user profile or the original shared collection.
+                // Never overwrite existing data; the original owner profile must be migrated, not auto-created empty.
                 await runTransaction(db, async transaction => {
                     const existing = await transaction.get(userRef);
                     if (!existing.exists()) {
+                        if (user.uid === 'ni2UkOT32qUXU2UB7g5omv06JZj2') {
+                            throw new Error('OWNER_MIGRATION_MISSING');
+                        }
                         transaction.set(userRef, {
                             obtainedMap: {}, captureDataMap: {}, duplicateCaptures: [],
                             itemsOwned: {}, nickname: user.displayName || '',
@@ -1740,61 +1749,80 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             } catch (error) {
                 if (generation !== accountGeneration) return;
                 console.error('Erro ao abrir perfil:', error);
-                sync.textContent = 'Erro ao acessar perfil. Verifique o Firebase.';
+                sync.textContent = error.message === 'OWNER_MIGRATION_MISSING'
+                  ? 'Coleção não migrada: o documento M4caco ainda não existe no Firebase. Nenhum dado foi apagado.'
+                  : error.code === 'permission-denied'
+                    ? 'Acesso negado pelo Firestore. Confira as regras antes de editar a coleção.'
+                    : 'Falha ao carregar a coleção do Firebase. Confira sua conexão e as permissões.';
                 return;
             }
             if (generation !== accountGeneration) return;
             docRef = userRef;
+            sync.textContent = 'Conectado. Recebendo cartas do Firebase...';
             collectionUnsubscribe = onSnapshot(userRef, snapshot => {
                 if (generation !== accountGeneration) return;
                 const data = snapshot.data();
-                if (!data) { collectionReady = false; sync.textContent = 'Perfil não encontrado.'; return; }
-                collectionReady = true;
+                if (!data) { collectionReady = false; sync.textContent = 'Documento da conta não encontrado.'; return; }
                 obtainedMap = data.obtainedMap && typeof data.obtainedMap === 'object' ? data.obtainedMap : {};
                 captureDataMap = data.captureDataMap && typeof data.captureDataMap === 'object' ? data.captureDataMap : {};
                 duplicateCaptures = Array.isArray(data.duplicateCaptures) ? data.duplicateCaptures : [];
+                const count = Object.values(obtainedMap).filter(Boolean).length;
+                if (user.uid === 'ni2UkOT32qUXU2UB7g5omv06JZj2'
+                    && data.migratedLegacy !== true && count === 0) {
+                    collectionReady = false;
+                    sync.textContent = 'Sua conta existe, mas a coleção antiga ainda não aparece neste documento. Verifique a migração.';
+                } else {
+                    collectionReady = true;
+                    sync.textContent = 'Coleção sincronizada: ' + count + ' cartas adquiridas.';
+                }
                 try {
                     localStorage.setItem(userStorageKey('pokedex_obtained_v2'),JSON.stringify(obtainedMap));
                     localStorage.setItem(userStorageKey('pokedex_capture_data_v1'),JSON.stringify(captureDataMap));
                     localStorage.setItem(userStorageKey('scorace_duplicate_captures_v1'),JSON.stringify(duplicateCaptures));
                 } catch (error) { console.warn('Cache local indisponível:', error); }
-                window.scoraceItemsApplyCloud?.(data.itemsOwned || {});
+                safelyRefreshCollectionUI(() => window.scoraceItemsApplyCloud?.(data.itemsOwned || {}), 'itens da conta');
                 if (!user.displayName && data.nickname) {
-                    window.scoraceSyncNickname?.(data.nickname);
+                    safelyRefreshCollectionUI(() => window.scoraceSyncNickname?.(data.nickname), 'apelido');
                 }
-                window.scoraceBinderSetProfile?.(user.uid, data.migratedLegacy === true);
+                safelyRefreshCollectionUI(() => window.scoraceBinderSetProfile?.(user.uid, data.migratedLegacy === true), 'fichário da conta');
                 if (data.migratedLegacy === true) {
-                    // Local Mercado drafts belong to the original browser, not the old
-                    // shared Firestore doc. Copy only for the migrated owner profile.
-                    const savedDraft = localStorage.getItem('scorace_market_draft_v1');
-                    if (savedDraft && !localStorage.getItem(userStorageKey('scorace_market_draft_v1'))) {
-                        localStorage.setItem(userStorageKey('scorace_market_draft_v1'), savedDraft);
-                        restoreMarketDraft();
-                    }
+                    safelyRefreshCollectionUI(() => {
+                        const savedDraft = localStorage.getItem('scorace_market_draft_v1');
+                        if (savedDraft && !localStorage.getItem(userStorageKey('scorace_market_draft_v1'))) {
+                            localStorage.setItem(userStorageKey('scorace_market_draft_v1'), savedDraft);
+                            restoreMarketDraft();
+                        }
+                    }, 'rascunho legado do mercado');
                 }
-                const importButton = document.getElementById('scorace-import-legacy-items');
-                let hasLocalLegacyItems = false;
-                try {
-                    const items = JSON.parse(localStorage.getItem('scorace_official_items_owned_v1') || '{}');
-                    hasLocalLegacyItems = items && typeof items === 'object' && Object.values(items).some(Boolean);
-                } catch (_) {}
-                importButton.hidden = !(data.migratedLegacy === true
-                  && !data.legacyItemsImportedAt
-                  && !Object.values(data.itemsOwned || {}).some(Boolean)
-                  && hasLocalLegacyItems);
-                sync.textContent = 'Coleção sincronizada';
-                renderMarketReview();
+                safelyRefreshCollectionUI(() => {
+                    const importButton = document.getElementById('scorace-import-legacy-items');
+                    let hasLocalLegacyItems = false;
+                    try {
+                        const items = JSON.parse(localStorage.getItem('scorace_official_items_owned_v1') || '{}');
+                        hasLocalLegacyItems = items && typeof items === 'object' && Object.values(items).some(Boolean);
+                    } catch (_) {}
+                    importButton.hidden = !(data.migratedLegacy === true
+                      && !data.legacyItemsImportedAt
+                      && !Object.values(data.itemsOwned || {}).some(Boolean)
+                      && hasLocalLegacyItems);
+                }, 'importação de itens');
+                safelyRefreshCollectionUI(renderMarketReview, 'mercado sincronizado');
                 if (isInitialLoad) {
                     isInitialLoad = false;
-                    if (!document.getElementById('nav-pokemon').hasAttribute('aria-current')) {
-                        switchTab('dashboard');
-                    }
-                } else refreshCurrentView();
+                    safelyRefreshCollectionUI(() => {
+                        if (!document.getElementById('nav-pokemon').hasAttribute('aria-current')) {
+                            switchTab('dashboard');
+                        }
+                    }, 'tela inicial');
+                } else safelyRefreshCollectionUI(refreshCurrentView, 'coleção sincronizada');
+                safelyRefreshCollectionUI(updateHeaderCounters, 'contadores');
             }, error => {
                 if (generation !== accountGeneration) return;
                 collectionReady = false;
                 console.error('Erro de acesso à coleção:', error);
-                sync.textContent = 'Sem acesso à coleção. Verifique as regras do Firebase.';
+                sync.textContent = error.code === 'permission-denied'
+                  ? 'Sem acesso às cartas: regras do Firebase bloquearam a leitura.'
+                  : 'Falha na sincronização da coleção. Confira sua conexão com o Firebase.';
             });
         }
         initScoraceAuth(firebaseApp, loadAccountCollection);
