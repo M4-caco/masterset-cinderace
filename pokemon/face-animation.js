@@ -7,66 +7,26 @@ const loader = new TextureLoader();
 // The old eye atlas also contains opaque skin patches, stray dark shapes and
 // a lilac/white backdrop. All of those must be transparent outside the eye
 // artwork, not painted darker: painting them caused the reported cheek stains.
-export function locateShinyIrisCenters(pixels, width, height) {
-    const groups = [[], []];
-    for (let y = Math.floor(height * 0.055); y < height * 0.42; y++) {
-        for (let x = 0; x < width; x++) {
-            const side = x < width / 2 ? 0 : 1;
-            if (side === 0 && (x < width * .13 || x > width * .44)) continue;
-            if (side === 1 && (x < width * .56 || x > width * .87)) continue;
-            const i = (y * width + x) * 4;
-            const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
-            if (r > 115 && g < 165 && r > g * 1.42 && r > b * 1.4)
-                groups[side].push([x, y]);
-        }
+// Retain the full native Shiny face illustration (skin around the eyes,
+// eyelids, eyeliner, red pupils, mouth and all three expressions).
+// Only the flat lilac atlas background should become transparent.
+export function restoreShinyFaceArtwork(pixels, width, height) {
+    if (pixels.length !== width * height * 4)
+        throw new Error('Invalid Shiny face frame');
+    const result = new Uint8ClampedArray(pixels);
+    // All frames have an empty area of flat lilac behind the facial artwork.
+    const sample = (Math.floor(height * .92) * width + Math.floor(width / 2)) * 4;
+    const bgR = pixels[sample], bgG = pixels[sample + 1], bgB = pixels[sample + 2];
+    for (let i = 0; i < pixels.length; i += 4) {
+        const distance = Math.hypot(
+            pixels[i] - bgR, pixels[i + 1] - bgG, pixels[i + 2] - bgB
+        );
+        // Small feather at the border removes lilac/white fringe.
+        // Never alter the original eye artwork's colours or orientation.
+        const coverage = Math.max(0, Math.min(1, (distance - 4) / 8));
+        result[i + 3] = Math.round(pixels[i + 3] * coverage);
     }
-    return groups.map((group, side) => group.length
-        ? group.reduce((acc, [x,y]) => [acc[0]+x/group.length, acc[1]+y/group.length], [0,0])
-        : [width * (side ? .73 : .27), height * .23]);
-}
-
-export function isolateShinyEyeArtwork(pixels, width, height, centers) {
-    if (pixels.length !== width * height * 4) throw new Error('Invalid Shiny face frame');
-    const out = new Uint8ClampedArray(width * height * 4);
-    const seeded = new Uint8Array(width * height);
-    const redSeeded = new Uint8Array(width * height);
-    const nearEye = (x, y) => centers.some(([cx, cy]) =>
-        Math.abs(x - cx) <= width * .135 && Math.abs(y - cy) <= height * .16);
-    const inside = (x,y) => y <= height * .435 && nearEye(x,y);
-    const ink = (r,g,b) => {
-        const red = r > 115 && g < 165 && r > g * 1.42 && r > b * 1.4;
-        const dark = r < 116 && g < 116 && b < 125;
-        return red || dark;
-    };
-    for(let y=0;y<height;y++)for(let x=0;x<width;x++){
-        if(!inside(x,y))continue;
-        const i=(y*width+x)*4;
-        if(ink(pixels[i],pixels[i+1],pixels[i+2]))seeded[y*width+x]=1;
-        if (pixels[i]>115 && pixels[i+1]<165 &&
-            pixels[i]>pixels[i+1]*1.42 && pixels[i]>pixels[i+2]*1.4)
-            redSeeded[y*width+x]=1;
-    }
-    const nearInk=(x,y,radius,seeds=seeded)=>{
-        for(let yy=Math.max(0,y-radius);yy<=Math.min(height-1,y+radius);yy++)
-            for(let xx=Math.max(0,x-radius);xx<=Math.min(width-1,x+radius);xx++)
-                if(seeds[yy*width+xx])return true;
-        return false;
-    };
-    for(let y=0;y<height;y++)for(let x=0;x<width;x++){
-        if(!inside(x,y))continue;
-        const i=(y*width+x)*4,r=pixels[i],g=pixels[i+1],b=pixels[i+2];
-        const white = r>198 && g>198 && b>198 &&
-            r>=b-4 && g>=b-4 && Math.abs(r-g)<18;
-        // Preserve thin sclera and antialias next to the original dark eye
-        // outline. Everything elsewhere, including lower decals, disappears.
-        const antialias = Math.abs(r-g)<16 && Math.abs(g-b)<16 &&
-            r>=118 && r<=203;
-        if(seeded[y*width+x] || (white && nearInk(x,y,3,redSeeded)) ||
-           (antialias && nearInk(x,y,2))) {
-            out[i]=r;out[i+1]=g;out[i+2]=b;out[i+3]=pixels[i+3];
-        }
-    }
-    return out;
+    return result;
 }
 
 async function loadFrames(id, original, shiny) {
@@ -74,16 +34,6 @@ async function loadFrames(id, original, shiny) {
     const atlas = await loader.loadAsync(new URL(`./visuals/${id}-face${suffix}.webp`, import.meta.url).href);
     const { image } = atlas;
     const height = image.height / FRAME_COUNT;
-    let shinyCenters = null;
-    if (id === 'cinderace' && shiny) {
-        const canvas = document.createElement('canvas');
-        canvas.width = image.width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d', { willReadFrequently: true });
-        ctx.drawImage(image, 0, 0, image.width, height, 0, 0, image.width, height);
-        const source = ctx.getImageData(0, 0, image.width, height);
-        shinyCenters = locateShinyIrisCenters(source.data, canvas.width, canvas.height);
-    }
     const frames = [];
     for (let i = 0; i < FRAME_COUNT; i++) {
         const canvas = document.createElement('canvas');
@@ -92,9 +42,9 @@ async function loadFrames(id, original, shiny) {
         const context = canvas.getContext('2d', { willReadFrequently: true });
         context.drawImage(image, 0, i * height, image.width, height,
             0, 0, image.width, height);
-        if (shinyCenters) {
+        if (id === 'cinderace' && shiny) {
             const frame = context.getImageData(0, 0, canvas.width, canvas.height);
-            frame.data.set(isolateShinyEyeArtwork(frame.data, canvas.width, canvas.height, shinyCenters));
+            frame.data.set(restoreShinyFaceArtwork(frame.data, canvas.width, canvas.height));
             context.putImageData(frame, 0, 0);
         }
         const texture = new original.constructor(canvas);

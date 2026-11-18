@@ -9,6 +9,14 @@ on:
       - 'tests/pokemon-*.mjs'
       - '.github/workflows/pokemon-max-landing-test.yml'
       - 'index.html'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'pokemon/**'
+      - 'tests/pokemon-*.mjs'
+      - '.github/workflows/pokemon-max-landing-test.yml'
+      - 'index.html'
   workflow_dispatch:
 
 permissions:
