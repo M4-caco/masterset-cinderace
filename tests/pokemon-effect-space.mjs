@@ -59,7 +59,7 @@ function method(name, next) {
         physical: 'Ataque físico',
     });
 }
-const tap = method('tapAttack', 'playQuickAttack');
+const tap = method('tapAttack', 'tapGigamaxReaction');
 const quick = method('playQuickAttack', 'playAttackCry');
 let played = 0;
 const fake = {
