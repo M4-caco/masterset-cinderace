@@ -14,56 +14,30 @@ const loader = new TextureLoader();
 // Mask only the lavender backdrop connected to the canvas edges. Removing
 // pale colours globally erases actual sclera and delicate eyelid antialias.
 // Never redraw an iris, eyelash or mouth, or change the model's UVs.
+// Preserve original Shiny iris, white sclera, tapered eyelashes and lid lines.
+// Both the lilac atlas background AND its opaque tan facial backing are merely
+// compositing aids, not facial ink. The native 3D FaceBase supplies skin.
+// Removing these two flat backing tones prevents grey polygons and leaves the
+// full eye art, including whites far from the pupil, untouched.
 export function restoreShinyFaceArtwork(pixels, width, height) {
     if (pixels.length !== width * height * 4)
         throw new Error('Invalid Shiny face frame');
     const output = new Uint8ClampedArray(pixels);
-    const sample = (Math.floor(height * .92) * width + Math.floor(width / 2)) * 4;
-    const background = [pixels[sample], pixels[sample + 1], pixels[sample + 2]];
-    const count = width * height;
-    const visited = new Uint8Array(count);
-    const queue = new Int32Array(count);
-    let first = 0, last = 0;
-    const distance = position => {
-        const i = position * 4;
-        return Math.hypot(
-            pixels[i] - background[0],
-            pixels[i + 1] - background[1],
-            pixels[i + 2] - background[2]
-        );
+    const bg = (Math.floor(height * .92) * width + Math.floor(width * .5)) * 4;
+    const skin = (Math.floor(height * .20) * width + Math.floor(width * .08)) * 4;
+    const background = [pixels[bg], pixels[bg + 1], pixels[bg + 2]];
+    const patch = [pixels[skin], pixels[skin + 1], pixels[skin + 2]];
+    const matte = (r,g,b,color,inner,outer) => {
+        const d = Math.hypot(r-color[0],g-color[1],b-color[2]);
+        return Math.max(0, Math.min(1, (d-inner)/(outer-inner)));
     };
-    // Flood-fill only the backdrop: preserve pale whites surrounded by the
-    // red iris, dark lash or warm Shiny skin, even if close to lilac in RGB.
-    const visit = position => {
-        if (visited[position] || distance(position) > 16) return;
-        visited[position] = 1;
-        queue[last++] = position;
-    };
-    for (let x = 0; x < width; x++) {
-        visit(x);
-        visit((height - 1) * width + x);
-    }
-    for (let y = 0; y < height; y++) {
-        visit(y * width);
-        visit(y * width + width - 1);
-    }
-    while (first < last) {
-        const position = queue[first++];
-        const x = position % width;
-        const y = Math.floor(position / width);
-        if (x > 0) visit(position - 1);
-        if (x + 1 < width) visit(position + 1);
-        if (y > 0) visit(position - width);
-        if (y + 1 < height) visit(position + width);
-    }
-    for (let position = 0; position < count; position++) {
-        if (!visited[position]) continue;
-        // Transparent lavender outside the original illustration; a subtle
-        // only-at-the-border fade retains texture antialias without a halo.
-        const d = distance(position);
-        output[position * 4 + 3] = Math.round(
-            pixels[position * 4 + 3] * Math.max(0, Math.min(1, (d - 5) / 11))
-        );
+    for (let i=0;i<pixels.length;i+=4) {
+        const r=pixels[i],g=pixels[i+1],b=pixels[i+2];
+        // A small transition only around the removed flat backing tones.
+        // All white sclera, black eyelid and red iris pixels remain exact RGB.
+        const alpha = matte(r,g,b,background,7,18) *
+            matte(r,g,b,patch,9,24);
+        output[i+3] = Math.round(pixels[i+3] * alpha);
     }
     return output;
 }
