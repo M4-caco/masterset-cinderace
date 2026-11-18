@@ -45,7 +45,7 @@ jobs:
       - name: Testar gestos dos ataques
         run: node tests/pokemon-tap-gestures.mjs
 
-      - name: Conferir contorno Shiny em três ângulos (temporário)
+      - name: Ajustar visualmente tom da FaceBase rara (temporário)
         run: |
           python -m pip install --quiet playwright Pillow
           (python -m http.server 8765 --bind 127.0.0.1 >/tmp/scorace-http.log 2>&1 &)
@@ -66,42 +66,46 @@ jobs:
               page.locator('#pokemon-inspector .pokemon-controls').nth(1).locator('.pokemon-colors button').nth(1).click()
               page.wait_for_timeout(1100)
               stage=card.locator('.pokemon-stage')
+              palette=['98918a','a59b91','b5aaa1','c1b6aa','cfc2b7','ffffff']
               frames=[]
-              for angle in [-.35,0,.35]:
-                  info=page.evaluate("""angle => {
+              for tint in palette:
+                  info=page.evaluate("""tint=>{
                     const v=window.__scoraceFaceDebug;
-                    if(!v?.model)return 'missing model';
-                    v.rotate(angle);
+                    if(!v?.model) return 'no model';
+                    v.rotate(.35);
+                    let match=false;
+                    for(const [mesh,normal,rare] of v.model.materialPairs){
+                      if(!normal.name.endsWith('_FaceBase'))continue;
+                      rare.color.set('#'+tint);
+                      rare.transparent=false;
+                      rare.opacity=1;
+                      rare.depthWrite=true;
+                      rare.needsUpdate=true;
+                      match=mesh.material===rare;
+                    }
                     v.invalidate();
-                    return v.model.materialPairs.filter(([mesh,normal])=>
-                      normal.name.endsWith('_FaceBase')||
-                      normal.name.endsWith('_FaceComposite')).map(
-                        ([mesh,normal,rare])=>({
-                          name:normal.name,selected:mesh.material===rare,
-                          alpha:rare.opacity,transparent:rare.transparent
-                        })
-                      );
-                  }""",angle)
-                  page.wait_for_timeout(360)
-                  shot=Image.open(io.BytesIO(stage.screenshot())).convert('RGB')
-                  face=shot.crop((int(shot.width*.26),int(shot.height*.49),
-                      int(shot.width*.74),int(shot.height*.75)))
-                  face=face.resize((face.width*3,face.height*3))
-                  frames.append((angle,face))
-                  print('FACE_ANGLE',angle,info)
+                    return match;
+                  }""",tint)
+                  page.wait_for_timeout(330)
+                  frame=Image.open(io.BytesIO(stage.screenshot())).convert('RGB')
+                  cut=frame.crop((int(frame.width*.22),int(frame.height*.48),
+                                  int(frame.width*.78),int(frame.height*.75)))
+                  cut=cut.resize((cut.width*3,cut.height*3))
+                  frames.append((tint,cut))
+                  print('FACE_TINT',tint,info)
               cw=frames[0][1].width+8
-              ch=frames[0][1].height+26
-              sheet=Image.new('RGB',(3*cw,ch),(92,92,92))
+              ch=frames[0][1].height+28
+              sheet=Image.new('RGB',(cw*3,ch*2),(80,80,80))
               draw=ImageDraw.Draw(sheet)
-              for index,(angle,im) in enumerate(frames):
-                  x=index*cw
-                  sheet.paste(im,(x,26))
-                  draw.text((x+6,4),'Camera '+str(angle),fill='white')
+              for i,(tint,im) in enumerate(frames):
+                  x=(i%3)*cw;y=(i//3)*ch
+                  sheet.paste(im,(x,y+28))
+                  draw.text((x+6,y+5),'FaceBase #'+tint,fill='white')
               stream=io.BytesIO()
-              sheet.save(stream,format='JPEG',quality=82,optimize=True)
+              sheet.save(stream,format='JPEG',quality=84,optimize=True)
               print('FACE_QA_BROWSER_ERRORS',errors[:5])
-              print('FACE_FINAL_JPEG_BEGIN')
+              print('FACE_TINT_JPEG_BEGIN')
               print(base64.b64encode(stream.getvalue()).decode())
-              print('FACE_FINAL_JPEG_END')
+              print('FACE_TINT_JPEG_END')
               browser.close()
           PY
