@@ -3,7 +3,9 @@ name: Pokémon 3D smoke test
 on:
   push:
     branches:
+      - main
       - feature/max-landing-impact
+      - fix/gigamax-tap-ground-fire
     paths:
       - 'pokemon/**'
       - 'tests/pokemon-*.mjs'
@@ -23,8 +25,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Validar sintaxe dos módulos JavaScript alterados
+        run: |
+          node --check pokemon/showcase.js
+          node --check pokemon/battle-effects.js
+          node --check pokemon/ground-fire.js
+          node --check pokemon/entry.js
       - name: Testar colisão e limpeza de partículas Max
         run: node tests/pokemon-max-landing.mjs
+      - name: Testar fogo 3D de contato e toque Gigamax
+        run: node tests/pokemon-ground-fire.mjs
       - name: Testar ancoragem dos golpes Pokémon
         run: node tests/pokemon-effect-space.mjs
       - name: Testar gestos dos ataques

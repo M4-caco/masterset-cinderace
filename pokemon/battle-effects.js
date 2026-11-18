@@ -178,21 +178,6 @@ function drawGmaxFireball(ctx, time, frame) {
     }
 }
 
-function drawGroundFire(ctx, time, frame, behind) {
-    const { x, floor, extent, angle } = frame;
-    for (let i = 0; i < 16; i++) {
-        const orbit = i * TAU / 16 + angle;
-        const point = frame.groundPoint(orbit, extent * 0.35);
-        if (point.behind !== behind) continue;
-        const life = (time * 1.8 + i * 0.37) % 1;
-        const flameHeight = extent * (0.10 + life * 0.15);
-        const px = point.x;
-        const py = point.y - flameHeight * 0.5;
-        sprite(ctx, 5 + Math.floor(life * 4), px, py,
-            extent * 0.15, flameHeight, Math.sin(life * Math.PI) * 0.85);
-    }
-}
-
 function drawFlamethrower(ctx, time, frame) {
     const phase = time / frame.duration;
     if (phase < 0.16 || phase > 0.91) return;
@@ -241,12 +226,10 @@ export class BattleEffects {
     constructor(stage, target) {
         loadAttackSprites();
         this.front = createSurface(stage, target);
-        this.back = createSurface(stage, target, ' pokemon-battle-effects-back');
     }
 
     clear() {
         this.front.canvas.hidden = true;
-        this.back.canvas.hidden = true;
     }
 
     draw(kind, frame) {
@@ -257,13 +240,6 @@ export class BattleEffects {
         const direction = frame.direction;
         const context = { ...frame, extent, forward, depth, direction };
         const front = prepareSurface(this.front, width, height);
-        if (frame.groundFire) {
-            const back = prepareSurface(this.back, width, height);
-            if (back) drawGroundFire(back, frame.groundTime, context, true);
-            if (front) drawGroundFire(front, frame.groundTime, context, false);
-        } else {
-            this.back.canvas.hidden = true;
-        }
         if (front) drawMoves[kind]?.(front, time, context);
     }
 }

@@ -59,12 +59,13 @@ function method(name, next) {
         physical: 'Ataque físico',
     });
 }
-const tap = method('tapAttack', 'playQuickAttack');
+const tap = method('tapAttack', 'tapGigamaxReaction');
 const quick = method('playQuickAttack', 'playAttackCry');
 let played = 0;
 const fake = {
     model: { clips: new Set(['Ataque físico']) },
     loading: false, form: 'gigamax', lastAttackTap: 0,
+    tapGigamaxReaction: () => {}, // its delayed roar is tested separately
     play: () => played++,
 };
 for (let i = 0; i < 100; i++) {
