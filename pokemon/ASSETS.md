@@ -27,3 +27,12 @@ Na forma normal, um clique isolado aciona o clipe corporal de ataque especial co
 No modo Dinamax, um clique isolado executa o clipe especial e o efeito Chama Max. No modo Gigamax, tocar no Pokémon não aciona o ataque especial: o botão exclusivo Bola de Chamas G-Max permanece responsável por ele. Arrastar continua girando o modelo. As vozes aprimoradas do anime são exclusivas da saudação ao passar o mouse; as vocalizações de ataque vêm dos arquivos `pokemon/audio/*.wav` extraídos do Pokémon GO.
 
 Teste da lógica de intervalos e formas: `node tests/pokemon-tap-gestures.mjs`.
+
+
+## Impacto no solo durante Dynamax e Gigamax
+
+O módulo `max-landing.js` adiciona uma explosão leve de fragmentos tridimensionais e poeira no instante da substituição visual do modelo Max. As pedras seguem uma trajetória balística determinística com gravidade, uma colisão com o piso e um quique, independentemente da taxa de quadros. O efeito usa um pool fixo de objetos e é cancelado ao trocar de forma, evitando duplicações e vazamentos. Em celulares a quantidade de partículas é menor.
+
+**Limite dos recursos:** os fragmentos e a poeira desta implementação são materiais e geometrias procedurais, não as texturas exatas de `breadbattlefx_assets_all`. O repositório ainda não contém os arquivos de textura da aterrissagem Max que foram mencionados em um teste anterior. Substituí-los pela extração original e fazer uma comparação visual com Pokémon GO são tarefas distintas; não afirmar equivalência exata enquanto isso não for verificado.
+
+Teste de trajetória, limpeza e cem reativações por perfil de renderização: `node tests/pokemon-max-landing.mjs`.
