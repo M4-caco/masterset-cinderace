@@ -1751,6 +1751,7 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                     localStorage.setItem(userStorageKey('scorace_duplicate_captures_v1'),JSON.stringify(duplicateCaptures));
                 } catch (error) { console.warn('Cache local indisponível:', error); }
                 window.scoraceItemsApplyCloud?.(data.itemsOwned || {});
+                window.scoraceBinderSetProfile?.(user.uid, data.migratedLegacy === true);
                 sync.textContent = 'Coleção sincronizada';
                 renderMarketReview();
                 if (isInitialLoad) {
