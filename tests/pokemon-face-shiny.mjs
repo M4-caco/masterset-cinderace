@@ -59,7 +59,8 @@ assert.match(face, /shiny\.transparent = true/);
 assert.match(face, /shiny\.alphaTest = 0\.05/);
 assert.match(face, /shiny\.depthWrite = false/);
 assert.match(face, /\/_FaceBase\$\/\.test\(normal\.name\)/);
-assert.match(face, /shiny\.opacity = 0/);
+assert.match(face, /shiny\.color\.set\('#98918a'\)/);
+assert.match(face, /shiny\.opacity = 1/);
 
 assert.doesNotMatch(face, /nativeCinderaceShinyFrame/);
 const entry = await readFile(new URL('pokemon/entry.js', root), 'utf8');
