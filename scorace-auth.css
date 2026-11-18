@@ -1,0 +1,47 @@
+#scorace-auth-dialog {
+  border: 1px solid rgba(244, 214, 100, .3);
+  border-radius: 24px;
+  background: #202020;
+  color: #efefef;
+  padding: 0;
+  width: min(440px, calc(100vw - 28px));
+  max-height: min(90dvh, 780px);
+  box-shadow: 0 26px 90px rgba(0, 0, 0, .55);
+  overflow: auto;
+}
+#scorace-auth-dialog::backdrop { background: rgba(0,0,0,.76); backdrop-filter: blur(8px); }
+.scorace-auth-content { padding: clamp(19px, 5vw, 30px); display: grid; gap: 16px; }
+.scorace-auth-top { display:flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.scorace-auth-title { margin: 0; font-size: 23px; line-height: 1.2; font-weight: 850; color: #f4d664; }
+.scorace-auth-subtitle { color: #c8c8c8; font-size: 13px; margin: 6px 0 0; }
+.scorace-auth-close { font-size: 24px; border-radius: 50%; width: 32px; height: 32px; flex-shrink: 0; color: #ddd; }
+.scorace-auth-close:hover { background: #363636; }
+.scorace-auth-modes { display:flex; border:1px solid #595959; border-radius:13px; overflow:hidden; }
+.scorace-auth-modes button { flex:1; padding:10px 8px; font-weight: 750; font-size: 13px; }
+.scorace-auth-modes button[aria-pressed="true"] { background:#f4d664; color:#1c1c1c; }
+.scorace-auth-form { display:grid; gap:13px; }
+.scorace-auth-form[hidden], #scorace-account-panel[hidden] { display:none; }
+.scorace-auth-form label { display:grid; gap:5px; font-size:12px; font-weight:750; }
+.scorace-auth-form input { width:100%; box-sizing:border-box; border:1px solid #555; border-radius:12px; padding:11px 12px; background:#111; color:#fff; outline:none; font-size:14px; }
+.scorace-auth-form input:focus { border-color:#f4d664; box-shadow: 0 0 0 2px rgba(244,214,100,.16); }
+.scorace-auth-primary { color:#181818; background:#f4d664; font-size:14px; font-weight:850; padding:12px; border-radius:12px; }
+.scorace-auth-primary:hover { background:#ffe484; }
+.scorace-auth-link { font-size:12px; text-decoration:underline; text-underline-offset:3px; color:#f4d664; justify-self:start; }
+.scorace-auth-secondary { font-size:12px; border-radius:10px; padding:9px 11px; border:1px solid #777; font-weight:650; }
+.scorace-auth-secondary:hover { background:#383838; }
+.scorace-auth-status { min-height:18px; margin:0; color:#bce6ad; font-size:12px; }
+.scorace-auth-status.is-error { color:#ffaaa4; }
+.scorace-auth-trigger { background:#f4d664 !important; color:#181818 !important; border:1px solid #e8bd53 !important; border-radius:12px; font-weight:850; padding:8px 11px; min-height:36px; font-size:12px; white-space:nowrap; }
+.scorace-auth-trigger:hover { background:#ffe48d !important; }
+.scorace-auth-trigger-mobile { width:100%; text-align:center; padding:12px; }
+.scorace-account-identity { padding:12px 14px; background:#141414; border:1px solid #444; border-radius:14px; }
+#scorace-account-name { color:#f4d664; font-size:18px; font-weight:850; }
+#scorace-account-email { color:#bbb; font-size:12px; margin-top:3px; overflow-wrap:anywhere; }
+#scorace-verification { display:grid; gap:9px; padding:12px; border-radius:12px; border:1px solid #b78730; background:rgba(183,135,48,.09); font-size:12px; }
+#scorace-verification[hidden] { display:none; }
+.scorace-verification-actions { display:flex; flex-wrap:wrap; gap:8px; }
+#scorace-logout { justify-self:start; }
+#scorace-auth-dialog button:disabled { opacity: .55; cursor: wait; }
+@media (max-width:400px) {
+  .scorace-auth-trigger:not(.scorace-auth-trigger-mobile) { font-size:11px; padding:6px 7px; max-width:110px; overflow:hidden; text-overflow:ellipsis; }
+}
