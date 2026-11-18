@@ -1,6 +1,6 @@
 import {
-    Group, IcosahedronGeometry, Mesh, MeshBasicMaterial, MeshStandardMaterial,
-    SphereGeometry,
+    BufferGeometry, Float32BufferAttribute, Group, Mesh, MeshBasicMaterial,
+    MeshStandardMaterial,
 } from './vendor/three-gltf.js';
 
 const TAU = Math.PI * 2;
@@ -11,6 +11,42 @@ const hash = (index, salt) => {
     return value - Math.floor(value);
 };
 const clamp = value => Math.max(0, Math.min(1, value));
+
+// The project's Three.js build is deliberately small; create the two shapes
+// from its existing BufferGeometry instead of shipping a second Three copy.
+function geometryFromTriangles(points) {
+    const geometry = new BufferGeometry();
+    geometry.setAttribute('position', new Float32BufferAttribute(points, 3));
+    geometry.computeVertexNormals();
+    return geometry;
+}
+
+function makeRockGeometry() {
+    const top = [0, 1.06, 0], bottom = [0, -0.79, 0];
+    const right = [1.0, -0.03, 0.05], left = [-0.82, 0.03, 0];
+    const front = [0.02, 0, 1.05], back = [0, -0.03, -0.88];
+    const faces = [
+        [top, front, right], [top, left, front], [top, back, left], [top, right, back],
+        [bottom, right, front], [bottom, front, left], [bottom, left, back], [bottom, back, right],
+    ];
+    return geometryFromTriangles(faces.flat(2));
+}
+
+function makeDustGeometry() {
+    const points = [], rings = 5, sections = 9;
+    function vertex(ring, section) {
+        const theta = Math.PI * ring / rings;
+        const phi = TAU * section / sections;
+        return [Math.sin(theta) * Math.cos(phi), Math.cos(theta),
+            Math.sin(theta) * Math.sin(phi)];
+    }
+    for (let r = 0; r < rings; r++) for (let c = 0; c < sections; c++) {
+        const a = vertex(r, c), b = vertex(r + 1, c);
+        const d = vertex(r, c + 1), e = vertex(r + 1, c + 1);
+        points.push(...a, ...e, ...b, ...a, ...d, ...e);
+    }
+    return geometryFromTriangles(points);
+}
 
 // Analytical motion makes the result independent of frame rate and prevents
 // particles from tunnelling through the floor when mobile frames are skipped.
@@ -65,8 +101,8 @@ export class MaxLandingImpact {
         this.rocks = [];
         this.dust = [];
         this.active = false;
-        this.geometry = new IcosahedronGeometry(1, 0);
-        this.dustGeometry = new SphereGeometry(1, 8, 5);
+        this.geometry = makeRockGeometry();
+        this.dustGeometry = makeDustGeometry();
         this.rockMaterials = [0x655c58, 0x867973, 0xaca098].map(color =>
             new MeshStandardMaterial({ color, roughness: 1, flatShading: true }));
         const rockCount = compact ? 8 : 17;
