@@ -45,7 +45,7 @@ jobs:
       - name: Testar gestos dos ataques
         run: node tests/pokemon-tap-gestures.mjs
 
-      - name: Diagnosticar camadas do rosto Shiny no Chromium (temporário)
+      - name: Conferir contorno Shiny em três ângulos (temporário)
         run: |
           python -m pip install --quiet playwright Pillow
           (python -m http.server 8765 --bind 127.0.0.1 >/tmp/scorace-http.log 2>&1 &)
@@ -66,59 +66,42 @@ jobs:
               page.locator('#pokemon-inspector .pokemon-controls').nth(1).locator('.pokemon-colors button').nth(1).click()
               page.wait_for_timeout(1100)
               stage=card.locator('.pokemon-stage')
-              versions=['current','noComposite','faceBaseMagenta','bodyMagenta','noFaceBase','noBoth']
-              imgs=[]
-              for variant in versions:
-                  info=page.evaluate("""variant => {
+              frames=[]
+              for angle in [-.35,0,.35]:
+                  info=page.evaluate("""angle => {
                     const v=window.__scoraceFaceDebug;
-                    if (!v?.model) return {error:'no model'};
-                    v.rotate(0);
-                    const names=[];
-                    for(const [mesh,normal,rare] of v.model.materialPairs) {
-                      if (normal.name.includes('_Face') || normal.name==='BodyAll') {
-                        rare.color.set(normal.name.endsWith('_FaceBase')?'#98918a':'#ffffff');
-                        rare.opacity=1;
-                        rare.transparent=normal.name.endsWith('_FaceComposite');
-                        rare.depthWrite=!rare.transparent;
-                        if (variant==='noComposite' && normal.name.endsWith('_FaceComposite')) {
-                          rare.opacity=0;
-                        }
-                        if (variant==='faceBaseMagenta' && normal.name.endsWith('_FaceBase'))
-                          rare.color.set('#ff00ff');
-                        if (variant==='bodyMagenta' && normal.name==='BodyAll')
-                          rare.color.set('#ff00ff');
-                        if ((variant==='noFaceBase'||variant==='noBoth') &&
-                            normal.name.endsWith('_FaceBase')) {
-                          rare.opacity=0;rare.transparent=true;rare.depthWrite=false;
-                        }
-                        if (variant==='noBoth' && normal.name.endsWith('_FaceComposite'))rare.opacity=0;
-                        rare.needsUpdate=true;
-                        names.push([normal.name,mesh.material===rare,rare.color.getHexString(),rare.opacity]);
-                      }
-                    }
+                    if(!v?.model)return 'missing model';
+                    v.rotate(angle);
                     v.invalidate();
-                    return {names};
-                  }""",variant)
-                  page.wait_for_timeout(260)
-                  image=Image.open(io.BytesIO(stage.screenshot())).convert('RGB')
-                  cut=image.crop((int(image.width*.26),int(image.height*.53),
-                     int(image.width*.74),int(image.height*.79)))
-                  cut=cut.resize((cut.width*3,cut.height*3))
-                  imgs.append((variant,cut))
-                  print('FACE_LAYER',variant,info)
-              cw=max(im.width for _,im in imgs)+10
-              ch=max(im.height for _,im in imgs)+32
-              sheet=Image.new('RGB',(cw*3,ch*2),(85,85,85))
+                    return v.model.materialPairs.filter(([mesh,normal])=>
+                      normal.name.endsWith('_FaceBase')||
+                      normal.name.endsWith('_FaceComposite')).map(
+                        ([mesh,normal,rare])=>({
+                          name:normal.name,selected:mesh.material===rare,
+                          alpha:rare.opacity,transparent:rare.transparent
+                        })
+                      );
+                  }""",angle)
+                  page.wait_for_timeout(360)
+                  shot=Image.open(io.BytesIO(stage.screenshot())).convert('RGB')
+                  face=shot.crop((int(shot.width*.26),int(shot.height*.49),
+                      int(shot.width*.74),int(shot.height*.75)))
+                  face=face.resize((face.width*3,face.height*3))
+                  frames.append((angle,face))
+                  print('FACE_ANGLE',angle,info)
+              cw=frames[0][1].width+8
+              ch=frames[0][1].height+26
+              sheet=Image.new('RGB',(3*cw,ch),(92,92,92))
               draw=ImageDraw.Draw(sheet)
-              for i,(label,im) in enumerate(imgs):
-                  x=(i%3)*cw;y=(i//3)*ch
-                  sheet.paste(im,(x,y+26))
-                  draw.text((x+8,y+5),label,fill='white')
+              for index,(angle,im) in enumerate(frames):
+                  x=index*cw
+                  sheet.paste(im,(x,26))
+                  draw.text((x+6,4),'Camera '+str(angle),fill='white')
               stream=io.BytesIO()
-              sheet.save(stream,format='JPEG',quality=79,optimize=True)
+              sheet.save(stream,format='JPEG',quality=82,optimize=True)
               print('FACE_QA_BROWSER_ERRORS',errors[:5])
-              print('FACE_VARIANTS_JPEG_BEGIN')
+              print('FACE_FINAL_JPEG_BEGIN')
               print(base64.b64encode(stream.getvalue()).decode())
-              print('FACE_VARIANTS_JPEG_END')
+              print('FACE_FINAL_JPEG_END')
               browser.close()
           PY
