@@ -34,8 +34,8 @@ assert.match(showcase, /new MaxLandingImpact\(this\.scene, mobile\.matches\)/);
 assert.match(showcase, /this\.maxLanding\.start\(/);
 assert.match(showcase, /this\.maxLanding\?\.update\(now\)/);
 assert.doesNotMatch(css, /pokemon-battle-effects|data-attack-away/);
-assert.match(entry, /showcase\.js\?v=49/);
-assert.match(html, /pokemon\/entry\.js\?v=49/);
+assert.match(entry, /showcase\.js\?v=50/);
+assert.match(html, /pokemon\/entry\.js\?v=50/);
 assert.match(html, /pokemon\/showcase\.css\?v=27/);
 
 const deadModules = [
