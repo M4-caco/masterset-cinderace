@@ -5,14 +5,11 @@ import {
 import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=8';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=10';
 import { MaxLandingImpact } from './max-landing.js?v=1';
-import { GroundFireTrail } from './ground-fire.js?v=1';
 import { iconControl, mountVolume } from './showcase-controls.js?v=14';
-import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=16';
-import { effectSpace } from './effect-space.js?v=2';
 import { mountPokedex } from './pokedex.js?v=12';
 import { prepareFace, updateFace } from './face-animation.js?v=16';
 import { createJornadasGreeting } from './jornadas-voices.js?v=4';
-import { isRapidTap, singleTapEffect, SINGLE_TAP_WINDOW_MS, RAPID_TAP_GRACE_MS } from './tap-gestures.mjs?v=1';
+import { isRapidTap, SINGLE_TAP_WINDOW_MS, RAPID_TAP_GRACE_MS } from './tap-gestures.mjs?v=2';
 
 const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
 const SPECIES = [
@@ -80,25 +77,6 @@ function smoothstep(value) {
     return t * t * (3 - 2 * t);
 }
 
-function tacklePath(waist, clip) {
-    const track = clip?.tracks.find(({ name }) => name === `${waist?.name}.position`);
-    if (!track) return null;
-    const { values, times } = track;
-    const x = values[0], z = values[2];
-    let range = 0, dx = 0, dz = 0, hit = 0;
-    for (let index = 0; index < times.length; index++) {
-        const offset = index * 3;
-        const alongX = values[offset] - x;
-        const alongZ = values[offset + 2] - z;
-        const distance = Math.hypot(alongX, alongZ);
-        if (distance <= range) continue;
-        range = distance;
-        dx = alongX;
-        dz = alongZ;
-        hit = times[index];
-    }
-    return range ? { waist, x, z, dx: dx / range, dz: dz / range, range, hit } : null;
-}
 const MOVES = {
     physical: 'Ataque físico',
     special: 'Ataque especial',
@@ -273,7 +251,6 @@ class PokemonViewer {
         rim.position.set(4, 2, -4);
         this.scene.add(this.turntable, fill, key, rim);
         this.maxLanding = new MaxLandingImpact(this.scene, mobile.matches);
-        this.groundFlames = new GroundFireTrail(this.scene, mobile.matches);
         this.observer = new ResizeObserver(() => this.invalidate());
         this.observer.observe(this.stage);
         this.visibilityObserver = new IntersectionObserver(([entry]) => {
@@ -292,13 +269,11 @@ class PokemonViewer {
             const props = [];
             const eyes = [];
             let visibilityController;
-            let waist;
             let head;
             let feeding;
             root.traverse(object => {
                 if (object.name.startsWith('_jnt_Visibility_')) visibilityController = object;
                 if (/^_jnt_(?:L|R)?Eye_\d+$/i.test(object.name)) eyes.push(object);
-                if (/^Waist_\d+$/.test(object.name)) waist = object;
                 if (/^Head_\d+$/.test(object.name)) head = object;
                 if (/^Feeding_Socket_\d+$/.test(object.name)) feeding = object;
                 if (!object.isMesh) return;
@@ -324,7 +299,6 @@ class PokemonViewer {
                 other.geometry.attributes.position === mesh.geometry.attributes.position));
             const model = {
                 id, root, mixer, clips, materialPairs, body, props, head, visibilityController, idleBounds, boundsMeshes, face,
-                tackle: tacklePath(waist, clips.get(MOVES.physical)),
                 idle: clips.get('Repouso da Pokédex') ?? clips.get('Repouso de batalha') ?? clips.get('Repouso'),
             };
             this.setRest(model);
@@ -388,7 +362,6 @@ class PokemonViewer {
         void flash.offsetWidth;
         flash.classList.toggle('is-max', maxTransformation);
         this.maxLanding?.clear();
-        this.groundFlames?.clear();
         this.maxBurstStart = null;
         const previousHeight = this.displayHeight;
         if ((this.form === 'gigamax') !== (form === 'gigamax')) this.angle = this.species.angle;
@@ -629,10 +602,8 @@ class PokemonViewer {
             if (this.lastTapAt !== now || this.loading || !this.model || this.form === 'gigamax' ||
                 this.showcase.classList.contains('hidden')) return;
             if (this.attack && !['intro', 'greeting', 'combat-fast', 'combat-single'].includes(this.attack.kind)) return;
-            const effect = singleTapEffect(this.species.id, this.form);
-            if (effect && this.model.clips.has(MOVES.special)) {
-                this.play(MOVES.special, 'combat-single', effect);
-            }
+            // Keep the authentic character animation without artificial flames.
+            if (this.model.clips.has(MOVES.special)) this.play(MOVES.special, 'combat-single');
         }, SINGLE_TAP_WINDOW_MS);
     }
 
@@ -667,7 +638,7 @@ class PokemonViewer {
         this.lastAttackTap = -Infinity;
         if (this.form === 'gigamax' || !this.model?.clips.has(MOVES.physical)) return;
         const clip = MOVES.physical;
-        this.play(clip, 'combat-fast', 'spin');
+        this.play(clip, 'combat-fast');
     }
 
     playAttackCry() {
@@ -704,21 +675,24 @@ class PokemonViewer {
     }
 
     battleMoves() {
-        const fire = 'fire';
+        // Only real glTF animation clips remain. All invented attack FX
+        // (fire, projectiles and impact overlays) have been discontinued.
         return this.form === 'gigamax'
-            ? [['Bola de Chamas G-Max', fire, MOVES.special, 'gmax']]
+            ? [['Animação especial Gigamax', MOVES.special]]
             : this.form === 'dynamax'
-                ? [['Chama Max', fire, MOVES.special, 'max']]
-                : this.species.gigamax
-                    ? [['Chama Furacão', fire, MOVES.physical, 'spin'], ['Ataque de Chamas', fire, MOVES.special, 'charge'],
-                        ['Bola Incendiária', fire, MOVES.alternate, 'ball']]
-                    : [['Investida', 'normal', MOVES.physical, 'tackle'], ['Lança-chamas', fire, MOVES.special, 'flamethrower']];
+                ? [['Animação especial Dinamax', MOVES.special]]
+                : [
+                    ['Ataque físico', MOVES.physical],
+                    ['Ataque especial', MOVES.special],
+                    ['Ataque alternativo', MOVES.alternate],
+                ];
     }
 
     renderControls() {
-        const buttons = this.battleMoves().filter(([, , clip]) => this.model.clips.has(clip))
-            .map(([name, symbol, clip, effect]) => iconControl(name, symbol, symbol === 'fire' ? 'fire' : 'move-normal',
-                () => this.play(clip, 'battle', effect)));
+        const buttons = this.battleMoves()
+            .filter(([, clip]) => this.model.clips.has(clip))
+            .map(([name, clip]) => iconControl(name, 'move-normal', 'move-normal',
+                () => this.play(clip, 'battle')));
         this.moves.replaceChildren(...buttons);
     }
 
@@ -757,7 +731,7 @@ class PokemonViewer {
         return { frameHeight, cameraY: this.camera.position.y };
     }
 
-    play(name, kind = 'battle', effect) {
+    play(name, kind = 'battle') {
         if (!this.model || this.loading || (this.attack && kind === 'pokedex')) return false;
         const { mixer, clips } = this.model;
         const clip = clips.get(name);
@@ -775,7 +749,7 @@ class PokemonViewer {
         action.reset().setLoop(LoopOnce, 1).setEffectiveWeight(0).play().paused = true;
         action.clampWhenFinished = true;
         const clipDuration = clip.duration;
-        const duration = effect === 'charge' ? Math.max(clipDuration, 2.65) : clipDuration;
+        const duration = clipDuration;
         const gigamaxMove = this.form === 'gigamax' &&
             (name === MOVES.special || name === MOVES.roar);
         // Never freeze a partially completed carousel transition at its
@@ -788,13 +762,9 @@ class PokemonViewer {
         const cameraLock = gigamaxMove ? this.captureGigamaxFrame() : null;
         // The original movement keeps its timeline; only the camera is fixed.
         const start = performance.now();
-        this.attack = { action, effect, kind, start, clipDuration, duration, time: 0,
+        this.attack = { action, kind, start, clipDuration, duration, time: 0,
             cameraLock, lockFraming: gigamaxMove };
-        if (effect) this.battleEffects ??= new BattleEffects(this.stage, this.target);
-        if (kind === 'combat-fast') this.groundFlames?.begin();
-        else this.groundFlames?.clear();
         this.stage.dataset.attacking = kind;
-        this.stage.toggleAttribute('data-attack-away', Boolean(effect) && Math.cos(this.angle) < -0.25);
         if (kind === 'combat-fast' || kind === 'battle') {
             this.greetingAudio?.pause();
             this.playAttackCry();
@@ -804,12 +774,9 @@ class PokemonViewer {
     }
 
     stopAttack() {
-        this.groundFlames?.clear();
         if (!this.attack) return;
         this.attack = null;
-        this.battleEffects?.clear();
         delete this.stage.dataset.attacking;
-        this.stage.removeAttribute('data-attack-away');
         this.stage.style.removeProperty('--pokemon-shadow-depth');
         this.turntable.position.set(0, 0, 0);
         this.turntable.scale.setScalar(1);
@@ -923,16 +890,13 @@ class PokemonViewer {
             this.effectsHeight = this.displayHeight;
             this.positionEffects(width, height, frameHeight, floor);
         }
-        const tall = this.displayHeight / pixelToWorld;
-        const dash = this.attack?.effect === 'tackle' && this.model.tackle
-            ? this.moveTackle(surfaceWidth, origin, tall, pixelToWorld, height * floor, height) : null;
         // The Gigamax clips have their whole body movement measured ahead of
         // time. Never include the changing fireball/spark props in a per-frame
         // camera correction, including when the Pokémon is tapped to roar.
         const adjustment = this.attack?.lockFraming ? null
             : this.attack ? this.keepAttackInView(pixelToWorld) : null;
-        const dx = (dash?.pixels ?? 0) + (adjustment?.x ?? 0);
-        const dy = (dash?.floorOffset ?? 0) + (adjustment?.y ?? 0);
+        const dx = adjustment?.x ?? 0;
+        const dy = adjustment?.y ?? 0;
         if (this.attack) this.stage.style.setProperty('--pokemon-shadow-depth', `${dy}px`);
         const shadowCenter = 50 + 100 * dx / width;
         if (shadowCenter !== this.shadowCenter) {
@@ -966,46 +930,7 @@ class PokemonViewer {
             }
         }
         this.maxLanding?.update(now);
-        if (this.attack?.kind === 'combat-fast') {
-            this.groundFlames?.update(this.attack.time, this.model, this.turntable,
-                this.angle, this.displayHeight);
-        } else this.groundFlames?.clear();
         renderer.render(this.scene, camera);
-        if (this.attack?.effect) {
-            this.battleEffects.draw(this.attack.effect, {
-                ...effectSpace(this.model, this.turntable, camera, surfaceWidth, height, this.attack),
-                time: this.attack.time, duration: this.attack.clipDuration,
-                width: surfaceWidth, height, form: this.form, species: this.species.id,
-                modelHeight: tall * this.turntable.scale.x,
-                floor: height * floor + dy,
-                angle: this.angle, x: origin + dx,
-                hit: dash?.hit, hitX: dash?.hitX,
-            });
-        }
-    }
-
-    moveTackle(width, origin, tall, pixelToWorld, floor, height) {
-        const { waist, x, z, dx, dz, range, hit } = this.model.tackle;
-        const forward = Math.sin(this.angle);
-        const depth = Math.cos(this.angle);
-        const moveX = waist.position.x - x;
-        const moveZ = waist.position.z - z;
-        const progress = Math.max(0, Math.min(1, (moveX * dx + moveZ * dz) / range));
-        const room = forward >= 0 ? width - origin : origin;
-        const stride = forward * Math.max(0, room - Math.min(tall * 0.29, width * 0.20) - 8);
-        const pixels = stride * progress;
-        const depthProgress = depth * progress;
-        // The orthographic view uses scale and ground contact to show movement into depth.
-        const scale = 1 + depthProgress * 0.19;
-        const floorOffset = depthProgress * Math.min(height * 0.085, Math.max(0, height - floor) * 0.62);
-        const placementScale = this.placement.scale.x * scale;
-        this.turntable.scale.setScalar(scale);
-        this.turntable.position.set(
-            pixels * pixelToWorld - placementScale * (depth * moveX + forward * moveZ),
-            -floorOffset * pixelToWorld,
-            depthProgress * 1.1 + placementScale * (forward * moveX - depth * moveZ),
-        );
-        return { pixels, scale, floorOffset, hit, hitX: origin + stride };
     }
 
     fitFrame(height, leftPixels, rightPixels) {
@@ -1249,7 +1174,6 @@ export function mountShowcase(section) {
     window.visualViewport?.addEventListener('resize', fitViewport);
 
     const closeVolume = mountVolume(section, cards);
-    loadAttackSprites();
     mobile.addEventListener('change', refreshView);
     refreshView();
 
