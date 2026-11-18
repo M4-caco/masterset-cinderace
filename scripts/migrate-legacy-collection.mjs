@@ -4,9 +4,10 @@
  * the Firebase Authentication account supplied by SCORACE_OWNER_UID.
  *
  * Setup (run from a trusted machine, NOT in the browser or Vercel build):
- *   npm install --no-save firebase-admin
+ *   cd scripts && npm install
  *   export GOOGLE_APPLICATION_CREDENTIALS=/private/path/service-account.json
  *   export SCORACE_OWNER_UID=the_uid_from_firebase_authentication
+ *   export SCORACE_OWNER_EMAIL=the_verified_owner_email
  *   node scripts/migrate-legacy-collection.mjs             # preview
  *   node scripts/migrate-legacy-collection.mjs --apply     # commit
  *
@@ -14,6 +15,7 @@
  */
 import { initializeApp, applicationDefault } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
+import { getAuth } from 'firebase-admin/auth';
 
 const uid = process.env.SCORACE_OWNER_UID;
 if (!uid || !/^[A-Za-z0-9_-]{6,128}$/.test(uid)) {
@@ -24,11 +26,20 @@ if (uid === 'cinderace_masterset') {
   console.error('O destino precisa ser um UID de usuário, diferente da coleção antiga.');
   process.exit(1);
 }
+const expectedEmail = (process.env.SCORACE_OWNER_EMAIL || '').trim().toLowerCase();
+if (!expectedEmail || !expectedEmail.includes('@')) {
+  console.error('Configure SCORACE_OWNER_EMAIL para confirmar o e-mail da conta de destino.');
+  process.exit(1);
+}
 const apply = process.argv.includes('--apply');
 const firestore = getFirestore(initializeApp({
   credential: applicationDefault(),
   projectId: 'pokedex-colecao'
 }));
+const targetUser = await getAuth().getUser(uid);
+if ((targetUser.email || '').toLowerCase() !== expectedEmail) {
+  throw new Error('O UID não pertence ao e-mail proprietário informado. Operação cancelada.');
+}
 const originalRef = firestore.doc('users_data/cinderace_masterset');
 const targetRef = firestore.doc('users_data/' + uid);
 const source = await originalRef.get();
