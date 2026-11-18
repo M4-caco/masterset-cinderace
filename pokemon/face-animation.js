@@ -16,6 +16,7 @@ export function shinyFaceInk(r, g, b) {
 export function composeShinyEyePixels(native, pose, width, height) {
     const output = new Uint8ClampedArray(width * height * 4);
     const marked = new Uint8Array(width * height);
+    const redMarked = new Uint8Array(width * height);
     const eye = (x, y) => y >= height * 0.055 && y < height * 0.44 &&
         ((x >= width * .15 && x <= width * .44) ||
          (x >= width * .56 && x <= width * .85));
@@ -24,13 +25,14 @@ export function composeShinyEyePixels(native, pose, width, height) {
     for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
         if (!eye(x, y)) continue;
         const i = (y * width + x) * 4;
-        if (red(pose[i], pose[i + 1], pose[i + 2]) ||
+        if (red(pose[i], pose[i + 1], pose[i + 2])) redMarked[y * width + x] = 1;
+        if (redMarked[y * width + x] ||
             dark(pose[i], pose[i + 1], pose[i + 2])) marked[y * width + x] = 1;
     }
-    const near = (x, y, radius) => {
+    const near = (x, y, radius, marks = marked) => {
         for (let yy = Math.max(0, y - radius); yy <= Math.min(height - 1, y + radius); yy++)
             for (let xx = Math.max(0, x - radius); xx <= Math.min(width - 1, x + radius); xx++)
-                if (marked[yy * width + xx]) return true;
+                if (marks[yy * width + xx]) return true;
         return false;
     };
     const back = [native[0], native[1], native[2]];
@@ -39,7 +41,7 @@ export function composeShinyEyePixels(native, pose, width, height) {
         const r = pose[i], g = pose[i + 1], b = pose[i + 2];
         if (eye(x, y)) {
             const white = r > 210 && g > 210 && b > 210 &&
-                r >= b - 3 && g >= b - 3 && near(x, y, 7);
+                r >= b - 3 && g >= b - 3 && near(x, y, 1, redMarked);
             const edge = r < 195 && Math.abs(r - g) < 14 &&
                 Math.abs(g - b) < 14 && near(x, y, 2);
             if (marked[y * width + x] || white || edge) {
