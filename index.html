@@ -2948,12 +2948,12 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
             duplicateCaptures.push({id:duplicateId(),cardId,type:'compra',entity:'',price:'',locked:false});
             saveDuplicateCaptures();renderDuplicateCaptures();
         };
-        window.editDuplicateCapture=function(id,key,value){
+        window.editDuplicateCapture=function(id,key,value){if(!window.scoraceRequireAccount())return;
             const copy=duplicateCaptures.find(c=>c.id===id);if(!copy||copy.locked||!['entity','price','type','booster'].includes(key))return;
             copy[key]=value;saveDuplicateCaptures();
         };
-        window.lockDuplicateCapture=function(id){const copy=duplicateCaptures.find(c=>c.id===id);if(!copy)return;copy.locked=!copy.locked;saveDuplicateCaptures();renderDuplicateCaptures();};
-        window.removeDuplicateCapture=function(id){const copy=duplicateCaptures.find(c=>c.id===id);if(!copy||copy.locked)return;if(!window.confirm('Remover somente esta cópia extra? A carta da coleção principal será mantida.'))return;duplicateCaptures=duplicateCaptures.filter(c=>c.id!==id);saveDuplicateCaptures();renderDuplicateCaptures();};
+        window.lockDuplicateCapture=function(id){if(!window.scoraceRequireAccount())return;const copy=duplicateCaptures.find(c=>c.id===id);if(!copy)return;copy.locked=!copy.locked;saveDuplicateCaptures();renderDuplicateCaptures();};
+        window.removeDuplicateCapture=function(id){if(!window.scoraceRequireAccount())return;const copy=duplicateCaptures.find(c=>c.id===id);if(!copy||copy.locked)return;if(!window.confirm('Remover somente esta cópia extra? A carta da coleção principal será mantida.'))return;duplicateCaptures=duplicateCaptures.filter(c=>c.id!==id);saveDuplicateCaptures();renderDuplicateCaptures();};
         function renderDuplicateCaptures(){
             const host=document.getElementById('capture-grid');
             const visible=duplicateCaptures.filter(copy=>{
