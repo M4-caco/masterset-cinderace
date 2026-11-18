@@ -16,7 +16,7 @@ function show() {
     status.hidden = false;
     status.textContent = 'Preparando visualizador 3D…';
     retry.hidden = true;
-    loading = import('./showcase.js?v=44').then(({ mountShowcase }) => {
+    loading = import('./showcase.js?v=45').then(({ mountShowcase }) => {
         viewer = mountShowcase(section);
         status.hidden = true;
     }).catch(error => {

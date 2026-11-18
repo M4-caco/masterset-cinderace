@@ -3,53 +3,82 @@ import { TextureLoader } from './vendor/three-gltf.js';
 const FRAME_COUNT = 3;
 const loader = new TextureLoader();
 
-// The native Cinderace rare Eye_Col texture is correct. An older handmade
-// three-frame atlas contained big opaque tan patches around the Shiny eyes.
-// Preserve the native frame and reconstruct only the animated lids on top of
-// the original texture instead of painting over the cheek and forehead.
+// Separate the eye art from the old lavender backing and tan eye masks.
+// The native FaceBase rare material remains visible behind the decal.
 export function shinyFaceInk(r, g, b) {
-    const redIris = r > 110 && g < 150 && r - g > 44 && r - b > 50;
-    const warmPatch = r > 109 && g > 99 && r - g > 6 && g - b > 3;
-    if (warmPatch && !redIris) return false;
-    const darkLine = r < 145 && g < 145 && b < 145;
-    const sclera = r >= 205 && g >= 205 && b >= 205;
-    return redIris || darkLine || sclera;
+    const red = r > 110 && g < 175 && r > g * 1.32 && r > b * 1.3;
+    const dark = r < 125 && g < 125 && b < 140;
+    const white = r > 210 && g > 210 && b > 210 &&
+        r >= b - 3 && g >= b - 3;
+    return red || dark || white;
 }
 
-function nativeCinderaceShinyFrame(original, atlas, pose) {
-    if (pose === 0) return original;
-    const { image } = atlas;
-    const height = image.height / FRAME_COUNT;
-    const canvas = document.createElement('canvas');
-    canvas.width = image.width;
-    canvas.height = height;
-    const context = canvas.getContext('2d', { alpha: false });
-    context.drawImage(original.image, 0, 0, canvas.width, height);
-    const native = context.getImageData(0, 0, canvas.width, height);
-    const background = [native.data[0], native.data[1], native.data[2]];
-    const draft = document.createElement('canvas');
-    draft.width = canvas.width;
-    draft.height = height;
-    const ctx = draft.getContext('2d', { alpha: false });
-    ctx.drawImage(image, 0, pose * height, canvas.width, height, 0, 0, canvas.width, height);
-    const input = ctx.getImageData(0, 0, canvas.width, height).data;
-    const pixels = native.data;
-    // The animated eyes occupy the upper half of the native 256px atlas.
-    // The lower pupils are unchanged across the original three poses.
-    for (let y = 0; y < Math.floor(height * 0.49); y++) {
-        for (let x = 0; x < canvas.width; x++) {
-            const index = (y * canvas.width + x) * 4;
-            pixels[index] = background[0];
-            pixels[index + 1] = background[1];
-            pixels[index + 2] = background[2];
-            if (shinyFaceInk(input[index], input[index + 1], input[index + 2])) {
-                pixels[index] = input[index];
-                pixels[index + 1] = input[index + 1];
-                pixels[index + 2] = input[index + 2];
+export function composeShinyEyePixels(native, pose, width, height) {
+    const output = new Uint8ClampedArray(width * height * 4);
+    const marked = new Uint8Array(width * height);
+    const redMarked = new Uint8Array(width * height);
+    const eye = (x, y) => y >= height * 0.055 && y < height * 0.44 &&
+        ((x >= width * .15 && x <= width * .44) ||
+         (x >= width * .56 && x <= width * .85));
+    const red = (r, g, b) => r > 110 && g < 175 && r > g * 1.32 && r > b * 1.3;
+    const dark = (r, g, b) => r < 125 && g < 125 && b < 140;
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+        if (!eye(x, y)) continue;
+        const i = (y * width + x) * 4;
+        if (red(pose[i], pose[i + 1], pose[i + 2])) redMarked[y * width + x] = 1;
+        if (redMarked[y * width + x] ||
+            dark(pose[i], pose[i + 1], pose[i + 2])) marked[y * width + x] = 1;
+    }
+    const near = (x, y, radius, marks = marked) => {
+        for (let yy = Math.max(0, y - radius); yy <= Math.min(height - 1, y + radius); yy++)
+            for (let xx = Math.max(0, x - radius); xx <= Math.min(width - 1, x + radius); xx++)
+                if (marks[yy * width + xx]) return true;
+        return false;
+    };
+    const back = [native[0], native[1], native[2]];
+    for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
+        const i = (y * width + x) * 4;
+        const r = pose[i], g = pose[i + 1], b = pose[i + 2];
+        if (eye(x, y)) {
+            const white = r > 210 && g > 210 && b > 210 &&
+                r >= b - 3 && g >= b - 3 && near(x, y, 1, redMarked);
+            const edge = r < 195 && Math.abs(r - g) < 14 &&
+                Math.abs(g - b) < 14 && near(x, y, 2);
+            if (marked[y * width + x] || white || edge) {
+                output.set([r, g, b, 255], i);
+            }
+        } else if (y > height * .44) {
+            const rr = native[i], gg = native[i + 1], bb = native[i + 2];
+            const diff = Math.abs(rr - back[0]) + Math.abs(gg - back[1]) +
+                Math.abs(bb - back[2]);
+            if (diff > 64 && (red(rr, gg, bb) || dark(rr, gg, bb) ||
+                (rr > 210 && gg > 210 && bb > 210 && rr >= bb - 3))) {
+                output.set([rr, gg, bb, 255], i);
             }
         }
     }
-    context.putImageData(native, 0, 0);
+    return output;
+}
+
+function transparentCinderaceShinyFrame(original, atlas, frame) {
+    const { image } = atlas;
+    const width = image.width, height = image.height / FRAME_COUNT;
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext('2d', { willReadFrequently: true });
+    const source = document.createElement('canvas');
+    source.width = width;
+    source.height = height;
+    const ctx = source.getContext('2d', { willReadFrequently: true });
+    ctx.drawImage(original.image, 0, 0, width, height);
+    const native = ctx.getImageData(0, 0, width, height).data;
+    ctx.clearRect(0, 0, width, height);
+    ctx.drawImage(image, 0, frame * height, width, height, 0, 0, width, height);
+    const pose = ctx.getImageData(0, 0, width, height).data;
+    const data = context.createImageData(width, height);
+    data.data.set(composeShinyEyePixels(native, pose, width, height));
+    context.putImageData(data, 0, 0);
     return canvas;
 }
 
@@ -60,15 +89,11 @@ async function loadFrames(id, original, shiny) {
     const height = image.height / FRAME_COUNT;
     const frames = [];
     for (let i = 0; i < FRAME_COUNT; i++) {
-        if (id === 'cinderace' && shiny && i === 0) {
-            // Restore the exact native rare face texture during idle.
-            frames.push(original);
-            continue;
-        }
-        const canvas = id === 'cinderace' && shiny
-            ? nativeCinderaceShinyFrame(original, atlas, i)
+        const cinderaceShiny = id === 'cinderace' && shiny;
+        const canvas = cinderaceShiny
+            ? transparentCinderaceShinyFrame(original, atlas, i)
             : document.createElement('canvas');
-        if (id !== 'cinderace' || !shiny) {
+        if (!cinderaceShiny) {
             canvas.width = image.width;
             canvas.height = height;
             canvas.getContext('2d', { alpha: false }).drawImage(image, 0, i * height, image.width, height,
@@ -89,12 +114,37 @@ async function loadFrames(id, original, shiny) {
 }
 
 export async function prepareFace(id, materials, controllers) {
+    if (id === 'cinderace') {
+        // The rare FaceBase from glTF is a solid lavender 4x4 texture.
+        // It creates the broad white mask visible in the reported screenshot.
+        // Tint the base to the warm grey of the rare body so it occludes any
+        // light face islands from BodyAll_SHINY behind the transparent eyes.
+        for (const [, normal, shiny] of materials) {
+            if (!/_FaceBase$/.test(normal.name)) continue;
+            shiny.transparent = false;
+            shiny.opacity = 1;
+            shiny.color.set('#98918a');
+            shiny.depthWrite = true;
+            shiny.needsUpdate = true;
+        }
+    }
     const pairs = materials.filter(([, normal]) => /_Face(?:Tex|Composite)$/.test(normal.name));
     const bindings = await Promise.all(pairs.map(async ([, normal, shiny]) => {
         const [regularFrames, shinyFrames] = await Promise.all([
             loadFrames(id, normal.map, false),
             loadFrames(id, shiny.map, true),
         ]);
+        if (id === 'cinderace') {
+            // Make only the 3D eye artwork visible: the authentic rare
+            // FaceBase underneath supplies all the original face colouring.
+            shiny.transparent = true;
+            shiny.alphaTest = 0.05;
+            shiny.depthWrite = false;
+            shiny.polygonOffset = true;
+            shiny.polygonOffsetFactor = -1;
+            shiny.polygonOffsetUnits = -1;
+            shiny.needsUpdate = true;
+        }
         return [[normal, regularFrames], [shiny, shinyFrames]];
     }));
     const face = { bindings: bindings.flat(), controllers, pose: -1 };
