@@ -1,70 +1,38 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { composeShinyEyePixels, shinyFaceInk } from '../pokemon/face-animation.js';
+import { nativeRareFacePixels } from '../pokemon/face-animation.js';
 
-const root = new URL('../', import.meta.url);
-const gltf = JSON.parse(await readFile(new URL('pokemon/models/cinderace.gltf', root), 'utf8'));
-const materials = gltf.materials.map(x => x.name);
-assert.ok(materials.includes('BodyAll_SHINY _FaceComposite'));
-assert.ok(materials.includes('BodyAll_SHINY _FaceBase'));
-assert.ok(materials.includes('BodyAll_SHINY'));
-
-assert.ok(materials.includes('BodyAll _FaceComposite'));
-
-assert.equal(shinyFaceInk(230, 228, 238), false, 'lavender atlas background must be transparent');
-assert.equal(shinyFaceInk(183, 169, 155), false, 'tan mask must be transparent');
-assert.equal(shinyFaceInk(188, 72, 50), true, 'red iris');
-assert.equal(shinyFaceInk(48, 42, 45), true, 'dark eye outline');
-assert.equal(shinyFaceInk(245, 243, 241), true, 'near-neutral sclera white');
-
-const width = 256, height = 256;
-const native = new Uint8ClampedArray(width * height * 4);
-const pose = new Uint8ClampedArray(width * height * 4);
-function pixel(array, x, y, rgb) {
-    const i = (y * width + x) * 4;
-    array.set([...rgb, 255], i);
+const width=256,height=256,pixels=new Uint8ClampedArray(width*height*4);
+for(let i=0;i<pixels.length;i+=4)pixels.set([231,228,237,255],i);
+const draw=(x,y,r,g,b)=>pixels.set([r,g,b,255],4*(y*width+x));
+for(const c of [68,188]){
+  draw(c,64,182,55,38); // original red pupil
+  draw(c+2,64,38,34,36); // native outline
+  draw(c+2,62,246,243,241); // small sclera highlight
 }
-for (let y = 0; y < height; y++) for (let x = 0; x < width; x++) {
-    pixel(native, x, y, [232, 228, 235]);
-    pixel(pose, x, y, [230, 228, 238]);
-}
-for (const centre of [69, 187]) {
-    for (let y = 35; y < 91; y++)
-        for (let x = centre - 23; x < centre + 23; x++)
-            pixel(pose, x, y, [185, 171, 158]); // old massive tan patch
-    pixel(pose, centre, 63, [180, 68, 48]);    // genuine red iris
-    pixel(pose, centre + 1, 63, [45, 42, 45]); // dark outline
-    pixel(pose, centre + 1, 62, [245, 243, 241]); // tiny iris reflection
-    pixel(pose, centre - 14, 46, [247, 246, 245]); // stray brow streak
-}
-pixel(native, 74, 163, [180, 67, 48]);   // mouth remains original
-const result = composeShinyEyePixels(native, pose, width, height);
-const alpha = (x, y) => result[(y * width + x) * 4 + 3];
-assert.equal(alpha(0, 0), 0, 'background must be truly transparent');
-assert.equal(alpha(110, 70), 0, 'old overlay cannot cover the Shiny cheek');
-assert.equal(alpha(69, 40), 0, 'tan eye mask must not render');
-assert.equal(alpha(187, 40), 0, 'both eye masks must be transparent');
-assert.equal(alpha(69, 63), 255, 'left red iris');
-assert.equal(alpha(187, 63), 255, 'right red iris');
-assert.equal(alpha(70, 62), 255, 'left iris reflection');
-assert.equal(alpha(188, 62), 255, 'right iris reflection');
-assert.equal(alpha(55, 46), 0, 'white brow streak away from eye must not show');
-assert.equal(alpha(74, 163), 255, 'original mouth element preserved');
-assert.equal(alpha(128, 63), 0, 'no white stripe between eyes');
-
-const face = await readFile(new URL('pokemon/face-animation.js', root), 'utf8');
-assert.match(face, /id === 'cinderace' && shiny/);
-assert.match(face, /transparentCinderaceShinyFrame\(original, atlas, i\)/);
-assert.match(face, /shiny\.transparent = true/);
-assert.match(face, /shiny\.alphaTest = 0\.05/);
-assert.match(face, /shiny\.depthWrite = false/);
-assert.match(face, /\/_FaceBase\$\/\.test\(normal\.name\)/);
-assert.match(face, /shiny\.color\.set\('#98918a'\)/);
-assert.match(face, /shiny\.opacity = 1/);
-
-assert.doesNotMatch(face, /nativeCinderaceShinyFrame/);
-const entry = await readFile(new URL('pokemon/entry.js', root), 'utf8');
-const html = await readFile(new URL('index.html', root), 'utf8');
-assert.match(entry, /showcase\.js\?v=45/);
-assert.match(html, /pokemon\/entry\.js\?v=45/);
-console.log('PASS: Cinderace Shiny has symmetric native-backed eyes, no lavender/white/tan face patches, genuine iris and updated cache chain.');
+const output=nativeRareFacePixels(pixels,width,height);
+const a=(x,y)=>output[(y*width+x)*4+3];
+assert.equal(a(0,0),0,'lilac original background is transparent');
+assert.equal(a(100,70),0,'no blanket masking over Shiny cheek');
+assert.equal(a(68,64),255,'left eye from native texture');
+assert.equal(a(188,64),255,'right eye from native texture');
+assert.equal(a(70,62),255,'native eye highlight is preserved');
+assert.ok(a(68,64)===a(188,64),'no asymmetric alpha changes');
+assert.throws(()=>nativeRareFacePixels(new Uint8ClampedArray(5),256,256));
+const face=await readFile(new URL('../pokemon/face-animation.js',import.meta.url),'utf8');
+assert.match(face,/id === 'cinderace' && shiny/);
+assert.match(face,/return \[native, native, native\]/);
+assert.match(face,/nativeCinderaceRareEyes\(original\)/);
+assert.doesNotMatch(face,/composeShinyEyePixels|cinderace-face-shiny\.webp/);
+assert.match(face,/rare\.transparent = true/);
+assert.match(face,/rare\.alphaTest = 0\.03/);
+const gltf=JSON.parse(await readFile(new URL('../pokemon/models/cinderace.gltf',import.meta.url),'utf8'));
+assert.equal(gltf.images[7].name,'pm0815_00_Eye_Col_rare');
+assert.equal(gltf.meshes[4].primitives[2].material,6);
+assert.equal(gltf.meshes[4].primitives[2].extras.shinyMaterial,7);
+assert.notDeepEqual(gltf.meshes[4].primitives[2].attributes.TEXCOORD_0,gltf.meshes[4].primitives[1].attributes.TEXCOORD_0);
+const entry=await readFile(new URL('../pokemon/entry.js',import.meta.url),'utf8');
+const html=await readFile(new URL('../index.html',import.meta.url),'utf8');
+assert.match(entry,/showcase\.js\?v=46/);
+assert.match(html,/pokemon\/entry\.js\?v=46/);
+console.log('PASS: original Eye_Col_rare art and original UV layout, no artificial mirrored eyes or opaque lilac face.');
