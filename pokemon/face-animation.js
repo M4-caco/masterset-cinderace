@@ -19,6 +19,12 @@ const loader = new TextureLoader();
 // compositing aids, not facial ink. The native 3D FaceBase supplies skin.
 // Removing these two flat backing tones prevents grey polygons and leaves the
 // full eye art, including whites far from the pupil, untouched.
+// Do not redraw eyes: preserve the real Shiny sclera, eyelid strokes,
+// eyelashes, red irises and mouth in all 3 original expression frames.
+// Remove two *backing* colours, not any nearby pale eye artwork:
+// (1) only the lavender backdrop reachable from an image edge;
+// (2) the flat tan eye patch that causes sharp-edged grey face islands.
+// The original opaque 3D FaceBase supplies the facial skin underneath.
 export function restoreShinyFaceArtwork(pixels, width, height) {
     if (pixels.length !== width * height * 4)
         throw new Error('Invalid Shiny face frame');
@@ -27,17 +33,43 @@ export function restoreShinyFaceArtwork(pixels, width, height) {
     const skin = (Math.floor(height * .20) * width + Math.floor(width * .08)) * 4;
     const background = [pixels[bg], pixels[bg + 1], pixels[bg + 2]];
     const patch = [pixels[skin], pixels[skin + 1], pixels[skin + 2]];
-    const matte = (r,g,b,color,inner,outer) => {
-        const d = Math.hypot(r-color[0],g-color[1],b-color[2]);
-        return Math.max(0, Math.min(1, (d-inner)/(outer-inner)));
+    const count = width * height;
+    const connectedBackground = new Uint8Array(count);
+    const queue = new Int32Array(count);
+    const distance = (at, tone) => {
+        const i=at*4;
+        return Math.hypot(
+            pixels[i]-tone[0], pixels[i+1]-tone[1], pixels[i+2]-tone[2]
+        );
     };
-    for (let i=0;i<pixels.length;i+=4) {
-        const r=pixels[i],g=pixels[i+1],b=pixels[i+2];
-        // A small transition only around the removed flat backing tones.
-        // All white sclera, black eyelid and red iris pixels remain exact RGB.
-        const alpha = matte(r,g,b,background,7,18) *
-            matte(r,g,b,patch,9,24);
-        output[i+3] = Math.round(pixels[i+3] * alpha);
+    let head=0, tail=0;
+    const enqueue = at => {
+        if (connectedBackground[at] || distance(at,background)>15) return;
+        connectedBackground[at]=1;
+        queue[tail++]=at;
+    };
+    for(let x=0;x<width;x++){
+        enqueue(x);enqueue((height-1)*width+x);
+    }
+    for(let y=0;y<height;y++){
+        enqueue(y*width);enqueue(y*width+width-1);
+    }
+    while(head<tail){
+        const at=queue[head++],x=at%width,y=Math.floor(at/width);
+        if(x>0)enqueue(at-1);
+        if(x+1<width)enqueue(at+1);
+        if(y>0)enqueue(at-width);
+        if(y+1<height)enqueue(at+width);
+    }
+    for(let at=0;at<count;at++){
+        const patchDistance=distance(at,patch);
+        // The disconnected original white sclera keeps full opacity even
+        // when its RGB is close to lavender: do not threshold it by colour.
+        const skinMask=Math.max(0,Math.min(1,(patchDistance-9)/15));
+        const backdropMask=connectedBackground[at]
+            ? Math.max(0,Math.min(1,(distance(at,background)-5)/10))
+            : 1;
+        output[at*4+3]=Math.round(pixels[at*4+3]*skinMask*backdropMask);
     }
     return output;
 }
