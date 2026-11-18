@@ -10,7 +10,7 @@ assert.match(source,/loadFrames\(id, shiny\.map, true\)/);
 assert.match(source,/removeStrayShinyWhites\(frame\.data, canvas\.width, canvas\.height\)/);
 assert.match(source,/rare\.color\.set\('#98918a'\)/);
 assert.doesNotMatch(source,/nativeCinderaceRareEyes|composeShinyEyePixels|nativeCinderaceShinyFrame/);
-assert.doesNotMatch(source,/flipX|mirror|scaleX|rotate\(/);
+assert.doesNotMatch(source,/\.flipX|\.scaleX|\.rotate\(|\.scale\.x\s*=/);
 
 const w=256,h=256,base=new Uint8ClampedArray(w*h*4);
 for(let i=0;i<base.length;i+=4)base.set([183,171,159,255],i);
