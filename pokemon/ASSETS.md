@@ -20,14 +20,13 @@ Investida, Chama Furacão, Ataque de Chamas e Bola Incendiária usam texturas do
 
 O catálogo Android registra `max_flare` e `gmax_fireball` em `breadattackfx_assets_all` e a transformação em `breadbattlefx_assets_all`. A Chama Max usa uma adaptação web com texturas de fogo de `attackfx_assets_all`. A Bola de Chamas G-Max usa a animação e a malha da bola de fogo do pacote `pm815.floaf_assets_all`.
 
-## Gestos de ataque na aba Pokémon
+## Interação com animações originais
 
-Na forma normal, um clique isolado aciona o clipe corporal de ataque especial com o efeito de Lança-chamas (Scorbunny e Raboot) ou de Ataque de Chamas (Cinderace). Uma sequência de dois ou mais cliques próximos aciona o antigo ataque físico com efeito de Chama Furacão; um atraso de 300 ms permite distinguir a ação simples do início da sequência. Toques repetidos prolongam a sequência física enquanto continuam chegando.
+Os toques e os botões da aba Pokémon executam apenas os clipes de animação do próprio modelo GLTF (físico, especial, alternativo e rugido Gigamax, conforme os clipes disponíveis). Os sons originais do Pokémon GO continuam em `pokemon/audio/*.wav`. Arrastar gira o modelo 360°. Nenhum efeito visual de golpe é criado pelo site.
 
-No modo Dinamax, um clique isolado executa o clipe especial e o efeito Chama Max. No modo Gigamax, tocar no Pokémon não aciona o ataque especial: o botão exclusivo Bola de Chamas G-Max permanece responsável por ele. Arrastar continua girando o modelo. As vozes aprimoradas do anime são exclusivas da saudação ao passar o mouse; as vocalizações de ataque vêm dos arquivos `pokemon/audio/*.wav` extraídos do Pokémon GO.
+Gestos rápidos distinguem a animação física da especial; o Gigamax reage com rugido ao toque isolado. Os botões identificam as **animações**, e não reproduções de projéteis ou efeitos de batalha.
 
-Teste da lógica de intervalos e formas: `node tests/pokemon-tap-gestures.mjs`.
-
+Teste: `node tests/pokemon-tap-gestures.mjs`.
 
 ## Impacto no solo durante Dynamax e Gigamax
 
@@ -38,20 +37,16 @@ O módulo `max-landing.js` adiciona uma explosão leve de fragmentos tridimensio
 Teste de trajetória, limpeza e cem reativações por perfil de renderização: `node tests/pokemon-max-landing.mjs`.
 
 
-## Fogo no chão e reação Gigamax (2026-11)
+## Efeitos experimentais de golpes descontinuados (18/11/2026)
 
-O efeito anterior de fogo no solo desenhava dezesseis chamas idênticas em uma órbita 2D, sem nascer da malha ou considerar a profundidade da cena. Esse desenho foi removido de `battle-effects.js`. O módulo `ground-fire.js` utiliza partículas WebGL em três dimensões, ancoradas no pé animado no momento da emissão, com crescimento, movimento, quadros e dissipação individuais. As partículas são reutilizadas e reduzidas no mobile. Este efeito acompanha a sequência de golpes físicos rápidos, sem criar uma aura permanente ao redor do Pokémon.
+A pedido do usuário, a implementação própria de combate e efeitos de ataques foi retirada. Não são mais importados nem renderizados `battle-effects.js`, `ground-fire.js` ou `effect-space.js`, nem o antigo atlas `visuals/attack-fx.webp`. A simulação de investida, fogo no chão, lança-chamas, Bola Incendiária, Chama Max e projétil G-Max foi removida. Também não existe mais troca do efeito de acordo com o ângulo: só restam as animações 3D nativas dos modelos e seus sons.
 
-As imagens das chamas ainda vêm do atlas `visuals/attack-fx.webp`, adaptado de `attackfx_assets_all`. O efeito ainda **não** é a reprodução literal do prefab do Pokémon GO, cujo grafo original de partículas não está neste repositório. É necessário confrontar o timing e o desenho com vídeo do jogo em WebGL.
+**Os efeitos de transformação** Dynamax/Gigamax, incluindo materiais Max, nuvens e a explosão de pedras em `max-landing.js`, são uma funcionalidade diferente e continuam ativos.
 
-Um toque isolado sobre Cinderace Gigamax reproduz a animação original de `Rugido` após a janela de diferenciação de 300 ms. Toques rápidos em sequência cancelam essa reação e não executam golpes. A Bola de Chamas G-Max continua exclusivamente no botão especial.
+Teste de regressão: `node tests/pokemon-no-attack-effects.mjs`.
 
-Teste: `node tests/pokemon-ground-fire.mjs`.
-
-## Cinderace Shiny: rosto e pontos dos ataques
+## Cinderace Shiny: rosto
 
 **Revisão facial Shiny (18/11/2026):** o formato e a orientação dos olhos na versão anterior à primeira reclamação estavam corretos. Foi mantido o mesmo atlas web de três expressões cinderace-face-shiny.webp, sem espelhamento ou reconstrução das íris. A camada do atlas agora é um decal transparente: preserva os olhos vermelhos, seu contorno escuro e apenas o branco próximo às íris. As regiões de cor que não pertencem aos olhos, incluindo os pontos escuros próximos ao nariz e à bochecha e as linhas claras ao redor do rosto, deixam de encobrir a pele. O material _FaceBase Shiny continua opaco para cobrir as áreas escuras internas da malha, com tonalidade aproximada à pele (#b5aaa1); ocultá-lo completamente causa artefatos escuros. A textura normal e os demais Pokémon não são alterados. Este é um ajuste específico da composição web, não uma importação completa do shader de olhos original do Pokémon GO. Validado com testes de pixel (dois olhos, detalhes brancos naturais, pálpebras e remoção de manchas) e comparação de materiais na cena WebGL em Chromium; a aparência deve ser revisada também no dispositivo do usuário.
 
-A projeção de ataques deixou de usar o centro do maxilar ou a origem global como se fossem a abertura da boca. Scorbunny calcula a saída no espaço entre as pontas das mandíbulas animadas; Raboot vincula o `Feeding_Socket` do glTF à cabeça na pose de repouso e acompanha os movimentos subsequentes dela. O vetor de saída deriva da posição física boca–cabeça, inclusive quando o usuário gira o Pokémon em 360°. Golpes chutados usam `EndRToe2`, não o centro do tornozelo. O G-Max preserva a origem da malha animada `FireBallInSkin`.
-
-**Limitação importante:** estes ajustes corrigem o posicionamento dos efeitos já presentes; os shaders/prefabs de partículas originais dos golpes ainda não foram exportados integralmente ao navegador. Não os apresentar como uma reprodução visual exata do Pokémon GO até testar os recursos originais em WebGL. Testes: `node tests/pokemon-face-shiny.mjs` e `node tests/pokemon-effect-space.mjs`.
+Os recursos de efeitos de ataque removidos permanecem apenas no histórico Git. Não são utilizados nem carregados pelo aplicativo. A composição facial Shiny e as suas correções continuam em desenvolvimento independente da descontinuação dos efeitos de golpes.
