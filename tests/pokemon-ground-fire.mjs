@@ -52,8 +52,8 @@ assert.match(showcase, /this\.groundFlames = new GroundFireTrail\(this\.scene, m
 assert.match(showcase, /this\.groundFlames\?\.begin\(\)/);
 assert.match(showcase, /this\.groundFlames\?\.update\(this\.attack\.time/);
 assert.doesNotMatch(effects, /drawGroundFire|frame\.groundFire/);
-assert.match(entry, /showcase\.js\?v=46/);
-assert.match(html, /pokemon\/entry\.js\?v=46/);
+assert.match(entry, /showcase\.js\?v=47/);
+assert.match(html, /pokemon\/entry\.js\?v=47/);
 
 // Exercise the actual Gigamax tap method with deterministic timers.
 // A lone tap reacts with the available 'Rugido' clip, a double tap does not
