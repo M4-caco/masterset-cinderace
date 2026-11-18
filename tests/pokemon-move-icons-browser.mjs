@@ -1,0 +1,59 @@
+// Verify that move badges contain real visible SVG path geometry in Chromium.
+// This runs against the PR's local checkout, not a Vercel preview.
+import assert from 'node:assert/strict';
+import { chromium } from 'playwright-core';
+import { spawn } from 'node:child_process';
+import { setTimeout as pause } from 'node:timers/promises';
+const server=spawn('python3',['-m','http.server','8772','--bind','127.0.0.1'],
+  {cwd:process.cwd(),stdio:'ignore'});
+let browser;
+try {
+  for(let n=0;n<40;n++){
+    try { if((await fetch('http://127.0.0.1:8772/')).ok)break; }catch {}
+    if(n===39)throw new Error('Local server did not start');
+    await pause(250);
+  }
+  browser=await chromium.launch({
+    executablePath:process.env.CHROME_BIN||'/usr/bin/google-chrome',
+    args:['--no-sandbox','--disable-dev-shm-usage',
+      '--enable-webgl','--enable-unsafe-swiftshader',
+      '--use-gl=angle','--use-angle=swiftshader'],
+    headless:true
+  });
+  const page=await browser.newPage({viewport:{width:1440,height:950},deviceScaleFactor:2});
+  const errors=[];
+  page.on('pageerror',e=>errors.push(e.message));
+  await page.goto('http://127.0.0.1:8772/',{waitUntil:'domcontentloaded'});
+  await page.locator('#nav-pokemon').click();
+  const cinderace=page.locator('#pokemon-lineup .pokemon-viewer').nth(1);
+  await page.waitForFunction(()=>{
+    const v=document.querySelectorAll('#pokemon-lineup .pokemon-viewer')[1];
+    return v && !v.querySelector('.pokemon-target')?.disabled && !!v.querySelector('canvas');
+  },null,{timeout:45000});
+  await cinderace.locator('.pokemon-target').click();
+  const controls=page.locator('#pokemon-inspector .pokemon-controls').nth(1);
+  const buttons=controls.locator('.pokemon-moves .pokemon-icon-control');
+  await page.waitForFunction(()=> {
+    const v=document.querySelectorAll('#pokemon-inspector .pokemon-controls')[1];
+    return v && v.querySelectorAll('.pokemon-moves button').length>=2;
+  },null,{timeout:20000});
+  const states=await buttons.evaluateAll(nodes=>nodes.map(el=>{
+    const svg=el.querySelector('.pokemon-badge svg');
+    return {label:el.textContent.trim(),pathCount:svg?.querySelectorAll('path').length||0,
+      paths:[...(svg?.querySelectorAll('path')||[])].map(p=>p.getAttribute('d'))};
+  }));
+  for(const state of states)
+    assert.ok(state.paths.length && state.paths.every(p=>p && p.trim().length>15),
+      'missing actual SVG glyph for '+state.label);
+  assert.ok(states.length>=2,'two or more Cinderace moves are exposed');
+  const region=controls.locator('.pokemon-control-group').last();
+  const png=await region.screenshot({type:'png',animations:'disabled'});
+  console.log('MOVE_ICONS='+JSON.stringify({moves:states.map(({label,pathCount})=>({label,pathCount})),
+    errors:errors.slice(0,3)}));
+  const encoded=png.toString('base64');
+  for(let i=0;i<encoded.length;i+=3000)
+    console.log('MOVE_ICONS_PNG_CHUNK:'+encoded.slice(i,i+3000));
+} finally {
+  if(browser)await browser.close();
+  server.kill();
+}
