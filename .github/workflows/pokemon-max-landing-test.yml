@@ -143,5 +143,29 @@ jobs:
               print('WEBGL_FACE_JPEG_BASE64_START')
               print(base64.b64encode(stream2.getvalue()).decode())
               print('WEBGL_FACE_JPEG_BASE64_END')
+              variants=[]
+              for eye_opacity in [0,1]:
+                  page.evaluate("""value => {
+                    const viewer=window.__scoraceShinyDebug;
+                    for(const [mesh,normal,rare] of viewer.model.materialPairs){
+                      if(normal.name.endsWith('_FaceComposite')) rare.opacity=value;
+                    }
+                    viewer.invalidate();
+                  }""",eye_opacity)
+                  page.wait_for_timeout(380)
+                  raw=stage.screenshot()
+                  frame=Image.open(io.BytesIO(raw)).convert('RGB')
+                  region=frame.crop((int(frame.width*.32),int(frame.height*.52),
+                                     int(frame.width*.68),int(frame.height*.70)))
+                  variants.append(region)
+              out=Image.new('RGB',(variants[0].width*2,variants[0].height))
+              out.paste(variants[0],(0,0))
+              out.paste(variants[1],(variants[0].width,0))
+              out=out.resize((out.width*3,out.height*3))
+              buffer=io.BytesIO()
+              out.save(buffer,format='JPEG',quality=88)
+              print('FACE_OPACITY_COMPARE_BASE64_START')
+              print(base64.b64encode(buffer.getvalue()).decode())
+              print('FACE_OPACITY_COMPARE_BASE64_END')
               browser.close()
           PY
