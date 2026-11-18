@@ -28,7 +28,7 @@ for(const pose of ['idle','angry','blink']){
     put(input,198,203,[188,70,50,255]);
     put(input,120,124,[229,229,237,255]); // background variation
     const out=restoreShinyFaceArtwork(input,width,height);
-    for(const x of [30,155])assert.equal(at(out,x,100)[3],0,pose+' tan backing removed, 3D FaceBase supplies skin');
+    for(const x of [30,155])assert.deepEqual(at(out,x,100),[181,170,161,255],pose+' skin coverage harmonized to FaceBase');
     for(const center of [68,187]){
         assert.deepEqual(at(out,center,lidY),[32,29,31,255],pose+' eyeliner');
         assert.deepEqual(at(out,center,65),[183,66,48,255],pose+' iris');
