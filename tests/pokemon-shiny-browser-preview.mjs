@@ -28,7 +28,7 @@ try {
     });
     const page = await browser.newPage({
         viewport: { width: 1360, height: 940 },
-        deviceScaleFactor: 1,
+        deviceScaleFactor: 3,
         reducedMotion: 'reduce',
     });
     const errors = [];
@@ -48,7 +48,20 @@ try {
     const canvas = cinderace.locator('canvas');
     if (!(await canvas.count())) throw new Error('No WebGL canvas present in Cinderace');
     const stage = cinderace.locator('.pokemon-stage');
-    const shot = await stage.screenshot({type:'png',animations:'disabled',timeout:20000});
+    const rect = await stage.boundingBox();
+    if (!rect) throw new Error('No stage rectangle');
+    const shot = await page.screenshot({
+        type: 'png',
+        clip: {
+            x: rect.x + rect.width * .32,
+            y: rect.y + rect.height * .40,
+            width: rect.width * .37,
+            height: rect.height * .275,
+        },
+        scale: 'device',
+        animations: 'disabled',
+        timeout: 20000,
+    });
     console.log('VISUAL_RENDER_SUMMARY='+JSON.stringify({
         status: 'captured',
         pixels: (await stage.boundingBox())?.width,
