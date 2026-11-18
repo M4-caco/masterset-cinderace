@@ -45,3 +45,15 @@
 @media (max-width:400px) {
   .scorace-auth-trigger:not(.scorace-auth-trigger-mobile) { font-size:11px; padding:6px 7px; max-width:110px; overflow:hidden; text-overflow:ellipsis; }
 }
+
+/* Símbolo oficial: a chama identifica a conta, sem substituir o logotipo SCORACE. */
+.scorace-auth-emblem {
+  display: block;
+  width: 88px;
+  height: 88px;
+  max-width: 100%;
+  object-fit: contain;
+  border-radius: 19px;
+  margin: -5px auto 12px;
+  filter: drop-shadow(0 2px 12px rgba(255,105,16,.24));
+}
