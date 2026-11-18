@@ -109,7 +109,16 @@ jobs:
               page.locator('#pokemon-lineup .pokemon-viewer').nth(1).locator('.pokemon-stage[data-ready]').wait_for(timeout=30000)
               page.locator('#pokemon-lineup .pokemon-viewer').nth(1).locator('button.pokemon-target').click()
               page.locator('#pokemon-inspector .pokemon-controls').nth(1).locator('.pokemon-colors button').nth(1).click()
-              page.wait_for_timeout(1300)
+              page.wait_for_timeout(500)
+              page.evaluate("""() => {
+                  const v=window.__scoraceShinyDebug;
+                  v.resetTapSequence();
+                  v.stopAttack();
+                  v.introPending=false;
+                  v.setRest(v.model);
+                  v.invalidate();
+              }""")
+              page.wait_for_timeout(650)
               print('FACE_MATERIALS',page.evaluate("""() => {
                   const v=window.__scoraceShinyDebug;
                   if(!v?.model)return 'no-debug-model';
