@@ -4,6 +4,7 @@ import {
 } from './vendor/three-gltf.js';
 import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=8';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=10';
+import { MaxLandingImpact } from './max-landing.js?v=1';
 import { iconControl, mountVolume } from './showcase-controls.js?v=14';
 import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=15';
 import { effectSpace } from './effect-space.js?v=1';
@@ -270,6 +271,7 @@ class PokemonViewer {
         key.position.set(-3, 5, 5);
         rim.position.set(4, 2, -4);
         this.scene.add(this.turntable, fill, key, rim);
+        this.maxLanding = new MaxLandingImpact(this.scene, mobile.matches);
         this.observer = new ResizeObserver(() => this.invalidate());
         this.observer.observe(this.stage);
         this.visibilityObserver = new IntersectionObserver(([entry]) => {
@@ -375,6 +377,7 @@ class PokemonViewer {
         // their 3D assets are cached and load in the very same browser frame.
         void flash.offsetWidth;
         flash.classList.toggle('is-max', maxTransformation);
+        this.maxLanding?.clear();
         this.maxBurstStart = null;
         const previousHeight = this.displayHeight;
         if ((this.form === 'gigamax') !== (form === 'gigamax')) this.angle = this.species.angle;
@@ -433,6 +436,9 @@ class PokemonViewer {
             this.updatePlacement(true, changingForms ? previousHeight : undefined,
                 maxTransformation ? MAX_GROW_DURATION : CAROUSEL_DURATION);
             this.configureMax(pattern);
+            // Debris belongs to the shared ground, not the rotating Pokémon.
+            // Start at the model-swap flash peak, for Dynamax and Gigamax only.
+            if (maxTransformation) this.maxLanding.start(this.targetDisplayHeight(), performance.now());
             // Begin the body glow only after the new 3D form is visible;
             // otherwise it would be spent on the outgoing model.
             this.maxBurstStart = maxTransformation ? performance.now() : null;
@@ -831,7 +837,7 @@ class PokemonViewer {
             this.model.mixer.update(0);
         }
         updateFace(this.model.face, (now - this.restStart) / 1000, this.attack);
-        if (ambient || this.attack || this.placementTransition) this.invalidate();
+        if (ambient || this.attack || this.placementTransition || this.maxLanding?.active) this.invalidate();
 
         const { renderer, camera } = this;
         const stage = this.stage.getBoundingClientRect();
@@ -917,6 +923,7 @@ class PokemonViewer {
                     gigamax && this.model.head ? this.cloudAnchor : null, this.maxFocusProgress());
             }
         }
+        this.maxLanding?.update(now);
         renderer.render(this.scene, camera);
         if (this.attack?.effect) {
             this.battleEffects.draw(this.attack.effect, {
