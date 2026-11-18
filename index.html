@@ -1759,6 +1759,9 @@ Object.assign(allCards.find(c => c.id === 'card-54'), {"imagem": "image(20261028
                     localStorage.setItem(userStorageKey('scorace_duplicate_captures_v1'),JSON.stringify(duplicateCaptures));
                 } catch (error) { console.warn('Cache local indisponível:', error); }
                 window.scoraceItemsApplyCloud?.(data.itemsOwned || {});
+                if (!user.displayName && data.nickname) {
+                    window.scoraceSyncNickname?.(data.nickname);
+                }
                 window.scoraceBinderSetProfile?.(user.uid, data.migratedLegacy === true);
                 if (data.migratedLegacy === true) {
                     // Local Mercado drafts belong to the original browser, not the old
