@@ -42,7 +42,7 @@ try {
             !!viewer.querySelector('canvas');
     }, { timeout: 45000 });
     await cinderace.locator('.pokemon-target').click();
-    const shinyButton = page.locator('#pokemon-inspector .pokemon-colors button').filter({hasText:'Shiny'});
+    const shinyButton = page.locator('#pokemon-inspector .pokemon-controls').nth(1).locator('.pokemon-colors button').filter({hasText:'Shiny'});
     await shinyButton.click({ timeout: 15000 });
     await page.waitForTimeout(1800);
     const canvas = cinderace.locator('canvas');
