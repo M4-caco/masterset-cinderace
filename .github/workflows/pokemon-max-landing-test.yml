@@ -121,5 +121,13 @@ jobs:
               print('WEBGL_IMAGE_BASE64_START')
               print(base64.b64encode(stream.getvalue()).decode())
               print('WEBGL_IMAGE_BASE64_END')
+              face=img.crop((int(img.width*.34),int(img.height*.53),
+                             int(img.width*.66),int(img.height*.70)))
+              face=face.resize((face.width*4,face.height*4))
+              stream2=io.BytesIO()
+              face.save(stream2,format='JPEG',quality=90)
+              print('WEBGL_FACE_JPEG_BASE64_START')
+              print(base64.b64encode(stream2.getvalue()).decode())
+              print('WEBGL_FACE_JPEG_BASE64_END')
               browser.close()
           PY
