@@ -10,23 +10,62 @@ const loader = new TextureLoader();
 // Retain the full native Shiny face illustration (skin around the eyes,
 // eyelids, eyeliner, red pupils, mouth and all three expressions).
 // Only the flat lilac atlas background should become transparent.
+// The original Shiny atlas has complete white sclera and tapered eyeliner.
+// Mask only the lavender backdrop connected to the canvas edges. Removing
+// pale colours globally erases actual sclera and delicate eyelid antialias.
+// Never redraw an iris, eyelash or mouth, or change the model's UVs.
 export function restoreShinyFaceArtwork(pixels, width, height) {
     if (pixels.length !== width * height * 4)
         throw new Error('Invalid Shiny face frame');
-    const result = new Uint8ClampedArray(pixels);
-    // All frames have an empty area of flat lilac behind the facial artwork.
+    const output = new Uint8ClampedArray(pixels);
     const sample = (Math.floor(height * .92) * width + Math.floor(width / 2)) * 4;
-    const bgR = pixels[sample], bgG = pixels[sample + 1], bgB = pixels[sample + 2];
-    for (let i = 0; i < pixels.length; i += 4) {
-        const distance = Math.hypot(
-            pixels[i] - bgR, pixels[i + 1] - bgG, pixels[i + 2] - bgB
+    const background = [pixels[sample], pixels[sample + 1], pixels[sample + 2]];
+    const count = width * height;
+    const visited = new Uint8Array(count);
+    const queue = new Int32Array(count);
+    let first = 0, last = 0;
+    const distance = position => {
+        const i = position * 4;
+        return Math.hypot(
+            pixels[i] - background[0],
+            pixels[i + 1] - background[1],
+            pixels[i + 2] - background[2]
         );
-        // Small feather at the border removes lilac/white fringe.
-        // Never alter the original eye artwork's colours or orientation.
-        const coverage = Math.max(0, Math.min(1, (distance - 4) / 8));
-        result[i + 3] = Math.round(pixels[i + 3] * coverage);
+    };
+    // Flood-fill only the backdrop: preserve pale whites surrounded by the
+    // red iris, dark lash or warm Shiny skin, even if close to lilac in RGB.
+    const visit = position => {
+        if (visited[position] || distance(position) > 16) return;
+        visited[position] = 1;
+        queue[last++] = position;
+    };
+    for (let x = 0; x < width; x++) {
+        visit(x);
+        visit((height - 1) * width + x);
     }
-    return result;
+    for (let y = 0; y < height; y++) {
+        visit(y * width);
+        visit(y * width + width - 1);
+    }
+    while (first < last) {
+        const position = queue[first++];
+        const x = position % width;
+        const y = Math.floor(position / width);
+        if (x > 0) visit(position - 1);
+        if (x + 1 < width) visit(position + 1);
+        if (y > 0) visit(position - width);
+        if (y + 1 < height) visit(position + width);
+    }
+    for (let position = 0; position < count; position++) {
+        if (!visited[position]) continue;
+        // Transparent lavender outside the original illustration; a subtle
+        // only-at-the-border fade retains texture antialias without a halo.
+        const d = distance(position);
+        output[position * 4 + 3] = Math.round(
+            pixels[position * 4 + 3] * Math.max(0, Math.min(1, (d - 5) / 11))
+        );
+    }
+    return output;
 }
 
 async function loadFrames(id, original, shiny) {
