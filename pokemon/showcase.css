@@ -880,17 +880,6 @@
     .pokemon-loading { padding: 0.15rem; font-size: 0.75rem; }
 }
 
-.pokemon-stage .pokemon-battle-effects {
-    z-index: 1;
-    pointer-events: none;
-}
-
-.pokemon-stage canvas.pokemon-battle-effects-back { z-index: 0; }
-
-.pokemon-stage[data-attack-away] canvas:not(.pokemon-battle-effects) { z-index: 1; }
-.pokemon-stage[data-attack-away] .pokemon-battle-effects { z-index: auto; }
-
-
 /* Opening trio: a wider, more cinematic presentation. The selected-Pokémon
    inspector and the mobile single-character carousel keep their existing layout. */
 .pokemon-welcome {
