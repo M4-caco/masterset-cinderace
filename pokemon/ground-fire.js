@@ -68,17 +68,17 @@ export function groundFlameMotion(index, time, height, origin, angle) {
 }
 
 export class GroundFireTrail {
-    constructor(scene, compact = false) {
+    constructor(scene, compact = false, testTexture = null) {
         this.scene = scene;
         this.group = new Group();
         this.group.name = 'Fire from animated foot contacts';
         this.group.visible = false;
         scene.add(this.group);
         this.geometries = FLAME_FRAMES.map(flameQuad);
-        this.texture = new TextureLoader().load(
+        this.texture = testTexture ?? new TextureLoader().load(
             new URL('./visuals/attack-fx.webp', import.meta.url).href,
         );
-        this.texture.colorSpace = SRGBColorSpace;
+        if (!testTexture) this.texture.colorSpace = SRGBColorSpace;
         this.particles = [];
         this.active = false;
         const count = compact ? 8 : 14;
