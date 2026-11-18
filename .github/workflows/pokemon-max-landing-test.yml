@@ -88,3 +88,38 @@ jobs:
           print(base64.b64encode(bio.getvalue()).decode())
           print('PREVIEW_PNG_BASE64_END')
           PY
+
+      - name: Capturar cena 3D Shiny no Chromium (diagnóstico)
+        run: |
+          python -m pip install --quiet playwright Pillow
+          (python -m http.server 8765 --bind 127.0.0.1 >/tmp/scorace-http.log 2>&1 &)
+          python - <<'PY'
+          from playwright.sync_api import sync_playwright
+          from PIL import Image
+          import io,base64
+          with sync_playwright() as p:
+              browser=p.chromium.launch(headless=True, executable_path='/usr/bin/google-chrome', args=[
+                  '--no-sandbox', '--use-gl=angle', '--use-angle=swiftshader',
+                  '--enable-unsafe-swiftshader', '--disable-dev-shm-usage'])
+              page=browser.new_page(viewport={'width':1440,'height':900},device_scale_factor=1)
+              failures=[]
+              page.on('pageerror',lambda e:failures.append(str(e)))
+              page.goto('http://127.0.0.1:8765/',wait_until='domcontentloaded')
+              page.locator('#nav-pokemon').click()
+              page.locator('#pokemon-lineup .pokemon-viewer').nth(1).locator('.pokemon-stage[data-ready]').wait_for(timeout=30000)
+              page.locator('#pokemon-lineup .pokemon-viewer').nth(1).locator('button.pokemon-target').click()
+              page.locator('#pokemon-inspector .pokemon-controls').nth(1).locator('.pokemon-colors button').nth(1).click()
+              page.wait_for_timeout(1300)
+              stage=page.locator('#pokemon-lineup .pokemon-viewer').nth(1).locator('.pokemon-stage')
+              shot=stage.screenshot()
+              img=Image.open(io.BytesIO(shot)).convert('RGB')
+              img.thumbnail((540,680))
+              stream=io.BytesIO()
+              img.save(stream,format='JPEG',quality=78,optimize=True)
+              print('WEBGL_ERRORS',failures[:7])
+              print('STAGE_SIZE',img.size)
+              print('WEBGL_IMAGE_BASE64_START')
+              print(base64.b64encode(stream.getvalue()).decode())
+              print('WEBGL_IMAGE_BASE64_END')
+              browser.close()
+          PY
