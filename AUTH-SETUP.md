@@ -1,6 +1,6 @@
 # SCORACE: autenticação individual e migração sem perda de dados
 
-**NÃO publicar esta branch antes de configurar o Firebase e fazer a migração.**
+**Antes de publicar regras restritivas, confirmar que a versão autenticada está funcionando.**
 
 ## Arquitetura
 
@@ -11,30 +11,19 @@
 - Cache da coleção, rascunhos do Mercado e biblioteca local do fichário são isolados por conta.
 - O legado `users_data/cinderace_masterset` permanece intocado e não é mais lido pelo site.
 
-## Migração guiada, sem precisar instalar o Admin SDK
+## Migração e implantação
 
-Depois de criar a conta do proprietário no Authentication, a versão de testes oferece `migrar-colecao.html`.
-Essa página NÃO contém o backup nem senhas. Ela exige login com o UID proprietário confirmado,
-consulta o documento antigo diretamente e, após consentimento explícito, copia cartas, capturas e
-duplicatas em transação, sem apagar a origem. Também confere o conteúdo gravado no destino.
+A migração guiada foi realizada pelo proprietário na versão de testes.
+A ferramenta temporária de migração foi retirada da release pública.
+Se precisar repetir o procedimento em outro ambiente, use a alternativa administrativa abaixo
+e confirme antes que o documento de destino ainda não possui progresso.
 
-1. Faça backup no Console e confira o documento antigo. O arquivo de texto fornecido pelo usuário
-   representa uma versão de 13/11/2026 e pode estar desatualizado.
-2. Na prévia da Vercel desta branch, abra `/migrar-colecao.html`. Entre com o usuário do Firebase.
-3. Clique em **Verificar coleção atual no Firebase**, confira os totais e a data. Se a leitura não funcionar,
-   a interface permite escolher uma cópia JSON do próprio usuário; o arquivo NÃO é enviado ao GitHub.
-   Prefira sempre a cópia mais recente do Firebase.
-4. Se o destino estiver vazio, marque a confirmação e clique em **Copiar minha coleção com segurança**.
-5. Aguarde a conferência e confira `users_data/{uid}` no Console. O documento antigo deverá permanecer.
-6. **Se houver permission-denied, não substitua as regras por regras abertas**. Investigue as regras
-   atuais e mantenha o banco original intacto. Para cenários com restrições, use o script administrativo abaixo.
+Para a migração do proprietário, o documento anterior `users_data/cinderace_masterset`
+permanece intacto; o novo site utiliza `users_data/{uid}`.
+É essencial publicar as regras definitivas do arquivo `firestore.rules`
+imediatamente após verificar que o site principal autenticado está funcionando,
+para impedir qualquer acesso público ao documento legado.
 
-**Ordem de publicação:** execute e verifique a migração ANTES de fechar o acesso legado com `firestore.rules`.
-Somente depois publique o site autenticado, confirme que ele mostra a coleção migrada e aplique
-imediatamente as regras restritivas do Firestore. Publicar essas regras antes de atualizar o site
-principal pode impedir a leitura da coleção pelo frontend antigo.
-
-### Alternativa administrativa
 ## Configuração obrigatória antes do deploy
 
 1. No Firebase **pokedex-colecao**, faça backup do documento `users_data/cinderace_masterset` e confira a quantidade de cartas/duplicatas.
