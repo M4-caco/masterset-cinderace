@@ -51,20 +51,29 @@ for (const id of ['scorbunny', 'raboot', 'cinderace', 'cinderace-gigamax']) {
 console.log(`PASS: ${count} actual model/animation/rotation samples; stationary launch after recovery; ground plane and orthographic projection.`);
 
 // Test the public interaction guards without creating a WebGL renderer.
+// The single-tap delay and rapid-tap timing are tested in pokemon-tap-gestures.mjs.
 const showcase = await readFile(root + 'pokemon/showcase.js', 'utf8');
 function method(name, next) {
-    const body = showcase.split(`    ${name}() {`)[1].split(`    ${next}`)[0];
-    return new Function(body.slice(0, body.lastIndexOf('}')));
+    const body = showcase.split('    ' + name + '() {')[1].split('    ' + next + '() {')[0];
+    return new Function('MOVES', 'return function() {' + body.slice(0, body.lastIndexOf('}')) + '}')({
+        physical: 'Ataque físico',
+    });
 }
 const tap = method('tapAttack', 'playQuickAttack');
-const quick = method('playQuickAttack', 'configureMax');
+const quick = method('playQuickAttack', 'playAttackCry');
 let played = 0;
-const fake = { model: {}, loading: false, form: 'gigamax',
-    playQuickAttack: () => played++, play: () => played++ };
-for (let i = 0; i < 100; i++) { tap.call(fake); quick.call(fake); }
+const fake = {
+    model: { clips: new Set(['Ataque físico']) },
+    loading: false, form: 'gigamax', lastAttackTap: 0,
+    play: () => played++,
+};
+for (let i = 0; i < 100; i++) {
+    tap.call(fake);
+    quick.call(fake);
+}
 assert.equal(played, 0, 'Gigamax rapid taps must not attack');
 assert.equal(fake.lastAttackTap, -Infinity);
 fake.form = 'normal';
-tap.call(fake);
-assert.equal(played, 1, 'Normal forms still respond to a tap');
-console.log('PASS: Gigamax tap guards; normal form tap interaction.');
+quick.call(fake);
+assert.equal(played, 1, 'Normal quick attacks remain available');
+console.log('PASS: Gigamax tap guards; normal physical attack.');
