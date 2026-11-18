@@ -3,42 +3,70 @@ import { TextureLoader } from './vendor/three-gltf.js';
 const FRAME_COUNT = 3;
 const loader = new TextureLoader();
 
-// A few near-white brush marks in the original browser-made Shiny
-// composite extend beyond the iris/sclera. Keep the original eyes and all
-// their UVs; repaint ONLY those stray white pixels with the adjacent rare
-// face colour. Never rotate, mirror, resize or replace the pupils.
-export function removeStrayShinyWhites(pixels, width, height) {
+// Preserve the shape, orientation and three poses of the original web eyes.
+// The old eye atlas also contains opaque skin patches, stray dark shapes and
+// a lilac/white backdrop. All of those must be transparent outside the eye
+// artwork, not painted darker: painting them caused the reported cheek stains.
+export function locateShinyIrisCenters(pixels, width, height) {
+    const groups = [[], []];
+    for (let y = Math.floor(height * 0.055); y < height * 0.42; y++) {
+        for (let x = 0; x < width; x++) {
+            const side = x < width / 2 ? 0 : 1;
+            if (side === 0 && (x < width * .13 || x > width * .44)) continue;
+            if (side === 1 && (x < width * .56 || x > width * .87)) continue;
+            const i = (y * width + x) * 4;
+            const r = pixels[i], g = pixels[i + 1], b = pixels[i + 2];
+            if (r > 115 && g < 165 && r > g * 1.42 && r > b * 1.4)
+                groups[side].push([x, y]);
+        }
+    }
+    return groups.map((group, side) => group.length
+        ? group.reduce((acc, [x,y]) => [acc[0]+x/group.length, acc[1]+y/group.length], [0,0])
+        : [width * (side ? .73 : .27), height * .23]);
+}
+
+export function isolateShinyEyeArtwork(pixels, width, height, centers) {
     if (pixels.length !== width * height * 4) throw new Error('Invalid Shiny face frame');
-    const result = new Uint8ClampedArray(pixels);
-    const eyeRegion = (x, y) => y < height * 0.47 &&
-        ((x > width * 0.045 && x < width * 0.455) ||
-         (x > width * 0.545 && x < width * 0.955));
-    const irises = [];
-    for (let y = 0; y < height * 0.47; y++) for (let x = 0; x < width; x++) {
-        if (!eyeRegion(x, y)) continue;
-        const index = (y * width + x) * 4;
-        const r = pixels[index], g = pixels[index + 1], b = pixels[index + 2];
-        if (r > 120 && r > g * 1.42 && r > b * 1.4 && g < 150)
-            irises.push([x, y]);
+    const out = new Uint8ClampedArray(width * height * 4);
+    const seeded = new Uint8Array(width * height);
+    const redSeeded = new Uint8Array(width * height);
+    const nearEye = (x, y) => centers.some(([cx, cy]) =>
+        Math.abs(x - cx) <= width * .135 && Math.abs(y - cy) <= height * .16);
+    const inside = (x,y) => y <= height * .435 && nearEye(x,y);
+    const ink = (r,g,b) => {
+        const red = r > 115 && g < 165 && r > g * 1.42 && r > b * 1.4;
+        const dark = r < 116 && g < 116 && b < 125;
+        return red || dark;
+    };
+    for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+        if(!inside(x,y))continue;
+        const i=(y*width+x)*4;
+        if(ink(pixels[i],pixels[i+1],pixels[i+2]))seeded[y*width+x]=1;
+        if (pixels[i]>115 && pixels[i+1]<165 &&
+            pixels[i]>pixels[i+1]*1.42 && pixels[i]>pixels[i+2]*1.4)
+            redSeeded[y*width+x]=1;
     }
-    for (let y = 0; y < height * 0.47; y++) for (let x = 0; x < width; x++) {
-        if (!eyeRegion(x, y)) continue;
-        const index = (y * width + x) * 4;
-        const r = pixels[index], g = pixels[index + 1], b = pixels[index + 2];
-        // Reject the lavender atlas background, tan skin and red pupils.
-        const white = r > 210 && g > 208 && b > 207 &&
-            r >= b - 3 && g >= b - 3 && Math.abs(r - g) < 20;
-        if (!white) continue;
-        const nearbyIris = irises.some(([cx, cy]) =>
-            (cx - x) ** 2 + (cy - y) ** 2 <= 8 ** 2);
-        if (nearbyIris) continue; // keep the real thin sclera and highlights
-        // The untouched atlas has a warm taupe skin colour around the eyes.
-        // Use that same colour instead of inventing transparency/UV offsets.
-        result[index] = 184;
-        result[index + 1] = 171;
-        result[index + 2] = 159;
+    const nearInk=(x,y,radius,seeds=seeded)=>{
+        for(let yy=Math.max(0,y-radius);yy<=Math.min(height-1,y+radius);yy++)
+            for(let xx=Math.max(0,x-radius);xx<=Math.min(width-1,x+radius);xx++)
+                if(seeds[yy*width+xx])return true;
+        return false;
+    };
+    for(let y=0;y<height;y++)for(let x=0;x<width;x++){
+        if(!inside(x,y))continue;
+        const i=(y*width+x)*4,r=pixels[i],g=pixels[i+1],b=pixels[i+2];
+        const white = r>198 && g>198 && b>198 &&
+            r>=b-4 && g>=b-4 && Math.abs(r-g)<18;
+        // Preserve thin sclera and antialias next to the original dark eye
+        // outline. Everything elsewhere, including lower decals, disappears.
+        const antialias = Math.abs(r-g)<16 && Math.abs(g-b)<16 &&
+            r>=118 && r<=203;
+        if(seeded[y*width+x] || (white && nearInk(x,y,3,redSeeded)) ||
+           (antialias && nearInk(x,y,2))) {
+            out[i]=r;out[i+1]=g;out[i+2]=b;out[i+3]=pixels[i+3];
+        }
     }
-    return result;
+    return out;
 }
 
 async function loadFrames(id, original, shiny) {
@@ -46,17 +74,27 @@ async function loadFrames(id, original, shiny) {
     const atlas = await loader.loadAsync(new URL(`./visuals/${id}-face${suffix}.webp`, import.meta.url).href);
     const { image } = atlas;
     const height = image.height / FRAME_COUNT;
+    let shinyCenters = null;
+    if (id === 'cinderace' && shiny) {
+        const canvas = document.createElement('canvas');
+        canvas.width = image.width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        ctx.drawImage(image, 0, 0, image.width, height, 0, 0, image.width, height);
+        const source = ctx.getImageData(0, 0, image.width, height);
+        shinyCenters = locateShinyIrisCenters(source.data, canvas.width, canvas.height);
+    }
     const frames = [];
     for (let i = 0; i < FRAME_COUNT; i++) {
         const canvas = document.createElement('canvas');
         canvas.width = image.width;
         canvas.height = height;
-        const context = canvas.getContext('2d', { alpha: false });
+        const context = canvas.getContext('2d', { willReadFrequently: true });
         context.drawImage(image, 0, i * height, image.width, height,
             0, 0, image.width, height);
-        if (id === 'cinderace' && shiny) {
+        if (shinyCenters) {
             const frame = context.getImageData(0, 0, canvas.width, canvas.height);
-            frame.data.set(removeStrayShinyWhites(frame.data, canvas.width, canvas.height));
+            frame.data.set(isolateShinyEyeArtwork(frame.data, canvas.width, canvas.height, shinyCenters));
             context.putImageData(frame, 0, 0);
         }
         const texture = new original.constructor(canvas);
@@ -75,14 +113,16 @@ async function loadFrames(id, original, shiny) {
 
 export async function prepareFace(id, materials, controllers) {
     if (id === 'cinderace') {
-        // The original Shiny eye geometry and atlas are already oriented
-        // correctly. Its separate FaceBase rare map, however, is nearly
-        // white and leaks through as stray white marks. Only tint that
-        // underlying face base to match the original grey Shiny skin.
-        // Keep the complete original eye atlas, UVs and animation intact.
+        // FaceBase is needed to cover the dark eye-hole surface in the model.
+        // Its previous tint (#98918a) was darker than the surrounding skin,
+        // leaving visible brown islands on nose and cheeks. Keep this surface
+        // opaque, but move it toward the body skin colour instead.
         for (const [, normal, rare] of materials) {
             if (!/_FaceBase$/.test(normal.name)) continue;
-            rare.color.set('#98918a');
+            rare.transparent = false;
+            rare.opacity = 1;
+            rare.color.set('#b5aaa1');
+            rare.depthWrite = true;
             rare.needsUpdate = true;
         }
     }
@@ -92,6 +132,17 @@ export async function prepareFace(id, materials, controllers) {
             loadFrames(id, normal.map, false),
             loadFrames(id, shiny.map, true),
         ]);
+        if (id === 'cinderace') {
+            // The original facial backing supplies the skin colour. The
+            // Shiny composite must blend ONLY the actual artwork above it.
+            shiny.transparent = true;
+            shiny.alphaTest = 0.05;
+            shiny.depthWrite = false;
+            shiny.polygonOffset = true;
+            shiny.polygonOffsetFactor = -1;
+            shiny.polygonOffsetUnits = -1;
+            shiny.needsUpdate = true;
+        }
         return [[normal, regularFrames], [shiny, shinyFrames]];
     }));
     const face = { bindings: bindings.flat(), controllers, pose: -1 };
