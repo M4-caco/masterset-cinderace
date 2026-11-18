@@ -30,6 +30,18 @@ async function loadFrames(id, original, shiny) {
 }
 
 export async function prepareFace(id, materials, controllers) {
+    if (id === 'cinderace') {
+        // The original Shiny eye geometry and atlas are already oriented
+        // correctly. Its separate FaceBase rare map, however, is nearly
+        // white and leaks through as stray white marks. Only tint that
+        // underlying face base to match the original grey Shiny skin.
+        // Keep the complete original eye atlas, UVs and animation intact.
+        for (const [, normal, rare] of materials) {
+            if (!/_FaceBase$/.test(normal.name)) continue;
+            rare.color.set('#98918a');
+            rare.needsUpdate = true;
+        }
+    }
     const pairs = materials.filter(([, normal]) => /_Face(?:Tex|Composite)$/.test(normal.name));
     const bindings = await Promise.all(pairs.map(async ([, normal, shiny]) => {
         const [regularFrames, shinyFrames] = await Promise.all([
