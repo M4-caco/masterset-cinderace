@@ -20,7 +20,7 @@ function anchors(model) {
     // once in the idle pose, so its mouth still follows every head animation.
     if (!result.upperJaw && result.head && result.feedingSocket) {
         model.root.updateWorldMatrix(true, true);
-        result.headMouth = result.head.worldToLocal(
+        result.headMouth = model.mouthLocal ?? result.head.worldToLocal(
             result.feedingSocket.getWorldPosition(new Vector3()));
     }
     references.set(model, result);
@@ -39,8 +39,9 @@ function mouthPosition(model, refs, target) {
 
 function ballPosition(mesh, target) {
     // A skinned mesh needs its deformed bounds, not the static geometry box.
-    mesh.computeBoundingBox();
-    return mesh.localToWorld(mesh.boundingBox.getCenter(target));
+    const box = mesh.isSkinnedMesh ? mesh : mesh.geometry;
+    box.computeBoundingBox();
+    return mesh.localToWorld(box.boundingBox.getCenter(target));
 }
 
 // All coordinates use the same camera and world matrices as the character.
