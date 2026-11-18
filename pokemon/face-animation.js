@@ -112,6 +112,18 @@ async function loadFrames(id, original, shiny) {
 }
 
 export async function prepareFace(id, materials, controllers) {
+    if (id === 'cinderace') {
+        // The rare FaceBase from glTF is a solid lavender 4x4 texture.
+        // It creates the broad white mask visible in the reported screenshot.
+        // Let BodyAll_SHINY show through, with the eyes overlaid separately.
+        for (const [, normal, shiny] of materials) {
+            if (!/_FaceBase$/.test(normal.name)) continue;
+            shiny.transparent = true;
+            shiny.opacity = 0;
+            shiny.depthWrite = false;
+            shiny.needsUpdate = true;
+        }
+    }
     const pairs = materials.filter(([, normal]) => /_Face(?:Tex|Composite)$/.test(normal.name));
     const bindings = await Promise.all(pairs.map(async ([, normal, shiny]) => {
         const [regularFrames, shinyFrames] = await Promise.all([
