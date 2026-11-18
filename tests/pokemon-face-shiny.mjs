@@ -34,7 +34,7 @@ for (const centre of [69, 187]) {
             pixel(pose, x, y, [185, 171, 158]); // old massive tan patch
     pixel(pose, centre, 63, [180, 68, 48]);    // genuine red iris
     pixel(pose, centre + 1, 63, [45, 42, 45]); // dark outline
-    pixel(pose, centre + 3, 63, [245, 243, 241]); // adjacent white
+    pixel(pose, centre + 1, 62, [245, 243, 241]); // tiny iris reflection
     pixel(pose, centre - 14, 46, [247, 246, 245]); // stray brow streak
 }
 pixel(native, 74, 163, [180, 67, 48]);   // mouth remains original
@@ -46,8 +46,8 @@ assert.equal(alpha(69, 40), 0, 'tan eye mask must not render');
 assert.equal(alpha(187, 40), 0, 'both eye masks must be transparent');
 assert.equal(alpha(69, 63), 255, 'left red iris');
 assert.equal(alpha(187, 63), 255, 'right red iris');
-assert.equal(alpha(72, 63), 255, 'white sclera next to actual eye');
-assert.equal(alpha(190, 63), 255, 'right sclera');
+assert.equal(alpha(70, 62), 255, 'left iris reflection');
+assert.equal(alpha(188, 62), 255, 'right iris reflection');
 assert.equal(alpha(55, 46), 0, 'white brow streak away from eye must not show');
 assert.equal(alpha(74, 163), 255, 'original mouth element preserved');
 assert.equal(alpha(128, 63), 0, 'no white stripe between eyes');
