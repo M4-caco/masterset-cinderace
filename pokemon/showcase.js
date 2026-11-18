@@ -5,6 +5,7 @@ import {
 import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=8';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=10';
 import { MaxLandingImpact } from './max-landing.js?v=1';
+import { GroundFireTrail } from './ground-fire.js?v=1';
 import { iconControl, mountVolume } from './showcase-controls.js?v=14';
 import { BattleEffects, loadAttackSprites } from './battle-effects.js?v=15';
 import { effectSpace } from './effect-space.js?v=1';
@@ -272,6 +273,7 @@ class PokemonViewer {
         rim.position.set(4, 2, -4);
         this.scene.add(this.turntable, fill, key, rim);
         this.maxLanding = new MaxLandingImpact(this.scene, mobile.matches);
+        this.groundFlames = new GroundFireTrail(this.scene, mobile.matches);
         this.observer = new ResizeObserver(() => this.invalidate());
         this.observer.observe(this.stage);
         this.visibilityObserver = new IntersectionObserver(([entry]) => {
@@ -378,6 +380,7 @@ class PokemonViewer {
         void flash.offsetWidth;
         flash.classList.toggle('is-max', maxTransformation);
         this.maxLanding?.clear();
+        this.groundFlames?.clear();
         this.maxBurstStart = null;
         const previousHeight = this.displayHeight;
         if ((this.form === 'gigamax') !== (form === 'gigamax')) this.angle = this.species.angle;
@@ -585,7 +588,8 @@ class PokemonViewer {
 
     tapAttack() {
         this.greetingAudio?.pause();
-        if (!this.model || this.loading || this.form === 'gigamax') return;
+        if (!this.model || this.loading) return;
+        if (this.form === 'gigamax') return this.tapGigamaxReaction();
         // Battle buttons take precedence; normal taps may replace a greeting,
         // a quick attack or a previous single-tap fire animation.
         if (this.attack && !['intro', 'greeting', 'combat-fast', 'combat-single'].includes(this.attack.kind)) return;
@@ -621,6 +625,33 @@ class PokemonViewer {
             if (effect && this.model.clips.has(MOVES.special)) {
                 this.play(MOVES.special, 'combat-single', effect);
             }
+        }, SINGLE_TAP_WINDOW_MS);
+    }
+
+    tapGigamaxReaction() {
+        // A normal tap can make Gigamax Cinderace react using its actual
+        // 'Rugido' animation. Quick successive taps never launch G-Max or
+        // manufacture a nonexistent rapid-attack combo.
+        if (this.attack && !['intro', 'greeting', 'gigamax-reaction'].includes(this.attack.kind)) return;
+        if (this.attack?.kind === 'gigamax-reaction') return;
+        const now = performance.now();
+        const rapid = isRapidTap(now, this.lastTapAt, this.rapidTapUntil);
+        this.lastTapAt = now;
+        this.clearPendingSingleTap();
+        if (rapid) {
+            this.rapidTapUntil = now + RAPID_TAP_GRACE_MS;
+            return;
+        }
+        this.rapidTapUntil = -Infinity;
+        this.introPending = false;
+        // Keep the sound inside the user gesture so Android WebView can play it.
+        this.playAttackCry();
+        this.pendingSingleTap = setTimeout(() => {
+            this.pendingSingleTap = null;
+            if (this.form !== 'gigamax' || !this.model || this.loading ||
+                this.showcase.classList.contains('hidden') ||
+                this.lastTapAt !== now || this.attack?.kind === 'battle') return;
+            this.play(MOVES.roar, 'gigamax-reaction');
         }, SINGLE_TAP_WINDOW_MS);
     }
 
@@ -752,6 +783,8 @@ class PokemonViewer {
         this.attack = { action, effect, kind, start, clipDuration, duration, time: 0,
             cameraLock, lockFraming: gigamaxMove };
         if (effect) this.battleEffects ??= new BattleEffects(this.stage, this.target);
+        if (kind === 'combat-fast') this.groundFlames?.begin();
+        else this.groundFlames?.clear();
         this.stage.dataset.attacking = kind;
         this.stage.toggleAttribute('data-attack-away', Boolean(effect) && Math.cos(this.angle) < -0.25);
         if (kind === 'combat-fast' || kind === 'battle') {
@@ -763,6 +796,7 @@ class PokemonViewer {
     }
 
     stopAttack() {
+        this.groundFlames?.clear();
         if (!this.attack) return;
         this.attack = null;
         this.battleEffects?.clear();
@@ -924,13 +958,15 @@ class PokemonViewer {
             }
         }
         this.maxLanding?.update(now);
+        if (this.attack?.kind === 'combat-fast') {
+            this.groundFlames?.update(this.attack.time, this.model, this.turntable,
+                this.angle, this.displayHeight);
+        } else this.groundFlames?.clear();
         renderer.render(this.scene, camera);
         if (this.attack?.effect) {
             this.battleEffects.draw(this.attack.effect, {
                 ...effectSpace(this.model, this.turntable, camera, surfaceWidth, height, this.attack),
                 time: this.attack.time, duration: this.attack.clipDuration,
-                groundFire: this.focused && this.attack.kind === 'combat-fast',
-                groundTime: now / 1000,
                 width: surfaceWidth, height, form: this.form, species: this.species.id,
                 modelHeight: tall * this.turntable.scale.x,
                 floor: height * floor + dy,
