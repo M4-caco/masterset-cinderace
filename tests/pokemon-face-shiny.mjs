@@ -11,6 +11,7 @@ for(const center of [70,185]){
         draw(center+dx,65+dy,[183,66,48]); // original pupils, never redraw or rotate
     draw(center-6,65,[29,25,30]);           // black outline
     draw(center+8,65,[245,242,240]);        // thin white sclera
+    draw(center-9,65,[246,244,242]);       // unwanted white halo near black but outside red
     draw(center+19,65,[180,169,156]);       // artificial tan cheek patch
     draw(center+23,90,[252,249,248]);       // stray bright facial perimeter
     draw(center-4,156,[58,51,56]);         // stray dark mark at lower cheek
@@ -26,6 +27,7 @@ for(const center of [70,185]){
     assert.deepEqual(pixel(out,center,65),[183,66,48,255],'same iris colour and placement');
     assert.deepEqual(pixel(out,center-6,65),[29,25,30,255],'same natural black outline');
     assert.deepEqual(pixel(out,center+8,65),[245,242,240,255],'thin white sclera preserved');
+    assert.equal(pixel(out,center-9,65)[3],0,'extra white halo outside iris must disappear');
     assert.equal(pixel(out,center+19,65)[3],0,'tan cheek no longer overlays face');
     assert.equal(pixel(out,center+23,90)[3],0,'white facial edge no longer overlays face');
     assert.equal(pixel(out,center-4,156)[3],0,'lower dark cheek decoration removed');
@@ -41,6 +43,9 @@ assert.match(eyes,/loadFrames\(id, shiny\.map, true\)/);
 assert.match(eyes,/isolateShinyEyeArtwork\(frame\.data, canvas\.width, canvas\.height, shinyCenters\)/);
 assert.match(eyes,/shiny\.transparent = true/);
 assert.match(eyes,/shiny\.depthWrite = false/);
+assert.match(eyes,/rare\.transparent = true/);
+assert.match(eyes,/rare\.opacity = 0/);
+assert.match(eyes,/rare\.depthWrite = false/);
 assert.doesNotMatch(eyes,/nativeCinderaceRareEyes|nativeCinderaceShinyFrame|composeShinyEyePixels/);
 const gltf=JSON.parse(await readFile(new URL('../pokemon/models/cinderace.gltf',import.meta.url),'utf8'));
 assert.equal(gltf.images[7].name,'pm0815_00_Eye_Col_rare');
