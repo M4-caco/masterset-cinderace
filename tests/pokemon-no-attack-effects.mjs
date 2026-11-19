@@ -36,7 +36,7 @@ assert.match(showcase, /this\.maxLanding\?\.update\(now\)/);
 assert.doesNotMatch(css, /pokemon-battle-effects|data-attack-away/);
 assert.match(entry, /showcase\.js\?v=51/);
 assert.match(html, /pokemon\/entry\.js\?v=51/);
-assert.match(html, /pokemon\/showcase\.css\?v=28/);
+assert.match(html, /pokemon\/showcase\.css\?v=29/);
 
 const deadModules = [
     'pokemon/battle-effects.js', 'pokemon/ground-fire.js',
