@@ -137,16 +137,17 @@ export async function prepareFace(id, materials, controllers) {
             loadFrames(id, shiny.map, true),
         ]);
         if (id === 'cinderace') {
-            // Shiny now uses the same complete opaque face atlas and material
-            // behavior as the normal form: no clipped eye or skin surfaces.
-            // FaceBase remains the original opaque Shiny material underneath.
-            shiny.transparent = normal.transparent;
-            shiny.alphaTest = normal.alphaTest;
-            shiny.opacity = normal.opacity;
-            shiny.depthWrite = normal.depthWrite;
-            shiny.polygonOffset = normal.polygonOffset;
-            shiny.polygonOffsetFactor = normal.polygonOffsetFactor;
-            shiny.polygonOffsetUnits = normal.polygonOffsetUnits;
+            // The Shiny FaceBase and Eye/FaceComposite share overlapping
+            // geometry. Render the FULL opaque-atlas pixels in the overlay
+            // pass to keep red eyes above the skin layer. Unlike the old
+            // approach, NO pixels in the new canvas are cut out or erased.
+            shiny.transparent = true;
+            shiny.opacity = 1;
+            shiny.alphaTest = 0;
+            shiny.depthWrite = false;
+            shiny.polygonOffset = true;
+            shiny.polygonOffsetFactor = -1;
+            shiny.polygonOffsetUnits = -1;
             shiny.needsUpdate = true;
         }
         return [[normal, regularFrames], [shiny, shinyFrames]];
