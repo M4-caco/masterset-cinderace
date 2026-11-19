@@ -534,16 +534,23 @@
     }
 }
 
-.pokemon-grid[data-focus] .pokemon-viewer:not([data-selected]) .pokemon-stage {
+.pokemon-grid[data-focus] .pokemon-viewer:not([data-selected]) .pokemon-stage,
+.pokemon-grid[data-focus] .pokemon-viewer:not([data-selected]) .pokemon-stage-species {
     filter: brightness(0.59) saturate(0.82);
 }
 
+/* Captions live outside the stage now, so apply its exact dimming rules to
+   both elements. The mobile layout only shows the selected Pokémon. */
+.pokemon-stage-species {
+    transition: filter 360ms ease;
+}
+
 @media (hover: hover) {
-    .pokemon-grid:has(.pokemon-viewer:hover) .pokemon-viewer:not(:hover) .pokemon-stage {
+    .pokemon-grid:has(.pokemon-viewer:hover) .pokemon-viewer:not(:hover) :is(.pokemon-stage, .pokemon-stage-species) {
         filter: brightness(0.59) saturate(0.82);
     }
 
-    .pokemon-grid:has(.pokemon-viewer:hover) .pokemon-viewer:hover .pokemon-stage {
+    .pokemon-grid:has(.pokemon-viewer:hover) .pokemon-viewer:hover :is(.pokemon-stage, .pokemon-stage-species) {
         filter: none;
     }
 }
