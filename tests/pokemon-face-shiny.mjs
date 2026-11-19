@@ -68,6 +68,6 @@ const showcase=await readFile(new URL('../pokemon/showcase.js',import.meta.url),
 const entry=await readFile(new URL('../pokemon/entry.js',import.meta.url),'utf8');
 const index=await readFile(new URL('../index.html',import.meta.url),'utf8');
 assert.match(showcase,/face-animation\.js\?v=18/);
-assert.match(entry,/showcase\.js\?v=52/);
-assert.match(index,/pokemon\/entry\.js\?v=52/);
+assert.match(entry,/showcase\.js\?v=53/);
+assert.match(index,/pokemon\/entry\.js\?v=53/);
 console.log('PASS: Shiny skin, eyelids, eyeliner, iris, mouth and three expressions retained.');
