@@ -67,7 +67,7 @@ assert.equal(gltf.images[7].name,'pm0815_00_Eye_Col_rare');
 const showcase=await readFile(new URL('../pokemon/showcase.js',import.meta.url),'utf8');
 const entry=await readFile(new URL('../pokemon/entry.js',import.meta.url),'utf8');
 const index=await readFile(new URL('../index.html',import.meta.url),'utf8');
-assert.match(showcase,/face-animation\.js\?v=17/);
+assert.match(showcase,/face-animation\.js\?v=18/);
 assert.match(entry,/showcase\.js\?v=51/);
 assert.match(index,/pokemon\/entry\.js\?v=51/);
 console.log('PASS: Shiny skin, eyelids, eyeliner, iris, mouth and three expressions retained.');
