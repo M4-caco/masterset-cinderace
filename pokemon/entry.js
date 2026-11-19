@@ -7,7 +7,7 @@ let viewer;
 // First mobile entrance: a user pressing the Pokémon tab is a trusted gesture,
 // unlike an automatic animation frame after the async GLTF has loaded.
 const mobileWelcomeVoices = new Map();
-document.getElementById('nav-pokemon')?.addEventListener('click', () => {
+for (const nav of document.querySelectorAll('#nav-pokemon, #mob-nav-pokemon')) nav.addEventListener('click', () => {
     if (!matchMedia('(max-width: 767px)').matches) return;
     const chosen = section.querySelector('.pokemon-viewer[data-selected] .pokemon-stage-species')
         ?.textContent?.trim()?.toLowerCase() || 'scorbunny';
