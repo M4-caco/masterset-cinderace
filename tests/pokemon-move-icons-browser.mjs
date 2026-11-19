@@ -31,6 +31,25 @@ try {
     return v && !v.querySelector('.pokemon-target')?.disabled && !!v.querySelector('canvas');
   },null,{timeout:45000});
   await cinderace.locator('.pokemon-target').click();
+  // Captions were moved below the 3D stage; they must visually dim together
+  // with their non-selected models, but keep the selected name at full light.
+  await page.mouse.move(8, 8); // no hovered Pokémon
+  await page.waitForTimeout(420); // wait for label's CSS filter transition
+  const names = await page.locator('#pokemon-lineup .pokemon-viewer')
+    .evaluateAll(viewers => viewers.map(viewer => ({
+      selected: viewer.hasAttribute('data-selected'),
+      caption: getComputedStyle(viewer.querySelector('.pokemon-stage-species')).filter,
+      model: getComputedStyle(viewer.querySelector('.pokemon-stage')).filter,
+    })));
+  assert.equal(names.length, 3);
+  for (const item of names) {
+    assert.equal(item.caption, item.model,
+      'caption and Pokémon model must use the same brightness filter');
+    assert.equal(item.caption, item.selected ? 'none'
+      : 'brightness(0.59) saturate(0.82)',
+      'only the selected Pokémon name should stay fully bright');
+  }
+
   const controls=page.locator('#pokemon-inspector .pokemon-controls').nth(1);
   const buttons=controls.locator('.pokemon-moves .pokemon-icon-control');
   await page.waitForFunction(()=> {
