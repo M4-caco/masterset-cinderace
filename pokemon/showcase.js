@@ -8,7 +8,7 @@ import { MaxLandingImpact } from './max-landing.js?v=1';
 import { iconControl, mountVolume } from './showcase-controls.js?v=15';
 import { mountPokedex } from './pokedex.js?v=12';
 import { prepareFace, updateFace } from './face-animation.js?v=17';
-import { createJornadasGreeting } from './jornadas-voices.js?v=4';
+import { createJornadasGreeting } from './jornadas-voices.js?v=5';
 import { isRapidTap, SINGLE_TAP_WINDOW_MS, RAPID_TAP_GRACE_MS } from './tap-gestures.mjs?v=2';
 
 const FORMS = { normal: 'Normal', dynamax: 'Dinamax', gigamax: 'Gigamax' };
@@ -95,7 +95,7 @@ class PokemonViewer {
         this.onSelect = onSelect;
         this.controls = card.querySelector('.pokemon-controls');
         this.stage = card.querySelector('.pokemon-stage');
-        this.stageSpecies = this.stage.querySelector('.pokemon-stage-species');
+        this.stageSpecies = this.card.querySelector('.pokemon-stage-species');
         this.stageSpecies.textContent = species.name.toLocaleUpperCase('pt-BR');
         this.target = card.querySelector('.pokemon-target');
         this.placeholder = card.querySelector('.pokemon-loading');
@@ -555,6 +555,30 @@ class PokemonViewer {
         }
     }
 
+    mobileArrival(withVoice = false) {
+        if (!mobile.matches || this.showcase.classList.contains('hidden')) return;
+        // A cached model has already consumed introPending. Reset it on EVERY
+        // mobile arrow arrival, including Scorbunny -> Raboot -> Scorbunny.
+        this.introPending = true;
+        this.lastGreeting = -Infinity;
+        if (this.model && !this.loading) {
+            this.introPending = false;
+            if (!reducedMotion.matches) this.play('Felicidade', 'greeting');
+        }
+        // Called directly by the arrow's trusted click event, before any
+        // promises or model loads, so mobile autoplay policies allow playback.
+        if (withVoice && this.greetingAudio) {
+            try {
+                this.greetingAudio.pause();
+                this.greetingAudio.currentTime = 0;
+                void this.greetingAudio.play().catch(() => {});
+            } catch (error) {
+                console.debug('Saudação indisponível no navegador móvel', error);
+            }
+        }
+        this.invalidate();
+    }
+
     clearPendingSingleTap() {
         if (this.pendingSingleTap !== null) clearTimeout(this.pendingSingleTap);
         this.pendingSingleTap = null;
@@ -675,28 +699,35 @@ class PokemonViewer {
     }
 
     battleMoves() {
-        // Only real glTF animation clips remain. All invented attack FX
-        // (fire, projectiles and impact overlays) have been discontinued.
-        return this.form === 'gigamax'
-            ? [['Animação especial Gigamax', MOVES.special]]
-            : this.form === 'dynamax'
-                ? [['Animação especial Dinamax', MOVES.special]]
-                : [
-                    ['Ataque físico', MOVES.physical],
-                    ['Ataque especial', MOVES.special],
-                    ['Ataque alternativo', MOVES.alternate],
-                ];
+        // Recovered Pokémon GO style TYPED badges. These labels describe the
+        // existing native model clips; NO experimental attack FX are restored.
+        if (this.form === 'gigamax')
+            return [['Animação especial Gigamax', MOVES.special, 'fire']];
+        if (this.form === 'dynamax')
+            return [['Animação especial Dinamax', MOVES.special, 'fire']];
+        if (this.species.id === 'cinderace') return [
+            ['Ataque físico', MOVES.physical, 'fire'],
+            ['Ataque especial', MOVES.special, 'fire'],
+            ['Ataque alternativo', MOVES.alternate, 'fire'],
+        ];
+        return [
+            ['Ataque físico', MOVES.physical, 'normal'],
+            ['Ataque especial', MOVES.special, 'fire'],
+            ['Ataque alternativo', MOVES.alternate, 'fire'],
+        ];
     }
 
     renderControls() {
         const buttons = this.battleMoves()
             .filter(([, clip]) => this.model.clips.has(clip))
-            .map(([name, clip]) => {
-                const symbol = this.form !== 'normal' ? 'move-max'
-                    : clip === MOVES.physical ? 'move-physical'
-                    : clip === MOVES.alternate ? 'move-alternate' : 'fire';
-                return iconControl(name, symbol, 'move-normal',
+            .map(([name, clip, type]) => {
+                const icon = type === 'fire' ? 'fire' : 'normal';
+                const button = iconControl(name, icon, 'move-' + type,
                     () => this.play(clip, 'battle'));
+                button.dataset.moveType = type;
+                button.setAttribute('aria-label',
+                    name + '. Tipo ' + (type === 'fire' ? 'Fogo' : 'Normal'));
+                return button;
             });
         this.moves.replaceChildren(...buttons);
     }
@@ -1095,7 +1126,7 @@ export function mountShowcase(section) {
         if (!viewer.model && !viewer.loading) viewer.select(viewer.form);
     }
 
-    function selectPokemon(index) {
+    function selectPokemon(index, fromMobileArrow = false) {
         if (selected === index || (index === -1 && mobile.matches)) return;
         const previous = selected;
         const smooth = !mobile.matches && !reducedMotion.matches && typeof grid.animate === 'function';
@@ -1121,7 +1152,10 @@ export function mountShowcase(section) {
             viewer.setFocus(position === index);
         }
         updateProfile(index === -1 ? null : cards[index]);
-        if (mobile.matches) loadViewer(cards[index]);
+        if (mobile.matches) {
+            loadViewer(cards[index]);
+            if (fromMobileArrow) cards[index].mobileArrival(true);
+        }
         fitViewport();
         if (smooth) {
             for (const [position, { card }] of cards.entries()) {
@@ -1148,7 +1182,8 @@ export function mountShowcase(section) {
         section.querySelector(selector).addEventListener('click', () => {
             const order = mobile.matches ? mobileOrder : [0, 1, 2];
             const position = order.indexOf(selected);
-            selectPokemon(order[(position + step + order.length) % order.length]);
+            selectPokemon(order[(position + step + order.length) % order.length],
+                mobile.matches);
         });
     }
 
