@@ -7,7 +7,7 @@ import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=10';
 import { MaxLandingImpact } from './max-landing.js?v=1';
 import { iconControl, mountVolume } from './showcase-controls.js?v=15';
 import { mountPokedex } from './pokedex.js?v=12';
-import { prepareFace, updateFace } from './face-animation.js?v=17';
+import { prepareFace, updateFace } from './face-animation.js?v=18';
 import { createJornadasGreeting } from './jornadas-voices.js?v=5';
 import { isRapidTap, SINGLE_TAP_WINDOW_MS, RAPID_TAP_GRACE_MS } from './tap-gestures.mjs?v=2';
 
