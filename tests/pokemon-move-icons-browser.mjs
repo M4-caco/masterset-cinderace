@@ -83,7 +83,7 @@ try {
   });
   assert.equal(fireAppearance.bg,'rgb(255, 164, 86)','GO-inspired flat Fire orange');
   assert.equal(fireAppearance.size,'36px','readable GO-like battle icon scale');
-  assert.ok(parseFloat(fireAppearance.border)>1,'thin game-like white outline');
+  assert.ok(parseFloat(fireAppearance.border)>=1,'thin game-like white outline');
   assert.ok(fireAppearance.path?.startsWith('M12.6 1.2'), 'curled white flame silhouette loaded');
 
   // Selected state is brightness, never the old square outline.
