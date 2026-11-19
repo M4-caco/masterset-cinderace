@@ -74,6 +74,18 @@ try {
     assert.ok(state.paths.length && state.paths.every(p=>p && p.trim().length>15),
       'missing actual SVG glyph for '+state.label);
   assert.ok(states.length>=2,'two or more Cinderace moves are exposed');
+  const fireBadge=buttons.first().locator('.pokemon-badge');
+  const fireAppearance=await fireBadge.evaluate(el=>{
+    const style=getComputedStyle(el);
+    const svg=el.querySelector('svg');
+    return {bg:style.backgroundColor, border:style.borderWidth, size:style.width,
+      whiteArt:getComputedStyle(svg).color, path:svg.querySelector('path')?.getAttribute('d')};
+  });
+  assert.equal(fireAppearance.bg,'rgb(255, 164, 86)','GO-inspired flat Fire orange');
+  assert.equal(fireAppearance.size,'36px','readable GO-like battle icon scale');
+  assert.ok(parseFloat(fireAppearance.border)>=1,'thin game-like white outline');
+  assert.ok(fireAppearance.path?.startsWith('M12.6 1.2'), 'curled white flame silhouette loaded');
+
   // Selected state is brightness, never the old square outline.
   const selectedColor=controls.locator('.pokemon-colors .pokemon-icon-control[aria-pressed="true"]');
   const unselectedColor=controls.locator('.pokemon-colors .pokemon-icon-control[aria-pressed="false"]');
@@ -119,6 +131,19 @@ try {
   },null,{timeout:12000});
   assert.equal(await typeIcon.getAttribute('aria-pressed'),'false',
     'move returns to dimmed state at clip end');
+  // Render the Normal badge style in a detached test element, without
+  // changing the carousel selection while the shader is animating.
+  const normalAppearance=await page.evaluate(()=>{
+    const el=document.createElement('span');
+    el.className='pokemon-badge pokemon-badge-move-normal';
+    document.body.append(el);
+    const bg=getComputedStyle(el).backgroundColor;
+    el.remove();
+    return {bg};
+  });
+  assert.equal(normalAppearance.bg,'rgb(152, 161, 168)',
+    'GO-inspired flat Normal grey');
+  console.log('GO_BADGES='+JSON.stringify({fireAppearance,normalAppearance}));
   console.log('MOVE_EXECUTION='+JSON.stringify({appearance,dim,offset,middleOffset,
     cleared:true}));
   console.log('MOVE_ICONS='+JSON.stringify({moves:states.map(({label,pathCount})=>({label,pathCount})),

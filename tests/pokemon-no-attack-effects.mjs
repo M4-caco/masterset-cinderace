@@ -34,9 +34,9 @@ assert.match(showcase, /new MaxLandingImpact\(this\.scene, mobile\.matches\)/);
 assert.match(showcase, /this\.maxLanding\.start\(/);
 assert.match(showcase, /this\.maxLanding\?\.update\(now\)/);
 assert.doesNotMatch(css, /pokemon-battle-effects|data-attack-away/);
-assert.match(entry, /showcase\.js\?v=52/);
-assert.match(html, /pokemon\/entry\.js\?v=52/);
-assert.match(html, /pokemon\/showcase\.css\?v=30/);
+assert.match(entry, /showcase\.js\?v=53/);
+assert.match(html, /pokemon\/entry\.js\?v=53/);
+assert.match(html, /pokemon\/showcase\.css\?v=31/);
 
 const deadModules = [
     'pokemon/battle-effects.js', 'pokemon/ground-fire.js',

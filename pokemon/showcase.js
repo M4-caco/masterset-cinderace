@@ -5,7 +5,7 @@ import {
 import { applyMaxMaterial, loadMaxPattern } from './max-material.js?v=8';
 import { loadMaxClouds, positionMaxClouds } from './max-clouds.js?v=10';
 import { MaxLandingImpact } from './max-landing.js?v=1';
-import { iconControl, mountVolume } from './showcase-controls.js?v=15';
+import { iconControl, mountVolume } from './showcase-controls.js?v=16';
 import { mountPokedex } from './pokedex.js?v=12';
 import { prepareFace, updateFace } from './face-animation.js?v=18';
 import { createJornadasGreeting } from './jornadas-voices.js?v=5';
