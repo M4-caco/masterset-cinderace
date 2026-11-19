@@ -101,6 +101,16 @@ try {
   const offset=await circle.evaluate(el=>Number(el.style.strokeDashoffset));
   assert.ok(Number.isFinite(offset)&&offset>=0&&offset<100,
     'ring must advance during actual clip: '+offset);
+  // Do not take a screenshot in the first few animation frames. Capture
+  // a visibly filled meter and prove it updates beyond its initial value.
+  await page.waitForFunction(() => {
+    const circle=document.querySelectorAll('#pokemon-inspector .pokemon-controls')[1]
+      ?.querySelector('.pokemon-moves [data-executing] .pokemon-move-timer-fill');
+    return circle && Number(circle.style.strokeDashoffset) < 75;
+  },null,{timeout:9000});
+  const middleOffset=await circle.evaluate(el=>Number(el.style.strokeDashoffset));
+  assert.ok(middleOffset>=0&&middleOffset<75,
+    'ring advances to at least 25% before native clip completes');
   const region=controls.locator('.pokemon-control-group').last();
   const png=await region.screenshot({type:'png',animations:'disabled'});
   await page.waitForFunction(()=>{
@@ -109,7 +119,7 @@ try {
   },null,{timeout:12000});
   assert.equal(await typeIcon.getAttribute('aria-pressed'),'false',
     'move returns to dimmed state at clip end');
-  console.log('MOVE_EXECUTION='+JSON.stringify({appearance,dim,offset,
+  console.log('MOVE_EXECUTION='+JSON.stringify({appearance,dim,offset,middleOffset,
     cleared:true}));
   console.log('MOVE_ICONS='+JSON.stringify({moves:states.map(({label,pathCount})=>({label,pathCount})),
     errors:errors.slice(0,3)}));
