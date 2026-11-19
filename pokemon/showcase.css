@@ -134,32 +134,28 @@
     transition: opacity 360ms ease, filter 360ms ease;
 }
 
-/* The species name stays readable above the Pokémon and Max effects. */
+/* Pokémon names are captions BELOW the 3D stages, on desktop and mobile. */
 .pokemon-stage-species {
-    position: absolute;
-    left: 50%;
-    width: max-content;
+    display: block;
+    position: relative;
+    width: 100%;
     max-width: 100%;
-    transform: translateX(-50%);
+    margin: 0.15rem auto 0.45rem;
+    text-align: center;
     pointer-events: none;
     user-select: none;
-    text-align: center;
     white-space: nowrap;
     text-transform: uppercase;
     font-family: 'Barlow Condensed', 'Arial Black', sans-serif;
     font-style: normal;
     font-weight: 900;
-    line-height: 1;
+    line-height: 1.05;
     letter-spacing: 0.015em;
+    color: var(--pk-text);
+    font-size: clamp(1rem, 2.2vw, 1.65rem);
 }
-
-.pokemon-stage-species {
-    top: 4%;
-    z-index: 3;
-    color: #fff7ed;
-    font-size: clamp(1.1rem, 8cqw, 3.4rem);
-    opacity: 1;
-    text-shadow: none;
+#view-pokemon[data-pokemon-selected] .pokemon-viewer[data-selected] .pokemon-stage-species {
+    color: var(--pk-accent);
 }
 
 /* Both forms use the same silhouette. The clip keeps the Dynamax stroke inside its edge. */
@@ -608,6 +604,9 @@
 
 .pokemon-pagination button { min-width: 2.4rem; }
 .pokemon-pagination button:is([data-prev], [data-next]) { font-size: 1.2rem; padding-block: 0; }
+/* Keep the existing desktop chevrons and controls unchanged. */
+.pokemon-pagination button svg { display: none; }
+
 
 .pokemon-controls {
     padding: 0.45rem 0;
@@ -874,6 +873,39 @@
         z-index: 4;
     }
     .pokemon-pagination button { pointer-events: auto; min-width: 2.75rem; min-height: 2.75rem; }
+    .pokemon-stage-species {
+        font-size: clamp(1.12rem, 5.5vw, 1.6rem);
+        margin: 0.1rem auto 0.4rem;
+    }
+    /* User-provided SVG chevrons: no square buttons or background on mobile. */
+    .pokemon-pagination button:is([data-prev], [data-next]) {
+        appearance: none;
+        display: grid;
+        place-items: center;
+        min-width: 2.95rem;
+        min-height: 3.5rem;
+        padding: 0.32rem;
+        border: 0 !important;
+        border-radius: 0 !important;
+        background: transparent !important;
+        box-shadow: none !important;
+        color: var(--pk-text);
+        -webkit-tap-highlight-color: transparent;
+    }
+    .pokemon-pagination .pokemon-pagination-desktop-arrow { display: none; }
+    .pokemon-pagination button:is([data-prev], [data-next]) svg {
+        display: block;
+        width: 1.65rem;
+        height: 2.1rem;
+        fill: currentColor;
+        filter: drop-shadow(0 1px 2px rgba(255,255,255,.5));
+        pointer-events: none;
+    }
+    .pokemon-pagination button:is([data-prev], [data-next]):focus-visible {
+        outline: 2px solid var(--pk-accent);
+        outline-offset: 1px;
+    }
+
 
     .pokemon-controls { gap: 0.28rem 0.4rem; padding-block: 0.18rem; }
     .pokemon-icon-control { width: clamp(3rem, 14vw, 4rem); }
