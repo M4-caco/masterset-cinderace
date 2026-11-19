@@ -34,7 +34,16 @@ try {
   // Captions were moved below the 3D stage; they must visually dim together
   // with their non-selected models, but keep the selected name at full light.
   await page.mouse.move(8, 8); // no hovered Pokémon
-  await page.waitForTimeout(420); // wait for label's CSS filter transition
+  // Browser/3D initialization may delay the 360ms stage/label transitions.
+  // Wait for the final CSS state instead of reading halfway through a fade.
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll('#pokemon-lineup .pokemon-viewer')].every(el => {
+      const selected=el.hasAttribute('data-selected');
+      const caption=getComputedStyle(el.querySelector('.pokemon-stage-species')).filter;
+      const model=getComputedStyle(el.querySelector('.pokemon-stage')).filter;
+      const expected=selected?'none':'brightness(0.59) saturate(0.82)';
+      return caption===expected && model===expected;
+    }), null, { timeout: 10000 });
   const names = await page.locator('#pokemon-lineup .pokemon-viewer')
     .evaluateAll(viewers => viewers.map(viewer => ({
       selected: viewer.hasAttribute('data-selected'),
