@@ -3,117 +3,87 @@ import { TextureLoader } from './vendor/three-gltf.js';
 const FRAME_COUNT = 3;
 const loader = new TextureLoader();
 
-// Preserve the shape, orientation and three poses of the original web eyes.
-// The old eye atlas also contains opaque skin patches, stray dark shapes and
-// a lilac/white backdrop. All of those must be transparent outside the eye
-// artwork, not painted darker: painting them caused the reported cheek stains.
-// Retain the full native Shiny face illustration (skin around the eyes,
-// eyelids, eyeliner, red pupils, mouth and all three expressions).
-// Only the flat lilac atlas background should become transparent.
-// The original Shiny atlas has complete white sclera and tapered eyeliner.
-// Mask only the lavender backdrop connected to the canvas edges. Removing
-// pale colours globally erases actual sclera and delicate eyelid antialias.
-// Never redraw an iris, eyelash or mouth, or change the model's UVs.
-// Preserve original Shiny iris, white sclera, tapered eyelashes and lid lines.
-// Both the lilac atlas background AND its opaque tan facial backing are merely
-// compositing aids, not facial ink. The native 3D FaceBase supplies skin.
-// Removing these two flat backing tones prevents grey polygons and leaves the
-// full eye art, including whites far from the pupil, untouched.
-// Do not redraw eyes: preserve the real Shiny sclera, eyelid strokes,
-// eyelashes, red irises and mouth in all 3 original expression frames.
-// Remove two *backing* colours, not any nearby pale eye artwork:
-// (1) only the lavender backdrop reachable from an image edge;
-// (2) the flat tan eye patch that causes sharp-edged grey face islands.
-// The original opaque 3D FaceBase supplies the facial skin underneath.
-export function restoreShinyFaceArtwork(pixels, width, height) {
+// Cinderace's normal atlas already has a complete, correct eye outline,
+// sclera, lashes, mouth and all three native facial poses. Previous Shiny
+// atlases contained beige islands and required destructive alpha masking.
+// Recolor the *normal* atlas instead: keep its geometry and alpha untouched.
+// This also keeps the original normal form 100% unchanged.
+export function recolorNormalFaceForShiny(pixels, width, height) {
     if (pixels.length !== width * height * 4)
-        throw new Error('Invalid Shiny face frame');
-    const output = new Uint8ClampedArray(pixels);
-    const sample = (Math.floor(height * .92) * width + Math.floor(width / 2)) * 4;
-    const background = [pixels[sample], pixels[sample + 1], pixels[sample + 2]];
+        throw new Error('Invalid normal face frame');
+    const out = new Uint8ClampedArray(pixels);
     const count = width * height;
-    const visited = new Uint8Array(count);
+
+    // The normal atlas has one almost-neutral grey backdrop. Recolor ONLY
+    // its edge-connected area to the native Shiny face tone. An enclosed
+    // white sclera is not connected to this backdrop, and is not recolored.
+    const base = [pixels[0], pixels[1], pixels[2]];
+    const skin = [181, 170, 161]; // Shiny FaceBase tone, #b5aaa1
+    const connected = new Uint8Array(count);
     const queue = new Int32Array(count);
-    let first = 0, last = 0;
-    const distance = position => {
-        const i = position * 4;
-        return Math.hypot(
-            pixels[i] - background[0],
-            pixels[i + 1] - background[1],
-            pixels[i + 2] - background[2]
-        );
+    let head = 0, tail = 0;
+    const isBackdrop = position => {
+        const p = position * 4;
+        const r = pixels[p], g = pixels[p + 1], b = pixels[p + 2];
+        const neutral = Math.max(r,g,b) - Math.min(r,g,b);
+        // A tight match deliberately excludes the slightly brighter white
+        // sclera, even when an eye contour is open on a particular pose.
+        return neutral <= 7 && Math.hypot(r-base[0],g-base[1],b-base[2]) < 12;
     };
-    // Flood-fill only the backdrop: preserve pale whites surrounded by the
-    // red iris, dark lash or warm Shiny skin, even if close to lilac in RGB.
-    const visit = position => {
-        if (visited[position] || distance(position) > 16) return;
-        visited[position] = 1;
-        queue[last++] = position;
+    const visit = p => {
+        if (connected[p] || !isBackdrop(p)) return;
+        connected[p] = 1;
+        queue[tail++] = p;
     };
-    for (let x = 0; x < width; x++) {
+    for (let x=0;x<width;x++) {
         visit(x);
-        visit((height - 1) * width + x);
+        visit((height-1)*width+x);
     }
-    for (let y = 0; y < height; y++) {
-        visit(y * width);
-        visit(y * width + width - 1);
+    for (let y=0;y<height;y++) {
+        visit(y*width);
+        visit(y*width+width-1);
     }
-    while (first < last) {
-        const position = queue[first++];
-        const x = position % width;
-        const y = Math.floor(position / width);
-        if (x > 0) visit(position - 1);
-        if (x + 1 < width) visit(position + 1);
-        if (y > 0) visit(position - width);
-        if (y + 1 < height) visit(position + width);
+    while (head < tail) {
+        const p = queue[head++];
+        const x = p % width, y = Math.floor(p / width);
+        if (x > 0) visit(p - 1);
+        if (x + 1 < width) visit(p + 1);
+        if (y > 0) visit(p - width);
+        if (y + 1 < height) visit(p + width);
     }
-    for (let position = 0; position < count; position++) {
-        if (!visited[position]) continue;
-        // Transparent lavender outside the original illustration; a subtle
-        // only-at-the-border fade retains texture antialias without a halo.
-        const d = distance(position);
-        output[position * 4 + 3] = Math.round(
-            pixels[position * 4 + 3] * Math.max(0, Math.min(1, (d - 5) / 11))
-        );
-    }
-    // Recover the flat tan mask and its antialiased rim as a clean,
-    // skin-matched decal. Earlier corrections recoloured only near-identical
-    // tan pixels, leaving a thin grey/lilac contour on the outer eye corners.
-    //
-    // Tan and lavender are opposite endpoints of an antialiased boundary.
-    // Project a pixel onto that colour segment and reject anything outside
-    // a small tolerance: the white sclera, eyelid and dark lashes are NOT
-    // on that segment, so their original artwork remains untouched.
-    const skinSample=(Math.floor(height*.20)*width+Math.floor(width*.08))*4;
-    const skinTone=[
-        pixels[skinSample],pixels[skinSample+1],pixels[skinSample+2]
-    ];
-    const skinColor=[181,170,161];
-    const direction=background.map((value,i)=>value-skinTone[i]);
-    const directionLength=direction.reduce((sum,d)=>sum+d*d,0);
-    for(let p=0;p<count;p++){
+    for (let p=0;p<count;p++) {
         const i=p*4;
-        const c=[pixels[i],pixels[i+1],pixels[i+2]];
-        const t=Math.max(0,Math.min(1,
-            c.reduce((sum,value,k)=>sum+(value-skinTone[k])*direction[k],0)
-              / directionLength
-        ));
-        const residual=Math.hypot(...c.map((value,k)=>
-            value-(skinTone[k]+t*direction[k])
-        ));
-        if(residual>8 || t>.98)continue;
-        // This only changes matte pixels. The alpha ramp occupies the
-        // outermost <5% of the original tan/lavender antialiased edge, rather
-        // than exposing the dark underlying face near the eyelashes.
-        for(let k=0;k<3;k++)output[i+k]=skinColor[k];
-        output[i+3]=Math.round(pixels[i+3]*
-            Math.max(0,Math.min(1,(.98-t)/.05)));
+        const r=pixels[i],g=pixels[i+1],b=pixels[i+2];
+        if (connected[p]) {
+            // Retain gentle original shading while matching Shiny skin.
+            const difference=(r+g+b-base[0]-base[1]-base[2])/3;
+            for(let channel=0;channel<3;channel++)
+                out[i+channel] = Math.round(skin[channel]+difference*.52);
+        } else {
+            // On the normal atlas the outer lashes are navy. Shiny's native
+            // palette has pale ivory lashes; recolor their BLUE pixels only.
+            // Dark neutral eyeliner, the red iris, white sclera, and thin
+            // antialiased detail retain the exact normal eye shape/position.
+            const blueBias = b - Math.max(r,g);
+            if (blueBias > 7 && b > r*1.12 && r < 175) {
+                const amount = Math.max(0,Math.min(1,(blueBias-7)/17));
+                const ivory = [242,239,236];
+                for(let channel=0;channel<3;channel++)
+                    out[i+channel] = Math.round(pixels[i+channel] * (1-amount) +
+                        ivory[channel] * amount);
+            }
+        }
+        // IMPORTANT: alpha is copied byte-for-byte from the normal atlas.
+        // Do not apply transparent cutouts or per-colour alpha thresholds.
     }
-    return output;
+    return out;
 }
 
 async function loadFrames(id, original, shiny) {
-    const suffix = shiny ? '-shiny' : '';
+    // Shiny Cinderace is rebuilt from the complete, perfect normal atlas.
+    // Other species keep their original dedicated Shiny facial atlases.
+    const fromNormal = id === 'cinderace' && shiny;
+    const suffix = shiny && !fromNormal ? '-shiny' : '';
     const atlas = await loader.loadAsync(new URL(`./visuals/${id}-face${suffix}.webp`, import.meta.url).href);
     const { image } = atlas;
     const height = image.height / FRAME_COUNT;
@@ -125,9 +95,10 @@ async function loadFrames(id, original, shiny) {
         const context = canvas.getContext('2d', { willReadFrequently: true });
         context.drawImage(image, 0, i * height, image.width, height,
             0, 0, image.width, height);
-        if (id === 'cinderace' && shiny) {
+        if (fromNormal) {
             const frame = context.getImageData(0, 0, canvas.width, canvas.height);
-            frame.data.set(restoreShinyFaceArtwork(frame.data, canvas.width, canvas.height));
+            frame.data.set(recolorNormalFaceForShiny(
+                frame.data, canvas.width, canvas.height));
             context.putImageData(frame, 0, 0);
         }
         const texture = new original.constructor(canvas);
@@ -166,10 +137,13 @@ export async function prepareFace(id, materials, controllers) {
             loadFrames(id, shiny.map, true),
         ]);
         if (id === 'cinderace') {
-            // The original facial backing supplies the skin colour. The
-            // Shiny composite must blend ONLY the actual artwork above it.
+            // The Shiny FaceBase and Eye/FaceComposite share overlapping
+            // geometry. Render the FULL opaque-atlas pixels in the overlay
+            // pass to keep red eyes above the skin layer. Unlike the old
+            // approach, NO pixels in the new canvas are cut out or erased.
             shiny.transparent = true;
-            shiny.alphaTest = 0.05;
+            shiny.opacity = 1;
+            shiny.alphaTest = 0;
             shiny.depthWrite = false;
             shiny.polygonOffset = true;
             shiny.polygonOffsetFactor = -1;

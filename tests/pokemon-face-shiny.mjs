@@ -1,73 +1,65 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { restoreShinyFaceArtwork } from '../pokemon/face-animation.js';
+import { recolorNormalFaceForShiny } from '../pokemon/face-animation.js';
 
-const width=256,height=256,background=[230,228,238,255];
-const at=(array,x,y)=>[...array.slice((y*width+x)*4,(y*width+x)*4+4)];
-const put=(array,x,y,rgba)=>array.set(rgba,(y*width+x)*4);
-for(const pose of ['idle','angry','blink']){
+// The normal eye art is the source of truth: its exact contours, pupils,
+// eyelashes, white sclera, three expressions and alpha must all survive.
+const width=256,height=256,background=[238,238,238,255];
+const put=(a,x,y,rgba)=>a.set(rgba,(y*width+x)*4);
+const rgba=(a,x,y)=>[...a.slice((y*width+x)*4,(y*width+x)*4+4)];
+for (const pose of ['idle','angry','blink']) {
     const input=new Uint8ClampedArray(width*height*4);
     for(let i=0;i<input.length;i+=4)input.set(background,i);
-    for(const x0 of [20,147])for(let y=29;y<112;y++)for(let x=x0;x<x0+93;x++)
-        put(input,x,y,[184,171,159,255]); // original Shiny skin around both eyes
-    const lidY=pose==='blink'?60:pose==='angry'?49:42;
-    for(const center of [68,187]){
-        for(let dx=-15;dx<=15;dx++)put(input,center+dx,lidY,[32,29,31,255]);
-        put(input,center,65,[183,66,48,255]); // original iris
-        put(input,center+7,65,[247,246,244,255]); // sclera
-        put(input,center-11,lidY-2,[233,229,222,255]); // pale lid
+    const eyeTop=pose==='blink'?51:pose==='angry'?38:43;
+    for(const cx of [69,189]) {
+        // Closed black eyelid/eye contour, with white protected within.
+        for(let y=eyeTop;y<104;y++)for(let x=cx-28;x<=cx+28;x++) {
+            if (x===cx-28||x===cx+28||y===eyeTop||y===103)
+                put(input,x,y,[33,32,35,255]);
+            else put(input,x,y,[249,249,249,255]); // original white sclera
+        }
+        put(input,cx,77,[198,62,43,255]); // red pupil
+        put(input,cx-13,eyeTop,[20,43,79,255]); // navy outer lash
+        put(input,cx-12,eyeTop+1,[36,39,41,255]); // thin dark lash
     }
-    // A very pale white patch is intentionally close to the lavender RGB;
-    // it must remain when surrounded by the true facial art, not be erased
-    // merely because its colour resembles the background.
-    for(let y=77;y<89;y++)for(let x=54;x<80;x++)
-        put(input,x,y,[184,171,159,255]);
-    put(input,68,83,[235,233,239,255]); // delicate sclera
-    put(input,69,83,[36,32,35,255]); // one-pixel lash/liner
-    // The original tan decal's antialiased edge blends toward lilac.
-    // Previously these pixels caused a grey outline even when the pure
-    // tan interiors were retinted correctly.
-    const mix=(t)=>[...([184,171,159].map((v,k)=>
-        Math.round(v+t*([230,228,238][k]-v)))),255];
-    put(input,115,85,mix(.50)); // half-tan / half-backdrop fringe
-    put(input,114,86,mix(.77)); // very pale border fringe
-    put(input,55,175,[42,36,40,255]); // original mouth details
-    put(input,198,203,[188,70,50,255]);
-    put(input,120,124,[229,229,237,255]); // background variation
-    const out=restoreShinyFaceArtwork(input,width,height);
-    for(const x of [30,155])assert.deepEqual(at(out,x,100),[181,170,161,255],pose+' skin coverage harmonized to FaceBase');
-    for(const center of [68,187]){
-        assert.deepEqual(at(out,center,lidY),[32,29,31,255],pose+' eyeliner');
-        assert.deepEqual(at(out,center,65),[183,66,48,255],pose+' iris');
-        assert.deepEqual(at(out,center+7,65),[247,246,244,255],pose+' sclera');
-        assert.deepEqual(at(out,center-11,lidY-2),[233,229,222,255],pose+' eyelid');
+    put(input,54,192,[45,40,42,255]); // original mouth
+    put(input,199,201,[211,75,56,255]);
+    // Preserve the original alpha, even where 3D texture filtering gave
+    // antialiasing. No newly transparent skin pixels are permitted.
+    put(input,11,233,[239,239,239,187]);
+    const out=recolorNormalFaceForShiny(input,width,height);
+    assert.deepEqual(rgba(out,4,4),[181,170,161,255],pose+' skin replaces background');
+    for(const cx of [69,189]) {
+        assert.deepEqual(rgba(out,cx+10,90),[249,249,249,255],pose+' sclera unchanged');
+        assert.deepEqual(rgba(out,cx,77),[198,62,43,255],pose+' original iris');
+        assert.deepEqual(rgba(out,cx-12,eyeTop+1),[36,39,41,255],pose+' eyeliner');
+        const lash=rgba(out,cx-13,eyeTop);
+        assert.ok(lash[0]>220&&lash[1]>210&&lash[2]>210,pose+' blue lash becomes pale shiny ivory');
+        assert.equal(lash[3],255);
     }
-    assert.deepEqual(at(out,115,85),[181,170,161,255],
-        'antialiased tan-lavender rim corrected, with full skin coverage');
-    assert.deepEqual(at(out,114,86),[181,170,161,255],
-        'pale outer rim corrected without producing grey contours');
-    assert.deepEqual(at(out,68,83),[235,233,239,255],'pale white inside eye preserved');
-    assert.deepEqual(at(out,69,83),[36,32,35,255],'thin eyelash line preserved');
-    assert.deepEqual(at(out,55,175),[42,36,40,255]);
-    assert.deepEqual(at(out,198,203),[188,70,50,255]);
-    assert.equal(at(out,128,235)[3],0,'lilac backing transparent');
-    assert.equal(at(out,120,124)[3],0,'background halo transparent');
-    assert.deepEqual(at(input,128,235),background,'input remains unchanged');
+    assert.deepEqual(rgba(out,54,192),[45,40,42,255],pose+' mouth intact');
+    assert.deepEqual(rgba(out,199,201),[211,75,56,255],pose+' other mouth detail intact');
+    assert.equal(rgba(out,11,233)[3],187,'antialiased skin alpha preserved');
+    assert.deepEqual(rgba(input,4,4),background,'normal source remains untouched');
+    for(let i=3;i<input.length;i+=4)
+        assert.equal(out[i],input[i],'no pixel loses skin/eye alpha');
 }
-assert.throws(()=>restoreShinyFaceArtwork(new Uint8ClampedArray(13),width,height));
+assert.throws(()=>recolorNormalFaceForShiny(new Uint8ClampedArray(15),width,height));
 const face=await readFile(new URL('../pokemon/face-animation.js',import.meta.url),'utf8');
-assert.match(face,/restoreShinyFaceArtwork\(frame\.data, canvas\.width, canvas\.height\)/);
 assert.match(face,/id === 'cinderace' && shiny/);
-assert.doesNotMatch(face,/isolateShinyEyeArtwork|removeStrayShinyWhites|locateShinyIrisCenters/);
+assert.match(face,/shiny && !fromNormal/);
+assert.match(face,/recolorNormalFaceForShiny\(/);
+assert.doesNotMatch(face,/restoreShinyFaceArtwork|isolateShinyEyeArtwork|removeStrayShinyWhites/);
 assert.match(face,/shiny\.transparent = true/);
+assert.match(face,/shiny\.depthWrite = false/);
+assert.match(face,/shiny\.polygonOffset = true/);
 assert.match(face,/rare\.transparent = false/);
-assert.match(face,/rare\.color\.set\('#b5aaa1'\)/);
 const gltf=JSON.parse(await readFile(new URL('../pokemon/models/cinderace.gltf',import.meta.url),'utf8'));
 assert.equal(gltf.images[7].name,'pm0815_00_Eye_Col_rare');
 const showcase=await readFile(new URL('../pokemon/showcase.js',import.meta.url),'utf8');
 const entry=await readFile(new URL('../pokemon/entry.js',import.meta.url),'utf8');
 const index=await readFile(new URL('../index.html',import.meta.url),'utf8');
-assert.match(showcase,/face-animation\.js\?v=18/);
-assert.match(entry,/showcase\.js\?v=53/);
-assert.match(index,/pokemon\/entry\.js\?v=53/);
-console.log('PASS: Shiny skin, eyelids, eyeliner, iris, mouth and three expressions retained.');
+assert.match(showcase,/face-animation\.js\?v=19/);
+assert.match(entry,/showcase\.js\?v=54/);
+assert.match(index,/pokemon\/entry\.js\?v=54/);
+console.log('PASS: normal Cinderace facial art used for Shiny without alpha changes in three poses.');

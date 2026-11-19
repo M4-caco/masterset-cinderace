@@ -57,3 +57,6 @@ jobs:
       - name: Verificar setas, audio repetido e legendas do mobile no Chromium
         if: github.event_name == 'pull_request'
         run: node tests/pokemon-mobile-carousel-browser.mjs
+      - name: Comparar rosto Normal e Shiny reais no Chromium (somente PR)
+        if: github.event_name == 'pull_request'
+        run: node tests/pokemon-shiny-normal-source-browser.mjs
