@@ -113,6 +113,7 @@ class PokemonViewer {
         this.revision = 0;
         this.frameRequest = 0;
         this.attack = null;
+        this.activeMoveButton = null;
         this.lastAttackTap = -Infinity;
         this.lastTapAt = -Infinity;
         this.rapidTapUntil = -Infinity;
@@ -717,16 +718,58 @@ class PokemonViewer {
         ];
     }
 
+    playMove(clip, button) {
+        // The ring measures the actual native glTF clip, not a guessed
+        // cooldown. Repeated clicks restart it; interrupted moves clean up.
+        if (!this.play(clip, 'battle')) return;
+        this.activeMoveButton = button;
+        button.dataset.executing = 'true';
+        button.setAttribute('aria-pressed', 'true');
+        this.updateMoveProgress(performance.now());
+    }
+
+    updateMoveProgress(now) {
+        const button = this.activeMoveButton;
+        const active = this.attack;
+        if (!button || !active || active.kind !== 'battle') return;
+        const ratio = Math.max(0, Math.min(1,
+            (now - active.start) / (active.duration * 1000)));
+        const circle = button.querySelector('.pokemon-move-timer-fill');
+        if (circle) circle.style.strokeDashoffset = String(100 * (1 - ratio));
+    }
+
+    clearMoveProgress() {
+        if (!this.activeMoveButton) return;
+        const button = this.activeMoveButton;
+        button.removeAttribute('data-executing');
+        button.setAttribute('aria-pressed', 'false');
+        const circle = button.querySelector('.pokemon-move-timer-fill');
+        if (circle) circle.style.strokeDashoffset = '100';
+        this.activeMoveButton = null;
+    }
+
     renderControls() {
         const buttons = this.battleMoves()
             .filter(([, clip]) => this.model.clips.has(clip))
             .map(([name, clip, type]) => {
                 const icon = type === 'fire' ? 'fire' : 'normal';
                 const button = iconControl(name, icon, 'move-' + type,
-                    () => this.play(clip, 'battle'));
+                    () => this.playMove(clip, button));
                 button.dataset.moveType = type;
+                button.setAttribute('aria-pressed', 'false');
                 button.setAttribute('aria-label',
                     name + '. Tipo ' + (type === 'fire' ? 'Fogo' : 'Normal'));
+                // A circular progress ring sits INSIDE the type badge.
+                // It never obscures the icon or changes the native move.
+                const timer = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                timer.classList.add('pokemon-move-timer');
+                timer.setAttribute('viewBox', '0 0 40 40');
+                timer.setAttribute('aria-hidden', 'true');
+                timer.innerHTML = '<circle class="pokemon-move-timer-track" cx="20" cy="20" r="17"/>' +
+                    '<circle class="pokemon-move-timer-fill" cx="20" cy="20" r="17" ' +
+                    'pathLength="100" stroke-dasharray="100" stroke-dashoffset="100" ' +
+                    'transform="rotate(-90 20 20)"/>';
+                button.querySelector('.pokemon-badge').append(timer);
                 return button;
             });
         this.moves.replaceChildren(...buttons);
@@ -810,6 +853,7 @@ class PokemonViewer {
     }
 
     stopAttack() {
+        this.clearMoveProgress();
         if (!this.attack) return;
         this.attack = null;
         delete this.stage.dataset.attacking;
@@ -881,6 +925,7 @@ class PokemonViewer {
             rest.time = this.restTime(now);
             this.model.mixer.update(0);
         }
+        this.updateMoveProgress(now);
         updateFace(this.model.face, (now - this.restStart) / 1000, this.attack);
         if (ambient || this.attack || this.placementTransition || this.maxLanding?.active) this.invalidate();
 

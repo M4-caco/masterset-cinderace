@@ -34,7 +34,16 @@ try {
   // Captions were moved below the 3D stage; they must visually dim together
   // with their non-selected models, but keep the selected name at full light.
   await page.mouse.move(8, 8); // no hovered Pokémon
-  await page.waitForTimeout(420); // wait for label's CSS filter transition
+  // Browser/3D initialization may delay the 360ms stage/label transitions.
+  // Wait for the final CSS state instead of reading halfway through a fade.
+  await page.waitForFunction(() =>
+    [...document.querySelectorAll('#pokemon-lineup .pokemon-viewer')].every(el => {
+      const selected=el.hasAttribute('data-selected');
+      const caption=getComputedStyle(el.querySelector('.pokemon-stage-species')).filter;
+      const model=getComputedStyle(el.querySelector('.pokemon-stage')).filter;
+      const expected=selected?'none':'brightness(0.59) saturate(0.82)';
+      return caption===expected && model===expected;
+    }), null, { timeout: 10000 });
   const names = await page.locator('#pokemon-lineup .pokemon-viewer')
     .evaluateAll(viewers => viewers.map(viewer => ({
       selected: viewer.hasAttribute('data-selected'),
@@ -65,8 +74,53 @@ try {
     assert.ok(state.paths.length && state.paths.every(p=>p && p.trim().length>15),
       'missing actual SVG glyph for '+state.label);
   assert.ok(states.length>=2,'two or more Cinderace moves are exposed');
+  // Selected state is brightness, never the old square outline.
+  const selectedColor=controls.locator('.pokemon-colors .pokemon-icon-control[aria-pressed="true"]');
+  const unselectedColor=controls.locator('.pokemon-colors .pokemon-icon-control[aria-pressed="false"]');
+  await page.waitForTimeout(230);
+  const appearance=await selectedColor.evaluate(el=>{
+    const style=getComputedStyle(el);
+    return { border:style.borderWidth,background:style.backgroundColor,filter:style.filter };
+  });
+  const dim=await unselectedColor.evaluate(el=>getComputedStyle(el).filter);
+  assert.equal(appearance.border,'0px','no square around selected color');
+  assert.ok(appearance.background==='rgba(0, 0, 0, 0)'||appearance.background==='transparent',
+    'no selected square background');
+  assert.equal(appearance.filter,'brightness(1)','selected color stays 100% bright');
+  assert.equal(dim,'brightness(0.57) saturate(0.84)',
+    'unselected color/form uses dimmed state');
+  const typeIcon=buttons.first();
+  assert.equal(await typeIcon.getAttribute('aria-pressed'),'false');
+  await typeIcon.click();
+  assert.equal(await typeIcon.getAttribute('data-executing'),'true',
+    'active native move starts circular ring');
+  assert.equal(await typeIcon.getAttribute('aria-pressed'),'true',
+    'active move is full brightness');
+  const circle=typeIcon.locator('.pokemon-move-timer-fill');
+  await page.waitForTimeout(105);
+  const offset=await circle.evaluate(el=>Number(el.style.strokeDashoffset));
+  assert.ok(Number.isFinite(offset)&&offset>=0&&offset<100,
+    'ring must advance during actual clip: '+offset);
+  // Do not take a screenshot in the first few animation frames. Capture
+  // a visibly filled meter and prove it updates beyond its initial value.
+  await page.waitForFunction(() => {
+    const circle=document.querySelectorAll('#pokemon-inspector .pokemon-controls')[1]
+      ?.querySelector('.pokemon-moves [data-executing] .pokemon-move-timer-fill');
+    return circle && Number(circle.style.strokeDashoffset) < 75;
+  },null,{timeout:9000});
+  const middleOffset=await circle.evaluate(el=>Number(el.style.strokeDashoffset));
+  assert.ok(middleOffset>=0&&middleOffset<75,
+    'ring advances to at least 25% before native clip completes');
   const region=controls.locator('.pokemon-control-group').last();
   const png=await region.screenshot({type:'png',animations:'disabled'});
+  await page.waitForFunction(()=>{
+    const el=document.querySelectorAll('#pokemon-inspector .pokemon-controls')[1]?.querySelector('.pokemon-moves button');
+    return !el || !el.hasAttribute('data-executing');
+  },null,{timeout:12000});
+  assert.equal(await typeIcon.getAttribute('aria-pressed'),'false',
+    'move returns to dimmed state at clip end');
+  console.log('MOVE_EXECUTION='+JSON.stringify({appearance,dim,offset,middleOffset,
+    cleared:true}));
   console.log('MOVE_ICONS='+JSON.stringify({moves:states.map(({label,pathCount})=>({label,pathCount})),
     errors:errors.slice(0,3)}));
   const encoded=png.toString('base64');
