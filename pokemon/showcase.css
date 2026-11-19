@@ -714,6 +714,21 @@
 }
 
 .pokemon-badge svg { width: 63%; height: 63%; }
+/* Slightly larger, high-contrast emblems without changing control spacing. */
+.pokemon-badge { width: 2.25rem; height: 2.25rem; }
+.pokemon-badge:is(.pokemon-badge-move-fire, .pokemon-badge-move-normal) {
+    border: 1.75px solid rgba(255, 255, 255, 0.92);
+    box-shadow: inset 0 0 0 1px #ffffff24;
+}
+.pokemon-badge:is(.pokemon-badge-move-fire, .pokemon-badge-move-normal) > svg:first-child {
+    width: 76%;
+    height: 76%;
+    color: #fff;
+}
+/* Keep an easy-to-read white rim while the real 3D animation runs. */
+.pokemon-icon-control[data-executing="true"] .pokemon-badge:is(.pokemon-badge-move-fire, .pokemon-badge-move-normal) {
+    box-shadow: 0 0 0 1px #fffc, 0 0 10px #fff8;
+}
 /* Pokémon GO-style circular meter, but tied to the real execution timeline,
    not to an invented cooldown or an attack particle system. */
 .pokemon-badge svg.pokemon-move-timer {
@@ -734,7 +749,7 @@
 }
 .pokemon-move-timer-fill {
     fill: none;
-    stroke: #fff4ca;
+    stroke: #fff;
     stroke-width: 3.4;
     stroke-linecap: round;
     stroke-dasharray: 100;
@@ -745,10 +760,14 @@
 }
 .pokemon-badge-fire { background: linear-gradient(150deg, #de5a36, #a42710); }
 /* Pokémon GO-inspired typed move badges, restored from the original UI. */
-.pokemon-badge-move-fire { background: linear-gradient(150deg, #ef8740, #cc3d19 54%, #9f2417); color: #fff9e8; }
-.pokemon-badge-move-normal { background: linear-gradient(145deg, #a4abb5, #78818c 54%, #5a6471); color: #fff; }
-
-.pokemon-badge-move-normal { background: linear-gradient(145deg, #8793a5, #51566f); }
+.pokemon-badge-move-fire {
+    background: #ffa456;
+    color: #fff;
+}
+.pokemon-badge-move-normal {
+    background: #98a1a8;
+    color: #fff;
+}
 
 .pokemon-badge-dynamax,
 .pokemon-badge-gigamax {
