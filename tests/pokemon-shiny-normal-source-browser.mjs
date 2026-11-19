@@ -35,6 +35,9 @@ try {
             !!v.querySelector('canvas');
     },null,{timeout:55000});
     await cinderace.locator('.pokemon-target').click();
+    // The initial carousel interpolates between small and large renders.
+    // Compare both forms only after the camera/model reaches its final size.
+    await page.waitForTimeout(1800);
     const colors=page.locator('#pokemon-inspector .pokemon-controls').nth(1)
         .locator('.pokemon-colors button');
     const shiny=colors.filter({hasText:'Shiny'});
@@ -51,10 +54,10 @@ try {
         });
     };
     await normal.click();
-    await page.waitForTimeout(420);
+    await page.waitForTimeout(700);
     const original=await capture();
     await shiny.click();
-    await page.waitForTimeout(480);
+    await page.waitForTimeout(700);
     const modified=await capture();
     const atlas=await page.evaluate(async()=>{
         const {recolorNormalFaceForShiny}=await import('/pokemon/face-animation.js?v=19');
@@ -71,17 +74,29 @@ try {
                 0,0,image.width,singleHeight);
             const data=ctx.getImageData(0,0,canvas.width,canvas.height).data;
             const changed=recolorNormalFaceForShiny(data,canvas.width,canvas.height);
-            let alphaChanged=0, recolored=0, untouchedWhite=0, navyChanged=0;
+            let alphaChanged=0, recolored=0, untouchedWhite=0,
+                navyChanged=0, originalRed=0, unchangedRed=0;
             for(let i=0;i<data.length;i+=4) {
                 if(changed[i+3]!==data[i+3])alphaChanged++;
                 if(changed[i]!==data[i]||changed[i+1]!==data[i+1]||
                     changed[i+2]!==data[i+2])recolored++;
-                if(data[i]>248&&data[i+1]>248&&data[i+2]>248&&
+                const x=(i/4)%canvas.width;
+                const y=Math.floor(i/4/canvas.width);
+                const withinEyes=y<singleHeight*.50 &&
+                    ((x>30&&x<120)||(x>140&&x<250));
+                if(withinEyes && data[i]>233&&data[i+1]>233&&data[i+2]>233&&
                     data[i+3]>0&&changed[i]===data[i]&&changed[i+1]===data[i+1]&&
                     changed[i+2]===data[i+2]) untouchedWhite++;
+                if(withinEyes&&data[i]>120&&data[i]>data[i+1]+45&&
+                    data[i]>data[i+2]+25) {
+                    originalRed++;
+                    if(changed[i]===data[i]&&changed[i+1]===data[i+1]&&
+                        changed[i+2]===data[i+2])unchangedRed++;
+                }
                 if(data[i+2]>data[i]+20&&changed[i]>data[i]+100)navyChanged++;
             }
-            result.push({pose,alphaChanged,recolored,untouchedWhite,navyChanged});
+            result.push({pose,alphaChanged,recolored,untouchedWhite,
+                navyChanged,originalRed,unchangedRed});
         }
         return result;
     });
@@ -95,7 +110,9 @@ try {
     for(const entry of atlas) {
         assert.equal(entry.alphaChanged,0,'no face alpha may be deleted');
         assert.ok(entry.recolored>1000,'native skin background recolored to shiny');
-        assert.ok(entry.untouchedWhite>10,'white sclera remains visible');
+        assert.ok(entry.untouchedWhite>10,'original white eye art preserved');
+        assert.ok(entry.originalRed>10&&entry.unchangedRed===entry.originalRed,
+            'every original red iris pixel stays unchanged');
         if(entry.pose!==2)assert.ok(entry.navyChanged>10,'original dark blue eyelash palette updated');
     }
     assert.equal(await shiny.getAttribute('aria-pressed'),'true');
