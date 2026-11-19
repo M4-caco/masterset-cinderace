@@ -95,7 +95,7 @@ try {
   const region=controls.locator('.pokemon-control-group').last();
   const png=await region.screenshot({type:'png',animations:'disabled'});
   await page.waitForFunction(()=>{
-    const el=document.querySelector('#pokemon-inspector .pokemon-controls:nth-child(2) .pokemon-moves button');
+    const el=document.querySelectorAll('#pokemon-inspector .pokemon-controls')[1]?.querySelector('.pokemon-moves button');
     return !el || !el.hasAttribute('data-executing');
   },null,{timeout:12000});
   assert.equal(await typeIcon.getAttribute('aria-pressed'),'false',
