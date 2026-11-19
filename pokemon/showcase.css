@@ -678,6 +678,10 @@
 
 .pokemon-badge svg { width: 63%; height: 63%; }
 .pokemon-badge-fire { background: linear-gradient(150deg, #de5a36, #a42710); }
+/* Pokémon GO-inspired typed move badges, restored from the original UI. */
+.pokemon-badge-move-fire { background: linear-gradient(150deg, #ef8740, #cc3d19 54%, #9f2417); color: #fff9e8; }
+.pokemon-badge-move-normal { background: linear-gradient(145deg, #a4abb5, #78818c 54%, #5a6471); color: #fff; }
+
 .pokemon-badge-move-normal { background: linear-gradient(145deg, #8793a5, #51566f); }
 
 .pokemon-badge-dynamax,
