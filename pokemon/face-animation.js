@@ -26,7 +26,9 @@ export function recolorNormalFaceForShiny(pixels, width, height) {
         const p = position * 4;
         const r = pixels[p], g = pixels[p + 1], b = pixels[p + 2];
         const neutral = Math.max(r,g,b) - Math.min(r,g,b);
-        return neutral <= 12 && Math.hypot(r-base[0],g-base[1],b-base[2]) < 49;
+        // A tight match deliberately excludes the slightly brighter white
+        // sclera, even when an eye contour is open on a particular pose.
+        return neutral <= 7 && Math.hypot(r-base[0],g-base[1],b-base[2]) < 12;
     };
     const visit = p => {
         if (connected[p] || !isBackdrop(p)) return;
