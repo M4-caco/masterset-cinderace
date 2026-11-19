@@ -1,19 +1,20 @@
-// Vozes da saudação do Master Set. Os três arquivos OGG vêm dos
-// MP3s aprimorado-v2 enviados pelo usuário, com volume balanceado em -19 LUFS.
-// São independentes dos efeitos e gritos usados nos ataques.
-const CLIPS = Object.freeze({
-    scorbunny: './audio/jornadas/scorbunny.ogg?v=4',
-    raboot: './audio/jornadas/raboot.ogg?v=4',
-    cinderace: './audio/jornadas/cinderace.ogg?v=4',
+// Vozes PT-BR do anime, com o mesmo balanceamento do desktop (-19 LUFS).
+// Android/Chrome usa Opus; Safari/iOS antigos recebem MP3 compatível.
+const FILES = Object.freeze({
+    scorbunny: 'scorbunny',
+    raboot: 'raboot',
+    cinderace: 'cinderace',
 });
 
 export function createJornadasGreeting(id) {
-    const path = CLIPS[id];
-    if (!path) return null;
-    const audio = new Audio(new URL(path, import.meta.url).href);
-    audio.preload = 'auto';
-    // O volume de cada arquivo foi normalizado. Os três usam o mesmo ganho.
-    audio.dataset.gain = '1';
-    audio.volume = 0.55;
+    const stem=FILES[id];
+    if(!stem)return null;
+    const probe=document.createElement('audio');
+    const opus=probe.canPlayType('audio/ogg; codecs="opus"');
+    const ext=opus ? 'ogg' : 'mp3';
+    const audio=new Audio(new URL(`./audio/jornadas/${stem}.${ext}?v=5`,import.meta.url).href);
+    audio.preload='auto';
+    audio.dataset.gain='1';
+    audio.volume=.55;
     return audio;
 }
