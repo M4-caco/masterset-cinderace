@@ -14,8 +14,8 @@ for (const kind of ['move-fire','move-normal'])assert.ok(css.includes('.pokemon-
 assert.match(viewer,/button\.dataset\.moveType = type/);
 assert.match(viewer,/type === 'fire' \? 'fire' : 'normal'/);
 assert.match(controls,/GLYPHS\[name\]\s*\?\?\s*GLYPHS\.normal/);
-assert.match(entry,/showcase\.js\?v=51/);
-assert.match(page,/pokemon\/entry\.js\?v=51/);
-assert.match(page,/pokemon\/showcase\.css\?v=29/);
+assert.match(entry,/showcase\.js\?v=52/);
+assert.match(page,/pokemon\/entry\.js\?v=52/);
+assert.match(page,/pokemon\/showcase\.css\?v=30/);
 assert.match(viewer,/this\.play\(clip, 'battle'\)/);
 console.log('PASS: original Normal/Fire move-type SVGs and colored badges restored.');
