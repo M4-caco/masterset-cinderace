@@ -14,8 +14,8 @@ for (const kind of ['move-fire','move-normal'])assert.ok(css.includes('.pokemon-
 assert.match(viewer,/button\.dataset\.moveType = type/);
 assert.match(viewer,/type === 'fire' \? 'fire' : 'normal'/);
 assert.match(controls,/GLYPHS\[name\]\s*\?\?\s*GLYPHS\.normal/);
-assert.match(entry,/showcase\.js\?v=53/);
-assert.match(page,/pokemon\/entry\.js\?v=53/);
+assert.match(entry,/showcase\.js\?v=54/);
+assert.match(page,/pokemon\/entry\.js\?v=54/);
 assert.match(page,/pokemon\/showcase\.css\?v=31/);
 assert.match(viewer,/this\.play\(clip, 'battle'\)/);
 assert.match(viewer,/playMove\(clip, button\)/,'move buttons use native clip timer');
