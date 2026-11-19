@@ -476,8 +476,8 @@
 @media(max-width:640px){#item-detail{width:calc(100vw - 24px);max-height:calc(100dvh - 24px);padding:17px}#item-detail .it-detail-grid{grid-template-columns:minmax(0,1fr);gap:12px}#item-detail .it-detail-image{width:100%;height:220px;max-height:30dvh;aspect-ratio:auto}#item-detail .it-detail-image img{max-height:30dvh}}
 </style><link rel="stylesheet" href="scorace-binder.css?v=6">
     <link rel="stylesheet" href="scorace-auth.css?v=1">
-    <link rel="stylesheet" href="pokemon/showcase.css?v=27">
-    <script type="module" src="pokemon/entry.js?v=50"></script>
+    <link rel="stylesheet" href="pokemon/showcase.css?v=28">
+    <script type="module" src="pokemon/entry.js?v=51"></script>
 </head>
 <body class="text-slate-800 dark:text-cinder-white min-h-screen font-sans transition-colors duration-200 pb-10">
 
@@ -822,16 +822,15 @@
                 <button type="button" data-open-dex aria-haspopup="dialog" aria-controls="pokemon-dex-dialog" hidden>Ficha</button>
             </div>
         </div>
-        <p class="pokemon-welcome"><strong>Scorbunny · Cinderace · Raboot</strong> | Passe o mouse sobre cada Pokémon para vê-lo sorrir e ouvir sua voz.</p>
         <p class="pokemon-message" role="status" hidden></p>
         <button type="button" class="pokemon-retry" hidden>Tentar novamente</button>
         <div class="pokemon-layout">
             <div class="pokemon-viewing">
                 <div id="pokemon-lineup" class="pokemon-grid"></div>
                 <nav class="pokemon-pagination" aria-label="Navegar entre Pokémon" hidden>
-                    <button type="button" data-prev aria-label="Pokémon anterior">‹</button>
+                    <button type="button" data-prev aria-label="Pokémon anterior"><span class="pokemon-pagination-desktop-arrow" aria-hidden="true">‹</span><svg viewBox="0 0 42 42" aria-hidden="true" focusable="false"><polygon fill-rule="evenodd" points="27.066,1 7,21.068 26.568,40.637 31.502,35.704 16.865,21.068 32,5.933"/></svg></button>
                     <button type="button" data-overview>Ver trio</button>
-                    <button type="button" data-next aria-label="Próximo Pokémon">›</button>
+                    <button type="button" data-next aria-label="Próximo Pokémon"><span class="pokemon-pagination-desktop-arrow" aria-hidden="true">›</span><svg viewBox="0 0 42 42" aria-hidden="true" focusable="false"><polygon fill-rule="evenodd" points="13.933,1 34,21.068 14.431,40.637 9.498,35.704 24.136,21.068 9,5.933"/></svg></button>
                 </nav>
                 <div id="pokemon-inspector" class="pokemon-inspector" hidden></div>
             </div>
@@ -862,7 +861,6 @@
                         <use class="pokemon-stage-maxmark-dynamax" href="#pokemon-max-silhouette" clip-path="url(#pokemon-max-interior)"/>
                         <use class="pokemon-stage-maxmark-gigamax" href="#pokemon-max-silhouette"/>
                     </svg>
-                    <span class="pokemon-stage-species" aria-hidden="true"></span>
                     <div class="pokemon-shadow" aria-hidden="true"></div>
                     <button type="button" class="pokemon-target" disabled></button>
                     <div class="pokemon-transition" aria-hidden="true">
@@ -881,6 +879,7 @@
                         <button type="button" class="pokemon-retry" hidden>Tentar novamente</button>
                     </div>
                 </div>
+                <span class="pokemon-stage-species" aria-hidden="true"></span>
                 <div class="pokemon-controls" hidden>
                     <div class="pokemon-control-group" role="group" aria-label="Cor">
                         <span class="pokemon-control-heading" aria-hidden="true">Cor</span>
