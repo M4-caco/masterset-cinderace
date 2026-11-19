@@ -85,6 +85,13 @@ try {
         }
         return result;
     });
+    console.log('SHINY_ATLAS_METRICS='+JSON.stringify(atlas));
+    // Emit comparable browser crops even if a later assertion fails.
+    for(const [name,png] of [['NORMAL_FACE',original],['SHINY_FACE',modified]]){
+        const encoded=png.toString('base64');
+        for(let i=0;i<encoded.length;i+=3500)
+            console.log(name+'_PNG_CHUNK:'+encoded.slice(i,i+3500));
+    }
     for(const entry of atlas) {
         assert.equal(entry.alphaChanged,0,'no face alpha may be deleted');
         assert.ok(entry.recolored>1000,'native skin background recolored to shiny');
@@ -97,11 +104,6 @@ try {
     console.log('SHINY_NORMAL_SOURCE='+JSON.stringify({
         atlas,normalSize:original.length,shinySize:modified.length,errors
     }));
-    for(const [name,png] of [['NORMAL_FACE',original],['SHINY_FACE',modified]]){
-        const encoded=png.toString('base64');
-        for(let i=0;i<encoded.length;i+=3500)
-            console.log(name+'_PNG_CHUNK:'+encoded.slice(i,i+3500));
-    }
 }finally{
     if(browser)await browser.close();
     server.kill();
