@@ -39,7 +39,8 @@ try{
     const errors=[];
     page.on('pageerror',e=>errors.push(e.message));
     await page.goto('http://127.0.0.1:8775/',{waitUntil:'domcontentloaded'});
-    await page.locator('#nav-pokemon').click();
+    await page.locator('#hamburger-btn').click();
+    await page.locator('#mob-nav-pokemon').click();
     await page.waitForFunction(()=>{
         const stage=document.querySelector('.pokemon-viewer[data-selected] .pokemon-stage');
         return stage && stage.querySelector('canvas') && stage.hasAttribute('data-ready');
