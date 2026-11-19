@@ -65,8 +65,43 @@ try {
     assert.ok(state.paths.length && state.paths.every(p=>p && p.trim().length>15),
       'missing actual SVG glyph for '+state.label);
   assert.ok(states.length>=2,'two or more Cinderace moves are exposed');
+  // Selected state is brightness, never the old square outline.
+  const selectedColor=controls.locator('.pokemon-colors .pokemon-icon-control[aria-pressed="true"]');
+  const unselectedColor=controls.locator('.pokemon-colors .pokemon-icon-control[aria-pressed="false"]');
+  await page.waitForTimeout(230);
+  const appearance=await selectedColor.evaluate(el=>{
+    const style=getComputedStyle(el);
+    return { border:style.borderWidth,background:style.backgroundColor,filter:style.filter };
+  });
+  const dim=await unselectedColor.evaluate(el=>getComputedStyle(el).filter);
+  assert.equal(appearance.border,'0px','no square around selected color');
+  assert.ok(appearance.background==='rgba(0, 0, 0, 0)'||appearance.background==='transparent',
+    'no selected square background');
+  assert.equal(appearance.filter,'brightness(1)','selected color stays 100% bright');
+  assert.equal(dim,'brightness(0.57) saturate(0.84)',
+    'unselected color/form uses dimmed state');
+  const typeIcon=buttons.first();
+  assert.equal(await typeIcon.getAttribute('aria-pressed'),'false');
+  await typeIcon.click();
+  assert.equal(await typeIcon.getAttribute('data-executing'),'true',
+    'active native move starts circular ring');
+  assert.equal(await typeIcon.getAttribute('aria-pressed'),'true',
+    'active move is full brightness');
+  const circle=typeIcon.locator('.pokemon-move-timer-fill');
+  await page.waitForTimeout(105);
+  const offset=await circle.evaluate(el=>Number(el.style.strokeDashoffset));
+  assert.ok(Number.isFinite(offset)&&offset>=0&&offset<100,
+    'ring must advance during actual clip: '+offset);
   const region=controls.locator('.pokemon-control-group').last();
   const png=await region.screenshot({type:'png',animations:'disabled'});
+  await page.waitForFunction(()=>{
+    const el=document.querySelector('#pokemon-inspector .pokemon-controls:nth-child(2) .pokemon-moves button');
+    return !el || !el.hasAttribute('data-executing');
+  },null,{timeout:12000});
+  assert.equal(await typeIcon.getAttribute('aria-pressed'),'false',
+    'move returns to dimmed state at clip end');
+  console.log('MOVE_EXECUTION='+JSON.stringify({appearance,dim,offset,
+    cleared:true}));
   console.log('MOVE_ICONS='+JSON.stringify({moves:states.map(({label,pathCount})=>({label,pathCount})),
     errors:errors.slice(0,3)}));
   const encoded=png.toString('base64');
