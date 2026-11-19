@@ -37,6 +37,7 @@ jobs:
           node --check pokemon/showcase.js
           node --check pokemon/tap-gestures.mjs
           node --check pokemon/entry.js
+          node --check pokemon/jornadas-voices.js
       - name: Conferir olhos originais Shiny do Cinderace
         run: node tests/pokemon-face-shiny.mjs
       - name: Testar colisão e limpeza de partículas Max
@@ -53,3 +54,6 @@ jobs:
       - name: Testar e capturar ícones em Chromium (somente PR)
         if: github.event_name == 'pull_request'
         run: node tests/pokemon-move-icons-browser.mjs
+      - name: Verificar setas, audio repetido e legendas do mobile no Chromium
+        if: github.event_name == 'pull_request'
+        run: node tests/pokemon-mobile-carousel-browser.mjs
